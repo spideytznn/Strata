@@ -172,6 +172,7 @@ void ExpertCache::close() {
     next_free_ = 0;
     fills_ = 0;
     admitted_ = 0;
+    pinned_k_ = 0;
     layer_next_.clear();
 }
 

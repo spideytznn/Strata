@@ -5,7 +5,7 @@
 //   * `ngram_rows` - the HOST hash.  Sixteen row indices per token from the last three token ids, computed
 //     with 64-bit multiply/xor and no tensor op at all.  `qwen4exp.cpp` L1092-1124, where the source says
 //     outright that it is host-side because "ggml has no int64 and no xor".
-//   * `PleTable`  - the row gather.  `per_layer_token_embd.weight` is IQ4_NL and is NOT IN THE PACK: it is
+//   * `PleTable`  - the row gather. `per_layer_token_embd.weight` is IQ4_NL or Q8_0 and is NOT IN THE PACK: it is
 //     51.2e9 elements (28.8 GB) in the ORIGINAL second GGUF shard, and it is the only tensor this engine
 //     reads from the GGUF rather than from the canonical pack.
 //
@@ -96,6 +96,9 @@ int iq4nl_code(int code);
 /// a perfectly plausible embedding of the wrong 160 values.
 void iq4nl_dequant_row(const uint8_t* row, float* out160);
 
+/// Five Q8_0 blocks (FP16 scale + 32 signed int8 values), 170 bytes per row.
+void q8_0_dequant_row(const uint8_t* row, float* out160);
+
 /// How the table's rows are read (plan v0.3 P2). `Direct` is the default: unbuffered 4 KiB reads from the SSD,
 /// so the table never occupies RAM or the OS file cache. `Mmap` is the earlier memory-mapped path, kept as the
 /// A/B arm; it returns the same bytes.
@@ -108,7 +111,7 @@ enum class PleIo { Direct, Mmap };
 struct PleIoOptions {
     PleIo mode = PleIo::Direct;
     uint32_t max_inflight = 64;      ///< outstanding SSD reads (decode needs 16; prefill chunks use more)
-    uint64_t cache_rows = 1u << 20;  ///< bounded row cache: 1,048,576 rows x 90 B ~ 95 MB; 0 disables
+    uint64_t cache_rows = 1u << 20;  ///< bounded raw-row cache: ~99 MB IQ4_NL / ~183 MB Q8_0; 0 disables
     bool io_thread = true;           ///< reads submitted by a worker thread, not the caller
 };
 
@@ -145,6 +148,8 @@ public:
     void close();
     bool is_open() const;
     uint64_t rows() const;
+    uint32_t row_bytes() const;
+    const char* type_name() const;
 
     /// 16 row indices -> 2560 floats.  The gathered rows are flattened HEAD-SLOWEST: row h's 160 values
     /// occupy `out[h*160, (h+1)*160)`, which is what `ggml_get_rows` does and what makes the result a plain

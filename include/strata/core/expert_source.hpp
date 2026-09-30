@@ -59,6 +59,10 @@ public:
     virtual void begin_layer(int64_t layer, const int32_t* ids, int64_t k) { (void) layer; (void) ids; (void) k; }
     /// Plan v0.3 P6: the DEVICE address of a pinned, mapped blob (the GPU can read it over PCIe), or null.
     virtual const uint8_t* device_alias(int64_t layer, int64_t expert) const { (void) layer; (void) expert; return nullptr; }
+    /// The VRAM-only tier: the DEVICE address of layer `l`'s registered arena slice (the neighbourhood of any
+    /// RETAINED expert), or null.  Exists so the PCIe share's availability probe does not ask for expert 0 -
+    /// which the skip set may have excluded from the arena.  Default: `device_alias(layer, 0)`.
+    virtual const uint8_t* device_alias_layer(int64_t layer) const { return device_alias(layer, 0); }
 };
 
 /// Plan v0.3 P6: what the GPU computes in a verify window's layer, written by the pool (mapped host memory) right
@@ -323,6 +327,20 @@ public:
     bool open(const std::string& pack_dir, int64_t n_layers, int64_t n_expert, int threads, std::string& err);
     /// Plan v0.3 P6: a native pack without experts.bin takes its experts from the model's shard 1.
     void set_gguf(const std::string& shard1) { gguf_ = shard1; }
+    /// **THE VRAM-ONLY TIER: these (layer, expert) pairs are NOT loaded into the arena at all.**  Their bytes
+    /// go straight from the pack file into PINNED VRAM cache slots (see `read_expert_blob`), so the arena -
+    /// and with it the host RAM demand - shrinks by their bytes.  `blob()`/`pinned()`/`device_alias()` answer
+    /// nullptr/false for them; every consumer treats that as a hard error, which is exactly the pressure that
+    /// keeps them resident in VRAM for the whole run.  Call BEFORE `open()`; the pairs are copied.  An empty
+    /// set (or null) leaves the dense arena bit-for-bit as it was.
+    void set_skip(const std::vector<std::pair<int32_t, int32_t>>* skip);
+    /// True when (layer, expert) was excluded by `set_skip` - i.e. it exists ONLY in the VRAM tier.
+    bool skipped(int64_t layer, int64_t expert) const;
+    /// Reads one expert's blob straight from the pack's source file into `dst` (which must hold
+    /// `expert_layout().blob_bytes(layer)` bytes): a native pack's GGUF shards via the same three
+    /// gate/up/down reads the dense loader makes, or `experts.bin` at its dense offset.  The VRAM-only
+    /// preload path - the arena has no row for these experts.
+    bool read_expert_blob(int64_t layer, int64_t expert, uint8_t* dst, std::string& err) const;
     void close();
 
     bool mapped() const { return base_ != nullptr; }
@@ -331,11 +349,13 @@ public:
     int64_t reads() const { return reads_; }
     bool pinned(int64_t layer, int64_t expert) const override;
     const uint8_t* device_alias(int64_t layer, int64_t expert) const override;
+    const uint8_t* device_alias_layer(int64_t layer) const override;
 
     /// What backing was obtained and why, for the startup print.  "The engine adapts to the machine it is on" is
     /// only true if the engine says what it got.
     const std::string& note() const { return note_; }
     double load_gib_per_second() const { return gib_per_s_; }
+    uint64_t resident_bytes() const { return resident_bytes_; }
 
 private:
     void* arena_ = nullptr;          ///< the PinnedArena, owned
@@ -343,12 +363,24 @@ private:
     uint64_t slice_bytes_ = 0;
     const uint8_t* base_ = nullptr;
     int64_t blobs_ = 0;
+    int64_t n_layers_ = 0;
     int64_t n_expert_ = 0;
     int64_t reads_ = 0;
     std::string note_;
     double gib_per_s_ = 0.0;
     uint64_t pinned_bytes_ = 0;
+    uint64_t resident_bytes_ = 0;   ///< retained expert bytes, excluding allocation padding
     std::string gguf_;
+    /// The VRAM-only tier's compaction tables.  `ExpertLayout` still describes the FILE; this remap lives
+    /// only here, so every other consumer of the layout is untouched.
+    std::vector<std::pair<int32_t, int32_t>> skip_;   ///< the caller's set, copied by `set_skip`
+    bool sparse_ = false;                            ///< a non-empty skip set was applied before `open()`
+    std::vector<int32_t> kept_;        ///< [l * n_expert + e] -> compact index within the layer, or -1 (skipped)
+    std::vector<uint64_t> kept_off_;   ///< [l] -> the layer's compact slice's byte offset in the arena
+    std::vector<int64_t> kept_cnt_;    ///< [l] -> how many of the layer's experts the arena retains
+    std::vector<int32_t> slice_idx_;   ///< [l] -> index into dev_slice_ (the registered slices), or -1
+    std::string path_;                 ///< experts.bin, for `read_expert_blob` on a non-native pack
+    bool from_gguf_ = false;           ///< `open()` filled the arena from the GGUF rather than experts.bin
 };
 
 }  // namespace strata::core

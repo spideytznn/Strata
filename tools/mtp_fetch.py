@@ -19,7 +19,7 @@ import sys
 import time
 import urllib.request
 
-REPO = "https://huggingface.co/Qwen/Qwen3.8-Flash-Next/resolve/main/"
+REPO = os.environ.get("STRATA_MTP_REPO", "https://huggingface.co/Qwen/Qwen3.8-Flash-Next/resolve/main/")
 DTYPE_BYTES = {"BF16": 2, "F16": 2, "F32": 4, "F8_E4M3": 1, "I64": 8, "I32": 4}
 
 

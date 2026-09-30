@@ -292,7 +292,9 @@ void expert_pool_dispatch_multi(ExpertDispatch& d, const float* x_f, const int32
                 if (e >= 0 && e < d.n_expert && d.host_res[(size_t) d.layers * (size_t) d.n_expert + (size_t) e] < 0) ++nmiss;
             }
         }
-        const bool pcie_ok = d.pcie_num > 0 && d.src->device_alias(d.layers, 0) != nullptr;
+        // the tier fix: probe the LAYER's slice, not expert 0 - the VRAM-only skip set may have excluded
+        // expert 0 from the arena, and a null alias here would silently turn the PCIe share off
+        const bool pcie_ok = d.pcie_num > 0 && d.src->device_alias_layer(d.layers) != nullptr;
         const int m = pcie_ok ? (nmiss * d.pcie_num) >> 8 : 0;
         int miss_rank = 0, groups = 0, entries = 0, fetches = 0;
         GpuPlanSink& P = *d.plan;
@@ -546,6 +548,45 @@ void expert_hit_run(void* user, void* stream, HitPhase phase, const int32_t* ids
 
 // ================================ THE RESIDENT ARENA (R2.1) ================================
 
+namespace {
+
+// Plan v0.3 P6: a layer's experts may sit in another shard of the model (native_experts.txt v3): a name beside
+// `gguf`.  Shared by the dense loader, the sparse loader and the VRAM-only preload so all three agree on the path.
+std::string gguf_file_of(const std::string& gguf, const strata::kernels::cpu::ExpertLayout& lay, int64_t l) {
+    if (lay.gguf_file.empty() || lay.gguf_file[(size_t) l].empty()) return gguf;
+    const size_t cut = gguf.find_last_of("/\\");
+    const std::string dir = cut == std::string::npos ? std::string() : gguf.substr(0, cut + 1);
+    return dir + lay.gguf_file[(size_t) l];
+}
+
+// The VRAM-only tier: ONE expert's three GGUF slices (gate / up / down) read into `dst`, which must hold
+// `lay.blob_bytes(l)` bytes at the blob's internal layout [gate rows | up rows | down rows].  This is the inner
+// loop of `load_experts_gguf` extracted, byte for byte: a sparse arena load and a VRAM-only preload through
+// this helper read exactly what the dense loader would have written.
+bool read_expert_gguf(std::ifstream& f, std::string& open_name, const std::string& gguf,
+                      const strata::kernels::cpu::ExpertLayout& lay, int64_t l, int64_t e, uint8_t* dst) {
+    const std::string name = gguf_file_of(gguf, lay, l);
+    if (name != open_name) {
+        f.close();
+        f.clear();
+        f.open(name, std::ios::binary);
+        if (!f) return false;
+        open_name = name;
+    }
+    const auto& fm = lay.fmt[(size_t) l];
+    const uint64_t blob = lay.bytes[(size_t) l];
+    const uint64_t per[3] = {fm.up_off, fm.up_off, blob - fm.down_off};
+    const uint64_t at[3] = {0, fm.up_off, fm.down_off};
+    for (int r = 0; r < 3; ++r) {
+        f.seekg((std::streamoff) (lay.gguf_off[(size_t) (3 * l + r)] + (uint64_t) e * per[r]));
+        f.read((char*) (dst + at[r]), (std::streamsize) per[r]);
+        if ((uint64_t) f.gcount() != per[r]) return false;
+    }
+    return true;
+}
+
+}  // namespace
+
 // Plan v0.3 P6: the arena from the model's shard 1.  Each layer's gate, up and down tensors hold the 512 experts
 // one after another; they are read in chunks and each expert's slice lands at its place in the blob
 // [gate rows | up rows | down rows] - the layout tools/iq_pack.py would have written to experts.bin.
@@ -556,13 +597,6 @@ LoadStats load_experts_gguf(const std::string& gguf, uint8_t* dst, const strata:
     const auto t0 = std::chrono::steady_clock::now();
     std::atomic<int64_t> next{0};
     std::atomic<bool> bad{false};
-    // a layer's experts may sit in another shard of the model (native_experts.txt v3): a name beside `gguf`
-    const size_t cut = gguf.find_last_of("/\\");
-    const std::string dir = cut == std::string::npos ? std::string() : gguf.substr(0, cut + 1);
-    auto file_of = [&](int64_t l) -> std::string {
-        if (lay.gguf_file.empty() || lay.gguf_file[(size_t) l].empty()) return gguf;
-        return dir + lay.gguf_file[(size_t) l];
-    };
     auto worker = [&]() {
         std::ifstream f;
         std::string open_name;
@@ -570,8 +604,8 @@ LoadStats load_experts_gguf(const std::string& gguf, uint8_t* dst, const strata:
         for (;;) {
             const int64_t l = next.fetch_add(1);
             if (l >= lay.n_layers || bad) break;
-            const std::string name = file_of(l);
-            if (name != open_name) {
+            if (!f.is_open() || gguf_file_of(gguf, lay, l) != open_name) {
+                const std::string name = gguf_file_of(gguf, lay, l);
                 f.close();
                 f.clear();
                 f.open(name, std::ios::binary);
@@ -613,7 +647,157 @@ LoadStats load_experts_gguf(const std::string& gguf, uint8_t* dst, const strata:
     return st;
 }
 
+namespace {
+
+// The VRAM-only tier's sparse GGUF load: only the RETAINED experts are read, each through the same
+// three-slice `read_expert_gguf` the dense loader's inner loop performs, landing at the layer's COMPACT
+// offset (`kept_off[l] + compact_idx * blob_bytes`).  `kept` is [l * n_expert + e] -> compact index or -1.
+LoadStats load_experts_gguf_sparse(const std::string& gguf, uint8_t* dst,
+                                   const strata::kernels::cpu::ExpertLayout& lay,
+                                   const std::vector<int32_t>& kept, const std::vector<uint64_t>& kept_off,
+                                   const std::vector<int64_t>& kept_cnt, int threads) {
+    LoadStats st;
+    st.layers = (uint64_t) lay.n_layers;
+    uint64_t bytes = 0;
+    for (int64_t l = 0; l < lay.n_layers; ++l) bytes += (uint64_t) kept_cnt[(size_t) l] * lay.blob_bytes(l);
+    const auto t0 = std::chrono::steady_clock::now();
+    std::atomic<int64_t> next{0};
+    std::atomic<bool> bad{false};
+    auto worker = [&]() {
+        std::ifstream f;
+        std::string open_name;
+        for (;;) {
+            const int64_t l = next.fetch_add(1);
+            if (l >= lay.n_layers || bad) break;
+            const uint64_t bb = lay.blob_bytes(l);
+            for (int64_t e = 0; e < lay.n_expert; ++e) {
+                const int32_t c = kept[(size_t) (l * lay.n_expert + e)];
+                if (c < 0) continue;   // VRAM-only: its bytes are preloaded into the cache, not the arena
+                if (!read_expert_gguf(f, open_name, gguf, lay, l, e, dst + kept_off[(size_t) l] + (uint64_t) c * bb)) {
+                    bad = true;
+                    return;
+                }
+            }
+        }
+    };
+    std::vector<std::thread> pool;
+    for (int i = 1; i < threads; ++i) pool.emplace_back(worker);
+    worker();
+    for (auto& t : pool) t.join();
+    if (bad) {
+        st.seconds = -1.0;
+        return st;
+    }
+    st.bytes = bytes;
+    st.seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    return st;
+}
+
+// The VRAM-only tier's sparse experts.bin load: the retained experts of a layer form contiguous runs in the
+// FILE, and each run is one (source offset, arena offset, bytes) copy.  (`load_experts_ranges` cannot express
+// this: its file offset and destination offset are the same number, which is only true of the dense layout.)
+LoadStats load_experts_runs(const std::string& path, uint8_t* dst, const strata::kernels::cpu::ExpertLayout& lay,
+                            const std::vector<int32_t>& kept, const std::vector<uint64_t>& kept_off,
+                            int threads, uint64_t chunk) {
+    struct Run { uint64_t src, dst, bytes; };
+    std::vector<Run> runs;
+    for (int64_t l = 0; l < lay.n_layers; ++l) {
+        const uint64_t bb = lay.blob_bytes(l);
+        for (int64_t e = 0; e < lay.n_expert;) {
+            const int32_t c0 = kept[(size_t) (l * lay.n_expert + e)];
+            if (c0 < 0) { ++e; continue; }
+            int64_t e1 = e;
+            while (e1 < lay.n_expert && kept[(size_t) (l * lay.n_expert + e1)] == c0 + (e1 - e)) ++e1;
+            runs.push_back({lay.blob_offset(l, e), kept_off[(size_t) l] + (uint64_t) c0 * bb, (uint64_t) (e1 - e) * bb});
+            e = e1;
+        }
+    }
+    LoadStats st;
+    st.layers = (uint64_t) lay.n_layers;
+    for (const Run& r : runs) st.bytes += r.bytes;
+    if (threads < 1) threads = 1;
+    const auto t0 = std::chrono::steady_clock::now();
+    std::atomic<size_t> next{0};
+    std::atomic<bool> bad{false};
+    auto worker = [&]() {
+        std::vector<uint8_t> buf;
+        std::ifstream f(path, std::ios::binary);
+        if (!f) { bad = true; return; }
+        for (;;) {
+            const size_t r = next.fetch_add(1);
+            if (r >= runs.size() || bad) break;
+            if (buf.size() < chunk) buf.resize((size_t) chunk);
+            uint64_t pos = 0;
+            while (pos < runs[r].bytes) {
+                const uint64_t n = std::min<uint64_t>(chunk, runs[r].bytes - pos);
+                f.seekg((std::streamoff) (runs[r].src + pos));
+                f.read((char*) buf.data(), (std::streamsize) n);
+                if ((uint64_t) f.gcount() != n) { bad = true; return; }
+                std::memcpy(dst + runs[r].dst + pos, buf.data(), (size_t) n);
+                pos += n;
+            }
+        }
+    };
+    std::vector<std::thread> pool;
+    for (int i = 1; i < threads; ++i) pool.emplace_back(worker);
+    worker();
+    for (auto& t : pool) t.join();
+    if (bad) {
+        st.seconds = -1.0;
+        return st;
+    }
+    st.seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    return st;
+}
+
+}  // namespace
+
 ArenaExpertSource::~ArenaExpertSource() { close(); }
+
+void ArenaExpertSource::set_skip(const std::vector<std::pair<int32_t, int32_t>>* skip) {
+    skip_.clear();
+    if (skip != nullptr) skip_ = *skip;
+}
+
+bool ArenaExpertSource::skipped(int64_t layer, int64_t expert) const {
+    if (!sparse_ || layer < 0 || layer >= n_layers_ || expert < 0 || expert >= n_expert_) return false;
+    return kept_[(size_t) (layer * n_expert_ + expert)] < 0;
+}
+
+bool ArenaExpertSource::read_expert_blob(int64_t layer, int64_t expert, uint8_t* dst, std::string& err) const {
+    const strata::kernels::cpu::ExpertLayout& lay = strata::kernels::cpu::expert_layout();
+    if (layer < 0 || layer >= n_layers_ || expert < 0 || expert >= n_expert_) {
+        err = "ArenaExpertSource: expert (layer " + std::to_string(layer) + ", expert " + std::to_string(expert) +
+              ") is out of range";
+        return false;
+    }
+    if (from_gguf_) {
+        // the same three gate/up/down reads the (dense or sparse) arena load makes
+        std::ifstream f;
+        std::string open_name;
+        if (!read_expert_gguf(f, open_name, gguf_, lay, layer, expert, dst)) {
+            err = "ArenaExpertSource: cannot read expert (layer " + std::to_string(layer) + ", expert " +
+                  std::to_string(expert) + ") from " + gguf_file_of(gguf_, lay, layer);
+            return false;
+        }
+        return true;
+    }
+    // an experts.bin pack: the blob sits at its dense offset in the file whether or not the arena kept it
+    std::ifstream f(path_, std::ios::binary);
+    if (!f) {
+        err = "ArenaExpertSource: cannot open " + path_;
+        return false;
+    }
+    const uint64_t bb = lay.blob_bytes(layer);
+    f.seekg((std::streamoff) lay.blob_offset(layer, expert));
+    f.read((char*) dst, (std::streamsize) bb);
+    if ((uint64_t) f.gcount() != bb) {
+        err = "ArenaExpertSource: short read of expert (layer " + std::to_string(layer) + ", expert " +
+              std::to_string(expert) + ") from " + path_;
+        return false;
+    }
+    return true;
+}
 
 bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int64_t n_expert, int threads,
                              std::string& err) {
@@ -626,23 +810,56 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
         return false;
     }
     const int64_t blob = (int64_t) lay.max_blob;
-    const uint64_t want = lay.total;
+
+    // ---- the VRAM-only tier's compaction tables.  `ExpertLayout` keeps describing the FILE; this remap is
+    // private to the source.  With no skip set (the default) every table stays empty and every path below is
+    // bit-for-bit the dense one.
+    sparse_ = !skip_.empty();
+    kept_.clear();
+    kept_off_.clear();
+    kept_cnt_.clear();
+    slice_idx_.clear();
+    uint64_t want = lay.total;
+    if (sparse_) {
+        kept_.assign((size_t) (n_layers * n_expert), 0);
+        kept_off_.assign((size_t) n_layers, 0);
+        kept_cnt_.assign((size_t) n_layers, 0);
+        for (const auto& p : skip_) {
+            if (p.first < 0 || p.first >= n_layers || p.second < 0 || p.second >= n_expert) {
+                err = "ArenaExpertSource: the skip set holds (layer " + std::to_string(p.first) + ", expert " +
+                      std::to_string(p.second) + "), out of range";
+                return false;
+            }
+            const size_t at = (size_t) (p.first * n_expert + p.second);
+            kept_[at] = -1;   // exclusion set; duplicate pairs remain excluded
+        }
+        want = 0;
+        for (int64_t l = 0; l < n_layers; ++l) {
+            for (int64_t e = 0; e < n_expert; ++e) {
+                int32_t& c = kept_[(size_t) (l * n_expert + e)];
+                if (c >= 0) c = (int32_t) kept_cnt_[(size_t) l]++;
+            }
+            kept_off_[(size_t) l] = want;
+            want += (uint64_t) kept_cnt_[(size_t) l] * lay.blob_bytes(l);
+        }
+    }
 
     // plan v0.3 P6: no experts.bin in a native pack -> the experts come straight from the GGUF
     const bool from_gguf = !std::ifstream(path, std::ios::binary) && lay.native && !lay.gguf_off.empty() && !gguf_.empty();
     // SIZE CHECK BEFORE THE ALLOCATION, not after.  A wrong pack should name the two numbers rather than spend
-    // 34 GB and a minute of loading first.
+    // 34 GB and a minute of loading first.  (The check is against the FILE's dense size `lay.total`, not the
+    // compact `want`: it validates the pack, and only the arena is compacted.)
     if (!from_gguf) {
         std::ifstream f(path, std::ios::binary | std::ios::ate);
         if (!f) { err = "ArenaExpertSource: cannot open " + path; return false; }
         const uint64_t got = (uint64_t) f.tellg();
-        if (got != want) {
+        if (got != lay.total) {
             char buf[400];
             std::snprintf(buf, sizeof buf,
                           "ArenaExpertSource: %s is %llu B but %lld layers x %lld experts (blobs up to %lld B) "
                           "make %llu B - this is not the pack this geometry came from",
                           path.c_str(), (unsigned long long) got, (long long) n_layers, (long long) n_expert,
-                          (long long) blob, (unsigned long long) want);
+                          (long long) blob, (unsigned long long) lay.total);
             err = buf;
             return false;
         }
@@ -650,12 +867,19 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
 
     // one layer per registration slice, so no expert straddles two registrations.  The arena is one blob
     // longer than the file: a copy of a whole VRAM slot (the largest blob) may then start at any expert.
+    // (Sparse: one slice per layer WITH retained experts; an emptied layer would register zero bytes, which
+    // cudaHostRegister refuses, so `slice_idx_` maps layers to their slice instead of assuming layer order.)
     std::vector<uint64_t> bounds, loff, lbytes;
     for (int64_t l = 0; l < n_layers; ++l) {
-        bounds.push_back(lay.layer_offset(l));
-        loff.push_back(lay.layer_offset(l));
-        lbytes.push_back(lay.blob_bytes(l) * (uint64_t) n_expert);
+        if (sparse_ && kept_cnt_[(size_t) l] == 0) continue;
+        const uint64_t off = sparse_ ? kept_off_[(size_t) l] : lay.layer_offset(l);
+        const uint64_t bytes = sparse_ ? (uint64_t) kept_cnt_[(size_t) l] * lay.blob_bytes(l)
+                                       : lay.blob_bytes(l) * (uint64_t) n_expert;
+        bounds.push_back(off);
+        loff.push_back(off);
+        lbytes.push_back(bytes);
     }
+    if (bounds.empty()) bounds.push_back(0);
     bounds.push_back(want);
     PinnedArena* a = new PinnedArena(want + (uint64_t) blob, bounds);
     if (!a->valid()) {
@@ -663,14 +887,18 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
         err = "ArenaExpertSource: the arena could not be reserved (" + std::to_string(want) + " B)";
         return false;
     }
-    const LoadStats st = from_gguf ? load_experts_gguf(gguf_, a->data(), lay, threads)
-                                   : load_experts_ranges(path, a->data(), loff, lbytes, threads, /*chunk=*/8u << 20);
-    if (st.bytes != want) {
+    const LoadStats st = sparse_
+        ? (from_gguf ? load_experts_gguf_sparse(gguf_, a->data(), lay, kept_, kept_off_, kept_cnt_, threads)
+                     : load_experts_runs(path, a->data(), lay, kept_, kept_off_, threads, /*chunk=*/8u << 20))
+        : (from_gguf ? load_experts_gguf(gguf_, a->data(), lay, threads)
+                     : load_experts_ranges(path, a->data(), loff, lbytes, threads, /*chunk=*/8u << 20));
+    if (st.seconds < 0 || st.bytes != want) {
         delete a;
         err = "ArenaExpertSource: the load read " + std::to_string(st.bytes) + " B of " + std::to_string(want);
         return false;
     }
     arena_ = a;
+    resident_bytes_ = want;
     base_ = a->data();
     pinned_bytes_ = a->registered_bytes;
     // plan v0.3 P6: device aliases of the mapped registration, for the PCIe share of the misses
@@ -688,8 +916,19 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
             dev_slice_.push_back((const uint8_t*) d);
         }
     }
+    // the sparse remap of layer -> registration slice (the dense layout needs none: slice l IS layer l)
+    if (sparse_) {
+        slice_idx_.assign((size_t) n_layers, -1);
+        if (a->slice_bytes > 0)
+            for (int64_t l = 0; l < n_layers; ++l)
+                for (size_t i = 0; i < a->slice_starts.size(); ++i)
+                    if (a->slice_starts[i] == kept_off_[(size_t) l]) slice_idx_[(size_t) l] = (int32_t) i;
+    }
     blobs_ = n_layers * n_expert;
+    n_layers_ = n_layers;
     n_expert_ = n_expert;
+    path_ = path;
+    from_gguf_ = from_gguf;
     reads_ = 0;
     note_ = a->note;
     gib_per_s_ = st.gib_per_second();
@@ -702,23 +941,56 @@ void ArenaExpertSource::close() {
         arena_ = nullptr;
     }
     base_ = nullptr;
+    resident_bytes_ = 0;
     blobs_ = 0;
+    n_layers_ = 0;
     n_expert_ = 0;
+    sparse_ = false;
+    kept_.clear();
+    kept_off_.clear();
+    kept_cnt_.clear();
+    slice_idx_.clear();
+    path_.clear();
+    from_gguf_ = false;
 }
 
 bool ArenaExpertSource::pinned(int64_t layer, int64_t expert) const {
-    if (base_ == nullptr || layer < 0 || expert < 0 || expert >= n_expert_) return false;
+    if (base_ == nullptr || layer < 0 || expert < 0 || expert >= n_expert_ || layer >= n_layers_) return false;
     const auto& lay = strata::kernels::cpu::expert_layout();
+    if (sparse_) {
+        const int32_t c = kept_[(size_t) (layer * n_expert_ + expert)];
+        if (c < 0) return false;   // VRAM-only: no arena row, so nothing is pinned
+        return kept_off_[(size_t) layer] + (uint64_t) (c + 1) * lay.blob_bytes(layer) <= pinned_bytes_;
+    }
     return lay.blob_offset(layer, expert) + lay.blob_bytes(layer) <= pinned_bytes_;
 }
 
 const uint8_t* ArenaExpertSource::device_alias(int64_t layer, int64_t expert) const {
     if (dev_slice_.empty() || !pinned(layer, expert)) return nullptr;
     const auto& lay = strata::kernels::cpu::expert_layout();
+    if (sparse_) {
+        const int32_t c = kept_[(size_t) (layer * n_expert_ + expert)];
+        if (slice_bytes_ == 0) return dev_slice_[0] + kept_off_[(size_t) layer] + (uint64_t) c * lay.blob_bytes(layer);
+        // one registration slice per (non-empty) layer
+        const int32_t si = slice_idx_[(size_t) layer];
+        if (si < 0 || (size_t) si >= dev_slice_.size()) return nullptr;
+        return dev_slice_[(size_t) si] + (uint64_t) c * lay.blob_bytes(layer);
+    }
     if (slice_bytes_ == 0) return dev_slice_[0] + lay.blob_offset(layer, expert);
     // one registration slice per layer
     if ((size_t) layer >= dev_slice_.size()) return nullptr;
     return dev_slice_[(size_t) layer] + (uint64_t) expert * lay.blob_bytes(layer);
+}
+
+const uint8_t* ArenaExpertSource::device_alias_layer(int64_t layer) const {
+    if (dev_slice_.empty() || layer < 0 || layer >= n_layers_) return nullptr;
+    if (sparse_ && kept_cnt_[(size_t) layer] == 0) return nullptr;
+    const auto& lay = strata::kernels::cpu::expert_layout();
+    if (slice_bytes_ == 0)
+        return dev_slice_[0] + (sparse_ ? kept_off_[(size_t) layer] : lay.layer_offset(layer));
+    const int32_t si = sparse_ ? slice_idx_[(size_t) layer] : (int32_t) layer;
+    if (si < 0 || (size_t) si >= dev_slice_.size()) return nullptr;
+    return dev_slice_[(size_t) si];
 }
 
 const uint8_t* ArenaExpertSource::blob(int64_t layer, int64_t expert) {
@@ -726,10 +998,17 @@ const uint8_t* ArenaExpertSource::blob(int64_t layer, int64_t expert) {
     if (layer < 0 || expert < 0 || expert >= n_expert_) return nullptr;
     const int64_t idx = layer * n_expert_ + expert;
     if (idx < 0 || idx >= blobs_) return nullptr;
+    const auto& lay = strata::kernels::cpu::expert_layout();
+    if (sparse_) {
+        const int32_t c = kept_[(size_t) idx];
+        if (c < 0) return nullptr;   // VRAM-only: it lives in the cache, not here (and no read is counted)
+        ++reads_;
+        return base_ + kept_off_[(size_t) layer] + (uint64_t) c * lay.blob_bytes(layer);
+    }
     ++reads_;
     // Pointer arithmetic into resident memory.  No fault, no copy, no mapping - which is the entire point of
     // this class over `FileExpertSource`.
-    return base_ + strata::kernels::cpu::expert_layout().blob_offset(layer, expert);
+    return base_ + lay.blob_offset(layer, expert);
 }
 
 }  // namespace strata::core

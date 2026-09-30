@@ -1224,9 +1224,12 @@ def main() -> int:
         say(f"  {i}) {m:8s} {d['about']}; download {d['download_gb']:.0f} GB, uses ~{d['arena_gb']:.0f} GB of RAM{fit}")
     rec = str(names.index("IQ3_XXS") + 1) if ram >= 60 and "IQ3_XXS" in names else "1"
     model = a.model or names[int(ask("Which size?", [str(i) for i in range(1, len(names) + 1)], rec, a.yes)) - 1]
-    if ram < MODELS[model]["ram_gb"] - 4:
+    if ram < MODELS[model]["ram_gb"] - 4 and os.environ.get("STRATA_ALLOW_TIGHT") != "1":
         fail(f"{model} needs about {MODELS[model]['ram_gb']} GB of RAM; this PC has {ram:.0f} GB",
              "choose Q2_0 or IQ2_XS, or add RAM")
+    if ram < MODELS[model]["ram_gb"] - 4:
+        warn(f"{model} needs about {MODELS[model]['ram_gb']} GB of RAM; this PC has {ram:.0f} GB "
+             "(STRATA_ALLOW_TIGHT=1: continuing anyway)")
     ok(f"size: {model}")
     tag = fam["tag"] + model                           # names of the pack, config and start script
     rec_ctx = 32768 if gpu["vram_gb"] < 14 else 65536 if gpu["vram_gb"] < 20 else 131072

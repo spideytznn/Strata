@@ -104,7 +104,7 @@ struct Options {
     /// the head is one norm, two bf16 projections and one 794 MB GEMV, all of which can be recomputed in Python
     /// from the manifest.  If Python agrees with the engine on the same `R`, the head is right and the layers
     /// are wrong; if it disagrees, the head is wrong.  Nothing else in the engine can be split that cheaply.
-    std::string ple_gguf;              // the ORIGINAL second GGUF shard: the PLE table is not in the pack
+    std::string ple_gguf;              // PLE table GGUF; may be an independent replacement shard
     bool no_ple = false;              // explicit diagnostic ablation; never a normal inference default
     bool stream_token = false;        // R2.6 experiment: ordered work on the session stream
     bool check_logits = false;        // optional full-vocabulary finite scan
@@ -195,6 +195,11 @@ struct Options {
     /// trace is what the plan's `h = 0.6447` refers to, and compulsory-miss measured 0.4864 because it fills
     /// with whatever the prompt touched FIRST.  Empty means no profile.
     std::string expert_profile;
+    /// The VRAM-only expert tier: the profile's top K experts are preloaded straight from the pack file into
+    /// PINNED cache slots and EXCLUDED from the pinned host-RAM arena, shrinking RAM demand by their bytes.
+    /// Their arena rows do not exist (`blob()` answers nullptr), so the cache must never evict or lend them:
+    /// slots [0,K) are pinned.  0 (the default) is bit-for-bit the old behaviour.  Needs --expert-profile.
+    int vram_only_experts = 0;
     /// R4.2d: **ON by default**, because the measurement is unambiguous and the alternative is known-broken.
     /// Without it, 17 of 10,562 layers had the hit work done when the pool returned; with it, 9,190.  The
     /// A/B arm is `--no-hit-poke`.
@@ -297,7 +302,7 @@ void usage() {
                  "  --pack DIR           the pack directory (default pack/full)\n"
                  "  --tokens LIST        the prompt as comma-separated token IDS (required)\n"
                  "  --tokens-file PATH   pretokenized prompt, commas or whitespace (alternative to --tokens)\n"
-                 "  --ple-gguf PATH      required PLE table (original second GGUF shard)\n"
+                 "  --ple-gguf PATH      required PLE table (IQ4_NL or Q8_0 GGUF)\n"
                  "  --no-ple             explicit diagnostic ablation of the PLE layer\n"
                  "  --ple-io direct|mmap  n-gram table reads (plan v0.3 P2). direct (default): unbuffered SSD\n"
                  "                       reads, the table never enters RAM or the file cache; mmap: A/B arm\n"
@@ -385,6 +390,10 @@ void usage() {
                  "                       real graph that --stage-timing cannot give.  Prints and exits.\n"
                  "  --expert-profile P   R4.2e: pre-load the VRAM tier from a `profile.bin` (see\n"
                  "                       tools/make_profile.py) instead of admitting on first use.\n"
+                 "  --vram-only-experts K  the profile's top K experts live ONLY in VRAM: preloaded from the\n"
+                 "                       pack file into PINNED cache slots and excluded from the pinned host\n"
+                 "                       arena, so RAM demand shrinks by their bytes. Requires --expert-profile;\n"
+                 "                       refused with --no-pool, --mmap-experts or --expert-cache-per-layer.\n"
                  "  --no-hit-poke        R4.2d's A/B arm.  The hit path pokes the driver once right after its\n"
                  "                       launch so the GPU starts while the CPU pool runs; without it the work\n"
                  "                       waits for the next driver entry and does not overlap at all.\n"
@@ -970,6 +979,7 @@ int main(int argc, char** argv) {
         else if (a == "--expert-cache-per-layer") o.expert_cache_per_layer = true;
         else if (a == "--no-hit-poke") o.no_hit_poke = true;
         else if (a == "--expert-profile") o.expert_profile = next("--expert-profile");
+        else if (a == "--vram-only-experts") o.vram_only_experts = std::atoi(next("--vram-only-experts"));
         else if (a == "--gpu-stages") o.gpu_stages = true;
         else if (a == "--mmap-experts") o.mmap_experts = true;
         else if (a == "--stats") o.stats = true;
@@ -1043,11 +1053,20 @@ int main(int argc, char** argv) {
         o.native_qsa = o.native_qsa_indexer = o.native_rope = o.native_ple_postops = true;
         if (o.native_head_gguf.empty()) o.native_head_gguf = o.native_preset;
         if (o.native_dense_gguf.empty()) {
-            // every shard of the model (<name>-0000N-of-0000M.gguf beside --native), then the PLE shard: a split
-            // may put any layer in any shard (Swift's GGUFs: layers 13-47 in shard 2, the PLE table in shard 1)
+            // Every model shard may contain native projections. A separate PLE-only replacement
+            // supplies no projections and has its own split metadata; load it only through PleTable.
             o.native_dense_gguf = model_shards(o.native_preset);
-            if (std::find(o.native_dense_gguf.begin(), o.native_dense_gguf.end(), o.ple_gguf) == o.native_dense_gguf.end())
-                o.native_dense_gguf.push_back(o.ple_gguf);
+            if (std::find(o.native_dense_gguf.begin(), o.native_dense_gguf.end(), o.ple_gguf) == o.native_dense_gguf.end()) {
+                try {
+                    strata::GgufFile ple_file(o.ple_gguf);
+                    const bool table_only = ple_file.tensors().size() == 1 &&
+                        ple_file.find("per_layer_token_embd.weight") != nullptr;
+                    if (!table_only) o.native_dense_gguf.push_back(o.ple_gguf);
+                } catch (const std::exception& e) {
+                    std::fprintf(stderr, "strata generate: PLE file: %s\n", e.what());
+                    return 2;
+                }
+            }
         }
         // Plan v0.3 (24 Sep): the CPU experts stay on the VNNI kernel.  The llama.cpp-CPU-exact q8_0 contract
         // cost 27.0 vs 17.2 ms/token of pool time and G-C does not need it; `--cpu-oracle-q8-0` still selects it.
@@ -1099,6 +1118,41 @@ int main(int argc, char** argv) {
     if (o.cpu_oracle_q8_0 && (o.expert_cache != 0 || !o.expert_profile.empty())) {
         std::fprintf(stderr, "strata generate: --cpu-oracle-q8-0 cannot be combined with --expert-cache or --expert-profile until the GPU expert contract matches\n");
         return 2;
+    }
+    // The VRAM-only tier's own contract.  Every refusal below names a combination in which a skipped expert
+    // would have nowhere to be computed or nothing to be filled from, which is a wrong token and not an error.
+    if (o.vram_only_experts != 0) {
+        if (o.vram_only_experts < 0) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts must be >= 0\n");
+            return 2;
+        }
+        if (o.expert_profile.empty()) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts K needs --expert-profile P - the K "
+                                 "experts are the profile's top K of its ranking\n");
+            return 2;
+        }
+        if (o.no_pool) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts needs the expert pool's VRAM tier - the "
+                                 "GPU computes these experts; drop --no-pool\n");
+            return 2;
+        }
+        if (o.mmap_experts) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts excludes experts from the resident "
+                                 "arena, which --mmap-experts opts out of; drop --mmap-experts\n");
+            return 2;
+        }
+        if (o.expert_cache_per_layer) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts pins slot prefix [0,K), which only the "
+                                 "global admission order produces - per-layer admission scatters the top K "
+                                 "across each layer's own range; drop --expert-cache-per-layer\n");
+            return 2;
+        }
+        if (o.no_capture || o.no_token_graph || !o.dump_layers.empty() || !o.dump_halves.empty()) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts needs the token-graph residency table - "
+                                 "without it the prompt path would stream every expert and ask the arena for the "
+                                 "K it no longer holds; drop --no-capture/--no-token-graph/--dump-layers/--dump-halves\n");
+            return 2;
+        }
     }
 
     // **BEFORE ANYTHING ELSE.**  The CPU expert kernel is AVX-512 (VNNI + VBMI) and its translation unit is
@@ -1409,7 +1463,8 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "strata generate: the PLE run is not ready after construction\n");
             return 1;
         }
-        std::fprintf(stderr, "strata generate: PLE on, table %llu rows of %s\n",
+        std::fprintf(stderr, "strata generate: PLE on, %s, %u bytes/row, table %llu rows of %s\n",
+                     ple_table.type_name(), ple_table.row_bytes(),
                      (unsigned long long) ple_table.rows(), o.ple_gguf.c_str());
     } else {
         std::fprintf(stderr,
@@ -1447,6 +1502,51 @@ int main(int argc, char** argv) {
     strata::core::FileExpertSource src;
     strata::core::ArenaExpertSource arena_src;
     strata::core::ExpertSource* srcp = nullptr;
+    // ---- R4.2e: the profile is read BEFORE the arena opens.  It needs only the geometry and the path, and
+    // the VRAM-only tier needs its ranking first: the top K pairs are handed to the arena as the skip set, so
+    // the arena is BUILT without their bytes rather than built and shrunk afterwards.
+    std::vector<std::pair<int32_t, int32_t>> profile;
+    if (!o.expert_profile.empty()) {
+        int64_t pslots = 0;
+        if (!strata::core::read_expert_profile(o.expert_profile, g.n_layers, g.n_expert, profile, pslots, err)) {
+            std::fprintf(stderr, "strata generate: %s\n", err.c_str());
+            return 1;
+        }
+        // An explicit number truncates the ranked list ("what would 2,000 slots give" without rebuilding the
+        // file).  `--expert-cache 0` used to take the count the profile was built for; the profile now ranks
+        // every pair (issue #46: a card that holds more than the old 8,000 used to stop there), so it means auto.
+        if (o.expert_cache == 0) o.expert_cache = -1;
+        std::fprintf(stderr, "strata generate: profile %s: %zu ranked pairs, built for %lld slots\n",
+                     o.expert_profile.c_str(), profile.size(), (long long) pslots);
+    }
+    // ---- the VRAM-only expert tier: the profile's top K experts are preloaded straight from the pack file
+    // into PINN cache slots and excluded from the RAM arena (host demand shrinks by their bytes).  Their
+    // arena rows do not exist, so `blob()` answers nullptr for them - the pinning below is what keeps that
+    // from ever being asked.
+    int64_t vram_only = 0;
+    std::vector<uint8_t> vram_pinned;   ///< [l * n_expert + e] = 1: this expert exists only in the VRAM tier
+    if (o.vram_only_experts > 0) {
+        if ((int64_t) profile.size() < (int64_t) o.vram_only_experts) {
+            std::fprintf(stderr, "strata generate: --vram-only-experts %d but the profile ranks only %zu pairs\n",
+                         o.vram_only_experts, profile.size());
+            return 2;
+        }
+        vram_only = o.vram_only_experts;
+        vram_pinned.assign((size_t) (g.n_layers * g.n_expert), 0);
+        std::vector<std::pair<int32_t, int32_t>> skip;
+        uint64_t saved = 0;
+        for (int64_t i = 0; i < vram_only; ++i) {
+            const auto& pr = profile[(size_t) i];
+            const size_t at = (size_t) (pr.first * g.n_expert + pr.second);
+            if (vram_pinned[at]) continue;   // a duplicated pair in the ranking: skip it once
+            vram_pinned[at] = 1;
+            saved += strata::kernels::cpu::expert_layout().blob_bytes(pr.first);
+            skip.push_back(pr);
+        }
+        arena_src.set_skip(&skip);
+        std::fprintf(stderr, "strata generate: %lld VRAM-only experts excluded from the arena (-%.2f GiB of "
+                             "pinned RAM)\n", (long long) vram_only, (double) saved / 1073741824.0);
+    }
     if (o.mmap_experts) {
         if (!src.open(o.pack, g.n_layers, g.n_expert, err)) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
@@ -1462,7 +1562,7 @@ int main(int argc, char** argv) {
         }
         std::fprintf(stderr, "strata generate: expert arena: %s\n", arena_src.note().c_str());
         std::fprintf(stderr, "strata generate: loaded %.2f GiB at %.2f GiB/s\n",
-                     (double) strata::kernels::cpu::expert_layout().total / (1024.0 * 1024 * 1024),
+                     (double) arena_src.resident_bytes() / (1024.0 * 1024 * 1024),
                      arena_src.load_gib_per_second());
         srcp = &arena_src;
     }
@@ -1485,21 +1585,7 @@ int main(int argc, char** argv) {
     // sees the memory this process actually has left rather than the card's idle figure - and refuses with both
     // numbers if the slots do not fit, instead of handing back a cache smaller than it was asked for.
     mem_mark("the weights, the session and the drafter");
-    strata::core::ExpertCache xcache;
-    std::vector<std::pair<int32_t, int32_t>> profile;
-    if (!o.expert_profile.empty()) {
-        int64_t pslots = 0;
-        if (!strata::core::read_expert_profile(o.expert_profile, g.n_layers, g.n_expert, profile, pslots, err)) {
-            std::fprintf(stderr, "strata generate: %s\n", err.c_str());
-            return 1;
-        }
-        // An explicit number truncates the ranked list ("what would 2,000 slots give" without rebuilding the
-        // file).  `--expert-cache 0` used to take the count the profile was built for; the profile now ranks
-        // every pair (issue #46: a card that holds more than the old 8,000 used to stop there), so it means auto.
-        if (o.expert_cache == 0) o.expert_cache = -1;
-        std::fprintf(stderr, "strata generate: profile %s: %zu ranked pairs, built for %lld slots\n",
-                     o.expert_profile.c_str(), profile.size(), (long long) pslots);
-    }
+    strata::core::ExpertCache xcache;   // the profile itself was read before the arena opened, above
     // THE HEAD BEFORE THE CACHE.  The expert cache takes what is free minus the reserve, so everything allocated
     // after it comes out of the reserve.  The native head (~0.5 GB with IQ3_S) was loaded after it and ate most of
     // the 700 MiB: 128K IQ3_S ended with 30 MiB free, the driver paged, and a request stalled for good at its first
@@ -1645,6 +1731,19 @@ int main(int argc, char** argv) {
                                  "page file lets it use more of the free VRAM\n",
                          o.expert_cache, (double) xcache.bytes() / 1073741824.0, failed);
     }
+    // The VRAM-only tier's hard floor: the skipped experts' arena rows DO NOT EXIST, so a cache that cannot
+    // hold all K of them leaves them with no source at all - the auto-sizing shrink above must refuse rather
+    // than drop below K.  (Reached only when the card or the page file could not hold the tier.)
+    if (vram_only > 0) {
+        if (xcache.slots() < vram_only) {
+            std::fprintf(stderr, "strata generate: the expert cache holds %lld slots, fewer than the %lld "
+                                 "VRAM-only experts - their arena rows were never loaded, so they MUST be "
+                                 "resident; lower --vram-only-experts or raise --expert-cache\n",
+                         (long long) xcache.slots(), (long long) vram_only);
+            return 1;
+        }
+        xcache.pin_prefix(vram_only);   // slots [0,K): never lent to the prompt path, never swapped out
+    }
     if (o.expert_cache > 0) {
         std::fprintf(stderr, "strata generate: expert cache %lld slots, %.2f GiB of VRAM; policy is\n",
                      (long long) xcache.slots(), xcache.gib());
@@ -1676,12 +1775,27 @@ int main(int argc, char** argv) {
     // admission finds no room and every non-profiled expert stays a CPU miss.  That is what makes the profile
     // the policy rather than a hint.
     int64_t prefilled = 0;
+    // the VRAM-only tier's staging: one blob, into which an excluded expert's bytes are read straight from
+    // the pack file before their blocking fill (pageable is fine - `fill_slot_blocking` copies synchronously)
+    std::vector<uint8_t> vram_stage;
+    if (vram_only > 0) vram_stage.resize((size_t) strata::kernels::cpu::expert_layout().max_blob);
     if (!profile.empty() && srcp != nullptr) {
         const int64_t want = std::min<int64_t>((int64_t) profile.size(), xcache.slots());
         for (int64_t i = 0; i < want; ++i) {
             const int32_t slot = xcache.admit(profile[(size_t) i].first, profile[(size_t) i].second);
             if (slot == strata::core::kNotResident) break;
             const uint8_t* b = srcp->blob(profile[(size_t) i].first, profile[(size_t) i].second);
+            if (b == nullptr && i < vram_only) {
+                // the tier's own experts: the arena has no row for them, so their bytes come straight from
+                // the pack (the GGUF's three slices, or experts.bin at its dense offset)
+                if (!arena_src.read_expert_blob(profile[(size_t) i].first, profile[(size_t) i].second,
+                                                vram_stage.data(), err)) {
+                    std::fprintf(stderr, "strata generate: reading VRAM-only pair %lld from the pack failed: %s\n",
+                                 (long long) i, err.c_str());
+                    return 1;
+                }
+                b = vram_stage.data();
+            }
             if (b == nullptr || !xcache.fill_slot_blocking(slot, b, err,
                     (int64_t) strata::kernels::cpu::expert_layout().blob_bytes(profile[(size_t) i].first))) {
                 std::fprintf(stderr, "strata generate: the profile fill failed at pair %lld: %s\n",
@@ -1692,16 +1806,38 @@ int main(int argc, char** argv) {
         }
         // **AND ONE SLOT IS READ BACK AND COMPARED.**  A residency table that is right about indices and wrong
         // about bytes produces a plausible token, which is this project's most expensive failure mode; the
-        // cache's own `verify_slot` is the check and it costs one 1.38 MB D2H at startup.
-        if (prefilled > 0 && !xcache.verify_slot(xcache.slot_of(profile[0].first, profile[0].second),
-                                srcp->blob(profile[0].first, profile[0].second), err,
-                                (int64_t) strata::kernels::cpu::expert_layout().blob_bytes(profile[0].first))) {
-            std::fprintf(stderr, "strata generate: %s\n", err.c_str());
-            return 1;
+        // cache's own `verify_slot` is the check and it costs one 1.38 MB D2H at startup.  A VRAM-only pair's
+        // arena blob is null BY DESIGN, so the comparison re-reads the pair's own bytes from the pack.
+        if (prefilled > 0) {
+            const uint8_t* v0 = srcp->blob(profile[0].first, profile[0].second);
+            if (v0 == nullptr && !arena_src.read_expert_blob(profile[0].first, profile[0].second,
+                                                             vram_stage.data(), err)) {
+                std::fprintf(stderr, "strata generate: re-reading the top pair for verification failed: %s\n",
+                             err.c_str());
+                return 1;
+            }
+            if (!xcache.verify_slot(xcache.slot_of(profile[0].first, profile[0].second),
+                                    v0 != nullptr ? v0 : vram_stage.data(), err,
+                                    (int64_t) strata::kernels::cpu::expert_layout().blob_bytes(profile[0].first))) {
+                std::fprintf(stderr, "strata generate: %s\n", err.c_str());
+                return 1;
+            }
+        }
+        // The tier's invariant, checked rather than assumed: every excluded expert MUST hold a slot - its
+        // bytes exist nowhere else, and a miss here would surface at some later token as the source's fatal
+        // "could not produce a blob" instead of at startup where it belongs.
+        for (int64_t i = 0; i < vram_only; ++i) {
+            if (xcache.slot_of(profile[(size_t) i].first, profile[(size_t) i].second) < 0) {
+                std::fprintf(stderr, "strata generate: VRAM-only pair %lld (layer %d, expert %d) holds no cache "
+                                     "slot - it has no arena row either\n", (long long) i,
+                             (int) profile[(size_t) i].first, (int) profile[(size_t) i].second);
+                return 1;
+            }
         }
         mem_mark("the profile fill");
-        std::fprintf(stderr, "strata generate: pre-filled %lld of %lld slots from the profile; slot 0 verified\n",
-                     (long long) prefilled, (long long) want);
+        std::fprintf(stderr, "strata generate: pre-filled %lld of %lld slots from the profile; slot 0 verified%s\n",
+                     (long long) prefilled, (long long) want,
+                     vram_only > 0 ? "; the top K are VRAM-only (pinned, no arena row)" : "");
     }
 
     Drive drive;
@@ -2392,18 +2528,46 @@ int main(int argc, char** argv) {
                      : (int64_t) (strata::prefill::Prefill::pinned_share() >= 0.9 ? 90 : 85);
         }();
         auto slots_for = lend_slots;
+        // the VRAM-only tier: the prompt path may only borrow from ABOVE the pinned prefix, so `first`
+        // (slots - k) stays >= pinned_prefix() and the K experts with no arena row stay resident
+        const int64_t keep_free = 128 + xcache.pinned_prefix();
         if (o.prefill_auto) {
             for (const int64_t c : kAutoChunks) {
                 const int64_t k = slots_for(c);
-                if (k + 128 <= xcache.slots() && k * 100 <= kAutoLendPct * xcache.slots()) { chunk = c; return k; }
+                if (k + keep_free <= xcache.slots() && k * 100 <= kAutoLendPct * xcache.slots()) { chunk = c; return k; }
             }
             return 0;
         }
         for (int64_t c = chunk; c >= 256; c /= 2) {
             const int64_t k = slots_for(c);
-            if (k + 128 <= xcache.slots()) { chunk = c; return k; }
+            if (k + keep_free <= xcache.slots()) { chunk = c; return k; }
         }
         return 0;
+    };
+    // A VRAM-only prefix cannot be lent: it holds the only copy of those experts.  A small
+    // lendable tail must not force tiny batches while several GiB outside the cache are idle.
+    // Compare with independent buffers, keeping the reserve for verification and later allocations.
+    auto prefer_own_prefill = [&](int64_t& chunk, int64_t& lend) -> bool {
+        if (xcache.pinned_prefix() == 0) return false;
+        size_t free_b = 0, total_b = 0;
+        if (cudaMemGetInfo(&free_b, &total_b) != cudaSuccess) return false;
+        const uint64_t reserve = (uint64_t) std::max(0, o.vram_reserve_mib) << 20;
+        const uint64_t available = free_b > reserve ? free_b - reserve : 0;
+        const int64_t borrowed_chunk = lend > 0 ? chunk : 0;
+        static constexpr int64_t candidates[] = {8192, 6144, 4096, 3072, 2048, 1024, 512, 256};
+        for (const int64_t c : candidates) {
+            if (c > o.prefill_chunk || c <= borrowed_chunk) continue;
+            const uint64_t need = strata::prefill::Prefill::bytes_needed(g, ss, c);
+            if (need > available) continue;
+            chunk = c;
+            lend = 0;
+            std::fprintf(stderr, "strata prefill: independent buffers allow %lld tokens instead of %lld; "
+                                 "need %llu MiB, free %llu MiB, reserve %llu MiB\n",
+                         (long long) c, (long long) borrowed_chunk, (unsigned long long) (need >> 20),
+                         (unsigned long long) (free_b >> 20), (unsigned long long) (reserve >> 20));
+            return true;
+        }
+        return false;
     };
     if (o.serve) {
         if (o.spec < 2 || o.mtp.empty() || o.prefill_chunk <= 0 ||
@@ -2422,19 +2586,26 @@ int main(int argc, char** argv) {
         // prompt chunk is halved until its buffers fit in the lendable slots (a smaller chunk only reads slower)
         if (!o.no_prefill_borrow && d_res != nullptr) {
             int64_t chunk = o.prefill_chunk;
-            if (const int64_t k = plan_lend(chunk); k > 0) {
+            int64_t k = plan_lend(chunk);
+            const bool own = prefer_own_prefill(chunk, k);
+            // the tier's belt-and-braces: never lend at or below the pinned prefix (plan_lend already
+            // reserves it; a slot there holds an expert whose arena row does not exist)
+            if (k > 0 && xcache.slots() - k < xcache.pinned_prefix()) k = 0;
+            if (k > 0 || own) {
                 if (o.prefill_auto)
                     std::fprintf(stderr, "strata serve: prompt chunk auto: %lld tokens\n", (long long) chunk);
                 else if (chunk != o.prefill_chunk)
                     std::fprintf(stderr, "strata serve: prompt chunk %lld -> %lld tokens so its buffers fit in the "
                                          "expert cache\n", (long long) o.prefill_chunk, (long long) chunk);
                 o.prefill_chunk = chunk;
-                lend_first = (int32_t) (xcache.slots() - k);
-                lend_first_now = lend_first;
-                borrow = xcache.device_slot(lend_first);
-                borrow_bytes = xcache.slot_offsets()
-                                   ? (uint64_t) (xcache.bytes() - (int64_t) xcache.slot_offsets()[lend_first])
-                                   : (uint64_t) k * (uint64_t) strata::kernels::cpu::expert_layout().max_blob;
+                if (k > 0) {
+                    lend_first = (int32_t) (xcache.slots() - k);
+                    lend_first_now = lend_first;
+                    borrow = xcache.device_slot(lend_first);
+                    borrow_bytes = xcache.slot_offsets()
+                                       ? (uint64_t) (xcache.bytes() - (int64_t) xcache.slot_offsets()[lend_first])
+                                       : (uint64_t) k * (uint64_t) strata::kernels::cpu::expert_layout().max_blob;
+                }
             } else if (o.prefill_auto) {
                 o.prefill_chunk = 1024;   // nothing lendable: small buffers of its own
             }
@@ -2443,7 +2614,7 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "strata serve: the prompt path borrows %lld cache slots (%.2f GiB)\n",
                          (long long) (xcache.slots() - lend_first), (double) borrow_bytes / 1073741824.0);
         else
-            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
+            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers\n");
         if (!sp.init(wt, g, ss, srcp, &xcache, host_res.data(), o.prefill_chunk, main_cs, err, borrow, borrow_bytes)) {
             std::fprintf(stderr, "strata serve: %s\n", err.c_str());
             return 1;
@@ -2572,7 +2743,11 @@ int main(int argc, char** argv) {
                 const int32_t* r = host_res.data() + l * g.n_expert;
                 for (int32_t e = 0; e < (int32_t) g.n_expert; ++e) {
                     if (r[e] < 0) { if (u[e] >= 2.0f) cand.emplace_back(u[e], e); }
-                    else vict.emplace_back(u[e], e);
+                    // the pinned VRAM-only experts are never victims: their arena rows do not exist, so an
+                    // eviction would strand them with no source at all
+                    else if (r[e] >= (int32_t) xcache.pinned_prefix() &&
+                             (vram_pinned.empty() || !vram_pinned[(size_t) (l * g.n_expert + e)]))
+                        vict.emplace_back(u[e], e);
                 }
                 if (cand.empty() || vict.empty()) continue;
                 std::sort(cand.begin(), cand.end(), [](auto& a, auto& b) { return a.first > b.first; });
@@ -2692,7 +2867,8 @@ int main(int argc, char** argv) {
                                          ? ss.qsa_states[0].n_slots * 4 : 0),
                         (long long) xcache.slots(), (long long) (xcache.bytes() >> 20), o.spec, o.mtp_max_t,
                         o.suffix_draft, (long long) (free_b >> 20), cvec_summary.c_str(),
-                        (long long) (strata::kernels::cpu::expert_layout().total >> 20), pool.workers(), o.pcie_frac,
+                        (long long) ((o.mmap_experts ? strata::kernels::cpu::expert_layout().total
+                                                    : arena_src.resident_bytes()) >> 20), pool.workers(), o.pcie_frac,
                         o.spec_min_p);
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
@@ -3400,14 +3576,19 @@ int main(int argc, char** argv) {
         if (!o.no_prefill_borrow && !host_res.empty() && d_res != nullptr) {
             int64_t chunk = o.prefill_chunk;
             int64_t k = plan_lend(chunk);             // auto: the largest chunk that fits; fixed: halved to fit
-            if (k > 0 && chunk > (n_prompt - 1 + 255) / 256 * 256) {   // no bigger than the prompt needs
+            const bool own = prefer_own_prefill(chunk, k);
+            // the tier's belt-and-braces: never lend at or below the pinned prefix (see plan_lend)
+            if (k > 0 && xcache.slots() - k < xcache.pinned_prefix()) k = 0;
+            if ((k > 0 || own) && chunk > (n_prompt - 1 + 255) / 256 * 256) {   // no bigger than the prompt needs
                 chunk = std::max<int64_t>(256, (n_prompt - 1 + 255) / 256 * 256);
-                k = lend_slots(chunk);
+                if (!own) k = lend_slots(chunk);
                 if (!o.prefill_auto) o.prefill_chunk = chunk;
             }
             if (o.prefill_auto) {
-                o.prefill_chunk = k > 0 ? chunk : 1024;
+                o.prefill_chunk = k > 0 || own ? chunk : 1024;
                 std::fprintf(stderr, "strata generate: prompt chunk auto: %lld tokens\n", (long long) o.prefill_chunk);
+            } else if (own) {
+                o.prefill_chunk = chunk;
             } else if (chunk != o.prefill_chunk) {
                 k = 0;                                 // a fixed chunk that does not fit: its own buffers, as before
             }
@@ -3786,7 +3967,10 @@ int main(int argc, char** argv) {
                 const int32_t* r = host_res.data() + l * g.n_expert;
                 for (int32_t e = 0; e < (int32_t) g.n_expert; ++e) {
                     if (r[e] < 0) { if (u[e] >= 2.0f) cand.emplace_back(u[e], e); }
-                    else vict.emplace_back(u[e], e);
+                    // the pinned VRAM-only experts are never victims (no arena row to fall back to)
+                    else if (r[e] >= (int32_t) xcache.pinned_prefix() &&
+                             (vram_pinned.empty() || !vram_pinned[(size_t) (l * g.n_expert + e)]))
+                        vict.emplace_back(u[e], e);
                 }
                 if (cand.empty() || vict.empty()) continue;
                 std::sort(cand.begin(), cand.end(), [](auto& a, auto& b) { return a.first > b.first; });

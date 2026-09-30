@@ -855,6 +855,23 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
         }
     }
     for (int t = 0; t < T; ++t) out[t] = ((volatile int32_t*) h_out_)[t];
+    // Optional first-window diagnostic for native IQ packs, whose verify path bypasses --dump-logits.
+    // No allocation or readback in normal runs. Header: int32 vocab, int32 rows, int64 position; then FP32.
+    if (static const char* path = std::getenv("STRATA_VERIFY_LOGITS"); path != nullptr && windows == 0) {
+        std::vector<float> h((size_t) T * (size_t) n_vocab_);
+        if (cudaMemcpy(h.data(), head_logits_, h.size() * sizeof(float), cudaMemcpyDeviceToHost) != cudaSuccess) {
+            err = "verify: diagnostic logits readback failed";
+            return false;
+        }
+        std::FILE* f = std::fopen(path, "wb");
+        if (f == nullptr) { err = "verify: cannot open diagnostic logits file"; return false; }
+        const int32_t header[2] = {(int32_t) n_vocab_, T};
+        const bool ok = std::fwrite(header, sizeof header, 1, f) == 1 &&
+                        std::fwrite(&pos0, sizeof pos0, 1, f) == 1 &&
+                        std::fwrite(h.data(), sizeof(float), h.size(), f) == h.size();
+        const int closed = std::fclose(f);
+        if (!ok || closed != 0) { err = "verify: diagnostic logits write failed"; return false; }
+    }
     if (static const bool dbg = std::getenv("STRATA_DBG_NAN") != nullptr; dbg) {   // debug: the first non-finite head
         static bool reported = false;
         if (!reported) {
