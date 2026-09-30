@@ -1,3 +1,9 @@
+> **This repository is a customized version of [Niko1221/Strata](https://github.com/Niko1221/Strata), based on upstream v0.1.27.**
+> It adds VRAM-only expert residency for RAM-constrained machines, independent prefill buffers, and Q8_0 ngram tables.
+> **Build this version from source** to retain these changes; upstream prebuilt releases do not contain them.
+> See [our changes, configuration requirements, and validation limits](docs/LOCAL_VARIANT.md).
+> The upstream README and benchmark results follow below; they are not new measurements of this variant.
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on a normal gaming PC</b><br>
