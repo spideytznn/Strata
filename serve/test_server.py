@@ -7,6 +7,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -14,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from serve.frontend import ChatTemplate  # noqa: E402
-from serve.server import CTX_SLACK, ByteTokenizer, EngineDied, MockEngine, Service, StrataEngine, serve  # noqa: E402
+from serve.server import CTX_SLACK, ByteTokenizer, EngineDied, MockEngine, Service, StrataEngine, request_timings, serve  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CTX = 4096
@@ -163,6 +165,35 @@ class FitMaxTokens(unittest.TestCase):
         s, b, _, _ = self.call("openai", text="y" * (CTX - CTX_SLACK - overhead), max_tokens=100)
         self.assertEqual(s, 400, b)
         self.assertIn("no room to answer", b["error"]["message"])
+
+
+class ImageMarkers(unittest.TestCase):
+    """#150: the text "<|image_pad|>" inside a message is text, not an image's place."""
+
+    class FakeVision:
+        def __init__(self, d):
+            self.dir = Path(d)
+            self.rows = self.dir / "img.sve"
+            self.rows.write_bytes(b"rows")
+
+        def encode(self, source):
+            return self.rows, 3
+
+    def test_literal_marker_with_an_image(self):
+        import tempfile
+        tok = ByteTokenizer()
+        with tempfile.TemporaryDirectory() as d:
+            svc = Service(MockEngine(tok, "ok", max_context=CTX), tok, ChatTemplate(ROOT / "serve/chat_template.jinja"),
+                          vision=self.FakeVision(d))
+            pad = tok.encode("<|image_pad|>", parse_special=True)[0]
+            for text in ("the docs say <|image_pad|> marks an image", "plain"):
+                with self.subTest(text=text):
+                    msgs = [{"role": "user", "content": [{"type": "text", "text": text},
+                                                         {"type": "image", "source": "x.png"}]}]
+                    ids, _, _ = svc.prepare(msgs, None, {})
+                    self.assertEqual(ids.count(pad), 3)          # the image's three rows, nothing else
+                    self.assertIn("<|image_pad|> marks" if "docs" in text else "plain", tok.decode(ids))
+            svc.embeddings.path.unlink(missing_ok=True)
 
 
 class ClientShapes(unittest.TestCase):
@@ -368,6 +399,97 @@ class EngineDeath(unittest.TestCase):
             httpd.server_close()
 
 
+class LiveRate(unittest.TestCase):
+    """The Monitor's Speed readout: live.tok_s is a rate, and a request that never got a DONE keeps no counters.
+
+    It used to be `generated / (now - first_token)` - the mean since the first token, whose first sample is
+    1/elapsed.  Against a paced engine that reads five-digit numbers for the first instant of every answer and
+    undershoots for the first second after that.  It is now the rate over the last RATE_WINDOW_S, with the mean
+    still available as `live.tok_s_mean` for anyone who wants it."""
+
+    PACE_S = 0.02                    # 50 tokens/s: a 30-token answer takes about 0.6 s
+    TOKENS = 30
+
+    def setUp(self):
+        self.tok = ByteTokenizer()
+        self.engine = MockEngine(self.tok, "x" * self.TOKENS, max_context=CTX, delay_s=self.PACE_S)
+        self.svc = Service(self.engine, self.tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        self.httpd = serve(self.svc, port=0)
+        self.base = f"http://127.0.0.1:{self.httpd.server_address[1]}"
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+
+    def metrics(self):
+        with urllib.request.urlopen(self.base + "/metrics", timeout=10) as r:
+            return json.loads(r.read())
+
+    def test_the_live_number_is_a_rate(self):
+        live_samples, stop = [], threading.Event()
+
+        def poll():                                   # what the Monitor polls, at 10 ms
+            while not stop.is_set():
+                live = self.metrics()["live"]
+                if live["state"] == "generating" and live["tok_s"] is not None:
+                    live_samples.append((live["generated"], live["tok_s"], live["tok_s_mean"]))
+                time.sleep(0.01)
+
+        body = json.dumps({"model": "m", "max_tokens": self.TOKENS, "temperature": 0,
+                           "messages": [{"role": "user", "content": "hi"}]}).encode()
+        watcher = threading.Thread(target=poll, daemon=True)
+        watcher.start()
+        t0 = time.time()
+        try:
+            with urllib.request.urlopen(urllib.request.Request(self.base + "/v1/chat/completions", data=body,
+                                                               headers={"Content-Type": "application/json"}),
+                                        timeout=30) as r:
+                usage = json.loads(r.read())["usage"]
+        finally:
+            stop.set()
+            watcher.join(2)
+        true_rate = usage["completion_tokens"] / (time.time() - t0)
+        self.assertGreaterEqual(len(live_samples), 3, "too few live readings to judge the readout")
+        self.assertLess(max(s for _g, s, _m in live_samples), 4 * true_rate,
+                        f"live.tok_s peaked at {max(s for _g, s, _m in live_samples):.1f} tok/s "
+                        f"for a {true_rate:.1f} tok/s engine")
+        self.assertEqual(self.metrics()["live"]["state"], "idle")
+        self.assertIsNone(self.metrics()["live"]["tok_s"])
+
+    def test_a_request_without_a_done_keeps_no_engine_counters(self):
+        """An engine that dies mid-answer: the previous request's `last` must not become this row's decode rate."""
+        class HalfDead(MockEngine):
+            last = {"generated": 99, "prompt_tokens": 9, "prompt_ms": 10.0, "decode_ms": 100.0, "finish": "stop"}
+
+            def generate(self, ids, max_new, sampling, cancel, embeddings=None):
+                for i, t in enumerate(super().generate(ids, max_new, sampling, cancel, embeddings)):
+                    if i == 3:
+                        raise EngineDied("the engine stopped unexpectedly (exit code -9)")
+                    yield t
+
+        tok = ByteTokenizer()
+        svc = Service(HalfDead(tok, "x" * self.TOKENS, max_context=CTX), tok,
+                      ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        httpd = serve(svc, port=0)
+        base = f"http://127.0.0.1:{httpd.server_address[1]}"
+        try:
+            body = json.dumps({"model": "m", "max_tokens": self.TOKENS, "stream": True,
+                               "messages": [{"role": "user", "content": "hi"}]}).encode()
+            with urllib.request.urlopen(urllib.request.Request(base + "/v1/chat/completions", data=body,
+                                                               headers={"Content-Type": "application/json"}),
+                                        timeout=30) as r:
+                text = r.read().decode()
+            self.assertIn('"error"', text)
+            row = svc.metrics()["requests"][0]
+            self.assertEqual(row["finish"], "error")
+            self.assertEqual(row["output_tokens"], 3)
+            self.assertIsNone(row["decode_tok_s"], "the previous request's counters were recorded as this one's")
+            self.assertIsNone(row["engine_generated"])
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+
 class SharedSettings(unittest.TestCase):
     """The web app's "Use for other apps too": POST /settings makes its Chat settings every client's defaults."""
 
@@ -489,7 +611,7 @@ class WebApp(unittest.TestCase):
         code, ctype, body = self.get("/")
         self.assertEqual(code, 200)
         self.assertIn("text/html", ctype)
-        self.assertIn(b"/web/app.js", body)
+        self.assertIn(b"\"web/app.js\"", body)   # relative since #82 (works behind a path-prefixed proxy)
         for path, want in (("/web/app.js", "javascript"), ("/web/app.css", "text/css"), ("/web/tokens.css", "text/css"),
                            ("/web/components.css", "text/css"), ("/web/sprite.svg", "image/svg+xml")):
             with self.subTest(path=path):
@@ -516,6 +638,86 @@ class WebApp(unittest.TestCase):
         self.assertEqual(m["live"]["state"], "idle")
         self.assertEqual(m["requests"][0]["output_tokens"], 5)
 
+    def test_model_discovery_and_props(self):
+        svc = self.svc
+        previous = svc.engine.max_context, svc.vision, svc.sampling_defaults, svc.shared
+        try:
+            svc.engine.max_context = 262144
+            svc.sampling_defaults = {"temperature": 1.0, "repetition_penalty": 1.1}
+            svc.shared = {"temperature": 0.7, "max_tokens": 4096}
+            for vision in (None, object()):
+                svc.vision = vision
+                for path in ("/models", "/v1/models"):
+                    code, _, body = self.get(path)
+                    self.assertEqual(code, 200)
+                    models = json.loads(body)["data"]
+                    self.assertEqual(len(models), 1)
+                    model = models[0]
+                    self.assertEqual(model["id"], svc.model)
+                    self.assertEqual(model["status"]["value"], "loaded")
+                    self.assertEqual(model["meta"]["n_ctx"], 262144)
+                    self.assertEqual(model["architecture"]["input_modalities"],
+                                     ["text", "image"] if vision else ["text"])
+                code, _, body = self.get("/props?model=" + svc.model + "&autoload=false")
+                self.assertEqual(code, 200)
+                props = json.loads(body)
+                self.assertEqual(props["default_generation_settings"]["n_ctx"], 262144)
+                self.assertEqual(props["default_generation_settings"]["params"],
+                                 {"temperature": 0.7, "repeat_penalty": 1.1, "n_predict": 4096})
+                self.assertEqual(props["chat_template"], (ROOT / "serve/chat_template.jinja").read_text(encoding="utf-8"))
+                self.assertEqual(props["modalities"]["vision"], vision is not None)
+                self.assertEqual(props["total_slots"], 1)
+                self.assertFalse(props["models_autoload"])
+            svc.shared = {}
+            props = json.loads(self.get("/props")[2])
+            self.assertEqual(props["default_generation_settings"]["params"]["n_predict"], -1)
+            self.assertEqual(self.get("/props?model=not-loaded&autoload=true")[0], 404)
+        finally:
+            svc.engine.max_context, svc.vision, svc.sampling_defaults, svc.shared = previous
+
+    def test_discovery_needs_the_api_key(self):
+        self.svc.api_key = "secret"
+        try:
+            for path in ("/models", "/v1/models", "/props", "/slots"):
+                self.assertEqual(self.get(path)[0], 401)
+                self.assertEqual(self.get(path, {"Authorization": "Bearer secret"})[0], 200)
+        finally:
+            self.svc.api_key = ""
+
+    def test_build_model_path_and_slot_status(self):
+        engine = self.svc.engine
+        engine.model_path = "models/example.gguf"
+        engine.info = {"version": "0.1.21"}
+        try:
+            props = json.loads(self.get("/props")[2])
+            self.assertEqual(props["model_path"], engine.model_path)
+            self.assertEqual(props["build_info"], "Strata 0.1.21")
+            for busy in (True, False):
+                with self.svc.status_lock:
+                    self.svc.status["busy"] = busy
+                code, _, body = self.get("/slots")
+                self.assertEqual(code, 200)
+                self.assertEqual(json.loads(body), [{"id": 0, "n_ctx": CTX, "is_processing": busy}])
+        finally:
+            with self.svc.status_lock:
+                self.svc.status["busy"] = False
+            del engine.model_path, engine.info
+        props = json.loads(self.get("/props")[2])
+        self.assertNotIn("build_info", props)
+        self.assertNotIn("model_path", props)
+
+    def test_discovery_does_not_restart_a_dead_engine(self):
+        self.svc.engine.alive = lambda: False
+        try:
+            for path in ("/models", "/v1/models"):
+                code, _, body = self.get(path)
+                self.assertEqual(code, 200)
+                self.assertEqual(json.loads(body)["data"], [])
+            self.assertEqual(self.get("/props")[0], 503)
+            self.assertEqual(json.loads(self.get("/slots")[2]), [])
+        finally:
+            del self.svc.engine.alive
+
     def test_metrics_need_the_key_when_one_is_set(self):
         self.svc.api_key = "secret"
         try:
@@ -525,6 +727,120 @@ class WebApp(unittest.TestCase):
         finally:
             self.svc.api_key = ""
 
+
+class ClockedEngine(MockEngine):
+    """The mock engine with StrataEngine's clock: `last` as the engine's DONE line gives it, the conversation cache
+    holding the first REUSED tokens of every prompt."""
+    REUSED = 5
+
+    def generate(self, ids, max_new, sampling, cancel, embeddings=None):
+        n = 0
+        try:
+            for t in super().generate(ids, max_new, sampling, cancel, embeddings):
+                n += 1
+                yield t
+        finally:          # as StrataEngine reads its DONE line: also when the server closes the request at a stop token
+            self.last = {"generated": n, "prompt_tokens": len(ids), "prompt_ms": 40.0, "decode_ms": 20.0 * n,
+                         "finish": "stop", "reused": min(self.REUSED, len(ids)), "hits": 9, "lookups": 10}
+
+
+class UsageAndStatus(unittest.TestCase):
+    """What clients read besides the text: the part of the prompt the conversation cache held (OpenAI's
+    prompt_tokens_details.cached_tokens, Anthropic's cache_read_input_tokens), llama.cpp's timings, GET /v1/status."""
+
+    @classmethod
+    def setUpClass(cls):
+        tok = ByteTokenizer()
+        cls.engine = ClockedEngine(tok, "</think>\n\nok", max_context=CTX)
+        cls.svc = Service(cls.engine, tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        cls.httpd = serve(cls.svc, port=0)
+        cls.base = f"http://127.0.0.1:{cls.httpd.server_address[1]}"
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        cls.httpd.server_close()
+
+    def request(self, path, body=None):
+        req = urllib.request.Request(self.base + path, data=None if body is None else json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "anthropic-version": "2023-06-01"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.status, r.read()
+
+    def chat(self, path, stream=False):
+        body = {"model": "x", "max_tokens": 20, "messages": [{"role": "user", "content": "hi"}], "stream": stream}
+        status, raw = self.request(path, body)
+        self.assertEqual(status, 200)
+        if not stream:
+            return json.loads(raw)
+        return [json.loads(line[6:]) for line in raw.decode().splitlines()
+                if line.startswith("data: {")]
+
+    def test_openai(self):
+        b = self.chat("/v1/chat/completions")
+        u, t = b["usage"], b["timings"]
+        self.assertEqual(u["prompt_tokens_details"]["cached_tokens"], ClockedEngine.REUSED)
+        self.assertEqual(t["cache_n"], ClockedEngine.REUSED)
+        self.assertEqual(t["prompt_n"] + t["cache_n"], u["prompt_tokens"])
+        self.assertEqual(t["predicted_n"], u["completion_tokens"])
+        self.assertAlmostEqual(t["prompt_per_second"], t["prompt_n"] / 0.040, delta=0.1)
+        self.assertAlmostEqual(t["predicted_per_second"], 50.0, delta=0.1)            # 20 ms a token
+
+    def test_openai_stream(self):
+        last = self.chat("/v1/chat/completions", stream=True)[-1]
+        self.assertEqual(last["usage"]["prompt_tokens_details"]["cached_tokens"], ClockedEngine.REUSED)
+        self.assertEqual(last["timings"]["cache_n"], ClockedEngine.REUSED)
+
+    def test_anthropic(self):
+        u = self.chat("/v1/messages")["usage"]
+        self.assertEqual(u["cache_read_input_tokens"], ClockedEngine.REUSED)
+        self.assertEqual(u["input_tokens"] + u["cache_read_input_tokens"], len(self.engine.last_prompt))
+        self.assertGreater(u["output_tokens"], 0)
+
+    def test_v1_status(self):
+        self.chat("/v1/chat/completions")
+        status, raw = self.request("/v1/status")
+        self.assertEqual(status, 200)
+        s = json.loads(raw)
+        self.assertEqual(s["model"], self.svc.model)
+        self.assertEqual(s["context"]["max_positions"], CTX)
+        self.assertEqual(s["concurrency"]["serving"], 1)
+        self.assertFalse(s["vision"]["available"])
+        self.assertEqual(s["activity"]["in_flight"], 0)
+        self.assertGreaterEqual(s["activity"]["requests"], 1)
+        self.assertEqual(s["last_timings"]["cache_n"], ClockedEngine.REUSED)
+        self.assertIn("at", s["last_timings"])
+
+    def test_no_clock(self):
+        """An engine without a clock (MockEngine): no timings, nothing cached."""
+        tok = ByteTokenizer()
+        svc = Service(MockEngine(tok, "</think>\n\nok", max_context=CTX), tok,
+                      ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        httpd = serve(svc, port=0)
+        try:
+            data = json.dumps({"model": "x", "max_tokens": 5, "messages": [{"role": "user", "content": "hi"}]}).encode()
+            req = urllib.request.Request(f"http://127.0.0.1:{httpd.server_address[1]}/v1/chat/completions", data=data,
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                b = json.loads(r.read())
+            self.assertNotIn("timings", b)
+            self.assertEqual(b["usage"]["prompt_tokens_details"]["cached_tokens"], 0)
+            self.assertIsNone(svc.v1_status()["last_timings"])
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+
+class TimingsDrafts(unittest.TestCase):
+    """`timings` carries the speculative draft counts (PR #83's fields) only when the engine reported them."""
+
+    def test_draft_fields(self):
+        base = {"prompt_ms": 100.0, "decode_ms": 200.0, "generated": 20, "reused": 4}
+        t = request_timings(24, 20, dict(base, drafts_offered=15, drafts_accepted=11))
+        self.assertEqual((t["draft_n"], t["draft_n_accepted"]), (15, 11))
+        self.assertEqual((t["prompt_n"], t["cache_n"]), (20, 4))
+        self.assertNotIn("draft_n", request_timings(24, 20, base))
+        self.assertIsNone(request_timings(24, 20, {}))
 
 if __name__ == "__main__":
     unittest.main()

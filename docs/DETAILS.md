@@ -12,7 +12,7 @@ New here? Start with the [README](../README.md) - it has everything you need to 
 
 ## Speed (measured)
 
-RTX 5070 **12 GB**, Ryzen 5 7600 (6 cores), 64 GB DDR5-5200, Windows, engine 0.1.14 with the settings setup writes
+RTX 5070 **12 GB**, Ryzen 5 7600 (6 cores), 64 GB DDR5-5200, Windows, engine 0.1.26 with the settings setup writes
 (`--prefill auto`, 8-bit KV above 4K, KV streaming from 64K). One code-agent prompt per length, 256 generated tokens,
 MTP speculative decoding on. "262K" is the model's full context window (a 259,943-token prompt). The IQ2_XS row was
 measured with Swift 1.5's IQ2_XS, which runs at the original's speed.
@@ -21,21 +21,27 @@ measured with Swift 1.5's IQ2_XS, which runs at the original's speed.
 
 | Model | 1K | 4K | 32K | 64K | 128K | 262K |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Q2_0** | 494 | 1,007 | 1,308 | 1,294 | 1,208 | 967 |
-| **IQ2_XS** | 461 | 811 | 1,238 | 1,136 | 1,071 | 886 |
-| **IQ3_XXS** | 415 | 770 | 1,108 | 1,065 | 1,015 | - |
-| **IQ3_S** | 396 | 737 | 1,070 | 1,070 | 931 | - |
-| **Coder** | 599 | 1,152 | 1,298 | 1,350 | 1,266 | 1,034 |
+| **Q2_0** | 536 | 1,299 | 2,171 | 2,126 | 2,107 | 1,304† |
+| **IQ2_XS** | 534 | 1,256 | 2,092 | 1,754 | 1,752 | 1,181*† |
+| **IQ3_XXS** | 482 | 1,007 | 1,745 | 1,609 | 1,602 | - |
+| **IQ3_S** | 427 | 913 | 1,624 | 1,640 | 1,443 | - |
+| **Coder** | 656 | 1,583 | 2,177 | 2,236 | 2,208 | 1,034** |
+
+Engine 0.1.26; `bench/results/2026-09-29-speed-0126`. At 32K-128K that is 8-28% faster than 0.1.22. † not measured
+again: 0.1.22. \* measured with images on (the image encoder's VRAM reserve leaves fewer experts cached). \*\* not
+measured again: 0.1.14.
 
 ### Output (tokens/s)
 
 | Model | 1K | 4K | 32K | 64K | 128K | 262K |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Q2_0** | 84.3 | 90.3 | 73.6 | 69.0 | 67.2 | 60.3 |
-| **IQ2_XS** | 74.4 | 73.8 | 71.5 | 64.3 | 59.8 | 52.8 |
-| **IQ3_XXS** | 60.3 | 62.1 | 51.4 | 50.0 | 45.8 | - |
-| **IQ3_S** | 51.5 | 51.6 | 48.2 | 48.8 | 40.5 | - |
-| **Coder** | 53.3 | 50.6 | 53.3 | 50.8 | 44.0 | 42.8 |
+| **Q2_0** | 87.3 | 93.0 | 81.8 | 76.2 | 73.7 | 60.3† |
+| **IQ2_XS** | 79.6 | 78.6 | 76.3 | 63.7 | 62.7 | 52.8† |
+| **IQ3_XXS** | 61.9 | 61.6 | 58.5 | 57.2 | 49.0 | - |
+| **IQ3_S** | 52.4 | 53.3 | 48.3 | 46.3 | 45.5 | - |
+| **Coder** | 58.9 | 55.1 | 54.9 | 53.2 | 43.0 | 42.8† |
+
+Engine 0.1.26, the same runs. † not measured again: 0.1.14.
 
 Output speed depends on the text as well: speculative decoding runs faster when more of the drafted tokens are
 accepted, so a different answer to the same prompt moves it by several percent. Run back to back on the 4K prompt,
@@ -57,6 +63,21 @@ it on.
 halves the KV cache's memory with a Hadamard rotation before 4-bit rounding (PR #21), about 4% faster at 128K, but it
 is measurably less precise on long documents (perplexity +8-12%; needle tests still pass). 8-bit stays the default.
 Details: [`bench/results/2026-09-27-kv-q4`](../bench/results/2026-09-27-kv-q4/README.md).
+
+**Hybrid K8V4 KV cache (engine 0.1.25, optional, PR #120):** `--kv k8v4` (`START-HERE.bat --setup --kv k8v4`) keeps
+the keys at 8 bits and stores the values as rotated 4-bit: 23% less KV memory than 8-bit, so more experts fit in
+VRAM. RTX 3090, the Coder at 198K context: 99 instead of 85 tokens/s output, the same needle results, prompts 2-5%
+slower. It does not stream its KV cache (KV streaming is on by default from 64K), so it pays off mostly on large
+cards at long contexts.
+
+**Low-RAM mode (engine 0.1.26, chosen by setup):** normally all of a model's experts are copied into RAM (23-50 GB,
+pinned) and the GPU holds a copy of the most-used ones. On a PC whose RAM cannot hold them beside the system (the
+experts plus ~10 GB), setup instead maps them from one file in the model's folder (`--mmap-experts`, the pack's
+`experts.bin`, +23-50 GB of disk). The OS file cache holds what the GPU does not, and it can give that memory back.
+On the Coder the engine's committed memory drops from 36 to ~13 GB, with the same answers. With a big GPU (an RTX
+5090 holds all of the Coder's experts, most of Q2_0's) it runs at nearly the usual speed. With a small one, most
+experts come from the SSD and it is much slower (setup says so). `START-HERE.bat --setup --low-ram on|off` overrides
+the choice.
 
 Time to first token is prompt length / prompt speed: with Q2_0 about 4 s at 4K, 25 s at 32K, under 2 minutes at 128K
 and 4.5 minutes at 262K (engine 0.1.13 made long prompts about twice as fast, below).
@@ -148,7 +169,7 @@ You need **only an NVIDIA driver** (version 580 or newer; update it with the NVI
 
 | | |
 | --- | --- |
-| GPU | NVIDIA **RTX 30, 40 or 50 series**, **12 GB VRAM or more** (8 GB runs, slowly). Measured on an RTX 5070; RTX 30/40 are untested. |
+| GPU | NVIDIA **RTX 20, 30, 40 or 50 series**, **12 GB VRAM or more** (8 GB runs, slowly). Measured on an RTX 5070 and an RTX 3090; RTX 20 (Turing, since 0.1.27) was tested by a contributor on an RTX 2070. |
 | RAM | **64 GB** recommended (see the table above). |
 | CPU | x86-64 with AVX2 (any Intel/AMD desktop CPU from the last ~8 years). AVX-512 (Ryzen 7000/9000) is a bit faster. |
 | Disk | ~70-80 GB free for the model, ~6 GB for the MTP layer (+1 GB with images). **Q2_0 on an AVX-512 CPU** also writes a one-time ~40 GB copy of its experts for the fast CPU kernel. An NVMe SSD is strongly recommended. |
@@ -160,7 +181,7 @@ elsewhere) finds them and sets itself up the same way. The place is remembered p
 `~/.config/strata/settings.json`); `--data-dir` chooses another. Installs from before 0.1.16 are moved there by the next
 start (a rename on the same drive; files on another drive are used where they are).
 Python 3.12 if you have none (for your user account, no admin), a private Python environment, NVIDIA's CUDA libraries
-(from pip, ~0.4 GB), the ready-made Strata engine for RTX 30/40/50, the model and the MTP draft layer. If no
+(from pip, ~0.4 GB), the ready-made Strata engine for RTX 20/30/40/50, the model and the MTP draft layer. If no
 ready-made engine fits your PC, it offers to install the build tools (Visual Studio Build Tools + CUDA Toolkit on
 Windows, `build-essential` + CUDA on Ubuntu) and compiles the engine for your GPU (asks first; 20-40 minutes once).
 
@@ -216,6 +237,28 @@ install; `START-HERE.bat --calibrate` (Linux: `./setup.sh --calibrate`) does it 
 speed with each setting and keeps one only when it is more than 3% faster. The result is remembered per PC and model
 (in the settings file next to the data folder's record), so updates keep it.
 
+### Running it at startup (Task Scheduler)
+
+To have the model up at logon, people start the serve from **Task Scheduler** (or a service). Beware: Windows
+throttles such contexts, and the model's ~40 GB expert load then crawls at **~0.05 GiB/s (13-14 minutes)**
+instead of **~1.4-1.5 GiB/s (~35 seconds)** - a 24x slower start. Measured on an RTX 5070 Ti + Ryzen 7 9800X3D
++ NVMe, same binary, same args, same cache state:
+
+| How the serve starts | Expert load |
+| --- | ---: |
+| Double-click / terminal / SSH | 1.42-1.52 GiB/s (~35 s) |
+| Task Scheduler with its defaults | 0.05 GiB/s (821-841 s) |
+| Task Scheduler with the two settings below | 1.42 GiB/s (35 s) |
+
+In the task's properties set both of these (the defaults are the opposite):
+
+- **Priority level: Normal** (Options tab; the default is Below normal), and
+- **Run with highest privileges** (General tab; without it the task runs with a limited user token - which
+  also strips `SeLockMemoryPrivilege`, the privilege Windows large pages need).
+
+(Both were changed at once, so the isolated effect of each is not measured.) If the model still starts
+slowly, the engine prints a hint under its `loaded ... GiB at ...` line naming this cause.
+
 ### Chat in the terminal (optional)
 
 ```
@@ -254,10 +297,13 @@ The server listens on `http://127.0.0.1:8080` (change with `--port` in setup, or
 | --- | --- |
 | OpenAI Chat Completions (stream and non-stream, tools) | `POST /v1/chat/completions` |
 | Anthropic Messages (stream and non-stream, tools) | `POST /v1/messages` |
-| Model list / health | `GET /v1/models`, `GET /health` |
-| What the model is doing right now | `GET /status` |
+| Model list / health | `GET /v1/models`, `GET /models`, `GET /health` |
+| Model properties | `GET /props` (also accepts `?model=<loaded-model-id>`) |
+| What the model is doing right now | `GET /status`, `GET /slots` (single slot, busy or idle) |
 | Everything the Monitor tab shows (engine, live state, last requests, hardware) | `GET /metrics` |
 | The MCP servers, their state and tools ([below](#tools-from-mcp-servers)) | `GET /mcp` |
+
+`/models` and `/v1/models` list only the loaded model, with its context limit and input modalities. `/props` exposes the original chat template, context limit, configured generation defaults (shared settings take precedence), model path and engine version when available. Context means the full engine context, not the resident KV window. `n_predict: -1` means no fixed output cap. Unconfigured sampling fields are omitted. `autoload` has no effect; an unknown `model` returns 404. These metadata endpoints and `/slots` require the API key when one is configured. They do not load, unload or restart models.
 
 ```bash
 curl http://127.0.0.1:8080/v1/chat/completions -H "Content-Type: application/json" -d '{

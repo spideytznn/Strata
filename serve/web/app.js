@@ -3,7 +3,7 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const SPRITE = "/web/sprite.svg";
+const SPRITE = "web/sprite.svg";
 const icon = (name, cls = "st-icon") => `<svg class="${cls}" aria-hidden="true"><use href="${SPRITE}#i-${name}"/></svg>`;
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const fmt = (n, d = 0) => (n == null || Number.isNaN(n) ? "–" : Number(n).toLocaleString(undefined, {maximumFractionDigits: d, minimumFractionDigits: d}));
@@ -98,7 +98,7 @@ $("api-key").onchange = () => { store.set("apikey", $("api-key").value.trim()); 
 let health = {model: "strata", images: false, max_context: 0};
 async function loadHealth() {
   try {
-    health = await (await fetch("/health")).json();
+    health = await (await fetch("health")).json();
     $("attach-btn").title = health.images ? "Attach a text file or a picture (or drop it here)"
                                           : "Attach a text file (or drop it here)";
     $("chat-empty-sub").textContent = `${health.model} runs on this PC. Nothing leaves it.`;
@@ -147,7 +147,7 @@ let lastMetrics = null, metricsFailures = 0, keyWarned = false, mcpTick = 0;
 let reqShowAll = false;   // the Monitor's request table: the last 12, or every one the server keeps (issue #35)
 async function poll() {
   try {
-    const r = await fetch(reqShowAll ? "/metrics?requests=all" : "/metrics", {headers: headers()});
+    const r = await fetch(reqShowAll ? "metrics?requests=all" : "metrics", {headers: headers()});
     if (r.status === 401) {
       setPill("error", "API key needed");
       if (!keyWarned) { keyWarned = true; toast("warn", "API key needed", "This server needs a key: add it under About > Settings.", 6000); }
@@ -228,12 +228,18 @@ function renderMonitor(live, hw, st, eng, h, last, requests, totals, kept) {
   const speed = live.state === "generating" ? live.tok_s : last ? last.decode_tok_s : null;
   setMetric("speed", speed == null ? null : fmt(speed, 1), "tok/s", live.state === "generating" ? "now" : last ? "last request" : "");
   spark("sp-speed", h.tok_s);
-  setMetric("gpu", hw.gpu_util == null ? null : fmt(hw.gpu_util), "%", st.gpu_name || "");
+  // a model split across several cards (issue #112): the cards show their total / mean / hottest, and each card's own
+  const per = (f) => (hw.gpus || []).map((g) => `GPU ${g.index} ${f(g)}`).join(" · ");
+  const multi = (hw.gpus || []).length > 1;
+  setMetric("gpu", hw.gpu_util == null ? null : fmt(hw.gpu_util), "%",
+            multi ? per((g) => (g.util == null ? "–" : `${fmt(g.util)}%`)) : st.gpu_name || "");
   spark("sp-gpu", h.gpu_util, 100);
   setMetric("vram", hw.gpu_mem_used == null ? null : gb(hw.gpu_mem_used), hw.gpu_mem_total ? `/ ${gb(hw.gpu_mem_total, 0)} GB` : "GB",
-            eng.expert_slots ? `${fmt(eng.expert_slots)} experts cached` : "");
+            multi ? per((g) => (g.mem_used == null ? "–" : `${gb(g.mem_used)} GB`))
+                  : eng.expert_slots ? `${fmt(eng.expert_slots)} experts cached` : "");
   spark("sp-vram", h.gpu_mem_used, hw.gpu_mem_total);
-  setMetric("temp", hw.gpu_temp == null ? null : fmt(hw.gpu_temp), "°C", "");
+  setMetric("temp", hw.gpu_temp == null ? null : fmt(hw.gpu_temp), "°C",
+            multi ? per((g) => (g.temp == null ? "–" : `${fmt(g.temp)}°`)) : "");
   spark("sp-temp", h.gpu_temp, 90);
   setMetric("power", hw.gpu_power == null ? null : fmt(hw.gpu_power), "W", hw.gpu_power_limit ? `of ${fmt(hw.gpu_power_limit)} W limit` : "");
   spark("sp-power", h.gpu_power, hw.gpu_power_limit);
@@ -347,7 +353,7 @@ $("req-all").addEventListener("click", () => { reqShowAll = !reqShowAll; if (las
 let mcpInfo = {servers: [], tools: 0}, mcpRetry = null;
 async function loadMcp() {
   try {
-    const r = await fetch("/mcp", {headers: headers()});
+    const r = await fetch("mcp", {headers: headers()});
     if (!r.ok) return;
     mcpInfo = await r.json();
   } catch (e) { return; /* an older server: no MCP */ }
@@ -679,7 +685,7 @@ async function send() {
   let firstAt = null, thinkStart = null, usage = null, frame = 0;
   const paint = () => { frame = 0; updateAssistant(el, m, true); scrollDown(); };
   try {
-    const r = await fetch("/v1/chat/completions", {method: "POST", headers: headers(true), body: JSON.stringify(body),
+    const r = await fetch("v1/chat/completions", {method: "POST", headers: headers(true), body: JSON.stringify(body),
                                                    signal: controller.signal});
     if (!r.ok) {
       let msg = `HTTP ${r.status}`;
@@ -881,7 +887,7 @@ function loadDrawer(s = settings) {
 let sharedOn = false;
 async function loadShared() {
   try {
-    const r = await fetch("/settings", {headers: headers()});
+    const r = await fetch("settings", {headers: headers()});
     if (r.ok) sharedOn = !!(await r.json()).shared;
   } catch (e) { /* an older server: the switch just stays off */ }
   $("s-share").setAttribute("aria-checked", String(sharedOn));
@@ -895,7 +901,7 @@ function sharedDefaults(s) {
   return d;
 }
 async function saveShared(on, s) {
-  const r = await fetch("/settings", {method: "POST", headers: headers(true),
+  const r = await fetch("settings", {method: "POST", headers: headers(true),
                                       body: JSON.stringify({defaults: on ? sharedDefaults(s) : null})});
   if (!r.ok) {
     let msg = `HTTP ${r.status}`;
