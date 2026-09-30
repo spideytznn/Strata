@@ -136,6 +136,7 @@ bool NativeDense::load(const std::vector<std::string>& shards, WeightTable& tabl
                     err = "native dense: tensor absent from canonical table: " + tensor.name; return false;
                 }
                 auto& ref = found->second;
+                if (!ref.stage_resident) continue; // keep metadata, upload only this GPU's layers
                 if (ref.native_data) { err = "native dense: override already attached"; return false; }
                 if (!strata::kernels::native_mmvq_supported(tensor.type)) continue;
                 if (!ref.quantized() || tensor.shape.size() != 2 ||

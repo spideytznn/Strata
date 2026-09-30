@@ -1,5 +1,6 @@
 // src/core/expert_source.cpp - the adapter.  See the header for the three clauses of the contract.
 #include "strata/core/expert_source.hpp"
+#include "strata/core/complement_exchange.hpp"
 #include "strata/core/remote_experts.hpp"
 #include "strata/kernels/cpu/expert_layout.hpp"
 
@@ -139,7 +140,13 @@ const uint8_t* cache_complement_blob_or_fallback(
 }  // namespace detail
 
 namespace {
+// Linux: the complement is anonymous but everything it displaces (ngram page cache) is evictable, so a
+// 5 GiB floor still leaves the kernel room to shrink; 8 GiB caps a 32 GB PC's tier too early
+#if defined(__linux__)
+constexpr uint64_t kPinnedMemoryHeadroom = 5ull << 30;
+#else
 constexpr uint64_t kPinnedMemoryHeadroom = 8ull << 30;
+#endif
 
 #if defined(__linux__)
 bool read_cgroup_memory_stat(const std::filesystem::path& path, uint64_t current,
@@ -420,6 +427,10 @@ void FileExpertSource::close() {
     complement_offsets_.clear();
     complement_pinned_ = false;
     complement_ready_ = false;
+    complement_swap_scratch_.clear();
+    resident_exchanges_ = 0;
+    resident_reads_ = 0;
+    fallback_reads_ = 0;
 #if defined(_WIN32)
     if (base_ != nullptr) UnmapViewOfFile((LPCVOID) base_);
     if (mapping_ != nullptr) CloseHandle((HANDLE) mapping_);
@@ -457,8 +468,9 @@ const uint8_t* FileExpertSource::mapped_blob(int64_t layer, int64_t expert) cons
 
 bool FileExpertSource::pin_cache_complement(
     const ExpertCache& cache, std::string& err, bool pin,
-    const std::vector<std::pair<int32_t, int32_t>>& additional_gpu_pairs) {
+    const std::vector<std::pair<int32_t, int32_t>>& additional_gpu_pairs, uint64_t headroom_bytes) {
     err.clear();
+    const uint64_t headroom = headroom_bytes ? headroom_bytes : kPinnedMemoryHeadroom;
     if (base_ == nullptr) { err = "FileExpertSource: open the mapped experts before pinning a complement"; return false; }
     if (complement_ready_) { err = "FileExpertSource: the cache complement is already pinned"; return false; }
     if (!cache.valid()) { err = "FileExpertSource: the GPU expert cache is not open"; return false; }
@@ -492,11 +504,12 @@ bool FileExpertSource::pin_cache_complement(
             err = "FileExpertSource: cannot determine available RAM for the resident-memory safety check";
             return false;
         }
-        if (physical <= kPinnedMemoryHeadroom || bytes > physical - kPinnedMemoryHeadroom) {
+        if (physical <= headroom || bytes > physical - headroom) {
             char message[256];
             std::snprintf(message, sizeof message,
-                          "FileExpertSource: resident complement %.2f GiB exceeds available RAM minus the 8 GiB safety headroom",
-                          (double) bytes / 1073741824.0);
+                          "FileExpertSource: resident complement %.2f GiB exceeds available RAM %.2f GiB minus %.2f GiB safety headroom",
+                          (double) bytes / 1073741824.0, (double) physical / 1073741824.0,
+                          (double) headroom / 1073741824.0);
             err = message;
             return false;
         }
@@ -624,6 +637,38 @@ bool FileExpertSource::pin_cache_complement(
     return true;
 }
 
+bool FileExpertSource::exchange_resident(int64_t layer, int64_t incoming, int64_t outgoing,
+                                         void* device_slot, void* stream, std::string& err) {
+    if (!complement_ready_ || !device_slot || layer < 0 || layer >= n_layers_ ||
+        incoming < 0 || incoming >= n_expert_ || outgoing < 0 || outgoing >= n_expert_) {
+        err = "resident expert exchange: invalid layer, expert, or missing complement";
+        return false;
+    }
+    const size_t in = (size_t) layer * (size_t) n_expert_ + (size_t) incoming;
+    const size_t out = (size_t) layer * (size_t) n_expert_ + (size_t) outgoing;
+    const auto cs = (cudaStream_t) stream;
+    auto transfer = [&](const uint8_t* host_in, uint8_t* host_out, size_t bytes) {
+        // Preserve the victim before overwriting its GPU slot. Do not reuse the
+        // incoming RAM slot until its H2D read and the D2H write both complete.
+        cudaError_t e = cudaMemcpyAsync(host_out, device_slot, bytes, cudaMemcpyDeviceToHost, cs);
+        if (e == cudaSuccess) e = cudaMemcpyAsync(device_slot, host_in, bytes, cudaMemcpyHostToDevice, cs);
+        const cudaError_t done = cudaStreamSynchronize(cs);
+        if (e == cudaSuccess) e = done;
+        if (e != cudaSuccess) err = std::string("resident expert exchange: ") + cudaGetErrorString(e);
+        return e == cudaSuccess;
+    };
+    try {
+        if (!detail::exchange_complement(complement_offsets_, (uint8_t*) complement_arena_, complement_bytes_,
+                                         in, out, layer_blob_bytes_[(size_t) layer], complement_swap_scratch_, transfer, err))
+            return false;
+    } catch (const std::exception& e) {
+        err = std::string("resident expert exchange: ") + e.what();
+        return false;
+    }
+    ++resident_exchanges_;
+    return true;
+}
+
 const uint8_t* FileExpertSource::blob(int64_t layer, int64_t expert) {
     if (base_ == nullptr || layer < 0 || expert < 0 || layer >= n_layers_ || expert >= n_expert_) return nullptr;
     const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) expert;
@@ -631,8 +676,40 @@ const uint8_t* FileExpertSource::blob(int64_t layer, int64_t expert) {
     const uint8_t* result = complement_ready_
         ? detail::cache_complement_blob_or_fallback(index, complement_offsets_, complement_host_, mapped_fallback)
         : mapped_fallback;
-    if (result != nullptr) ++reads_;
+    if (result != nullptr) {
+        ++reads_;
+        if (complement_ready_) {
+            auto& counter = complement_offsets_[index] != kNoComplement ? resident_reads_ : fallback_reads_;
+            counter.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
     return result;
+}
+
+void FileExpertSource::begin_layer(int64_t layer, const int32_t* ids, int64_t k) {
+    if (base_ == nullptr || layer < 0 || layer >= n_layers_ || ids == nullptr || k <= 0) return;
+    const size_t i = (size_t) layer;
+    if (i >= layer_offsets_.size() || i >= layer_blob_bytes_.size()) return;
+    const uint64_t blob_bytes = layer_blob_bytes_[i];
+    if (blob_bytes == 0) return;
+#if !defined(_WIN32)
+    // a whole prefill chunk's ids repeat the same few hundred experts: dedupe or the advice alone costs
+    // tens of thousands of syscalls per layer
+    uint64_t seen[16] = {};
+    const bool bitmap = n_expert_ <= (int64_t) (sizeof(seen) * 8);
+    for (int64_t j = 0; j < k; ++j) {
+        const int32_t e = ids[j];
+        if (e < 0 || e >= n_expert_) continue;
+        if (bitmap) {
+            if (seen[e >> 6] & (1ull << (e & 63))) continue;
+            seen[e >> 6] |= 1ull << (e & 63);
+        }
+        const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) e;
+        if (complement_ready_ && complement_offsets_[index] != kNoComplement) continue;
+        const uint8_t* p = mapped_blob(layer, e);
+        if (p != nullptr) madvise((void*) p, (size_t) blob_bytes, MADV_WILLNEED);
+    }
+#endif
 }
 
 bool FileExpertSource::pinned(int64_t layer, int64_t expert) const {

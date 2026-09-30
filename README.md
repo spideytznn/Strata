@@ -2,6 +2,7 @@
 > It adds VRAM-only expert residency for RAM-constrained machines, independent prefill buffers, and Q8_0 ngram tables.
 > **Build this version from source** to retain these changes; upstream prebuilt releases do not contain them.
 > See [our changes, configuration requirements, and validation limits](docs/LOCAL_VARIANT.md).
+> Branch `strata-2080tix2` also includes the tested Linux configuration for two **22 GiB RTX 2080 Ti** cards and 32 GB RAM: stage-owned weights/QSA state, dynamic expert swaps and direct DMA from resident RAM. See [configuration and measured results](docs/RTX2080TI_DUAL.md).
 > The upstream README and benchmark results follow below; they are not new measurements of this variant.
 
 <h1 align="center">Strata</h1>

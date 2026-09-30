@@ -50,13 +50,18 @@ static uint64_t ple_hist_bytes() {
     return (uint64_t) strata::kernels::NG_HIST * strata::kernels::NG_HC_DIM * sizeof(float);
 }
 
-uint64_t session_bytes(const ModelGeometry& g, int64_t max_cells, int64_t k) {
+uint64_t session_bytes(const ModelGeometry& g, int64_t max_cells, int64_t k,
+                       int64_t qsa_begin, int64_t qsa_end) {
+    if (qsa_end == -1) qsa_end = g.n_qsa_layers();
+    if (qsa_begin < 0 || qsa_begin > qsa_end || qsa_end > g.n_qsa_layers() ||
+        (qsa_begin == qsa_end && g.n_qsa_layers() > 0)) return 0;
+    const int64_t nq = qsa_end - qsa_begin;
     uint64_t n = 0;
     n += gdn_buffers_bytes(g);
     n += (uint64_t) g.n_gdn_layers() * gdn_state_floats(g) * 4;
     // One QSA state carries the RoPE table; the others borrow it (P7: 64 MiB per layer at 262K).
-    if (g.n_qsa_layers() > 0)
-        n += qsa_state_bytes(g, max_cells, true) + (uint64_t) (g.n_qsa_layers() - 1) * qsa_state_bytes(g, max_cells, false);
+    if (nq > 0)
+        n += qsa_state_bytes(g, max_cells, true) + (uint64_t) (nq - 1) * qsa_state_bytes(g, max_cells, false);
     n += qsa_buffers_bytes(g, max_cells);
     n += moe_buffers_bytes(g, k);
     n += block_buffers_bytes(g);
@@ -64,7 +69,13 @@ uint64_t session_bytes(const ModelGeometry& g, int64_t max_cells, int64_t k) {
     return align_up(n, SESSION_STATE_ALIGN) + 4096;
 }
 
-uint64_t session_init(const ModelGeometry& g, int64_t max_cells, int64_t k, void* base, SessionState& s) {
+uint64_t session_init(const ModelGeometry& g, int64_t max_cells, int64_t k, void* base, SessionState& s,
+                      int64_t qsa_begin, int64_t qsa_end) {
+    if (qsa_end == -1) qsa_end = g.n_qsa_layers();
+    if (!session_bytes(g, max_cells, k, qsa_begin, qsa_end)) return 0;
+    s.qsa_begin = qsa_begin;
+    s.qsa_end = qsa_end;
+    const int64_t nq = qsa_end - qsa_begin;
     uint8_t* p = (uint8_t*) base;
     uint64_t used = 0;
     auto take = [&](uint64_t bytes) {
@@ -83,16 +94,16 @@ uint64_t session_init(const ModelGeometry& g, int64_t max_cells, int64_t k, void
     // pointers and `qsa_state_init` writes them - a contiguous array would need the arena to be laid out the
     // same way, which is a coupling with nothing to gain.
     const uint64_t first = qsa_state_bytes(g, max_cells, true), rest = qsa_state_bytes(g, max_cells, false);
-    s.qsa_state_arena = take(g.n_qsa_layers() > 0 ? first + (uint64_t) (g.n_qsa_layers() - 1) * rest : 0);
-    s.qsa_states = new QsaState[(size_t) g.n_qsa_layers()];
+    s.qsa_state_arena = take(nq > 0 ? first + (uint64_t) (nq - 1) * rest : 0);
+    s.qsa_states = new QsaState[(size_t) g.n_qsa_layers()]{};
     s.qsa_buf_arena = take(qsa_buffers_bytes(g, max_cells));
 
     uint8_t* qp = (uint8_t*) s.qsa_state_arena;
     // a layer whose pinned RAM could not be had (KV streaming's host copy) is half-built: going on would have the
     // attention read null host pointers at the first request ("illegal memory access"), so the session fails here
-    for (int64_t i = 0; i < g.n_qsa_layers(); ++i)
-        if (qsa_state_init(g, max_cells, qp + (i == 0 ? 0 : first + (uint64_t) (i - 1) * rest), s.qsa_states[i],
-                           i == 0 ? nullptr : &s.qsa_states[0]) == 0)
+    for (int64_t i = qsa_begin; i < qsa_end; ++i)
+        if (qsa_state_init(g, max_cells, qp + (i == qsa_begin ? 0 : first + (uint64_t) (i - qsa_begin - 1) * rest), s.qsa_states[i],
+                           i == qsa_begin ? nullptr : &s.first_qsa()) == 0)
             return 0;
     qsa_buffers_init(g, max_cells, s.qsa_buf_arena, s.qsa_bufs);
 
@@ -121,7 +132,8 @@ void session_zero(SessionState& s, const ModelGeometry& g, const float* R_init, 
     // every GDN layer's recurrence and conv history
     cudaMemsetAsync(s.gdn_state, 0, (size_t) g.n_gdn_layers() * gdn_state_floats(g) * 4, cs);
     // and every QSA layer's cache and indexer
-    for (int64_t i = 0; i < g.n_qsa_layers(); ++i) qsa_state_zero(s.qsa_states[i], g, stream);
+    for (int64_t i = 0; i < g.n_qsa_layers(); ++i)
+        if (s.owns_qsa(i)) qsa_state_zero(s.qsa_states[i], g, stream);
     // **AND THE PLE'S CONV HISTORY AND TOKEN WINDOW.**  A sequence that started with a warm history would
     // convolve over rows belonging to a different sequence - the conv reads NG_HIST previous NORMALIZED rows,
     // so a stale one is a real contribution and not a zero.  The token window resets to `NG_HIST`-many nulls
@@ -153,6 +165,7 @@ void stage_token(const ModelGeometry& g, int64_t pos, int32_t pos_base, SessionS
     sh.idx_n_head = g.idx_q_heads;
     sh.idx_dim = g.idx_key_dim;
     for (int64_t i = 0; i < g.n_qsa_layers(); ++i) {
+        if (!s.owns_qsa(i)) continue;
         QsaState& q = s.qsa_states[i];
         qsa_step_fill(q.host_step, pos, sh);
         for (int64_t h = 0; h < g.n_head; ++h) q.host_pos[h] = (int32_t) (pos_base + pos);
@@ -161,6 +174,10 @@ void stage_token(const ModelGeometry& g, int64_t pos, int32_t pos_base, SessionS
 
 bool session_capture(const WeightTable& tables, const ModelGeometry& g, SessionState& s, const float* parts,
                      SessionGraphs& gr, std::string& err, bool split) {
+    if (s.qsa_begin != 0 || (s.qsa_end >= 0 && s.qsa_end != g.n_qsa_layers())) {
+        err = "session_capture: partial QSA state requires the staged verifier";
+        return false;
+    }
     if (gr.captured) return true;
     gr.execs = new cudaGraphExec_t[(size_t) g.n_layers];
     gr.posts = new cudaGraphExec_t[(size_t) g.n_layers];
@@ -750,6 +767,10 @@ bool session_loop(const ModelGeometry& g, int64_t pos, int32_t pos_base, Session
 bool session_token(const WeightTable& tables, const ModelGeometry& g, int64_t pos, int32_t pos_base,
                    SessionState& s, const float* parts, void* stream, bool sync_every_layer,
                    std::string& err) {
+    if (s.qsa_begin != 0 || (s.qsa_end >= 0 && s.qsa_end != g.n_qsa_layers())) {
+        err = "session_token: partial QSA state requires the staged verifier";
+        return false;
+    }
     cudaStream_t cs = (cudaStream_t) stream;
     int64_t qsa_index = 0;
     int64_t gdn_index = 0;
@@ -798,6 +819,10 @@ namespace strata::core {
 bool session_capture_token(const WeightTable& tables, const ModelGeometry& g, SessionState& s, float* parts_dev,
                            const float* y_miss_host, size_t parts_bytes, TokenGraph& tg, std::string& err,
                            const TokenHits* hits) {
+    if (s.qsa_begin != 0 || (s.qsa_end >= 0 && s.qsa_end != g.n_qsa_layers())) {
+        err = "session_capture_token: partial QSA state requires the staged verifier";
+        return false;
+    }
     if (hits != nullptr && !hits->on()) { err = "session_capture_token: incomplete hit configuration"; return false; }
     if (tg.captured) return true;
     if (s.db == nullptr || s.db->d_flag == nullptr || s.db->d_seq == nullptr) {

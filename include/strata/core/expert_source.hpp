@@ -25,6 +25,7 @@
 #include "strata/core/hit_hook.hpp"
 #include "strata/kernels/cpu/pool.hpp"
 
+#include <atomic>
 #include <cstdint>
 #include <cstddef>
 #include <utility>
@@ -317,11 +318,12 @@ public:
     /// The size check is not a formality: a short file would fault at the END of a long sequence, and an
     /// over-long one means the pack is not the one the geometry came from.  Refuses with the two numbers.
     bool open(const std::string& pack_dir, int64_t n_layers, int64_t n_expert, std::string& err);
-    /// Pin a compact host mirror of experts absent from a fully filled static GPU cache. The mmap remains open
+    /// Build the RAM complement of the initial GPU caches. Dynamic resident swaps maintain this set. The mmap remains open
     /// as a fallback for later cache reloads. This is opt-in because the complement may still be a large allocation.
     bool pin_cache_complement(
         const ExpertCache& cache, std::string& err, bool pin = true,
-        const std::vector<std::pair<int32_t, int32_t>>& additional_gpu_pairs = {});
+        const std::vector<std::pair<int32_t, int32_t>>& additional_gpu_pairs = {},
+        uint64_t headroom_bytes = 0); // 0 preserves the platform's existing default
     void close();
 
     bool mapped() const { return base_ != nullptr; }
@@ -329,10 +331,23 @@ public:
     uint64_t pinned_bytes() const { return complement_pinned_ ? complement_bytes_ : 0; }
     uint64_t resident_bytes() const { return complement_bytes_; }
     bool complement_pinned() const { return complement_pinned_; }
+    /// Call only between completed verify windows, with no CPU/source readers.
+    /// The caller must publish the new GPU residency before the next window.
+    bool exchange_resident(int64_t layer, int64_t incoming, int64_t outgoing,
+                           void* device_slot, void* stream, std::string& err);
+    uint64_t resident_exchanges() const { return resident_exchanges_; }
+    uint64_t resident_reads() const { return resident_reads_.load(std::memory_order_relaxed); }
+    uint64_t fallback_reads() const { return fallback_reads_.load(std::memory_order_relaxed); }
 
     const uint8_t* blob(int64_t layer, int64_t expert) override;
     bool pinned(int64_t layer, int64_t expert) const override;
     const uint8_t* device_alias(int64_t layer, int64_t expert) const override;
+
+    /// The mmap source's page faults read 4 KB at a time in the compute's critical path; this hook kicks the
+    /// kernel's readahead off for the layer's routed blobs so a cold expert's SSD latency overlaps the CPU
+    /// work (the ids of a whole prefill chunk repeat the same experts, so they are deduplicated first;
+    /// Windows keeps the plain page-fault path).
+    void begin_layer(int64_t layer, const int32_t* ids, int64_t k) override;
 
     /// Blobs touched, for the driver to report.  With `h = 0` this is `48 * k` per token and the number is only
     /// interesting once Phase 3 makes it not so.
@@ -354,6 +369,9 @@ private:
     std::vector<uint64_t> complement_offsets_;
     bool complement_pinned_ = false;
     bool complement_ready_ = false;
+    std::vector<uint8_t> complement_swap_scratch_;
+    uint64_t resident_exchanges_ = 0;
+    std::atomic<uint64_t> resident_reads_{0}, fallback_reads_{0};
     int64_t reads_ = 0;
 #if defined(_WIN32)
     void* file_ = nullptr;

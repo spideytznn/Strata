@@ -334,7 +334,7 @@ namespace {
 bool stage_own() { static const bool v = std::getenv("STRATA_KV_STAGE_OWN") != nullptr; return v; }
 void take_stage(Alloc& o_borrowed, const core::SessionState& ss, const strata::kernels::QsaShapes& s,
                 strata::kernels::KvHostPools& st, bool& ok) {
-    const core::QsaState& q0 = ss.qsa_states[0];
+    const core::QsaState& q0 = ss.first_qsa();
     if (q0.kv_mode != 1) return;
     if (stage_own() && o_borrowed.count_only) return;
     Alloc own;
@@ -538,8 +538,8 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
             ok = false;
         m.ple_rows[b].resize(T * strata::kernels::PLE_N_HEADS);
     }
-    if (ss.qsa_states[0].kv_mode == 1) {   // KV streaming: the staging pool's identity page table
-        const int64_t pages = ss.qsa_states[0].n_pages;
+    if (ss.first_qsa().kv_mode == 1) {   // KV streaming: the staging pool's identity page table
+        const int64_t pages = ss.first_qsa().n_pages;
         std::vector<int32_t> ident((size_t) pages);
         for (int64_t i = 0; i < pages; ++i) ident[(size_t) i] = (int32_t) i;
         if (cudaMalloc((void**) &m.ident_table, ident.size() * 4) != cudaSuccess ||
@@ -586,7 +586,7 @@ bool Prefill::carve(size_t T, void* alloc) {
     s.n_head = g.n_head; s.n_head_kv = g.n_head_kv; s.head_dim = g.head_dim; s.idx_n_head = g.idx_q_heads;
     s.idx_dim = g.idx_key_dim;
     m.cap = strata::kernels::qsa_selection_width(strata::kernels::kTopkMaxCells, s);
-    m.max_blocks = ss.qsa_states[0].max_cells / s.idx_block + 2;
+    m.max_blocks = ss.first_qsa().max_cells / s.idx_block + 2;
     {
         // one region for the attention half's and the MoE half's scratch (see gdn_set_bytes)
         const uint64_t region = std::max({gdn_set_bytes(T), qsa_set_bytes(T, m.cap, m.max_blocks, m.sel_batch,
@@ -838,7 +838,7 @@ uint64_t Prefill::bytes_needed(const core::ModelGeometry& g, const core::Session
     s.n_head = g.n_head; s.n_head_kv = g.n_head_kv; s.head_dim = g.head_dim; s.idx_n_head = g.idx_q_heads;
     s.idx_dim = g.idx_key_dim;
     const int64_t cap = strata::kernels::qsa_selection_width(strata::kernels::kTopkMaxCells, s);
-    const int64_t max_blocks = ss.qsa_states[0].max_cells / s.idx_block + 2;
+    const int64_t max_blocks = ss.first_qsa().max_cells / s.idx_block + 2;
     o.take<uint8_t>((size_t) std::max({gdn_set_bytes(T), qsa_set_bytes(T, cap, max_blocks, 256, 32, s),
                                        moe_set_bytes(T, g.n_expert)}), ok);
     for (int i = 0; i < DQ; ++i) { o.take<uint16_t>(1280 * 2560, ok); o.take<uint16_t>(2560 * 640, ok); }
@@ -861,6 +861,7 @@ namespace {
 
 const core::WeightRef* need(const core::LayerView& v, const char* suffix, std::string& err) {
     const core::WeightRef* r = v.get(suffix);
+    if (r && !r->stage_resident) { err = v.name(suffix) + " belongs to another GPU stage"; return nullptr; }
     if (!r) err = v.name(suffix) + " is missing";
     return r;
 }
@@ -933,6 +934,11 @@ bool Prefill::run(const int64_t* tokens, int64_t n, int64_t pos0, std::string& e
     core::SessionState& ss = *m.ss;
     const auto t_start = Clock::now();
     const int64_t LB = stage_lb_, LE = stage_le_;
+    if (ss.qsa_begin > LB / g.qsa_interval ||
+        (ss.qsa_end >= 0 && ss.qsa_end < LE / g.qsa_interval)) {
+        err = "prefill: stage reads QSA state owned by another GPU";
+        return false;
+    }
     // the next stage reads chunk c on a thread while this one reads chunk c + 1 (declared first: an early return
     // waits for it before anything it reads goes away)
     std::string next_err;

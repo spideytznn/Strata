@@ -85,6 +85,7 @@ strata::kernels::QsaShapes shapes_of(const ModelGeometry& g) {
 
 const WeightRef* need(const LayerView& v, const char* suffix, std::string& err) {
     const WeightRef* r = v.get(suffix);
+    if (r && !r->stage_resident) { err = v.name(suffix) + " belongs to another GPU stage"; return nullptr; }
     if (r == nullptr && err.empty()) err = v.name(suffix) + " is missing";
     return r;
 }
@@ -173,7 +174,7 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
 
     const strata::kernels::QsaShapes s = shapes_of(g);
     cap_ = strata::kernels::qsa_selection_width(strata::kernels::kTopkMaxCells, s);
-    max_blocks_ = ss.qsa_states[0].max_cells / s.idx_block + 2;
+    max_blocks_ = ss.first_qsa().max_cells / s.idx_block + 2;
     attn_scratch_floats_ = (int64_t) strata::kernels::qsa_decode_attn_scratch_floats(cap_, s);
 
     const uint64_t T = (uint64_t) max_t, N = (uint64_t) g.n_embd, HC = (uint64_t) g.hc, K = (uint64_t) ss.k;
@@ -951,7 +952,12 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     if (T < 1 || T > max_t_) { err = "verify: window size out of range"; return false; }
     const ModelGeometry& g = *g_;
     SessionState& ss = *ss_;
-    if (pos0 + T > ss.qsa_states[0].max_cells) { err = "verify: the window runs past the context"; return false; }
+    if (ss.qsa_begin > lb_ / g.qsa_interval ||
+        (ss.qsa_end >= 0 && ss.qsa_end < le_ / g.qsa_interval)) {
+        err = "verify: stage reads QSA state owned by another GPU";
+        return false;
+    }
+    if (pos0 + T > ss.first_qsa().max_cells) { err = "verify: the window runs past the context"; return false; }
     if (!capture(T, err) || !capture_commit(err)) return false;
     VDBG("captured; staging\n");
     const Clock::time_point t0 = Clock::now();

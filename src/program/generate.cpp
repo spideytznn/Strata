@@ -183,6 +183,8 @@ struct Options {
     bool no_host_worker = false;
     bool mmap_experts = false;    ///< R2.1: opt OUT of the resident arena, back to MapViewOfFile
     bool resident_cpu_experts = false; ///< mmap-backed static-cache misses copied into ordinary RAM
+    bool pin_resident_experts = false; ///< page-lock the compact RAM complement for direct prefill DMA
+    int resident_ram_headroom_mib = 0; ///< 0 retains the platform default (Linux: 5120 MiB)
     /// R4: slots of VRAM-resident experts.  **0 = off, and off is the default.**
     /// **THE COMMENT THAT USED TO BE HERE WAS FALSE AND ROUND 328 MEASURED IT.**  It said "the cache has no
     /// consumer yet - `moe_hit_grouped_s2` does not exist - so switching it on costs the fill traffic and
@@ -275,6 +277,8 @@ struct Options {
     /// --serve, multi-GPU layer split: "K" or "K1,K2,.." (the first layer of each later stage) or "auto" (placed
     /// from each GPU's free VRAM); empty = one GPU
     std::string layer_split;
+    bool stage_kv = false; ///< only allocate QSA state for the stage-owned layers
+    bool stage_weights = false; ///< opt-in: native serve, explicit multi-GPU split
     /// the later stages' devices "D1,D2,.." (default: the next visible GPUs; "0" with one K: both stages on this
     /// GPU, sharing everything - the bit-exact A/B of the hand-off)
     std::string split_device;
@@ -319,6 +323,9 @@ void usage() {
     std::fprintf(stderr,
                  "strata generate --pack DIR --tokens \"1,2,3\" [options]\n"
                  "\n"
+                 "  --stage-kv           allocate only stage-owned QSA state; requires --stage-weights\n"
+                 "  --stage-weights      native serve: load only own layers; needs explicit multi-GPU --layer-split K\n"
+                 "  --resident-ram-headroom-mib N  available RAM to preserve before the CPU complement (1024..65536)\n"
                  "  --pack DIR           the pack directory (default pack/full)\n"
                  "  --tokens LIST        the prompt as comma-separated token IDS (required)\n"
                  "  --tokens-file PATH   pretokenized prompt, commas or whitespace (alternative to --tokens)\n"
@@ -445,6 +452,7 @@ void usage() {
                  "                       The A/B arm: the mmap's rate depends on the OS page cache holding\n"
                  "                       34 GB, and measured 71.97 vs 34.78 ms/token cold vs warm.\n"
                  "  --resident-cpu-experts  with mmap and a static profile, keep CPU misses resident in ordinary RAM.\n"
+                 "  --pin-resident-experts  page-lock that RAM complement for direct host-to-device transfers.\n"
                  "                       Borrowed GPU-cache entries may read from mmap during prompt prefill.\n");
 }
 
@@ -759,7 +767,7 @@ bool checkpoint_save(ConvCheckpoint& c, const strata::core::SessionState& ss, co
     if (cudaMemcpy(c.gdn.data(), ss.gdn_state, z.gdn, cudaMemcpyDeviceToHost) != cudaSuccess) return false;
     if (!c.ple.empty() && cudaMemcpy(c.ple.data(), ss.ple_hist, z.ple, cudaMemcpyDeviceToHost) != cudaSuccess)
         return false;
-    for (int64_t i = 0; i < g.n_qsa_layers(); ++i)
+    for (int64_t i = ss.qsa_begin; i < ss.qsa_end; ++i)
         if (cudaMemcpy(c.tails.data() + (size_t) i * z.tail, ss.qsa_states[i].idx_tail, z.tail, cudaMemcpyDeviceToHost) !=
             cudaSuccess)
             return false;
@@ -773,7 +781,7 @@ bool checkpoint_restore(const ConvCheckpoint& c, strata::core::SessionState& ss,
     if (cudaMemcpy(ss.gdn_state, c.gdn.data(), z.gdn, cudaMemcpyHostToDevice) != cudaSuccess) return false;
     if (!c.ple.empty() && cudaMemcpy(ss.ple_hist, c.ple.data(), z.ple, cudaMemcpyHostToDevice) != cudaSuccess)
         return false;
-    for (int64_t i = 0; i < g.n_qsa_layers(); ++i)
+    for (int64_t i = ss.qsa_begin; i < ss.qsa_end; ++i)
         if (cudaMemcpy(ss.qsa_states[i].idx_tail, c.tails.data() + (size_t) i * z.tail, z.tail, cudaMemcpyHostToDevice) !=
             cudaSuccess)
             return false;
@@ -1022,6 +1030,8 @@ int main(int argc, char** argv) {
         else if (a == "--spec-min-p") o.spec_min_p = std::atof(next("--spec-min-p"));
         else if (a == "--stop-eos") o.stop_eos = true;
         else if (a == "--spec-split") o.spec_split = true;
+        else if (a == "--stage-kv") o.stage_kv = true;
+        else if (a == "--stage-weights") o.stage_weights = true;
         else if (a == "--layer-split") o.layer_split = next("--layer-split");
         else if (a == "--split-device") o.split_device = next("--split-device");
         else if (a == "--pcie-mode") o.pcie_mode = next("--pcie-mode");
@@ -1081,6 +1091,16 @@ int main(int argc, char** argv) {
         else if (a == "--gpu-stages") o.gpu_stages = true;
         else if (a == "--mmap-experts") o.mmap_experts = true;
         else if (a == "--resident-cpu-experts") o.resident_cpu_experts = true;
+        else if (a == "--pin-resident-experts") o.pin_resident_experts = true;
+        else if (a == "--resident-ram-headroom-mib") {
+            const std::string v = next("--resident-ram-headroom-mib");
+            const auto r = std::from_chars(v.data(), v.data() + v.size(), o.resident_ram_headroom_mib);
+            if (r.ec != std::errc{} || r.ptr != v.data() + v.size() ||
+                o.resident_ram_headroom_mib < 1024 || o.resident_ram_headroom_mib > 65536) {
+                std::fprintf(stderr, "--resident-ram-headroom-mib requires an integer from 1024 to 65536\n");
+                return 2;
+            }
+        }
         else if (a == "--stats") o.stats = true;
         else if (a == "--shared-late") o.shared_late = true;
         else if (a == "--keep-canonical") o.keep_canonical = true;
@@ -1149,14 +1169,52 @@ int main(int argc, char** argv) {
         }
     }
     const bool multi_gpu = !split_devs.empty() && !split_same;
-    if (o.resident_cpu_experts && (!o.mmap_experts || o.expert_profile.empty() || o.adapt_every != 0)) {
-        std::fprintf(stderr, "strata generate: --resident-cpu-experts requires --mmap-experts, a static --expert-profile and --adapt-every 0\n");
+    if (o.stage_kv && !o.stage_weights) {
+        std::fprintf(stderr, "--stage-kv requires --stage-weights\n");
+        return 2;
+    }
+    if (o.stage_weights && (!multi_gpu || split_auto || !o.serve || o.native_preset.empty() || o.spec < 2)) {
+        std::fprintf(stderr, "strata generate: --stage-weights requires native --serve, --spec >= 2 and an explicit multi-GPU --layer-split (e.g. 24), not auto\n");
+        return 2;
+    }
+    if (o.stage_weights && (o.gpu_only_full || o.graph_only || o.gpu_stages)) {
+        std::fprintf(stderr, "strata generate: --stage-weights cannot use whole-model graph diagnostics\n");
+        return 2;
+    }
+    const strata::core::ModelGeometry weight_geometry;
+    if (o.stage_weights && split_at.back() >= weight_geometry.n_layers) {
+        std::fprintf(stderr, "strata generate: stage weight split exceeds model layers\n");
+        return 2;
+    }
+    if (o.stage_kv) {
+        int64_t previous = 0;
+        auto boundaries = split_at;
+        boundaries.push_back(weight_geometry.n_layers);
+        for (const auto end : boundaries) {
+            if (end / weight_geometry.qsa_interval <= previous / weight_geometry.qsa_interval) {
+                std::fprintf(stderr, "--stage-kv requires at least one QSA layer on every stage\n");
+                return 2;
+            }
+            previous = end;
+        }
+    }
+    const strata::core::WeightStage main_weight_stage{0, o.stage_weights ? split_at.front() : weight_geometry.n_layers};
+    const auto* main_weight_range = o.stage_weights ? &main_weight_stage : nullptr;
+    if (o.pin_resident_experts && !o.resident_cpu_experts) {
+        std::fprintf(stderr, "--pin-resident-experts requires --resident-cpu-experts\n");
+        return 2;
+    }
+    if (o.resident_ram_headroom_mib && !o.resident_cpu_experts) {
+        std::fprintf(stderr, "--resident-ram-headroom-mib requires --resident-cpu-experts\n");
+        return 2;
+    }
+    if (o.resident_cpu_experts && (!o.mmap_experts || o.expert_profile.empty())) {
+        std::fprintf(stderr, "strata generate: --resident-cpu-experts requires --mmap-experts and a --expert-profile\n");
         return 2;
     }
     if (o.resident_cpu_experts &&
-        (!o.layer_split.empty() || o.expert_cache_remote[0] > 0 || o.expert_cache_remote[1] > 0 ||
-         o.expert_cache_remote[2] > 0)) {
-        std::fprintf(stderr, "strata generate: --resident-cpu-experts does not support layer splits or remote expert caches\n");
+        (o.expert_cache_remote[0] > 0 || o.expert_cache_remote[1] > 0 || o.expert_cache_remote[2] > 0)) {
+        std::fprintf(stderr, "strata generate: --resident-cpu-experts does not support remote expert caches\n");
         return 2;
     }
     // the helper-GPU expert caches (--expert-cache-remote, docs/SECOND_GPU.md): CUDA1..3 on one GPU; with a layer
@@ -1188,6 +1246,8 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: layer split across %zu GPUs: CUDA0, then CUDA%s (split %s)\n",
                      split_devs.size() + 1, devs.c_str(), o.layer_split.c_str());
     }
+    // Dynamic complements must not lend GPU slots: their bytes have no RAM mirror.
+    if (o.resident_cpu_experts && o.adapt_every > 0) o.no_prefill_borrow = true;
     if (o.prefill_auto && (o.no_prefill_borrow || o.expert_profile.empty())) {
         o.prefill_auto = false;       // nothing to lend from: the buffers are reserved for the session, so keep them small
         o.prefill_chunk = 2048;
@@ -1456,8 +1516,12 @@ int main(int argc, char** argv) {
         if (!native_pack) skip.erase("blk.1.ple_key.weight");
         if (native_pack) skip.insert("token_embd.weight");
     }
+    if (o.stage_weights && !native_pack) {
+        std::fprintf(stderr, "strata generate: --stage-weights requires a native expert pack\n");
+        return 2;
+    }
     uint64_t pool_bytes = 0;
-    if (!strata::core::WeightTable::pool_bytes(o.pack, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
+    if (!strata::core::WeightTable::pool_bytes(o.pack, pool_bytes, err, skip.empty() ? nullptr : &skip, main_weight_range)) {
         std::fprintf(stderr, "strata generate: %s\n", err.c_str());
         return 1;
     }
@@ -1468,7 +1532,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     strata::core::WeightTable wt;
-    if (!wt.load(o.pack, arena, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
+    if (!wt.load(o.pack, arena, pool_bytes, err, skip.empty() ? nullptr : &skip, main_weight_range)) {
         std::fprintf(stderr, "strata generate: %s\n", err.c_str());
         return 1;
     }
@@ -1485,6 +1549,11 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: %zu native projection matrices, %.2f MiB of weights\n",
                      native_dense.tensor_count(), (double) native_dense.weight_bytes() / (1024.0 * 1024.0));
     }
+
+    if (o.stage_weights)
+        std::fprintf(stderr, "strata generate: stage weights CUDA0 layers 0-%lld: canonical %.2f MiB, native %.2f MiB\n",
+                     (long long) (main_weight_stage.end - 1), (double) pool_bytes / 1048576.0,
+                     (double) native_dense.weight_bytes() / 1048576.0);
 
     strata::kernels::gr_set_fp32_activations(o.gr_fp32_activations);
     strata::kernels::gr_set_native_mmvf(o.gr_native_mmvf);
@@ -1555,7 +1624,14 @@ int main(int argc, char** argv) {
     }
 
     void* sbuf = nullptr;
-    if (cudaMalloc(&sbuf, strata::core::session_bytes(g, o.max_context, K)) != cudaSuccess) {
+    const int64_t main_qsa_end = o.stage_kv ? split_at.front() / g.qsa_interval : g.n_qsa_layers();
+    // A/B diagnostic: keep the old allocation budget while exercising partial state,
+    // so expert placement does not change merely because more VRAM became available.
+    const char* kv_reserve_env = std::getenv("STRATA_STAGE_KV_RESERVE_FULL");
+    const bool kv_reserve_full = o.stage_kv && kv_reserve_env && std::atoi(kv_reserve_env) != 0;
+    const uint64_t main_session_bytes = strata::core::session_bytes(
+        g, o.max_context, K, 0, kv_reserve_full ? g.n_qsa_layers() : main_qsa_end);
+    if (cudaMalloc(&sbuf, main_session_bytes) != cudaSuccess) {
         std::fprintf(stderr, "strata generate: session state allocation failed\n");
         return 1;
     }
@@ -1573,13 +1649,17 @@ int main(int argc, char** argv) {
         return 1;
     }
     void* const main_cs = (void*) main_stream;
-    if (strata::core::session_init(g, o.max_context, K, sbuf, ss) == 0) {
+    if (strata::core::session_init(g, o.max_context, K, sbuf, ss, 0, main_qsa_end) == 0) {
         std::fprintf(stderr, "strata generate: session_init failed\n");
         return 1;
     }
-    if (g.n_qsa_layers() > 0 && ss.qsa_states[0].kv_mode == 1)
+    if (o.stage_kv)
+        std::fprintf(stderr, "strata generate: stage KV CUDA0: QSA [0,%lld), saved %.2f MiB\n",
+                     (long long) main_qsa_end,
+                     (double) (strata::core::session_bytes(g, o.max_context, K) - main_session_bytes) / 1048576.0);
+    if (g.n_qsa_layers() > 0 && ss.first_qsa().kv_mode == 1)
         std::fprintf(stderr, "strata generate: KV streaming: %lld of %lld cells per QSA layer in VRAM, the K/V in "
-                             "%.2f GiB of pinned RAM\n", (long long) (ss.qsa_states[0].n_slots * 4),
+                             "%.2f GiB of pinned RAM\n", (long long) (ss.first_qsa().n_slots * 4),
                      (long long) o.max_context, (double) strata::core::qsa_kv_host_bytes() / 1073741824.0);
 
     // ---- **THE HALF-LEVEL DUMP HAS TO BE ARMED BEFORE `session_capture`, AND THE LADDER MUST NOT BE.**  The
@@ -1715,9 +1795,15 @@ int main(int argc, char** argv) {
             return 1;
         }
         const strata::core::OnDevice on(st.dev);
+        const strata::core::WeightStage stage_range{
+            o.stage_weights ? split_at[i] : 0,
+            o.stage_weights && !last ? split_at[i + 1] : g.n_layers};
+        const auto* weight_range = o.stage_weights ? &stage_range : nullptr;
+        uint64_t stage_pool_bytes = 0;
         void* arena_s = nullptr;
-        if (cudaMalloc(&arena_s, pool_bytes) != cudaSuccess ||
-            !st.wt.load(o.pack, arena_s, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
+        if (!strata::core::WeightTable::pool_bytes(o.pack, stage_pool_bytes, err, skip.empty() ? nullptr : &skip, weight_range) ||
+            cudaMalloc(&arena_s, stage_pool_bytes) != cudaSuccess ||
+            !st.wt.load(o.pack, arena_s, stage_pool_bytes, err, skip.empty() ? nullptr : &skip, weight_range)) {
             std::fprintf(stderr, "strata generate: layer split, CUDA%d weights: %s\n", st.dev,
                          err.empty() ? "the weight arena does not fit" : err.c_str());
             return 1;
@@ -1727,15 +1813,28 @@ int main(int argc, char** argv) {
                          err.c_str());
             return 1;
         }
+        if (o.stage_weights)
+            std::fprintf(stderr, "strata generate: stage weights CUDA%d layers %lld-%lld: canonical %.2f MiB, native %.2f MiB\n",
+                         st.dev, (long long) stage_range.begin, (long long) (stage_range.end - 1),
+                         (double) stage_pool_bytes / 1048576.0, (double) st.dense.weight_bytes() / 1048576.0);
         void* sbuf_s = nullptr;
-        if (cudaMalloc(&sbuf_s, strata::core::session_bytes(g, o.max_context, K)) != cudaSuccess ||
-            strata::core::session_init(g, o.max_context, K, sbuf_s, st.ss) == 0 ||
+        const int64_t qsa_begin = o.stage_kv ? stage_range.begin / g.qsa_interval : 0;
+        const int64_t qsa_end = o.stage_kv ? stage_range.end / g.qsa_interval : g.n_qsa_layers();
+        const uint64_t stage_session_bytes = strata::core::session_bytes(
+            g, o.max_context, K, kv_reserve_full ? 0 : qsa_begin,
+            kv_reserve_full ? g.n_qsa_layers() : qsa_end);
+        if (cudaMalloc(&sbuf_s, stage_session_bytes) != cudaSuccess ||
+            strata::core::session_init(g, o.max_context, K, sbuf_s, st.ss, qsa_begin, qsa_end) == 0 ||
             cudaStreamCreateWithFlags(&st.stream, cudaStreamNonBlocking) != cudaSuccess ||
             cudaStreamCreateWithFlags(&st.adapt_stream, cudaStreamNonBlocking) != cudaSuccess ||
             cudaEventCreateWithFlags(&st.adapt_ev, cudaEventDisableTiming) != cudaSuccess) {
             std::fprintf(stderr, "strata generate: layer split, CUDA%d: the session state failed\n", st.dev);
             return 1;
         }
+        if (o.stage_kv)
+            std::fprintf(stderr, "strata generate: stage KV CUDA%d: QSA [%lld,%lld), saved %.2f MiB\n",
+                         st.dev, (long long) qsa_begin, (long long) qsa_end,
+                         (double) (strata::core::session_bytes(g, o.max_context, K) - stage_session_bytes) / 1048576.0);
         const strata::core::WeightRef* wo_s = st.wt.find("output.weight");
         if (wo_s == nullptr ||
             (last && !o.native_head_gguf.empty() && !st.head.load(o.native_head_gguf, g.n_embd, wo_s->ne1, err))) {
@@ -1946,7 +2045,10 @@ int main(int argc, char** argv) {
         if (const cudaError_t e = cudaMemGetInfo(&fb, &tb); e != cudaSuccess)
             std::fprintf(stderr, "strata generate: layer split: CUDA%d free memory: %s\n", dev < 0 ? 0 : dev,
                          cudaGetErrorString(e));
-        const int64_t reserve = ((int64_t) o.vram_reserve_mib + split_pf_mib + (later ? 1024 : 0)) << 20;
+        // --vram-reserve-mib holds room for the vision encoder's transient work, which sits on CUDA0 only;
+        // a later stage keeps a 128 MiB floor for its own small late allocations and spends the difference on experts
+        const int64_t vis_mib = later ? std::min<int64_t>(o.vram_reserve_mib, 128) : (int64_t) o.vram_reserve_mib;
+        const int64_t reserve = (vis_mib + split_pf_mib + (later ? 1024 : 0)) << 20;
         return std::max<int64_t>((int64_t) fb - reserve, 0);
     };
     if (multi_gpu && split_auto) {
@@ -2323,12 +2425,12 @@ int main(int argc, char** argv) {
                      vram_only > 0 ? "; the top K are VRAM-only (pinned, no arena row)" : "");
     }
 
-    if (o.resident_cpu_experts) {
-        if (!src.pin_cache_complement(xcache, err, /*pin=*/false)) {
+    if (o.resident_cpu_experts && !multi_gpu) {
+        if (!src.pin_cache_complement(xcache, err, o.pin_resident_experts, {}, (uint64_t) o.resident_ram_headroom_mib << 20)) {
             std::fprintf(stderr, "strata generate: CPU expert residency: %s\n", err.c_str());
             return 1;
         }
-        std::fprintf(stderr, "strata generate: steady-state CPU cache misses are resident in ordinary RAM; borrowed cache entries may use mmap during prompt prefill\n");
+        std::fprintf(stderr, "strata generate: steady-state CPU cache misses are resident in %s RAM; borrowed cache entries may use mmap during prompt prefill\n", o.pin_resident_experts ? "pinned" : "ordinary");
     }
 
     for (auto& stp : stages) {
@@ -2378,6 +2480,26 @@ int main(int argc, char** argv) {
     }
     if (multi_gpu)
         std::fprintf(stderr, "strata generate: layer split: CUDA0 runs layers 0-%lld\n", (long long) (split_at[0] - 1));
+
+    if (o.resident_cpu_experts && multi_gpu) {
+        // the complement covers every pair NO stage's cache holds, so a split needs the stages' residents
+        // listed as additional GPU pairs; their caches are filled above, so the exclusion list is final
+        std::vector<std::pair<int32_t, int32_t>> stage_pairs;
+        for (auto& stp : stages) {
+            for (int64_t layer = stp->lb; layer < stp->le; ++layer) {
+                for (int64_t expert = 0; expert < g.n_expert; ++expert) {
+                    if (stp->cache.slot_of(layer, expert) != strata::core::kNotResident)
+                        stage_pairs.emplace_back((int32_t) layer, (int32_t) expert);
+                }
+            }
+        }
+        if (!src.pin_cache_complement(xcache, err, o.pin_resident_experts, stage_pairs, (uint64_t) o.resident_ram_headroom_mib << 20)) {
+            std::fprintf(stderr, "strata generate: CPU expert residency: %s\n", err.c_str());
+            return 1;
+        }
+        std::fprintf(stderr, "strata generate: steady-state CPU cache misses are resident in %s RAM (%zu stage pairs "
+                     "excluded)\n", o.pin_resident_experts ? "pinned" : "ordinary", stage_pairs.size());
+    }
 
     std::array<strata::core::RemoteExperts, 3> remote_experts;
     const bool multi_remote = o.expert_cache_remote[1] > 0 || o.expert_cache_remote[2] > 0;
@@ -3450,7 +3572,6 @@ int main(int argc, char** argv) {
         sp.on_chunk = [&](const float* R_rows, int64_t T, int64_t p0, std::string& e) -> bool {
             std::vector<int32_t> nxt((size_t) T);
             for (int64_t t = 0; t < T; ++t) nxt[(size_t) t] = (int32_t) cur[(size_t) (p0 + t + 1)];
-            // E-9: batched through the prompt path when it can (one GPU: a layer split's drafter is on the last stage)
             const bool batched = !multi_gpu && sp.draft_kv(mtp, R_rows, nxt.data(), T, p0, e);
             if (!e.empty() || (!batched && !mtp.prefill(R_rows, nxt.data(), T, p0, e))) return false;
             // progress for the server window: PP <position reached> <prompt tokens> <ms> <fresh tokens/s>
@@ -3575,7 +3696,15 @@ int main(int argc, char** argv) {
                 const int stn = multi_gpu ? stage_of(s.layer) : 0;   // the swap stays in the layer's own cache
                 GpuStage* gs = stn > 0 ? stages[(size_t) stn - 1].get() : nullptr;
                 const strata::core::OnDevice on(gs ? gs->dev : -1);
-                if (slot < 0 || b == nullptr ||
+                if (o.resident_cpu_experts) {
+                    std::string exchange_err;
+                    if (slot < 0 || !src.exchange_resident(s.layer, s.in, s.out,
+                            gs ? gs->cache.device_slot(slot) : xcache.device_slot(slot),
+                            (void*) (gs ? gs->adapt_stream : adapt_stream), exchange_err)) {
+                        std::fprintf(stderr, "strata serve: %s\n", exchange_err.c_str());
+                        return false;
+                    }
+                } else if (slot < 0 || b == nullptr ||
                     cudaMemcpyAsync(gs ? gs->cache.device_slot(slot) : xcache.device_slot(slot), b,
                                     (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
                                     cudaMemcpyHostToDevice, gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)
@@ -3682,8 +3811,8 @@ int main(int argc, char** argv) {
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
-                        (long long) (g.n_qsa_layers() > 0 && ss.qsa_states[0].kv_mode == 1
-                                         ? ss.qsa_states[0].n_slots * 4 : 0),
+                        (long long) (g.n_qsa_layers() > 0 && ss.first_qsa().kv_mode == 1
+                                         ? ss.first_qsa().n_slots * 4 : 0),
                         (long long) xcache.slots(), (long long) (xcache.bytes() >> 20), o.spec, o.mtp_max_t,
                         o.suffix_draft, (long long) (free_b >> 20), cvec_summary.c_str(),
                         (long long) ((o.mmap_experts ? strata::kernels::cpu::expert_layout().total
@@ -4262,7 +4391,7 @@ int main(int argc, char** argv) {
                 drive.d.layers = 0;
                 drive.d.experts = 0;
                 drive.d.failed = false;
-                apply_pending(false);
+                apply_pending(o.resident_cpu_experts);
                 if (hist_n > 0) {
                     // the tails the penalties count over, ONE PER ROW: the tokens the state has consumed, the
                     // fed-back head `x` (it joins `consumed` only after this window commits), then the drafts
@@ -4417,8 +4546,9 @@ int main(int argc, char** argv) {
                     return a;
                 };
                 const int64_t end_cell = std::min<int64_t>(((L + qs.page_size - 1) / qs.page_size) * qs.page_size,
-                                                           ss.qsa_states[0].max_cells);
+                                                           ss.first_qsa().max_cells);
                 for (int64_t i = 0; i < g.n_qsa_layers(); ++i) {
+                    if (!ss.owns_qsa(i)) continue;
                     const strata::core::QsaState& st = ss.qsa_states[i];
                     h_tail = hash_dev(st.idx_tail, z.tail, h_tail);
                     h_pool = hash_dev(st.idx_pooled, (size_t) (L / qs.idx_block) * qs.idx_dim * 4, h_pool);
@@ -4461,6 +4591,10 @@ int main(int argc, char** argv) {
                              100.0 * (double) req_hits / (double) req_look,
                              (long long) req_hits, (long long) req_look);
             }
+            if (o.resident_cpu_experts)
+                std::fprintf(stderr, "strata serve: resident experts cumulative: %llu RAM reads, %llu mmap lookups, %llu exchanges (mmap lookups are not physical disk reads)\n",
+                             (unsigned long long) src.resident_reads(), (unsigned long long) src.fallback_reads(),
+                             (unsigned long long) src.resident_exchanges());
             // STRATA_SPLIT_TIMING: where each verify stage's host time went, cumulative per window since the start
             // (waiting for its GPU to ring a layer, the CPU pool and plan per layer, staging the window)
             if (static const bool st_timing = std::getenv("STRATA_SPLIT_TIMING") != nullptr; st_timing)
@@ -4471,11 +4605,12 @@ int main(int argc, char** argv) {
                                          "pool + plan %.3f ms, host staging %.3f ms, commit %.3f ms\n", st,
                                  (long long) v.windows, v.ms_wait / w, v.ms_pool / w, v.ms_host / w, v.ms_commit / w);
                 }
-            if (g.n_qsa_layers() > 0 && ss.qsa_states[0].kv_mode == 1) {
+            if (g.n_qsa_layers() > 0 && ss.first_qsa().kv_mode == 1) {
                 // KV streaming, cumulative over the process: blocks the selections named vs blocks read from RAM
                 uint64_t miss = 0, look = 0;
                 bool over = false;
                 for (int64_t i = 0; i < g.n_qsa_layers(); ++i) {
+                    if (!ss.owns_qsa(i)) continue;
                     const strata::kernels::KvStreamCounters c = strata::kernels::kv_stream_counters(ss.qsa_states[i].map);
                     miss += c.misses; look += c.lookups; over = over || c.overflow;
                 }
@@ -4781,6 +4916,7 @@ int main(int argc, char** argv) {
         // status readback. Retain one status per layer so a later layer cannot
         // hide an earlier failure; no extra synchronization or token allocation.
         if (o.native_flash_attn_short) for (int64_t i = 0; i < g.n_qsa_layers(); ++i) {
+            if (!ss.owns_qsa(i)) continue;
             const int32_t status = ss.qsa_states[i].host_step[strata::kernels::kStepCount];
             if (status != 0) {
                 std::fprintf(stderr, "strata generate: native attention status %d at QSA layer %lld, position %lld\n",
@@ -4937,7 +5073,14 @@ int main(int argc, char** argv) {
                 const int32_t slot = host_res[out];
                 const uint8_t* b = srcp->blob(s.layer, s.in);
                 // asynchronous: the copies run while the MTP drafts; the next window waits for them
-                if (slot < 0 || b == nullptr ||
+                if (o.resident_cpu_experts) {
+                    std::string exchange_err;
+                    if (slot < 0 || !src.exchange_resident(s.layer, s.in, s.out,
+                            xcache.device_slot(slot), (void*) adapt_stream, exchange_err)) {
+                        std::fprintf(stderr, "strata generate: %s\n", exchange_err.c_str());
+                        return false;
+                    }
+                } else if (slot < 0 || b == nullptr ||
                     cudaMemcpyAsync(xcache.device_slot(slot), b, (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
                                     cudaMemcpyHostToDevice, adapt_stream) != cudaSuccess) {
                     std::fprintf(stderr, "strata generate: an adaptive refill failed\n");
@@ -5015,7 +5158,7 @@ int main(int argc, char** argv) {
             drive.d.layers = 0;
             drive.d.experts = 0;
             drive.d.failed = false;
-            apply_pending(false);
+            apply_pending(o.resident_cpu_experts);
             if (!ver.run(T, window.data(), p, &drive_pool_multi, &drive, outv.data(), err)) {
                 std::fprintf(stderr, "strata generate: %s\n", err.c_str());
                 return 1;

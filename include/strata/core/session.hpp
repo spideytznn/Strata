@@ -29,6 +29,11 @@ namespace strata::core {
 /// handoff between the GPU and the CPU expert pool.
 struct SessionState {
     int64_t max_cells = 0;
+    // Global QSA ordinals stay stable; only this half-open range owns device state.
+    int64_t qsa_begin = 0, qsa_end = -1;
+    bool owns_qsa(int64_t i) const { return i >= qsa_begin && (qsa_end < 0 || i < qsa_end); }
+    QsaState& first_qsa() { return qsa_states[qsa_begin]; }
+    const QsaState& first_qsa() const { return qsa_states[qsa_begin]; }
 
     GdnBuffers gdn;                 ///< the 36 GDN layers share one set of scratch; their STATE is per layer
     float* gdn_state = nullptr;     ///< (n_gdn_layers, gdn_state_floats)
@@ -73,12 +78,18 @@ struct SessionState {
     PleRun ple;
 };
 
-/// Bytes for a whole session at `max_cells` of context.  Every layer's state is sized at once, because P2.T10
+/// Bytes for a session at `max_cells` of context. Optional global QSA ordinals
+/// [qsa_begin,qsa_end) omit other layers' KV/indexer allocations; -1 means all.
+/// GDN state and shared scratch retain the original layout. Invalid/empty ranges
+/// return zero (except a geometry with no QSA layers).
+/// Every owned layer's state is sized at once, because P2.T10
 /// requires ZERO token-path allocations - a `cudaMalloc` that happened on the first token of a longer sequence
 /// would satisfy every test here and fail that one.
-uint64_t session_bytes(const ModelGeometry& g, int64_t max_cells, int64_t k);
+uint64_t session_bytes(const ModelGeometry& g, int64_t max_cells, int64_t k,
+                       int64_t qsa_begin = 0, int64_t qsa_end = -1);
 /// Carves `base` (DEVICE memory) into `s`.  Returns the bytes used.
-uint64_t session_init(const ModelGeometry& g, int64_t max_cells, int64_t k, void* base, SessionState& s);
+uint64_t session_init(const ModelGeometry& g, int64_t max_cells, int64_t k, void* base, SessionState& s,
+                      int64_t qsa_begin = 0, int64_t qsa_end = -1);
 /// Zeroes every layer's state - the residual to `R_init`, everything else to zero, so a fresh sequence starts
 /// from the reference's own `zeros()`.
 void session_zero(SessionState& s, const ModelGeometry& g, const float* R_init, void* stream);
