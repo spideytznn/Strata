@@ -111,15 +111,6 @@ public:
     /// The slot range layer `l` may admit into under per-layer admission.  Exposed so a test can check it.
     void layer_slot_range(int64_t layer, int64_t& lo, int64_t& hi) const;
 
-    /// **THE VRAM-ONLY TIER: slots [0,k) are PINNED - never lent to the prompt path, never swapped out.**
-    /// They hold experts whose arena rows do not exist (their bytes went straight from the pack file into
-    /// VRAM), so an eviction would strand them with no source at all.  The cache itself never evicts; this
-    /// number is the floor the driver's two external evictors (the adapt() lambdas) and the prompt path's
-    /// borrow/lend respect.  Under global admission a profile preload hands slot `i` to rank `i`, so the
-    /// prefix [0,k) is exactly the profile's top k.  Clamped to the slot count; call after `open`.
-    void pin_prefix(int64_t k) { pinned_k_ = k < 0 ? 0 : (k > slots_ ? slots_ : k); }
-    int64_t pinned_prefix() const { return pinned_k_; }
-
     /// The device address of one slot.
     uint8_t* device_slot(int32_t slot);
     const uint8_t* device_slot(int32_t slot) const;
@@ -169,7 +160,6 @@ private:
     std::vector<int32_t> layer_next_;   ///< [n_layers] -> that layer's next free slot
     std::vector<uint64_t> off_;         ///< plan v0.3 P6: slot offsets (slots + 1 entries) when sized
     int64_t admitted_ = 0;
-    int64_t pinned_k_ = 0;              ///< the VRAM-only tier: slots below this are never lent or evicted
 };
 
 }  // namespace strata::core

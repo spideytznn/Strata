@@ -26,7 +26,6 @@
 // whose failure mode is a wrong byte offset - which decodes to a plausible weight and produces plausible
 // logits.  Python wrote the manifest and already parses it correctly.
 #pragma once
-
 #include "strata/core/weight_stage.hpp"
 
 #include <cstdint>
@@ -95,7 +94,7 @@ struct WeightRef {
     /// Plan v0.3 P1: false when the loader SKIPPED this tensor's canonical bytes because another form serves it
     /// (native GGUF projections, the native head).  The metadata above stays valid; `data` is null.
     bool resident = true;
-    bool stage_resident = true; ///< false only for layers assigned to another GPU
+    bool stage_resident = true; ///< false for layers executed on another GPU
 };
 
 struct LoadReport {
@@ -115,6 +114,12 @@ public:
     /// With `skip`, the size of the compacted arena that holds every tensor EXCEPT the named ones.
     static bool pool_bytes(const std::string& pack_dir, uint64_t& out, std::string& err,
                            const std::set<std::string>* skip = nullptr, const WeightStage* stage = nullptr);
+
+    /// The `code_bits` field of one row of `<pack_dir>/index.txt`, readable WITHOUT loading anything (0 = the
+    /// pack stores the tensor unquantized, e.g. a --compat-bf16 key; -1 = no such row).  #326: the loader has
+    /// to know this before it builds the skip set.
+    static bool index_code_bits(const std::string& pack_dir, const std::string& name, int& code_bits,
+                                std::string& err);
 
     /// Load every tensor in `<pack_dir>/index.txt` into `arena_base`.
     ///
