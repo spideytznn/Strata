@@ -52,6 +52,7 @@
 #include "strata/core/native_dense.hpp"
 #include "strata/program/logits_selection.hpp"
 #include "strata/program/conv_cache.hpp"
+#include "strata/program/local_memory_plan.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -3774,6 +3775,51 @@ int main(int argc, char** argv) {
         }
         return 0;
     };
+    // Retain M3's independent-buffer choice on one GPU, spending only VRAM left
+    // outside the filled cache. STRATA_PREFILL_OWN_AUTO=0 is the upstream A/B arm.
+    bool single_prefill_own = false;
+    if (!multi_gpu && !remote_caches && !o.no_prefill_borrow && !profile.empty() &&
+        o.prefill_chunk > 0 && d_res != nullptr &&
+        (std::getenv("STRATA_PREFILL_OWN_AUTO") == nullptr ||
+         std::string(std::getenv("STRATA_PREFILL_OWN_AUTO")) != "0")) {
+        int64_t borrowed = o.prefill_chunk;
+        const int64_t lend = plan_lend(borrowed);
+        const int64_t borrowed_chunk = lend > 0 ? borrowed : 0;
+        size_t free_b = 0, total_b = 0;
+        if (cudaMemGetInfo(&free_b, &total_b) == cudaSuccess) {
+            auto price = [&](int64_t c) -> strata::program::PrefillBufferCandidate {
+                return {c, strata::prefill::Prefill::bytes_needed(g, ss, c)};
+            };
+            const uint64_t reserve = (uint64_t) std::max(0, o.vram_reserve_mib) << 20;
+            int64_t cap = std::min(o.prefill_chunk, o.max_context);
+            if (!o.serve) cap = std::min(cap, request_chunk((int64_t) o.tokens.size() - 1, cap));
+            const int64_t own = strata::program::independent_prefill_chunk(
+                {price(32768), price(16384), price(8192), price(6144), price(4096),
+                 price(3072), price(2048), price(1024), price(512), price(256)},
+                free_b, reserve, cap, borrowed_chunk);
+            if (own > 0) {
+                single_prefill_own = true;
+                o.prefill_chunk = own;
+                std::fprintf(stderr, "strata prefill: local M3 plan: independent %lld-token buffers (%llu MiB), "
+                                     "borrowed choice %lld; preserving %d MiB VRAM reserve\n",
+                             (long long) own,
+                             (unsigned long long) (strata::prefill::Prefill::bytes_needed(g, ss, own) >> 20),
+                             (long long) borrowed_chunk, o.vram_reserve_mib);
+            }
+        }
+    }
+    if (o.resident_cpu_experts) {
+        const uint64_t previous = o.resident_headroom;
+        o.resident_headroom = strata::program::conversation_expert_headroom(
+            previous, (uint64_t) o.conversation_cache_mib << 20,
+            (uint64_t) o.conversation_cache_min_free_mib << 20,
+            o.serve && o.prompt_cache > 0 && o.conversation_cache_slots > 0);
+        if (o.resident_headroom > previous)
+            std::fprintf(stderr, "strata generate: local RAM plan: %.2f GiB expert headroom includes %lld MiB "
+                                 "conversation-cache budget and %lld MiB physical RAM floor\n",
+                         (double) o.resident_headroom / 1073741824.0,
+                         (long long) o.conversation_cache_mib, (long long) o.conversation_cache_min_free_mib);
+    }
     // ---- the resident RAM mode (--resident-experts / --resident-cpu-experts): the experts the GPU cache does not
     // hold are copied from experts.bin into RAM once, so no decode or prompt step reads the file (the plain mmap
     // mode reads them through the OS file cache, which a small-RAM PC keeps giving back to the SSD).  Built here,
@@ -3783,7 +3829,7 @@ int main(int argc, char** argv) {
     // share-of-pinned figure above (which sizes the prompt path) is left as the mmap mode's for the same reason.
     if (o.resident_cpu_experts) {
         int64_t lend_from = -1;
-        if (o.prefill_chunk > 0 && !o.no_prefill_borrow && d_res != nullptr && xcache.slots() > 0) {
+        if (o.prefill_chunk > 0 && !o.no_prefill_borrow && !single_prefill_own && d_res != nullptr && xcache.slots() > 0) {
             int64_t chunk = o.prefill_chunk;
             const int64_t k = plan_lend(chunk);
             if (k > 0) lend_from = xcache.slots() - k;
@@ -3905,7 +3951,7 @@ int main(int argc, char** argv) {
         // a cache too small to lend the prompt path its buffers would make it allocate them on top - on a card
         // whose cache already filled its reserve, that is the over-subscription the auto sizing avoids - so the
         // chunk is the largest one EVERY participant can lend (a smaller chunk only reads slower)
-        if (pf_borrow && d_res != nullptr) {
+        if (pf_borrow && !single_prefill_own && d_res != nullptr) {
             pf_parts.push_back({&xcache, &ss, &sp, -1, 0, multi_gpu ? split_at[0] : g.n_layers, -1, -1, 0, {}});
             for (auto& st : stages)
                 pf_parts.push_back({&st->cache, &st->ss, &st->sp, st->dev, st->lb, st->le, -1, -1, 0, {}});
@@ -4039,7 +4085,9 @@ int main(int argc, char** argv) {
                              (long long) pf_parts[i].cache->slots(),
                              (double) part_bytes(pf_parts[i], pf_parts[i].first) / 1073741824.0);
         } else {
-            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
+            std::fprintf(stderr, single_prefill_own
+                                     ? "strata serve: the prompt path allocates independent buffers (local M3 plan)\n"
+                                     : "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
         }
         // layer split across GPUs: a prompt path per stage, each handing its chunk's rows to the next.
         // THE CHUNK STEPS DOWN INSTEAD OF EXITING.  A split's stage caches are sized after the arena is registered, and
@@ -5719,7 +5767,7 @@ int main(int argc, char** argv) {
     if (o.prefill_chunk > 0 && n_prompt > 1) {
         void* borrow = nullptr;
         uint64_t borrow_bytes = 0;
-        if (!o.no_prefill_borrow && !host_res.empty() && d_res != nullptr) {
+        if (!o.no_prefill_borrow && !single_prefill_own && !host_res.empty() && d_res != nullptr) {
             int64_t chunk = o.prefill_chunk;
             int64_t k = plan_lend(chunk);             // auto: the largest chunk that fits; fixed: halved to fit
             const int64_t request_sized = request_chunk(n_batched, chunk);

@@ -1022,6 +1022,9 @@ endif()
 
 if(STRATA_BUILD_TESTS)
   enable_testing()
+  add_executable(local_memory_plan_test src/program/local_memory_plan_test.cpp)
+  target_include_directories(local_memory_plan_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  add_test(NAME local_memory_plan_test COMMAND local_memory_plan_test)
   # Model-level checks may be absent from source distributions.
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)
