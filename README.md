@@ -6,7 +6,7 @@
 
 ## 中文
 
-基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.35** 的优化分支，让
+基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.38** 的优化分支，让
 **Qwen3.8-Flash-Next** 在个人电脑上更合理地使用显存与系统内存。
 我们重点保留经过本机验证的内存规划改动，并沿用上游的计算内核、FP8 ngram、服务接口与会话缓存。
 
@@ -15,7 +15,7 @@
 | 分支 | 定位 | 实测设备 |
 | --- | --- | --- |
 | [`main`](https://github.com/spideytznn/Strata/tree/main) | 单卡内存规划与上游 RAM 多会话缓存配合 | Windows，RTX 5090 32 GiB 显存，48 GB 系统内存 |
-| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | 双卡权重分配、RAM 专家常驻与动态交换 | Linux，两张扩容至 22 GiB 的 RTX 2080 Ti，32 GB 系统内存 |
+| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | 双卡权重分配、RAM 专家常驻与动态交换（基于 v0.1.35） | Linux，两张扩容至 22 GiB 的 RTX 2080 Ti，32 GB 系统内存 |
 
 双卡测试使用扩容卡，普通 11 GiB RTX 2080 Ti 的容量与性能需要另行验证。
 两个分支的优化和测试范围各自独立。
@@ -41,6 +41,8 @@
 
 ### 实测结果
 
+以下性能数据基于 v0.1.35；v0.1.38 的速度需重新测量。
+
 主分支：2026-10-02，RTX 5090 / 48 GB RAM，IQ3_S、FP8 ngram、INT8 KV，配置上下文 262144。
 以下是顺序对照，文件缓存与运行状态会影响结果。
 
@@ -50,7 +52,7 @@
 | 17944-token 完整 prefill，较小专家缓存、同一二进制 | 借用缓冲 2312 tok/s | 独立缓冲 2902 tok/s | 独立缓冲在有显存余量时值得保留 |
 | 切回相同的 17944-token 提示 | — | 复用 17937 tokens，只重读 7 tokens | 上游多会话恢复有效 |
 
-独立缓冲对照将专家缓存字节预算设为 5400 MiB，实际分配 7056 槽、13.39 GiB；
+独立缓冲对照使用 `--expert-cache 5400`，引擎实报 7056 槽、13.39 GiB 实际分配；
 两组 prefill 批量均为 8192，独立缓冲约 3805 MiB，显存余量 1536 MiB。
 这是一次顺序测试，不代表默认配置或所有提示都有同等收益。
 解码复测波动较大，**尚未证明主分支有稳定的解码提速**。
@@ -111,7 +113,7 @@ cd Strata
 
 ## English
 
-An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.35** for running
+An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.38** for running
 **Qwen3.8-Flash-Next** on personal computers with a practical balance of VRAM and system RAM.
 We retain measured memory-planning changes while using upstream compute kernels, FP8 ngram support,
 service APIs, and conversation caching.
@@ -121,7 +123,7 @@ service APIs, and conversation caching.
 | Branch | Focus | Tested hardware |
 | --- | --- | --- |
 | [`main`](https://github.com/spideytznn/Strata/tree/main) | Single-GPU memory planning with upstream RAM conversation caching | Windows, RTX 5090 with 32 GiB VRAM, 48 GB system RAM |
-| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | Dual-GPU weight placement, resident RAM experts, and dynamic exchange | Linux, two RTX 2080 Ti cards modified to 22 GiB each, 32 GB system RAM |
+| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | Dual-GPU weight placement, resident RAM experts, and dynamic exchange (based on v0.1.35) | Linux, two RTX 2080 Ti cards modified to 22 GiB each, 32 GB system RAM |
 
 The dual-GPU measurements use modified cards. Capacity and performance on ordinary 11 GiB RTX 2080 Ti
 cards require separate validation. Each branch has its own implementation and test scope.
@@ -151,6 +153,8 @@ It uses upstream dedicated prefill buffers and layer-owned state allocation. See
 
 ### Measurements
 
+The performance figures below were measured on v0.1.35; v0.1.38 speed requires new measurements.
+
 Main: 2026-10-02, RTX 5090 / 48 GB RAM, IQ3_S, FP8 ngram, INT8 KV, configured context limit 262144.
 These are sequential comparisons affected by file caching and runtime conditions.
 
@@ -160,7 +164,7 @@ These are sequential comparisons affected by file caching and runtime conditions
 | Full 17944-token prefill, smaller expert cache, same binary | Borrowed buffers 2312 tok/s | Independent buffers 2902 tok/s | The independent option is useful when free VRAM permits |
 | Return to the same 17944-token prompt | — | 17937 tokens reused, only 7 reread | Upstream conversation restoration works |
 
-The independent-buffer comparison used a 5400 MiB expert-cache byte budget, yielding 7056 sized slots and
+The independent-buffer comparison used `--expert-cache 5400`; the engine reported 7056 slots and
 13.39 GiB of actual allocation. Both arms used 8192-token batches; independent buffers used about 3805 MiB,
 preserving a 1536 MiB VRAM reserve. This single sequential pair does not establish the same improvement
 for default settings or all prompts. Repeated decode measurements varied substantially;
