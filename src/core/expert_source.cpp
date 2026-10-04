@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -56,6 +57,41 @@
 namespace strata::core {
 
 namespace detail {
+
+std::vector<RamPromotion> plan_ram_promotions(
+    int64_t layers, int64_t experts, const std::vector<uint64_t>& offsets,
+    const std::vector<int32_t>& gpu, const std::vector<float>& usage, int limit) {
+    std::vector<RamPromotion> plan;
+    if (layers <= 0 || experts <= 0 || limit <= 0 || experts > INT32_MAX || layers > INT32_MAX ||
+        (uint64_t) layers > (uint64_t) SIZE_MAX / (uint64_t) experts) return plan;
+    const size_t count = (size_t) layers * (size_t) experts;
+    if (offsets.size() != count || gpu.size() != count || usage.size() != count) return plan;
+    std::vector<std::pair<float, int32_t>> hot, cold;
+    for (int64_t l = 0; l < layers; ++l) {
+        hot.clear(); cold.clear();
+        for (int32_t e = 0; e < (int32_t) experts; ++e) {
+            const size_t i = (size_t) l * (size_t) experts + (size_t) e;
+            if (gpu[i] >= 0 || !std::isfinite(usage[i]) || usage[i] < 0) continue;
+            if (offsets[i] != kNoCacheComplement) cold.emplace_back(usage[i], e);
+            else if (usage[i] >= 2.0f) hot.emplace_back(usage[i], e);
+        }
+        std::sort(hot.begin(), hot.end(), [](auto a, auto b) {
+            return a.first != b.first ? a.first > b.first : a.second < b.second;
+        });
+        std::sort(cold.begin(), cold.end());
+        for (size_t j = 0, n = std::min(hot.size(), cold.size()); j < n; ++j) {
+            if (hot[j].first < cold[j].first + 1.5f) break;
+            plan.push_back({(int32_t) l, hot[j].second, cold[j].second, hot[j].first - cold[j].first});
+        }
+    }
+    std::sort(plan.begin(), plan.end(), [](const RamPromotion& a, const RamPromotion& b) {
+        if (a.gain != b.gain) return a.gain > b.gain;
+        if (a.layer != b.layer) return a.layer < b.layer;
+        return a.in < b.in;
+    });
+    if (plan.size() > (size_t) limit) plan.resize((size_t) limit);
+    return plan;
+}
 
 bool cgroup_available_bytes(uint64_t limit, const CgroupMemoryStat& stat, uint64_t& bytes) {
     bytes = 0;
@@ -479,6 +515,8 @@ void FileExpertSource::close() {
     override_.clear();
     staged_.clear();
     exchanges_ = 0;
+    ram_promotions_ = 0;
+    ram_promotion_bytes_ = 0;
     file_reads_.store(0);
     complement_arena_ = nullptr;
     complement_host_ = nullptr;
@@ -1042,7 +1080,7 @@ void FileExpertSource::warm(int64_t layer, const int64_t* experts, int64_t n) {
         const int64_t e = experts[j];
         if (e < 0 || e >= n_expert_) continue;
         const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) e;
-        if (complement_ready_ && index < complement_offsets_.size() && complement_offsets_[index] != kNoComplement)
+        if (has_resident(layer, e))
             continue;                                                    // in the RAM copy
         if (warm_stamp_) warm_stamp_[index].store(stamp, std::memory_order_relaxed);
         warm_count_.fetch_add(1, std::memory_order_relaxed);
@@ -1600,6 +1638,7 @@ bool FileExpertSource::pin_cache_complement(
 }
 
 bool FileExpertSource::has_resident(int64_t layer, int64_t expert) const {
+    std::lock_guard<std::mutex> lock(complement_mu_);
     if (!complement_ready_ || layer < 0 || expert < 0 || layer >= n_layers_ || expert >= n_expert_) return false;
     const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) expert;
     return index < complement_offsets_.size() && complement_offsets_[index] != kNoComplement;
@@ -1653,6 +1692,7 @@ bool FileExpertSource::stage_exchange(int64_t layer, int64_t in, int64_t out, in
 }
 
 int64_t FileExpertSource::commit_exchanges() {
+    std::lock_guard<std::mutex> lock(complement_mu_);
     int64_t n = 0;
     for (const Exchange& x : staged_) {
         const uint8_t* src = override_[x.out];
@@ -1667,6 +1707,45 @@ int64_t FileExpertSource::commit_exchanges() {
     staged_.clear();
     exchanges_ += n;
     return n;
+}
+
+int64_t FileExpertSource::promote_hot_ram(const std::vector<float>& usage, const std::vector<int32_t>& gpu,
+                                        int limit, std::string& err) {
+    err.clear();
+    // A queued GPU exchange owns its source and destination slots until commit_exchanges(). Do not touch them.
+    if (!complement_ready_ || complement_host_ == nullptr || !staged_.empty() || limit <= 0) return 0;
+    const auto plan = detail::plan_ram_promotions(n_layers_, n_expert_, complement_offsets_, gpu, usage, limit);
+    if (plan.empty()) return 0;
+    const cudaError_t sync = cudaDeviceSynchronize();
+    if (sync != cudaSuccess) {
+        err = std::string("hot RAM: synchronizing expert readers failed: ") + cudaGetErrorString(sync);
+        return -1;
+    }
+    int64_t promoted = 0;
+    for (const auto& p : plan) {
+        const size_t in = (size_t) p.layer * (size_t) n_expert_ + (size_t) p.in;
+        const size_t out = (size_t) p.layer * (size_t) n_expert_ + (size_t) p.out;
+        const uint64_t at = complement_offsets_[out], bytes = layer_blob_bytes_[(size_t) p.layer];
+        if (at == kNoComplement || at > complement_bytes_ || bytes > complement_bytes_ - at ||
+            complement_offsets_[in] != kNoComplement || gpu[in] >= 0 || gpu[out] >= 0) {
+            err = "hot RAM: invalid replacement slot";
+            return -1;
+        }
+        // blob() assembles/reads into the existing stage buffers FIRST: a failed read leaves the victim intact.
+        const uint8_t* b = blob(p.layer, p.in);
+        if (b == nullptr) { err = "hot RAM: reading the promoted expert failed"; return -1; }
+        {
+            std::lock_guard<std::mutex> lock(complement_mu_);
+            std::memcpy((uint8_t*) complement_host_ + (size_t) at, b, (size_t) bytes);
+            // Same layer -> same byte size. Offsets (and CUDA registration boundaries) stay exactly as allocated.
+            complement_offsets_[in] = at;
+            complement_offsets_[out] = kNoComplement;
+        }
+        ++promoted;
+        ++ram_promotions_;
+        ram_promotion_bytes_ += bytes;
+    }
+    return promoted;
 }
 
 const uint8_t* FileExpertSource::blob(int64_t layer, int64_t expert) {

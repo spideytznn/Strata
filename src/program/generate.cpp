@@ -376,6 +376,9 @@ struct Options {
     /// Plan v0.3 P6: every `adapt_every` rounds, swap up to `adapt_swaps` of the most-routed missing experts into
     /// the VRAM tier in place of the least-routed resident ones (decayed counts).  0 = static residency.
     int adapt_every = 4;
+    bool ram_hot_experts = false;   ///< opt-in file -> RAM promotion inside the existing resident budget
+    int ram_hot_every = 16;
+    int ram_hot_swaps = 16;
     float adapt_decay = 0.7f;   ///< the usage counts are multiplied by this after each adaptation (--adapt-decay)
     /// Plan v0.3 P6: a draft enters the verify window only while every draft before it (and itself) has at least
     /// this probability under the draft layer; 0 = always --spec-1 drafts.
@@ -435,6 +438,9 @@ struct Options {
 };
 
 void usage() {
+    std::fprintf(stderr, "  --ram-hot-experts    promote hot file-tier experts into cold RAM slots (single GPU, budget, spec)\n"
+                         "  --ram-hot-every N    RAM promotion interval in decode rounds (default 16; 1..4096)\n"
+                         "  --ram-hot-swaps N    maximum RAM promotions per interval (default 16; 1..96)\n");
     std::fprintf(stderr,
                  "strata generate --pack DIR --tokens \"1,2,3\" [options]\n"
                  "\n"
@@ -1291,6 +1297,9 @@ int main(int argc, char** argv) {
             o.stop_eos = true;
         }
         else if (a == "--adapt-swaps") o.adapt_swaps = std::atoi(next("--adapt-swaps"));
+        else if (a == "--ram-hot-experts") o.ram_hot_experts = true;
+        else if (a == "--ram-hot-every") o.ram_hot_every = std::atoi(next("--ram-hot-every"));
+        else if (a == "--ram-hot-swaps") o.ram_hot_swaps = std::atoi(next("--ram-hot-swaps"));
         else if (a == "--expert-cache-cpu-order") o.expert_cache_cpu_order = true;
         else if (a == "--expert-cache-per-layer") o.expert_cache_per_layer = true;
         else if (a == "--peer-device") o.peer_device = std::atoi(next("--peer-device"));
@@ -1361,6 +1370,14 @@ int main(int argc, char** argv) {
     // cache slots to the prompt path (each stage's prompt path has its own buffers).
     // --pcie-frac given: that one share is every stage's (the stages' own link probes are skipped), so a split over
     // a fast and a slow link cannot set the two apart from the command line (#485)
+    if (o.ram_hot_experts && (o.ram_hot_every < 1 || o.ram_hot_every > 4096 ||
+        o.ram_hot_swaps < 1 || o.ram_hot_swaps > 96 || o.adapt_every < 1 || o.adapt_swaps < 1 ||
+        !o.layer_split.empty() || o.peer_device >= 1 || o.resident_budget == 0 || o.spec < 2 ||
+        std::any_of(o.expert_cache_remote.begin(), o.expert_cache_remote.end(), [](int n) { return n != 0; }))) {
+        std::fprintf(stderr, "--ram-hot-experts needs a single GPU, --resident-budget-gib above 0, --spec >= 2, "
+                             "the adaptive tier on, --ram-hot-every 1..4096 and --ram-hot-swaps 1..96\n");
+        return 2;
+    }
     const bool pcie_given = o.pcie_frac >= 0.0;
     std::vector<int64_t> split_at;
     std::vector<int> split_devs;
@@ -4129,6 +4146,16 @@ int main(int argc, char** argv) {
             return 1;
         }
     }
+    if (o.ram_hot_experts) {
+        if (srcp != &src || !src.complement_ready()) {
+            std::fprintf(stderr, "strata generate: hot RAM disabled: no resident file-source RAM budget\n");
+            o.ram_hot_experts = false;
+        } else {
+            std::fprintf(stderr, "strata generate: hot RAM ON: up to %d file-tier experts every %d decode rounds; "
+                                 "same-layer cold RAM slots, device readers synchronized, %.2f GiB budget unchanged\n",
+                         o.ram_hot_swaps, o.ram_hot_every, (double) src.resident_bytes() / 1073741824.0);
+        }
+    }
     if (o.serve) {
         if (o.spec < 2 || o.mtp.empty() || o.prefill_chunk <= 0 ||
             (graph_hits && (thits.d_res == nullptr || host_res.empty()))) {
@@ -5777,7 +5804,12 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                apply_pending(!adapt_nowait());
+                const bool ram_due = o.ram_hot_experts && rounds > 0 && rounds % o.ram_hot_every == 0;
+                apply_pending(ram_due || !adapt_nowait());
+                if (ram_due && src.promote_hot_ram(drive.d.usage, host_res, o.ram_hot_swaps, err) < 0) {
+                    std::printf("ERR %s\n", err.c_str());
+                    return 1;
+                }
                 if (hist_n > 0) {
                     // the tails the penalties count over, ONE PER ROW: the tokens the state has consumed, the
                     // fed-back head `x` (it joins `consumed` only after this window commits), then the drafts
@@ -6034,6 +6066,10 @@ int main(int argc, char** argv) {
                              (double) src.resident_bytes() / 1073741824.0, (long long) src.exchanges(),
                              (long long) src.file_reads());
             // CS-T: the tiers, cumulative - GPU cache hits (the decode lookups above), RAM copy, files (SSD / OS cache)
+            if (o.ram_hot_experts)
+                std::fprintf(stderr, "strata serve: hot RAM: %lld file-tier experts promoted, %.1f MB copied into "
+                                     "existing RAM slots (cumulative; budget unchanged)\n",
+                             (long long) src.ram_promotions(), (double) src.ram_promotion_bytes() / 1e6);
             if (srcp == &src)
                 std::fprintf(stderr, "strata serve: expert tiers: GPU %lld hits this request; since the start RAM %lld blobs, files %lld blobs "
                                      "%.1f MB read%s\n", (long long) req_hits, (long long) src.ram_reads(),
@@ -6635,7 +6671,12 @@ int main(int argc, char** argv) {
             // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
             // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
             // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-            apply_pending(!adapt_nowait());
+            const bool ram_due = o.ram_hot_experts && rounds > 0 && rounds % o.ram_hot_every == 0;
+            apply_pending(ram_due || !adapt_nowait());
+            if (ram_due && src.promote_hot_ram(drive.d.usage, host_res, o.ram_hot_swaps, err) < 0) {
+                std::fprintf(stderr, "strata generate: %s\n", err.c_str());
+                return 1;
+            }
             if (!ver.run(T, window.data(), p, &drive_pool_multi, &drive, outv.data(), err)) {
                 std::fprintf(stderr, "strata generate: %s\n", err.c_str());
                 return 1;
@@ -6750,6 +6791,9 @@ int main(int argc, char** argv) {
             std::printf("%-24s %.2f GiB of experts in RAM, %lld exchanged with the VRAM tier, %lld blob reads from "
                         "the file\n", "resident RAM", (double) src.resident_bytes() / 1073741824.0,
                         (long long) src.exchanges(), (long long) src.file_reads());
+        if (o.ram_hot_experts)
+            std::printf("%-24s %lld file-tier experts promoted, %.1f MB copied into existing RAM slots\n", "hot RAM",
+                        (long long) src.ram_promotions(), (double) src.ram_promotion_bytes() / 1e6);
         if (srcp == &src) {  // CS-T: the RAM and file tiers (the GPU cache's share is the hit rate above)
             const double fms = src.file_ms() - fms0, fmb = (double) (src.file_blob_bytes() - fbytes0) / 1e6;
             std::printf("%-24s decode: RAM %lld blobs, files %lld blobs, %.1f MB read from the files (%.2f MB/round, "

@@ -20,6 +20,7 @@
 #include <system_error>
 #include <utility>
 #include <vector>
+#include <cuda_runtime.h>
 
 namespace fs = std::filesystem;
 
@@ -253,6 +254,122 @@ void test_resident_exchange() {
     require(offsets == before, "exchanging back did not restore the plan");
 }
 
+void test_ram_hot_plan() {
+    using namespace strata::core::detail;
+    const uint64_t N = kNoCacheComplement;
+    // Same-layer replacement, a GPU expert excluded, one hot/cold pair each, gain ordering across layers.
+    const std::vector<uint64_t> offsets{0, N, N, N, 11, N, N, N};
+    const std::vector<int32_t> gpu{-1, -1, -1, 0, -1, -1, -1, -1};
+    const std::vector<float> heat{0, 10, 1, 100, 1, 8, 0, 0};
+    auto p = plan_ram_promotions(2, 4, offsets, gpu, heat, 1);
+    require(p.size() == 1 && p[0].layer == 0 && p[0].in == 1 && p[0].out == 0,
+            "hot RAM planner selected a GPU expert or ignored the global promotion limit");
+    p = plan_ram_promotions(2, 4, offsets, gpu, heat, 16);
+    require(p.size() == 2 && p[1].layer == 1 && p[1].in == 1 && p[1].out == 0,
+            "hot RAM planner crossed layer/blob-size boundaries");
+    require(plan_ram_promotions(2, 4, offsets, gpu, heat, 0).empty(), "zero promotion limit ignored");
+    require(plan_ram_promotions(2, 4, offsets, gpu, {0}, 2).empty(), "short heat table accepted");
+    require(plan_ram_promotions(INT64_MAX, 4, offsets, gpu, heat, 2).empty(), "overflow geometry accepted");
+    auto noisy = heat;
+    noisy[1] = std::numeric_limits<float>::quiet_NaN();
+    noisy[5] = 2.0f;  // not at least 1.5 hotter than its victim
+    require(plan_ram_promotions(2, 4, offsets, gpu, noisy, 2).empty(), "NaN or insufficient heat caused a promotion");
+}
+
+void test_ram_hot_runtime(bool native, bool pin) {
+    using namespace strata::core;
+    using namespace strata::kernels::cpu;
+    int devices = 0;
+    if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
+        std::cout << "hot RAM runtime: no CUDA device, skipped\n";
+        return;
+    }
+    constexpr int64_t layers = 2, experts = 4;
+    TempDirectory dir;
+    std::string err;
+    uint64_t sizes[2] = {BLOB, BLOB};
+#if defined(STRATA_NATIVE_EXPERTS)
+    if (native) {
+        NativeFmt a, b;
+        require(native_fmt(GGML_TYPE_IQ3_XXS, GGML_TYPE_IQ4_NL, 2560, 640, a, err), err);
+        require(native_fmt(GGML_TYPE_IQ2_XS, GGML_TYPE_IQ4_NL, 2560, 640, b, err), err);
+        sizes[0] = (uint64_t) a.bytes; sizes[1] = (uint64_t) b.bytes;
+        require(sizes[0] != sizes[1], "variable-size fixture is uniform");
+        std::ofstream meta(dir.path / "native_experts.txt");
+        meta << "0 " << GGML_TYPE_IQ3_XXS << ' ' << GGML_TYPE_IQ4_NL << " 0 " << sizes[0] << '\n';
+        meta << "1 " << GGML_TYPE_IQ2_XS << ' ' << GGML_TYPE_IQ4_NL << ' ' << sizes[0] * experts
+             << ' ' << sizes[1] << '\n';
+    }
+#else
+    (void) native;
+#endif
+    const uint64_t layer1 = sizes[0] * experts;
+    std::vector<std::pair<uint64_t, char>> markers;
+    for (int64_t l = 0; l < layers; ++l)
+        for (int64_t e = 0; e < experts; ++e)
+            markers.emplace_back((l ? layer1 : 0) + sizes[l] * e, (char) ('a' + l * experts + e));
+    create_pack(dir.path, layer1 + sizes[1] * experts, markers);
+    require(expert_layout_load(dir.path.string(), layers, experts, err), err);
+    FileExpertSource source;
+    require(source.open(dir.path.string(), layers, experts, err), err);
+    ExpertCache cache;
+    require(cache.open(1, layers, experts, (int64_t) sizes[0], err), err);
+    const int32_t slot = cache.admit(0, 3);
+    std::vector<uint8_t> gpu_bytes((size_t) sizes[0]);
+    require(slot >= 0 && source.copy_blob(0, 3, gpu_bytes.data()), "could not prepare GPU fixture");
+    require(cache.fill_slot_blocking(slot, gpu_bytes.data(), err), err);
+    const std::vector<std::pair<int32_t, int32_t>> rank{{0, 0}, {1, 0}};
+    require(source.pin_cache_complement(cache, err, pin, {}, -1, 0, sizes[0] + sizes[1], &rank), err);
+    const uint64_t budget = source.resident_bytes(), pinned = source.pinned_bytes();
+    const uint8_t* first_slot = source.blob(0, 0);
+    const uint8_t* first_alias = source.device_alias(0, 0);
+    std::vector<int32_t> gpu(8, -1); gpu[3] = slot;
+    std::vector<float> heat{0, 10, 1, 100, 0, 8, 0, 0};
+    require(source.promote_hot_ram(heat, gpu, 1, err) == 1, err);
+    require(!source.has_resident(0, 0) && source.has_resident(0, 1) && !source.has_resident(0, 3),
+            "file-to-RAM promotion did not replace its victim or copied a GPU expert");
+    const uint8_t* promoted = source.blob(0, 1);
+    std::vector<uint8_t> expected((size_t) sizes[0], 0); expected[0] = 'b';
+    require(promoted == first_slot && std::equal(expected.begin(), expected.end(), promoted),
+            "promoted expert has wrong bytes or a new RAM allocation");
+    require(source.device_alias(0, 1) == first_alias && !source.pinned(0, 0),
+            "promotion changed its CUDA alias or kept the evicted expert registered");
+    require(source.blob(0, 0)[0] == 'a', "evicted RAM expert lost its file fallback");
+    require(source.promote_hot_ram(heat, gpu, 2, err) == 1 && source.blob(1, 1)[0] == 'f',
+            "second/variable-size layer promotion failed");
+    require(source.resident_bytes() == budget && source.pinned_bytes() == pinned &&
+            source.ram_promotions() == 2 && source.ram_promotion_bytes() == sizes[0] + sizes[1],
+            "promotion changed the RAM budget, registration range, or counters");
+    // The newly admitted expert can exchange with VRAM using the original resident mechanism.
+    require(source.reserve_exchanges(1, err), err);
+    std::vector<uint8_t> out((size_t) sizes[1], 0); out[0] = 'h';
+    std::copy(out.begin(), out.end(), source.exchange_buffer(0));
+    require(source.stage_exchange(1, 1, 3, 0), "new RAM expert could not exchange with the GPU tier");
+    heat[2] = 30;
+    require(source.promote_hot_ram(heat, gpu, 16, err) == 0 && source.blob(0, 1)[0] == 'b',
+            "hot RAM replaced a slot while a GPU exchange was pending");
+    require(source.commit_exchanges() == 1 && !source.has_resident(1, 1) && source.has_resident(1, 3) &&
+            source.blob(1, 3)[0] == 'h', "GPU exchange damaged the promoted RAM slot");
+    gpu[5] = 0;
+    require(source.promote_hot_ram(heat, gpu, 16, err) == 1 && source.blob(0, 2)[0] == 'c' &&
+            source.blob(0, 1)[0] == 'b', "second replacement or file fallback failed after a GPU exchange");
+    require(source.resident_bytes() == budget, "multiple promotions grew the RAM budget");
+    for (int round = 0; round < 128; ++round) {
+        const int e = round % 3;
+        std::fill(heat.begin(), heat.end(), 0.0f);
+        heat[(size_t) e] = 30.0f;
+        const bool already = source.has_resident(0, e);
+        require(source.promote_hot_ram(heat, gpu, 16, err) == (already ? 0 : 1),
+                "repeated promotion failed after slot reuse: " + err);
+        expected[0] = (uint8_t) ('a' + e);
+        require(std::equal(expected.begin(), expected.end(), source.blob(0, e)) && source.resident_bytes() == budget &&
+                source.pinned_bytes() == pinned && source.device_alias(0, e) == first_alias,
+                "repeated replacements damaged bytes, registration, or the memory budget");
+    }
+    source.close();
+    require(source.ram_promotions() == 0 && source.ram_promotion_bytes() == 0, "close retained hot RAM state");
+}
+
 void test_cgroup_memory_budget() {
     using namespace strata::core::detail;
     constexpr uint64_t GiB = 1ull << 30;
@@ -296,6 +413,11 @@ int main() {
         test_resident_lend_region();
         test_resident_exchange();
         test_cgroup_memory_budget();
+        test_ram_hot_plan();
+        test_ram_hot_runtime(false, false);
+#if defined(STRATA_NATIVE_EXPERTS)
+        test_ram_hot_runtime(true, true);
+#endif
         test_canonical_layout();
 #if defined(STRATA_NATIVE_EXPERTS)
         test_native_variable_layout();
