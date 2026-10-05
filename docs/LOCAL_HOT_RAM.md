@@ -4,7 +4,7 @@ This opt-in extension adds a dynamic RAM tier to the existing SSD / RAM / VRAM
 expert path. It is supported on a single GPU with a resident RAM budget and
 speculative decoding, and leaves the upstream GPU adaptive tier enabled.
 
-The Q4 launch configuration enables:
+The current UD-IQ4_XS launch configuration enables:
 
 ```
 --ram-hot-experts --ram-hot-every 16 --ram-hot-swaps 16
@@ -25,7 +25,7 @@ failed read leaves that victim intact. An evicted RAM expert falls back to its
 original GGUF/experts.bin bytes. A pending RAM/VRAM exchange blocks promotion.
 The router lookahead's RAM-residency checks share a mutex with offset updates.
 
-No second RAM arena is allocated. The configured 31.5 GiB expert arena, original
+No second RAM arena is allocated. The configured 33 GiB expert arena, original
 CUDA registration boundaries, INT8 KV / 262144 context, and 8192 prefill batch
 remain unchanged. The existing staging buffers and small planner vectors are
 still used. A promoted expert in a registered RAM range can use the existing
@@ -43,4 +43,9 @@ Validation is recorded in the deployment report in the current Codex workspace.
 The full pre-change source, engine, launch files, expert profile, and maintainer
 Git history are backed up at:
 
-`D:\Strata\backups\before-ssd-hot-ram-20261004-140119`
+`G:\Strata\Strata\backups\before-ssd-hot-ram-20261004-140119`
+
+The v0.1.39 integration preserves the upstream file-cache decision after the
+RAM copy is built. Hot RAM admission does not change arena size or the number
+of file-tier slots. The extension is disabled by configuration unless requested,
+and it rejects concurrent engine batch slots (`--batch` / `--slots`).

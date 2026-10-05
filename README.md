@@ -1,3 +1,4 @@
+<!-- Local integration: upstream v0.1.39 plus memory planning and SSD-to-RAM promotion. -->
 # Strata · 本地推理优化 / Local inference optimizations
 
 [中文](#zh-cn) · [English](#english)
@@ -6,7 +7,7 @@
 
 ## 中文
 
-基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.38** 的优化分支，让
+基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.39** 的优化分支，让
 **Qwen3.8-Flash-Next** 在个人电脑上更合理地使用显存与系统内存。
 我们重点保留经过本机验证的内存规划改动，并沿用上游的计算内核、FP8 ngram、服务接口与会话缓存。
 
@@ -41,7 +42,7 @@
 
 ### 实测结果
 
-以下性能数据基于 v0.1.35；v0.1.38 的速度需重新测量。
+以下性能数据基于 v0.1.35；v0.1.39 的速度需重新测量。
 
 主分支：2026-10-02，RTX 5090 / 48 GB RAM，IQ3_S、FP8 ngram、INT8 KV，配置上下文 262144。
 以下是顺序对照，文件缓存与运行状态会影响结果。
@@ -67,7 +68,8 @@
 
 ### 多会话与并发
 
-服务可以接收多个客户端请求并排队，**同一时刻执行 1 条推理**。
+当前本机配置接收多个客户端请求并排队，**同一时刻执行 1 条推理**。
+上游 v0.1.39 另提供显式开启的并发槽；本地 SSD 热专家升级暂限单请求路径，不能与 `--batch` 混用。
 RAM 多会话缓存加速不同历史之间的切换，不增加同时推理数量。
 当前没有应用层队列长度上限或推理限流；已验证排队、断连取消与请求交接，尚未做高并发容量评测。
 **SSD 会话缓存暂不实现**，RAM 缓存随引擎退出而丢失。
@@ -113,7 +115,7 @@ cd Strata
 
 ## English
 
-An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.38** for running
+An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.39** for running
 **Qwen3.8-Flash-Next** on personal computers with a practical balance of VRAM and system RAM.
 We retain measured memory-planning changes while using upstream compute kernels, FP8 ngram support,
 service APIs, and conversation caching.
