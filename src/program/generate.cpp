@@ -2408,6 +2408,10 @@ int main(int argc, char** argv) {
         while (st < (int) split_at.size() && l >= split_at[(size_t) st]) ++st;
         return st;
     };
+    // The RAM tier serves every device. Preserve global routing order before
+    // splitting the per-device VRAM profiles, including for budget fallback.
+    const auto resident_profile = o.resident_cpu_experts && multi_gpu
+        ? profile : std::vector<std::pair<int32_t, int32_t>>{};
     if (multi_gpu) {
         std::vector<std::pair<int32_t, int32_t>> mine;
         for (const auto& pr : profile) {
@@ -3783,7 +3787,7 @@ int main(int argc, char** argv) {
             if (k > 0) lend_from = xcache.slots() - k;
         }
         bool resident_ok = src.pin_cache_complement(xcache, err, o.resident_pin, stage_pairs, lend_from, o.resident_headroom,
-                                                    o.resident_budget, &profile);
+                                                    o.resident_budget, multi_gpu ? &resident_profile : &profile);
         std::string whole_err;
         if (!resident_ok && o.resident_soft) {
             // #467: the whole complement does not fit - keep what does, the hottest by the profile, through the #403
@@ -3791,7 +3795,8 @@ int main(int argc, char** argv) {
             // the mmap fallback reads, so the answers are unchanged.  Nothing pinned: the old fallback below.
             whole_err = err;
             resident_ok = src.pin_cache_complement(xcache, err, o.resident_pin, stage_pairs, -1, o.resident_headroom,
-                                                   strata::core::FileExpertSource::kResidentWhatFits, &profile);
+                                                   strata::core::FileExpertSource::kResidentWhatFits,
+                                                   multi_gpu ? &resident_profile : &profile);
             if (resident_ok)
                 std::fprintf(stderr, "strata generate: WARNING: the whole resident RAM mode does not fit (%s); %.2f "
                                      "GiB of the experts the GPU does not hold, the hottest by the expert profile, are "
