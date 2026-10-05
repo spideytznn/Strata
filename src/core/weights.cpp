@@ -87,7 +87,7 @@ bool read_at(std::FILE* f, uint64_t off, void* dst, size_t n, std::string& err, 
 }  // namespace
 
 bool WeightTable::pool_bytes(const std::string& pack_dir, uint64_t& out, std::string& err,
-                             const std::set<std::string>* skip, const WeightStage* stage) {
+                             const std::set<std::string>* skip) {
     const std::string path = pack_dir + "/index.txt";
     std::FILE* f = std::fopen(path.c_str(), "rb");
     if (!f) { err = "cannot open " + path; return false; }
@@ -102,19 +102,19 @@ bool WeightTable::pool_bytes(const std::string& pack_dir, uint64_t& out, std::st
             if (std::sscanf(line, "# align %d pool %llu tensors %d", &a, &p, &tensors) == 3) { pool = p; align = a; }
             continue;
         }
-        if (skip == nullptr && stage == nullptr) continue;
+        if (skip == nullptr) continue;
         char name[256] = {0};
         unsigned long long dst_bytes = 0, dummy = 0;
         int i1 = 0, i2 = 0;
         if (std::sscanf(line, "%255s %d %d %llu %llu %llu %llu", name, &i1, &i2, &dummy, &dummy, &dummy, &dst_bytes) != 7)
             continue;
-        if ((skip && skip->count(name)) || (stage && !stage->owns(name))) continue;
+        if (skip->count(name)) continue;
         const uint64_t a = align > 0 ? (uint64_t) align : 256;
         compact += (dst_bytes + a - 1) / a * a;
     }
     std::fclose(f);
     if (pool == 0) { err = "no '# align ... pool ...' header in " + path; return false; }
-    out = (skip || stage) ? compact : pool;
+    out = skip ? compact : pool;
     return true;
 }
 
@@ -142,7 +142,7 @@ bool WeightTable::index_code_bits(const std::string& pack_dir, const std::string
 }
 
 bool WeightTable::load(const std::string& pack_dir, void* arena_base, uint64_t arena_bytes, std::string& err,
-                       const std::set<std::string>* skip, const WeightStage* stage) {
+                       const std::set<std::string>* skip) {
     const std::string path = pack_dir + "/index.txt";
     std::FILE* idx = std::fopen(path.c_str(), "rb");
     if (!idx) { err = "cannot open " + path + " (run tools/pack_index.py)"; return false; }
@@ -192,13 +192,11 @@ bool WeightTable::load(const std::string& pack_dir, void* arena_base, uint64_t a
     // Plan v0.3 P1: a skip set compacts the arena.  Kept rows are re-placed in index order at the index's
     // alignment; skipped rows keep their metadata and get no bytes.
     std::vector<bool> skipped(rows.size(), false);
-    if (skip != nullptr || stage != nullptr) {
+    if (skip != nullptr) {
         const uint64_t a = align > 0 ? (uint64_t) align : 256;
         uint64_t at = 0;
         for (size_t i = 0; i < rows.size(); ++i) {
-            if ((skip && skip->count(rows[i].name)) || (stage && !stage->owns(rows[i].name))) {
-                skipped[i] = true; continue;
-            }
+            if (skip->count(rows[i].name)) { skipped[i] = true; continue; }
             rows[i].dst_off = at;
             at += (rows[i].dst_bytes + a - 1) / a * a;
         }
@@ -246,7 +244,6 @@ bool WeightTable::load(const std::string& pack_dir, void* arena_base, uint64_t a
             WeightRef wr;
             wr.data = nullptr;
             wr.resident = false;
-            wr.stage_resident = !stage || stage->owns(r.name);
             wr.bytes = r.dst_bytes;
             wr.ne0 = r.ne0;
             wr.ne1 = r.ne1;

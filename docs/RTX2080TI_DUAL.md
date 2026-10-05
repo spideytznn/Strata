@@ -1,5 +1,39 @@
 # 双 RTX 2080 Ti / strata-2080tix2
 
+本分支融合官方 **v0.1.39**（`6f32ec070f23ced9f50e704d854d775da52591ab`）。目标机器是两张扩容至 **22 GiB** 的 RTX 2080 Ti、32 GB 系统 RAM，Linux / CUDA 12.8；普通 11 GiB 卡不能直接照抄容量配置。
+
+## 保留与采用的实现
+
+- 保留跨 GPU 的 RAM 专家补集和动态交换：从专家所属 GPU 保存被淘汰数据，等待所有相关卡的上传事件后再提交 RAM/GPU 归属；交换缓冲使用 `cudaHostAllocPortable`。
+- 修复 RAM 预算只按 CUDA0 层排序的问题：在分割显存 profile 前保留全局排序，使两张卡缺失的热门专家都能进入 RAM。
+- 保留 `--resident-experts-strict`；RAM 驻留模式的 layer split 强制独立 prefill 缓冲，防止借用唯一的专家副本。
+- 分层权重加载改用上游 `--trim-stage-weights`，保留 CUDA0 的 router 以供预取。旧 `--stage-weights` 仅作为兼容别名，不再维护第二套 loader。
+- 解码内核、服务层和会话处理采用 v0.1.39。并行会话需要单独配置与验证；本次单请求提速没有开启 `parallel > 1`，没有实现 SSD 会话缓存。
+
+当前 Q3XL 保留 `--max-context 262144`、INT8 KV、24/24 层划分、4096 prefill、MTP4 和 CPU 视觉。RAM 预算与实际可用 RAM 应同时检查：修复全局排序后，同一个预算会真正用于两张卡，不能根据旧版只分配约一半预算的表现推断内存安全。
+
+构建沿用上游固定的 llama.cpp revision。配置 `STRATA_BUILD_FUSION_TESTS=ON`，构建目标 `strata fusion_resident_swap_test file_expert_source_test`；GPU 架构为 75。旧的自定义 weight-stage loader 测试已随重复实现移除。
+
+## English
+
+This branch merges official **v0.1.39** (`6f32ec070f23ced9f50e704d854d775da52591ab`) for two modified **22 GiB** RTX 2080 Ti cards, 32 GB system RAM, Linux and CUDA 12.8. Capacity settings need adjustment for standard 11 GiB cards.
+
+- Retains a shared RAM expert complement with swaps routed to each expert's owning GPU. RAM ownership changes only after all participating GPU uploads finish; exchange buffers are portable across devices.
+- Preserves the global expert ranking before splitting the VRAM profiles, so a RAM budget covers hot missing experts from both GPUs.
+- Retains strict residency and dedicated prefill buffers with resident layer splits.
+- Uses upstream stage weight trimming, including CUDA0 router retention for prefetch. `--stage-weights` is a compatibility alias for `--trim-stage-weights`; the duplicate loader was removed.
+- Uses upstream decode kernels, server and conversation handling. Concurrent slots are not enabled by this single-request configuration. SSD session storage is not implemented.
+
+The Q3XL configuration retains 262144 context, INT8 KV, a 24/24 layer split, 4096 prefill, MTP4 and CPU vision. Check actual available RAM as well as the requested budget: global ranking now fills a budget across both GPUs, unlike the previous underfilled allocation.
+
+Build for CUDA architecture 75 with `STRATA_BUILD_FUSION_TESTS=ON`; targets are `strata fusion_resident_swap_test file_expert_source_test`. The duplicate weight-loader test was retired with that implementation.
+
+## 历史记录：v0.1.35 / Historical v0.1.35 results
+
+下面记录仅属于 2026-10-02 的 v0.1.35、IQ3_S 配置，不代表 v0.1.39 或 Q3XL 的性能。
+The following measurements describe the October 2 v0.1.35 IQ3_S configuration, not v0.1.39 or Q3XL.
+
+
 本分支采用上游 **0.1.35**（`d9ab8435f654c368c586340d490915f6addf56a3`）加实测双卡改动。设备为两张扩容至 **22 GiB** 的 RTX 2080 Ti、双 Xeon E5-2682 v4、32 GB DDR4，CUDA 12.8，Linux。普通 11 GiB 卡需要另行规划容量。
 
 ## 本次融合
