@@ -451,6 +451,7 @@ class ConvCacheLog:
                        r"(?: evictions=(\d+))?")
     DROPPED = re.compile(r"conversation cache: dropped \d+ superseded .*?parked=(\d+)")
     READ_MAX = 1 << 20                                  # at most the last MiB of new lines per read
+    MARKER = "conversation cache:"
 
     def __init__(self):
         self.key, self.pos = None, 0
@@ -482,7 +483,7 @@ class ConvCacheLog:
         self.pos += end
         now = time.time()
         for line in data[:end].decode("utf-8", "replace").splitlines():
-            if "conversation cache:" not in line:
+            if self.MARKER not in line:
                 continue
             m = self.EVENT.search(line)
             if m:
@@ -500,13 +501,24 @@ class ConvCacheLog:
         return dict(self.state)
 
 
-def conversation_cache_view(info: dict, hist: list, totals: dict, parked: dict) -> dict:
+class ConvDiskCacheLog(ConvCacheLog):
+    MARKER = "conversation SSD cache:"
+    EVENT = re.compile(r"conversation SSD cache: (parked|skipped|restored) (\d+) tokens.*?parked=(\d+) bytes=(\d+)"
+                       r"(?: evictions=(\d+))?")
+    DROPPED = re.compile(r"conversation SSD cache: dropped \d+ superseded .*?parked=(\d+)")
+
+
+def conversation_cache_view(info: dict, hist: list, totals: dict, parked: dict, disk: dict | None = None) -> dict:
     """#596: the Monitor's Conversation cache card: the parked conversations (the engine's opt-in
     --conversation-cache-mib: budget, slots, what its log says) and how much of the prompts the cache gave back."""
-    mib = info.get("conversation_cache_mib")
+    ssd = info.get("conversation_disk_enabled") == 1
+    mib = info.get("conversation_disk_mib" if ssd else "conversation_cache_mib")
+    if ssd:
+        parked = disk or {}
     last = hist[-1] if hist else None
     return {"enabled": isinstance(mib, int) and mib > 0, "budget_mib": mib if isinstance(mib, int) else None,
-            "slots": info.get("conversation_cache_slots"), **parked,
+            "storage": "ssd" if ssd else "ram",
+            "slots": info.get("conversation_disk_slots" if ssd else "conversation_cache_slots"), **parked,
             "requests": len(hist), "requests_reused": sum(1 for r in hist if (r.get("reused") or 0) > 0),
             "reused_tokens": totals.get("reused", 0), "prompt_tokens": totals.get("prompt_tokens", 0),
             "last_reused": last.get("reused") if last else None,
@@ -2160,6 +2172,7 @@ class Service:
         # turn before the answer instead of the top of the prompt, so switching it keeps the cached conversation
         self.effort_end = False
         self.conv_log = ConvCacheLog()                  # #596: the parked conversations, from the engine's log
+        self.conv_disk_log = ConvDiskCacheLog()
         self.config_path = None                         # #564: the run config the web page's Settings view edits
         self.config_lock = threading.Lock()
         # #321: browser pages of these origins may call /v1/* (CORS; "*" = any page - only with an api_key that
@@ -2627,8 +2640,11 @@ class Service:
                   **dict(getattr(self.engine, "info", {}) or {})}
         tel = self.telemetry.snapshot() if getattr(self, "telemetry", None) else {"now": {}, "history": {}, "static": {}}
         parked = self.conv_log.poll(getattr(self.engine, "log_path", None), getattr(self.engine, "log_start", None))
+        disk = self.conv_disk_log.poll(getattr(self.engine, "log_path", None), getattr(self.engine, "log_start", None))
         return {"engine": engine, "live": live, "requests": hist[::-1][:None if all_requests else 12],
-                "conversation_cache": conversation_cache_view(engine, hist, totals, parked),
+                "conversation_cache": conversation_cache_view(engine, hist, totals, parked, disk),
+                "conversation_disk_cache": {"enabled": engine.get("conversation_disk_enabled") == 1,
+                    "budget_mib": engine.get("conversation_disk_mib", 0), "slots": engine.get("conversation_disk_slots"), **disk},
                 "requests_kept": len(hist), "totals": totals, "hardware": tel["now"],
                 "hardware_static":
                 tel["static"], "history": tel["history"], "time": now}

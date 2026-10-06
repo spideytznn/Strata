@@ -1,4 +1,5 @@
 #include "strata/core/conversation_snapshot.hpp"
+#include "strata/core/conversation_disk.hpp"
 #include "strata/core/conversation_file.hpp"
 #include "strata/kernels/kv_q4.hpp"
 #include <cuda_runtime.h>
@@ -20,6 +21,7 @@ using namespace strata::kernels;
 namespace {
 int checks = 0;
 void check(bool ok, const char* label) {
+    if (std::getenv("STRATA_TEST_TRACE")) { std::fprintf(stderr, "%d: %s\n", checks + 1, label); std::fflush(stderr); }
     ++checks;
     if (!ok) { std::fprintf(stderr, "FAIL: %s\n", label); std::exit(1); }
 }
@@ -263,6 +265,44 @@ void full_session(int fmt, int mode, int experts) {
         check(!conversation_snapshot_capture_bytes(wrong,view,ss,g,nullptr,peak,err),"a draft image's K/V is not a stage's reuse");
     }
     check(conversation_snapshot_restore(a,ss,g,draft.state,err)==ConversationRestore::restored,"restore A after stage images");
+    {
+        const auto dir=std::filesystem::temp_directory_path()/("strata-ssd-gpu-test-"+std::to_string(checks));
+        {
+            ConversationDiskCache disk(dir.string(),64ull*1024*1024,4);
+            check(disk.enabled(),"GPU fixture SSD directory enabled");
+            size_t estimate=0;
+            check(conversation_snapshot_bytes(view,ss,g,draft.state,estimate,err),"SSD fixture size estimate");
+            auto capture=disk.begin(estimate,err); check(bool(capture),"SSD fixture admitted");
+            const std::vector<ConversationCheckpoint> no_checks;
+            const ConversationView direct_view{ids,images,no_checks,true};
+            SavedConversation streamed;
+            {
+                auto factory=capture->factory(); ConversationStorageScope backing(factory);
+                check(conversation_snapshot_save(streamed,direct_view,ss,g,draft.state,err),"capture GPU directly into SSD buffers");
+            }
+            check(streamed.kv[0].k.external(),"GPU SSD capture uses bounded file backing");
+            check(disk.put(*capture,streamed,{&checkpoints},err),"commit whole GPU state and borrowed checkpoints to SSD");
+            auto next=ids; next.push_back(777);
+            const auto match=disk.best(next,images,true);
+            check(match.tokens==65 && match.live,"SSD selects complete matching live state");
+            check(disk.verify(match.index,err),"SSD verifies every payload before GPU writes");
+            SavedConversation loaded,back;
+            check(disk.load(match.index,loaded,err),"load SSD metadata/checkpoints without materializing K/V");
+            check(conversation_snapshot_validate(loaded,ss,g,draft.state,err),"prevalidate SSD state against live GPU geometry");
+            fill(201);
+            check(conversation_snapshot_restore(loaded,ss,g,draft.state,err)==ConversationRestore::restored,"restore SSD A over GPU B");
+            check(conversation_snapshot_save(back,view,ss,g,draft.state,err),"read GPU back after SSD restore");
+            check(back.live.gdn==a.live.gdn && back.live.ple==a.live.ple && back.live.tails==a.live.tails &&
+                  back.live.dead==a.live.dead && back.live.block_pos==a.live.block_pos &&
+                  equal(back.kv[0],a.kv[0]) && equal(back.kv[1],a.kv[1]),"SSD A/B/A byte exact GDN PLE indexer main and draft K/V");
+            uint64_t fingerprint=0;
+            check(conversation_kv_verify(loaded.kv.back(),draft.state,g,65,false,fingerprint,err),"SSD draft authoritative pool and resident ring match");
+            check(conversation_checkpoint_restore(loaded.checkpoints[0],ss,g,err),"SSD earlier turn checkpoint restores");
+            check(ss.ple_prev[0]==2 && ss.ple_prev[1]==3,"SSD checkpoint reconstructs PLE previous tokens");
+        }
+        std::filesystem::remove(dir/".strata-ssd.lock"); std::filesystem::remove(dir);
+    }
+    check(conversation_snapshot_restore(a,ss,g,draft.state,err)==ConversationRestore::restored,"restore A after SSD fixture");
     check(conversation_checkpoint_restore(a.checkpoints[0],ss,g,err),"restore early running checkpoint");
     std::vector<uint8_t> spare(sizes.dead);
     cuda_check(cudaMemcpy(spare.data(),main.state.idx_pooled,sizes.dead,cudaMemcpyDeviceToHost));

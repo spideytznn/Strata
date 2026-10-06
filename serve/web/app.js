@@ -205,6 +205,7 @@ function since(t) {
 function renderConvCache(c) {
   $("cc-card").hidden = !c;
   if (!c) return;                                  // an older server
+  $("cc-storage-label").textContent = c.storage === "ssd" ? "Their storage (SSD)" : "Their memory (RAM)";
   const pct = (a, b) => (b ? `${Math.min(100, (100 * a) / b)}%` : "0%");
   $("cc-bars").hidden = !c.enabled;
   if (c.enabled) {
@@ -224,7 +225,9 @@ function renderConvCache(c) {
     ["Last switch", c.enabled ? event : null],
   ]);
   $("cc-note").textContent = c.enabled
-    ? "A request that continues a parked conversation gets its state back instead of reading it again; the oldest goes when the slots or the memory are full."
+    ? (c.storage === "ssd"
+      ? "Conversations are saved to SSD when switching branches and restored on return. The oldest is evicted when the disk budget is full. Files belong to this engine run."
+      : "A request that continues a parked conversation gets its state back instead of reading it again; the oldest goes when the slots or the memory are full.")
     : "The engine keeps the last conversation's state, so a follow-up reads only what is new. To keep several conversations (agents taking turns), add \"--conversation-cache-mib\", \"8192\" to the run config's args (docs/DETAILS.md).";
 }
 

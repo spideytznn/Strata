@@ -256,6 +256,22 @@ class ConversationCacheCard(unittest.TestCase):
             self.assertIn(f'id="{el}"', html)
             self.assertIn(f'"{el}"', js)
 
+    def test_ssd_log_and_metrics_are_separate_from_ram(self):
+        from serve.server import ConvDiskCacheLog, conversation_cache_view
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            log = Path(d) / "strata.log"
+            log.write_text(self.PARK +
+                "strata serve: conversation SSD cache: parked 144000 tokens in 800.0 ms; parked=1 bytes=2147483648 evictions=0\n" +
+                "strata serve: conversation SSD cache: restored 143000 tokens (checkpoint) in 700.0 ms; parked=1 bytes=104857600 evictions=2\n")
+            disk = ConvDiskCacheLog().poll(str(log), 0)
+            self.assertEqual((disk["parks"], disk["restores"], disk["evictions"]), (1, 1, 2))
+            info = {"conversation_cache_mib": 0, "conversation_disk_mib": 32768,
+                    "conversation_disk_slots": 64, "conversation_disk_enabled": 1}
+            card = conversation_cache_view(info, [], {}, {}, disk)
+            self.assertEqual((card["enabled"], card["storage"], card["budget_mib"], card["last_tokens"]),
+                             (True, "ssd", 32768, 143000))
+
 
 if __name__ == "__main__":
     unittest.main()

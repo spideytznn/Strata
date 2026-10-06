@@ -59,6 +59,10 @@ FLOAT = {"BF16", "F32", "F16"}
 ROUTERS = ("ffn_gate_inp.weight", "ffn_gate_inp_shexp.weight")
 NOT_IN_PACK = {"per_layer_token_embd.weight"}      # the 28.8 GB PLE table: read from its GGUF by the engine
 
+def external_atomic_ple(path):
+    return os.environ.get("STRATA_EXTERNAL_PLE_SHARD2") == "1" and pathlib.Path(path).name.startswith(
+        "Qwen3.8-Flash-Next-AD-5.00bpw-Q5_K_M-M64-")
+
 # The float form the engine reads each pack tensor in (name without `blk.N.`; from eddoursul/Strata's FORM table).
 # The residual, router, GDN, QSA and PLE kernels read these small projections as BF16, the norms as F32 and the PLE
 # conv as F16.  GSQ-RCO files already store them that way; other files do not (Unsloth's UD-Q4_K_XL: the routers,
@@ -150,6 +154,10 @@ class Model:
             paths = [first.with_name(first.name[:m.start()] + "-%05d-of-%05d.gguf" % (i, total))
                      for i in range(1, total + 1)]
         missing = [str(p) for p in paths if not p.is_file()]
+        if len(paths) == 33 and external_atomic_ple(first) and missing == [str(paths[1])]:
+            print("Atomic PLE-only shard 2 omitted; the test engine requires an explicit FP8 PLE table")
+            paths = paths[:1] + paths[2:]
+            missing = []
         if missing:
             raise FileNotFoundError("missing model shards (wait for the download): " + ", ".join(missing))
         self.paths = paths
@@ -187,13 +195,20 @@ def check_split(files) -> None:
         raise ValueError(f"{files[0].path.name} has no general.architecture; the first shard of a split model "
                          "carries the metadata")
     total = meta0.get("split.tensors.count")
+    external_ple = n == 32 and meta0.get("split.count") == 33 and external_atomic_ple(files[0].path)
+    declared_n = n + int(external_ple)
     for i, g in enumerate(files):
         md = g.metadata
-        if md.get("split.count") != n or md.get("split.no") != i or \
+        expected_no = i + int(external_ple and i > 0)
+        if md.get("split.count") != declared_n or md.get("split.no") != expected_no or \
                 (total is not None and md.get("split.tensors.count") != total):
             raise ValueError(f"{g.path.name} does not declare itself shard {i + 1} of {n} of this model "
                              "(split.count / split.no / split.tensors.count)")
-    if total is not None and sum(len(g.tensors) for g in files) != total:
+    tensors = sum(len(g.tensors) for g in files)
+    if external_ple and (total != 1224 or tensors != 1223 or
+                        any(t.name in NOT_IN_PACK for g in files for t in g.tensors)):
+        raise ValueError("external Atomic PLE: expected all 1223 main tensors and only one omitted PLE tensor")
+    if total is not None and tensors + int(external_ple) != total:
         raise ValueError(f"the {n} shards hold {sum(len(g.tensors) for g in files)} tensors, but "
                          f"split.tensors.count is {total}")
 

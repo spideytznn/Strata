@@ -49,6 +49,11 @@ class RemoteExperts;
 struct LoadStats;
 
 namespace detail {
+// Reuse a cold RAM slot for a hotter file-tier expert of the SAME layer. Native Q4 blob sizes differ by layer.
+struct RamPromotion { int32_t layer, in, out; float gain; };
+std::vector<RamPromotion> plan_ram_promotions(
+    int64_t layers, int64_t experts, const std::vector<uint64_t>& offsets,
+    const std::vector<int32_t>& gpu, const std::vector<float>& usage, int limit);
 
 /// Sentinel used by the pure complement planner for a blob that remains in the mmap fallback.
 inline constexpr uint64_t kNoCacheComplement = ~uint64_t{0};
@@ -520,6 +525,12 @@ public:
     /// The compact copy's blob of `(layer, expert)`, or null; not counted as a read (any thread).
     const uint8_t* resident_blob(int64_t layer, int64_t expert) const;
     int64_t exchanges() const { return exchanges_; }
+    /// Caller must have joined all expert workers and committed GPU exchanges. Synchronizes device reads before
+    /// reusing slots; no allocation or registration of another resident arena. A failed read preserves its victim.
+    int64_t promote_hot_ram(const std::vector<float>& usage, const std::vector<int32_t>& gpu,
+                            int limit, std::string& err);
+    int64_t ram_promotions() const { return ram_promotions_; }
+    uint64_t ram_promotion_bytes() const { return ram_promotion_bytes_; }
     bool exchange_rotation() const { return exchange_storage_.active(); }
     uint64_t rotated_exchanges() const { return exchange_storage_.exchanges(); }
     uint64_t avoided_exchange_copy_bytes() const { return exchange_storage_.avoided_bytes(); }
@@ -657,6 +668,7 @@ private:
     const uint8_t* complement_device_ = nullptr;
     uint64_t complement_bytes_ = 0;
     std::vector<uint64_t> complement_offsets_;
+    mutable std::mutex complement_mu_;       ///< protects offset changes from router lookahead's warm()
     detail::ExchangeStorage exchange_storage_; // authoritative when active; original arenas still own memory
     bool complement_pinned_ = false;
     bool complement_partial_ = false;         ///< CS-T: only the first complement_pin_limit_ bytes are registered
@@ -673,6 +685,8 @@ private:
     int64_t xstage_cap_ = 0;
     uint64_t xstage_blob_ = 0;
     int64_t exchanges_ = 0;
+    int64_t ram_promotions_ = 0;
+    uint64_t ram_promotion_bytes_ = 0;
     std::atomic<int64_t> file_reads_{0};
     int64_t reads_ = 0;
 #if defined(_WIN32)

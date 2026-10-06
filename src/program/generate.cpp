@@ -58,6 +58,8 @@
 #include "strata/core/native_dense.hpp"
 #include "strata/program/logits_selection.hpp"
 #include "strata/program/conv_cache.hpp"
+#include "strata/core/conversation_disk.hpp"
+#include "strata/program/local_memory_plan.hpp"
 #include "strata/program/message_boundary.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/draft_source.hpp"
@@ -552,6 +554,9 @@ struct Options {
     /// Plan v0.3 P6: every `adapt_every` rounds, swap up to `adapt_swaps` of the most-routed missing experts into
     /// the VRAM tier in place of the least-routed resident ones (decayed counts).  0 = static residency.
     int adapt_every = 4;
+    bool ram_hot_experts = false;   ///< opt-in file -> RAM promotion inside the existing resident budget
+    int ram_hot_every = 16;
+    int ram_hot_swaps = 16;
     float adapt_decay = 0.7f;   ///< the usage counts are multiplied by this after each adaptation (--adapt-decay)
     /// --adapt-async 1 (--serve with the resident RAM mode; opt-in): the adaptive tier's rounds advance between verify
     /// windows on a helper thread instead of one window waiting for a whole round (see the tier in the --serve block).
@@ -586,6 +591,9 @@ struct Options {
     int64_t conversation_cache_mib = 0; // opt-in host RAM for independent conversations
     int conversation_cache_slots = 4;
     int64_t conversation_cache_min_free_mib = 2560;
+    std::string conversation_disk_dir;
+    int64_t conversation_disk_mib = 0;
+    int conversation_disk_slots = 64;
     /// --serve SAVE: disk space a session file must leave free where it is written (MiB; 0 = no check)
     int64_t session_min_free_mib = 4096;
     /// --serve: also keep a checkpoint every N freshly read prompt tokens (0 = only at the last turn boundary)
@@ -640,6 +648,9 @@ struct Options {
 };
 
 void usage() {
+    std::fprintf(stderr, "  --ram-hot-experts    promote hot file-tier experts into cold RAM slots (single GPU, budget, spec)\n"
+                         "  --ram-hot-every N    RAM promotion interval in decode rounds (default 16; 1..4096)\n"
+                         "  --ram-hot-swaps N    maximum RAM promotions per interval (default 16; 1..96)\n");
     std::fprintf(stderr,
                  "strata generate --pack DIR --tokens \"1,2,3\" [options]\n"
                  "\n"
@@ -727,6 +738,9 @@ void usage() {
                  "  --conversation-cache-min-free-mib N  --serve: physical RAM floor when parking or restoring a\n"
                  "                       session file (default 2560)\n"
                  "  --session-min-free-mib N  --serve: disk space a SAVE must leave free (default 4096; 0 = no check)\n"
+                 "  --conversation-disk-dir PATH  --serve: SSD conversation directory (off by default)\n"
+                 "  --conversation-disk-mib N     --serve: total SSD snapshot budget in MiB\n"
+                 "  --conversation-disk-slots N   --serve: metadata record cap (default 64)\n"
                  "  --vram-elastic       --serve (#533, opt-in, NVIDIA): the expert cache in segments (--vram-segment-mib,\n"
                  "                       default 512), so the command `VRAM <reserve_mib>` (the server's POST /v1/vram) can\n"
                  "                       give VRAM back to other programs between requests and take it back later\n"
@@ -1704,17 +1718,21 @@ int main(int argc, char** argv) {
         else if (a == "--serve") o.serve = true;
         else if (a == "--vision") o.vision = true;
         else if (a == "--prompt-cache") o.prompt_cache = std::max(0, std::atoi(next("--prompt-cache")));
+        else if (a == "--conversation-disk-dir") o.conversation_disk_dir = next("--conversation-disk-dir");
         else if (a == "--conversation-cache-mib" || a == "--conversation-cache-slots" ||
-                 a == "--conversation-cache-min-free-mib" || a == "--session-min-free-mib") {
+                 a == "--conversation-cache-min-free-mib" || a == "--session-min-free-mib" ||
+                 a == "--conversation-disk-mib" || a == "--conversation-disk-slots") {
             const std::string value = next(a.c_str());
             int64_t number = 0;
             const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
-            const int64_t limit = a == "--conversation-cache-slots" ? INT32_MAX : INT64_MAX / (1024 * 1024);
+            const int64_t limit = a == "--conversation-cache-slots" || a == "--conversation-disk-slots" ? INT32_MAX : INT64_MAX / (1024 * 1024);
             if (result.ec != std::errc{} || result.ptr != value.data() + value.size() || number < 0 || number > limit) {
                 std::fprintf(stderr, "%s needs a nonnegative integer within range\n", a.c_str());
                 return 2;
             }
             if (a == "--conversation-cache-mib") o.conversation_cache_mib = number;
+            else if (a == "--conversation-disk-mib") o.conversation_disk_mib = number;
+            else if (a == "--conversation-disk-slots") o.conversation_disk_slots = (int) number;
             else if (a == "--conversation-cache-min-free-mib") o.conversation_cache_min_free_mib = number;
             else if (a == "--session-min-free-mib") o.session_min_free_mib = number;
             else o.conversation_cache_slots = (int) number;
@@ -1785,6 +1803,9 @@ int main(int argc, char** argv) {
             o.stop_eos = true;
         }
         else if (a == "--adapt-swaps") o.adapt_swaps = std::atoi(next("--adapt-swaps"));
+        else if (a == "--ram-hot-experts") o.ram_hot_experts = true;
+        else if (a == "--ram-hot-every") o.ram_hot_every = std::atoi(next("--ram-hot-every"));
+        else if (a == "--ram-hot-swaps") o.ram_hot_swaps = std::atoi(next("--ram-hot-swaps"));
         else if (a == "--expert-cache-cpu-order") o.expert_cache_cpu_order = true;
         else if (a == "--expert-cache-per-layer") o.expert_cache_per_layer = true;
         else if (a == "--peer-device") o.peer_device = std::atoi(next("--peer-device"));
@@ -1849,6 +1870,21 @@ int main(int argc, char** argv) {
     }
 #endif
     strata::core::set_coupled_draft(o.coupled_draft);
+    if (o.conversation_disk_mib > 0 && o.conversation_disk_dir.empty()) {
+        std::fprintf(stderr, "--conversation-disk-mib requires --conversation-disk-dir\n"); return 2;
+    }
+    if (o.conversation_disk_mib > 0 && o.batch > 0) {
+        std::fprintf(stderr, "SSD conversation parking currently requires single concurrency (--batch 0)\n"); return 2;
+    }
+    const char* grow_env = std::getenv("STRATA_KV_GROW");
+    const bool requested_grow = grow_env && grow_env[0] ? grow_env[0] != '0' : o.kv_grow;
+    if (o.conversation_disk_mib > 0 && requested_grow) {
+        std::fprintf(stderr, "SSD conversation parking currently requires fixed K/V pools (disable --kv-grow / STRATA_KV_GROW)\n"); return 2;
+    }
+    const char* rotate_env = std::getenv("STRATA_EXCHANGE_ROTATE");
+    if (o.ram_hot_experts && (o.adapt_async || (rotate_env && std::strcmp(rotate_env, "1") == 0))) {
+        std::fprintf(stderr, "--ram-hot-experts currently requires synchronous exchanges without STRATA_EXCHANGE_ROTATE\n"); return 2;
+    }
     {   // --host-core / STRATA_HOST_CORE, before the pool and the session pin any thread
         std::string hc = o.host_core;
         if (hc.empty())
@@ -1867,6 +1903,15 @@ int main(int argc, char** argv) {
     // prompt path (each stage's prompt path has its own buffers).
     // --pcie-frac given: that one share is every stage's (the stages' own link probes are skipped), so a split over
     // a fast and a slow link cannot set the two apart from the command line (#485)
+    if (o.ram_hot_experts && (o.ram_hot_every < 1 || o.ram_hot_every > 4096 ||
+        o.ram_hot_swaps < 1 || o.ram_hot_swaps > 96 || o.adapt_every < 1 || o.adapt_swaps < 1 ||
+        !o.layer_split.empty() || o.peer_device >= 1 || o.resident_budget == 0 || o.spec < 2 || o.batch > 1 ||
+        std::any_of(o.expert_cache_remote.begin(), o.expert_cache_remote.end(), [](int n) { return n != 0; }))) {
+        std::fprintf(stderr, "--ram-hot-experts needs a single GPU, --resident-budget-gib above 0, --spec >= 2, "
+                             "the adaptive tier on, single-request decoding (no --batch), "
+                             "--ram-hot-every 1..4096 and --ram-hot-swaps 1..96\n");
+        return 2;
+    }
     const bool pcie_given = o.pcie_frac >= 0.0;
     std::vector<int64_t> split_at;
     std::vector<int> split_devs;
@@ -1895,9 +1940,11 @@ int main(int argc, char** argv) {
             for (int d = 1; d < n_dev && (split_auto || split_devs.size() < split_at.size()); ++d) split_devs.push_back(d);
         if (ok && !split_auto && split_devs.empty() && split_at.size() == 1) split_devs.push_back(0);   // one GPU
         split_same = ok && split_devs.size() == 1 && split_devs[0] == 0 && !split_auto;
-        if (split_same && o.conversation_cache_mib > 0 && o.conversation_cache_slots > 0 && o.prompt_cache > 0) {
+        if (split_same && o.prompt_cache > 0 &&
+            ((o.conversation_cache_mib > 0 && o.conversation_cache_slots > 0) ||
+             (o.conversation_disk_mib > 0 && o.conversation_disk_slots > 0))) {
             std::fprintf(stderr, "strata serve: conversation parking does not support a layer split on one GPU "
-                                 "(--split-device 0); disable parking with --conversation-cache-mib 0\n");
+                                 "(--split-device 0); disable RAM/SSD parking with --conversation-cache-mib 0 --conversation-disk-mib 0\n");
             return 2;
         }
         if (ok && split_auto && split_devs.empty()) {
@@ -2098,6 +2145,16 @@ int main(int argc, char** argv) {
     strata::core::layer_set_shared_early(!o.shared_late);
     if (!o.native_preset.empty()) {
         try {
+            if (strata::external_atomic_ple(o.native_preset)) {
+                if (o.no_ple || o.ple_gguf.empty())
+                    throw std::runtime_error("external Atomic PLE requires an explicit --ple-gguf FP8 table");
+                const strata::GgufFile external(o.ple_gguf);
+                const auto* arch = external.get("general.architecture");
+                const auto* format = external.get("strata.ple.format");
+                if (!arch || arch->s != "strata-ple" || !format || format->s != "f8_e4m3")
+                    throw std::runtime_error("external Atomic PLE requires the standalone FP8 strata-ple table");
+                std::fprintf(stderr, "strata generate: Atomic PLE-only shard 2 replaced by explicit FP8 table\n");
+            }
             // every shard of the model (<name>-0000N-of-0000M.gguf beside --native).  A missing shard is an error
             // here: it used to be skipped, leaving a model with some tensors absent and a later error, or none.
             o.native_shards = strata::gguf_split_paths(o.native_preset);
@@ -5221,6 +5278,51 @@ int main(int argc, char** argv) {
         }
         return 0;
     };
+    // Retain M3's independent-buffer choice on one GPU, spending only VRAM left
+    // outside the filled cache. STRATA_PREFILL_OWN_AUTO=0 is the upstream A/B arm.
+    bool single_prefill_own = false;
+    if (!multi_gpu && !remote_caches && o.peer_device < 1 && !o.no_prefill_borrow && !profile.empty() &&
+        o.prefill_chunk > 0 && d_res != nullptr &&
+        (std::getenv("STRATA_PREFILL_OWN_AUTO") == nullptr ||
+         std::string(std::getenv("STRATA_PREFILL_OWN_AUTO")) != "0")) {
+        int64_t borrowed = o.prefill_chunk;
+        const int64_t lend = plan_lend(borrowed);
+        const int64_t borrowed_chunk = lend > 0 ? borrowed : 0;
+        size_t free_b = 0, total_b = 0;
+        if (cudaMemGetInfo(&free_b, &total_b) == cudaSuccess) {
+            auto price = [&](int64_t c) -> strata::program::PrefillBufferCandidate {
+                return {c, strata::prefill::Prefill::bytes_needed(g, ss, c)};
+            };
+            const uint64_t reserve = (uint64_t) std::max(0, o.vram_reserve_mib) << 20;
+            int64_t cap = std::min(o.prefill_chunk, o.max_context);
+            if (!o.serve) cap = std::min(cap, request_chunk((int64_t) o.tokens.size() - 1, cap));
+            const int64_t own = strata::program::independent_prefill_chunk(
+                {price(32768), price(16384), price(8192), price(6144), price(4096),
+                 price(3072), price(2048), price(1024), price(512), price(256)},
+                free_b, reserve, cap, borrowed_chunk);
+            if (own > 0) {
+                single_prefill_own = true;
+                o.prefill_chunk = own;
+                std::fprintf(stderr, "strata prefill: local M3 plan: independent %lld-token buffers (%llu MiB), "
+                                     "borrowed choice %lld; preserving %d MiB VRAM reserve\n",
+                             (long long) own,
+                             (unsigned long long) (strata::prefill::Prefill::bytes_needed(g, ss, own) >> 20),
+                             (long long) borrowed_chunk, o.vram_reserve_mib);
+            }
+        }
+    }
+    if (o.resident_cpu_experts) {
+        const uint64_t previous = o.resident_headroom;
+        o.resident_headroom = strata::program::conversation_expert_headroom(
+            previous, (uint64_t) o.conversation_cache_mib << 20,
+            (uint64_t) o.conversation_cache_min_free_mib << 20,
+            o.serve && o.prompt_cache > 0 && o.conversation_cache_slots > 0);
+        if (o.resident_headroom > previous)
+            std::fprintf(stderr, "strata generate: local RAM plan: %.2f GiB expert headroom includes %lld MiB "
+                                 "conversation-cache budget and %lld MiB physical RAM floor\n",
+                         (double) o.resident_headroom / 1073741824.0,
+                         (long long) o.conversation_cache_mib, (long long) o.conversation_cache_min_free_mib);
+    }
     // ---- THE ELASTIC K/V (--kv-grow; vmm.hpp).  Allocated for the whole --max-context up front, the K/V of a 262K
     // context (3.35 GiB with the drafter's at int8) takes VRAM the expert cache could hold more experts in.  Now the K/V pools hold physical memory only for the cells
     // the requests reach.  When a request needs more, slots just below the prompt path's loan give up their experts
@@ -5452,7 +5554,7 @@ int main(int argc, char** argv) {
     }
     if (o.resident_cpu_experts) {
         int64_t lend_from = -1;
-        if (o.prefill_chunk > 0 && !o.no_prefill_borrow && d_res != nullptr && xcache.slots() > 0) {
+        if (o.prefill_chunk > 0 && !o.no_prefill_borrow && !single_prefill_own && d_res != nullptr && xcache.slots() > 0) {
             int64_t chunk = o.prefill_chunk;
             const int64_t k = plan_lend(chunk);
             if (k > 0) lend_from = xcache.slots() - k;
@@ -5534,6 +5636,16 @@ int main(int argc, char** argv) {
         }
 #endif
     }
+    if (o.ram_hot_experts) {
+        if (srcp != &src || !src.complement_ready()) {
+            std::fprintf(stderr, "strata generate: hot RAM disabled: no resident file-source RAM budget\n");
+            o.ram_hot_experts = false;
+        } else {
+            std::fprintf(stderr, "strata generate: hot RAM ON: up to %d file-tier experts every %d decode rounds; "
+                                 "same-layer cold RAM slots, device readers synchronized, %.2f GiB budget unchanged\n",
+                         o.ram_hot_swaps, o.ram_hot_every, (double) src.resident_bytes() / 1073741824.0);
+        }
+    }
     if (o.adapt_async && !src.complement_ready()) adapt_async_off("the resident RAM mode is not running");
     if (o.serve) {
         if (o.spec < 2 || o.prefill_chunk <= 0 ||
@@ -5614,7 +5726,7 @@ int main(int argc, char** argv) {
         // a cache too small to lend the prompt path its buffers would make it allocate them on top - on a card
         // whose cache already filled its reserve, that is the over-subscription the auto sizing avoids - so the
         // chunk is the largest one EVERY participant can lend (a smaller chunk only reads slower)
-        if (pf_borrow && d_res != nullptr) {
+        if (pf_borrow && !single_prefill_own && d_res != nullptr) {
             pf_parts.push_back({&xcache, &ss, &sp, -1, 0, multi_gpu ? split_at[0] : g.n_layers, -1, -1, 0, {}});
             for (auto& st : stages)
                 pf_parts.push_back({&st->cache, &st->ss, &st->sp, st->dev, st->lb, st->le, -1, -1, 0, {}});
@@ -5815,7 +5927,9 @@ int main(int argc, char** argv) {
                              (long long) pf_parts[i].cache->slots(),
                              (double) part_bytes(pf_parts[i], pf_parts[i].first) / 1073741824.0);
         } else {
-            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
+            std::fprintf(stderr, single_prefill_own
+                                     ? "strata serve: the prompt path allocates independent buffers (local M3 plan)\n"
+                                     : "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
         }
         rss_probe("the prompt path set up");
         // layer split across GPUs: a prompt path per stage, each handing its chunk's rows to the next.
@@ -6294,6 +6408,8 @@ int main(int argc, char** argv) {
         std::vector<int32_t> live;
         std::vector<ImgKey> live_imgs, req_imgs;
         bool live_ok = false;
+        int64_t live_prompt_end = 0;
+        bool disk_switch = false;
         std::vector<ConvCheckpoint> checks;
         uint64_t check_clock = 0;   // the checkpoints' LRU clock; creation and every use advance it
         int64_t tail_ckpt_len = -1;   // --prompt-cache-tail: the length of the one tail checkpoint alive (-1 = none)
@@ -6303,6 +6419,14 @@ int main(int argc, char** argv) {
         strata::core::ConversationCache conversations(
             o.prompt_cache > 0 ? (size_t) o.conversation_cache_mib * 1024 * 1024 : 0,
             (size_t) o.conversation_cache_slots);
+        strata::core::ConversationDiskCache disk_conversations(o.conversation_disk_dir,
+            o.prompt_cache > 0 ? (uint64_t) o.conversation_disk_mib * 1024 * 1024 : 0,
+            (size_t) o.conversation_disk_slots);
+        if (disk_conversations.enabled())
+            std::fprintf(stderr, "strata serve: conversation SSD cache: enabled dir=%s budget_mib=%lld slots=%d staging_mib=8\n",
+                         o.conversation_disk_dir.c_str(), (long long) o.conversation_disk_mib, o.conversation_disk_slots);
+        else if (!disk_conversations.error().empty())
+            std::fprintf(stderr, "strata serve: conversation SSD cache: disabled (%s)\n", disk_conversations.error().c_str());
         // Disk sessions: what a session file is bound to.  The model fingerprint samples every model input this
         // engine loaded, by role (conversation_file.hpp), once; the config fingerprint covers the RESOLVED settings
         // that change what the saved bytes mean - the rope (K is cached post-RoPE), the loaded control vector, the
@@ -6380,7 +6504,7 @@ int main(int argc, char** argv) {
         // Save only on a switch/rewind, not on each continuing request. No graph
         // addresses change: all parked images live in ordinary host vectors.
         auto park_current_body = [&](size_t held) -> bool {
-            if (!conversations.enabled() || !live_ok || live.empty()) return true;
+            if ((!conversations.enabled() && !disk_conversations.enabled()) || !live_ok || live.empty()) return true;
             // #342: before make_room evicts oldest-first, the copies of this conversation a turn back go (they hold
             // nothing the outgoing chain does not, apart from the tail this conversation rewrote)
             if (const size_t dropped = conversations.drop_superseded(live, live_imgs, checks, cvec_cached))
@@ -6401,6 +6525,68 @@ int main(int argc, char** argv) {
                 ~MergeBack() { if (on && !strata::core::conversation_checkpoints_merge(std::move(cs), checks)) checks.clear(); }
             } merge_back{cs, checks, n_st > 0};
             const strata::core::ConversationView view{live, live_imgs, n_st > 0 ? cs.stage0 : checks, cvec_cached};
+            if (disk_conversations.enabled()) {
+                // An ordinary continuation may rewind only the last generated
+                // answer to its turn checkpoint. It must not dump GiB to SSD on
+                // every turn; a rewrite before the previous prompt is a branch.
+                if (!disk_switch) return true;
+                // Do not clone the CPU checkpoint chain or retain multi-GiB K/V
+                // in RAM. Capture K/V directly through the bounded file backing;
+                // serialize the existing checkpoints by reference afterward.
+                const auto t0 = Clock::now();
+                try {
+                    size_t estimate = 0;
+                    if (!strata::core::conversation_snapshot_bytes(view, ss, g, draft0, estimate, err)) {
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: skip parking (%s)\n", err.c_str()); err.clear(); return true;
+                    }
+                    for (size_t k = 0; k < n_st; ++k) {
+                        const strata::core::OnDevice on(stages[k]->dev);
+                        const strata::core::ConversationView v{live, live_imgs, cs.parts[k], cvec_cached};
+                        size_t b = 0;
+                        if (!strata::core::conversation_snapshot_bytes(v, stages[k]->ss, g, draft_of(k), b, err) || b > SIZE_MAX - estimate) {
+                            std::fprintf(stderr, "strata serve: conversation SSD cache: skip stage parking (%s)\n", err.c_str()); err.clear(); return true;
+                        }
+                        estimate += b;
+                    }
+                    auto capture = disk_conversations.begin(estimate, err);
+                    if (!capture) {
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: skip parking (%s)\n", err.c_str()); err.clear(); return true;
+                    }
+                    strata::core::ConversationStateSizes z;
+                    if (!strata::core::conversation_session_sizes(g, ss, z, err)) { err.clear(); return true; }
+                    if (!strata::core::conversation_memory_admit(strata::core::conversation_available_memory(),
+                            z.gdn + 16ull * 1024 * 1024, 128ull * 1024 * 1024)) {
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: skip parking (CPU running-state RAM headroom)\n"); return true;
+                    }
+                    auto factory = capture->factory();
+                    strata::core::ConversationStorageScope storage_scope(factory);
+                    const std::vector<ConvCheckpoint> no_checks;
+                    strata::core::SavedConversation image;
+                    const strata::core::ConversationView empty_view{live, live_imgs, no_checks, cvec_cached};
+                    if (!strata::core::conversation_snapshot_save(image, empty_view, ss, g, draft0, err)) {
+                        if (!err.empty()) return false; // CUDA transfer/sync failure remains fatal.
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: capture failed (%s); continuing without parking\n", err.c_str()); err.clear(); return true;
+                    }
+                    std::vector<const std::vector<ConvCheckpoint>*> borrowed{&view.checkpoints};
+                    for (size_t k = 0; k < n_st; ++k) {
+                        const strata::core::OnDevice on(stages[k]->dev);
+                        strata::core::SavedConversation part;
+                        if (!strata::core::conversation_snapshot_save(part, empty_view, stages[k]->ss, g, draft_of(k), err)) {
+                            if (!err.empty()) return false;
+                            std::fprintf(stderr, "strata serve: conversation SSD cache: stage capture failed (%s)\n", err.c_str()); err.clear(); return true;
+                        }
+                        image.stage_images.push_back(std::move(part)); borrowed.push_back(&cs.parts[k]);
+                    }
+                    const bool stored = disk_conversations.put(*capture, image, borrowed, err);
+                    std::fprintf(stderr, "strata serve: conversation SSD cache: %s %zu tokens in %.1f ms; parked=%zu bytes=%llu evictions=%zu%s%s\n",
+                        stored ? "parked" : "skipped", live.size(), std::chrono::duration<double, std::milli>(Clock::now() - t0).count(),
+                        disk_conversations.size(), (unsigned long long) disk_conversations.bytes(), disk_conversations.evictions(),
+                        err.empty() ? "" : " error=", err.c_str()); err.clear();
+                } catch (const std::exception& e) {
+                    std::fprintf(stderr, "strata serve: conversation SSD cache: parking failed (%s); active session unchanged\n", e.what()); err.clear();
+                }
+                return true;
+            }
             auto reuse = conversations.take_reuse();
             std::vector<strata::core::ConversationKvReuse> stage_reuse = std::move(reuse.stages);
             stage_reuse.resize(n_st);
@@ -7183,7 +7369,7 @@ int main(int argc, char** argv) {
                         "expert_slots_primary=%lld expert_cache_primary_mib=%lld spec=%d "
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f conversation_cache_mib=%lld conversation_cache_slots=%d "
-                        "conversation_cache_min_free_mib=%lld tail_role_token=%lld vram_elastic=%d%s engine=" STRATA_VERSION "\n",
+                        "conversation_cache_min_free_mib=%lld conversation_disk_mib=%lld conversation_disk_slots=%d conversation_disk_enabled=%d tail_role_token=%lld vram_elastic=%d%s engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
                         (long long) (g.n_qsa_layers() > 0 && ss.qsa_states[ss.qsa_primary()].kv_mode == 1
                                          ? ss.qsa_states[ss.qsa_primary()].n_slots * 4 : 0),
@@ -7194,7 +7380,8 @@ int main(int argc, char** argv) {
                         (long long) ((o.mmap_experts ? src.resident_bytes() : strata::kernels::cpu::expert_layout().total) >> 20),
                         pool.workers(), o.pcie_frac,
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
-                        (long long) o.conversation_cache_min_free_mib, (long long) o.tail_role_token, xcache.segmented() ? 1 : 0,
+                        (long long) o.conversation_cache_min_free_mib, (long long) o.conversation_disk_mib, o.conversation_disk_slots,
+                        disk_conversations.enabled() ? 1 : 0, (long long) o.tail_role_token, xcache.segmented() ? 1 : 0,
                         o.batch > 0 ? (" batch_slots=" + std::to_string(o.batch) +
                                        " slot_cache=" + std::to_string(o.prompt_cache > 0 ? 1 : 0)).c_str() : "");
         }
@@ -8001,6 +8188,11 @@ int main(int argc, char** argv) {
                     live = std::move(image.live.ids);
                     live_imgs = std::move(image.live.imgs);
                     checks = std::move(image.checkpoints);
+                    // A manual persistent restore starts a new active branch. Its
+                    // checkpoint is the prompt boundary used by automatic SSD parking.
+                    live_prompt_end = 0;
+                    for (const ConvCheckpoint& c : checks)
+                        live_prompt_end = std::max<int64_t>(live_prompt_end, c.ids.size());
                     for (const ConvCheckpoint& c : checks) check_clock = std::max(check_clock, c.used);
                     cvec_cached = image.cvec;
                     live_ok = true;
@@ -8252,10 +8444,13 @@ int main(int argc, char** argv) {
                             slot_ck = &c;
                         }
                 }
-            const auto parked = conversations.best(ids, req_imgs, want_cvec);
+            auto parked = conversations.best(ids, req_imgs, want_cvec);
+            const auto disk_match = disk_conversations.best(ids, req_imgs, want_cvec);
+            bool disk_source = disk_match.tokens > std::max({resume, slot_tokens, parked.tokens});
+            if (disk_source) { parked = disk_match; disk_conversations.pin(disk_match.index); }
             std::optional<strata::core::SavedConversation> incoming;
-            if (parked.tokens > std::max(resume, slot_tokens)) incoming.emplace(conversations.take(parked.index));
-            if (incoming) slot_source = -1;
+            if (!disk_source && parked.tokens > std::max(resume, slot_tokens)) incoming.emplace(conversations.take(parked.index));
+            if (incoming || disk_source) slot_source = -1;
             // Reject the entire image before parking/overwriting the outgoing
             // state. Invalid entries can safely fall back to its existing prefix.
             if (incoming && incoming->stage_images.size() != stages.size()) {
@@ -8281,9 +8476,42 @@ int main(int argc, char** argv) {
             }
             // Preserve the outgoing branch before any checkpoint rewind, reset,
             // or incoming restore overwrites the positional state it requires.
-            if ((!from_live || incoming || slot_source >= 0) && !park_current(incoming ? incoming->bytes() : 0)) {
+            disk_switch = disk_source || incoming.has_value() || slot_source >= 0 ||
+                          resume < live_prompt_end || want_cvec != cvec_cached;
+            if ((!from_live || incoming || slot_source >= 0 || disk_source) && !park_current(incoming ? incoming->bytes() : 0)) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
+            }
+            if (disk_source) {
+                const auto t0 = Clock::now();
+                // Verify while the outgoing CPU checkpoints still exist. A bad
+                // disk entry falls back to the original prefix without GPU writes.
+                if (!disk_conversations.verify(disk_match.index, err)) {
+                    std::fprintf(stderr, "strata serve: conversation SSD cache: discard invalid snapshot (%s)\n", err.c_str());
+                    disk_conversations.discard(disk_match.index); disk_source = false; err.clear();
+                } else {
+                    // Outgoing state has now been parked. Release its CPU chain
+                    // before allocating the incoming chain (K/V stays on SSD).
+                    std::vector<ConvCheckpoint>().swap(checks);
+                    resume = 0; from_live = false; live_ok = false;
+                    incoming.emplace();
+                    bool valid = disk_conversations.load(disk_match.index, *incoming, err) && incoming->stage_images.size() == stages.size();
+                    if (valid) valid = strata::core::conversation_snapshot_validate(*incoming, ss, g,
+                        stages.empty() ? &mtp.kv_state() : nullptr, err);
+                    if (valid) for (size_t i = 0; i < stages.size(); ++i) {
+                        const strata::core::OnDevice on(stages[i]->dev);
+                        if (!strata::core::conversation_snapshot_validate(incoming->stage_images[i], stages[i]->ss, g,
+                                i + 1 == stages.size() ? &mtp.kv_state() : nullptr, err)) { valid = false; break; }
+                    }
+                    if (!valid) {
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: restore preparation failed (%s); reading prompt\n", err.c_str());
+                        incoming.reset(); disk_conversations.discard(disk_match.index); disk_source = false; err.clear();
+                    } else {
+                        std::fprintf(stderr, "strata serve: conversation SSD cache: verified %lld tokens in %.1f ms\n",
+                            (long long) parked.tokens, std::chrono::duration<double, std::milli>(Clock::now() - t0).count());
+                    }
+                }
+                disk_conversations.unpin();
             }
             if (slot_source >= 0) {
                 const auto t0 = Clock::now();
@@ -8375,16 +8603,20 @@ int main(int argc, char** argv) {
                 cvec_cached = incoming->cvec;
                 resume = parked.tokens;
                 from_live = parked.live;
-                if (std::getenv("STRATA_SNAPSHOT_FULL_CAPTURE") == nullptr) {
+                if (!disk_source && std::getenv("STRATA_SNAPSHOT_FULL_CAPTURE") == nullptr) {
                     std::vector<std::vector<strata::core::ConversationKv>> stage_kv;   // every stage's, for its next park
                     for (auto& si : incoming->stage_images) stage_kv.push_back(std::move(si.kv));
                     conversations.retain(std::move(incoming->kv), int64_t(live.size()), std::move(stage_kv));
                 }
                 incoming.reset(); // Running-state/checkpoint copies are no longer needed.
+                if (disk_source) disk_conversations.discard(disk_match.index);
                 std::fprintf(stderr, "strata serve: conversation cache: restored %lld tokens (%s) in %.1f ms; parked=%zu bytes=%zu\n",
                              (long long) resume, from_live ? "live" : "checkpoint",
                              std::chrono::duration<double, std::milli>(Clock::now() - t0).count(),
                              conversations.size(), conversations.bytes());
+                if (disk_source) std::fprintf(stderr, "strata serve: conversation SSD cache: restored %lld tokens (%s) in %.1f ms; parked=%zu bytes=%llu evictions=%zu\n",
+                    (long long) resume, from_live ? "live" : "checkpoint", std::chrono::duration<double, std::milli>(Clock::now() - t0).count(),
+                    disk_conversations.size(), (unsigned long long) disk_conversations.bytes(), disk_conversations.evictions());
             }
             if (want_cvec != cvec_cached) {
                 live_ok = false;
@@ -9682,10 +9914,16 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                if (adapt_nowait()) apply_pending(false);
+                const bool ram_due = o.ram_hot_experts && rounds > 0 && rounds % o.ram_hot_every == 0;
+                if (ram_due) apply_pending(true);
+                else if (adapt_nowait()) apply_pending(false);
                 else if (pending.empty() || ++pending_age >= adapt_lag()) apply_pending(true);
                 if (!adapt_tick(false)) {   // --adapt-async: the round in flight moves on a step when it can
                     std::printf("ERR an adaptive refill failed\n");
+                    return 1;
+                }
+                if (ram_due && src.promote_hot_ram(drive.d.usage, host_res, o.ram_hot_swaps, err) < 0) {
+                    std::printf("ERR %s\n", err.c_str());
                     return 1;
                 }
                 if (hist_n > 0) {
@@ -9808,6 +10046,7 @@ int main(int argc, char** argv) {
                 // a prompt stopped halfway leaves the session somewhere between two chunks: nothing to continue from
                 // (the checkpoints taken while reading it are still good)
                 live.swap(consumed);
+                live_prompt_end = std::min<int64_t>(n, live.size());
                 live_imgs = imgs_below(req_imgs, (int64_t) live.size());
                 live_ok = o.prompt_cache > 0 && req_ckpt;   // ckpt=0: nothing to continue or park (#830)
             }
@@ -10037,6 +10276,10 @@ int main(int argc, char** argv) {
                              (unsigned long long)src.rotated_exchanges(),
                              (unsigned long long)src.avoided_exchange_copy_bytes());
             // CS-T: the tiers, cumulative - GPU cache hits (the decode lookups above), RAM copy, files (SSD / OS cache)
+            if (o.ram_hot_experts)
+                std::fprintf(stderr, "strata serve: hot RAM: %lld file-tier experts promoted, %.1f MB copied into "
+                                     "existing RAM slots (cumulative; budget unchanged)\n",
+                             (long long) src.ram_promotions(), (double) src.ram_promotion_bytes() / 1e6);
             if (srcp == &src)
                 std::fprintf(stderr, "strata serve: expert tiers: GPU %lld hits this request; since the start RAM %lld blobs, files %lld blobs "
                                      "%.1f MB read%s\n", (long long) req_hits, (long long) src.ram_reads(),
@@ -10107,7 +10350,7 @@ int main(int argc, char** argv) {
     if (o.prefill_chunk > 0 && n_prompt > 1) {
         void* borrow = nullptr;
         uint64_t borrow_bytes = 0;
-        if (!o.no_prefill_borrow && !host_res.empty() && d_res != nullptr) {
+        if (!o.no_prefill_borrow && !single_prefill_own && !host_res.empty() && d_res != nullptr) {
             int64_t chunk = o.prefill_chunk;
             int64_t k = plan_lend(chunk);             // auto: the largest chunk that fits; fixed: halved to fit
             const int64_t request_sized = equal_chunk(n_batched, chunk);
@@ -10742,8 +10985,14 @@ int main(int argc, char** argv) {
             // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
             // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
             // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-            if (adapt_nowait()) apply_pending(false);
+            const bool ram_due = o.ram_hot_experts && rounds > 0 && rounds % o.ram_hot_every == 0;
+            if (ram_due) apply_pending(true);
+            else if (adapt_nowait()) apply_pending(false);
                 else if (pending.empty() || ++pending_age >= adapt_lag()) apply_pending(true);
+            if (ram_due && src.promote_hot_ram(drive.d.usage, host_res, o.ram_hot_swaps, err) < 0) {
+                std::fprintf(stderr, "strata generate: %s\n", err.c_str());
+                return 1;
+            }
             if (!ver.run(T, window.data(), p, &drive_pool_multi, &drive, outv.data(), err)) {
                 std::fprintf(stderr, "strata generate: %s\n", err.c_str());
                 return 1;
@@ -10887,6 +11136,9 @@ int main(int argc, char** argv) {
             std::printf("%-24s %.2f GiB of experts in RAM, %lld exchanged with the VRAM tier, %lld blob reads from "
                         "the file\n", "resident RAM", (double) src.resident_bytes() / 1073741824.0,
                         (long long) src.exchanges(), (long long) src.file_reads());
+        if (o.ram_hot_experts)
+            std::printf("%-24s %lld file-tier experts promoted, %.1f MB copied into existing RAM slots\n", "hot RAM",
+                        (long long) src.ram_promotions(), (double) src.ram_promotion_bytes() / 1e6);
         if (srcp == &src) {  // CS-T: the RAM and file tiers (the GPU cache's share is the hit rate above)
             const double fms = src.file_ms() - fms0, fmb = (double) (src.file_blob_bytes() - fbytes0) / 1e6;
             std::printf("%-24s decode: RAM %lld blobs, files %lld blobs, %.1f MB read from the files (%.2f MB/round, "

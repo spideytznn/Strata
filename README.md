@@ -1,212 +1,231 @@
-<h1 align="center">Strata</h1>
+<!-- Local integration: upstream v0.1.39 plus memory planning and SSD-to-RAM promotion. -->
+# Strata · 本地推理优化 / Local inference optimizations
 
-**English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)
+[中文](#zh-cn) · [English](#english)
 
-<p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>
-NVIDIA or AMD graphics card (12 GB or more) · Windows or Linux · free and open source</p>
+<a id="zh-cn"></a>
 
-<p align="center"><a href="https://github.com/Niko1221/Strata/releases/download/v0.1.10/Pagoda.mp4"><img src="docs/media/pagoda-preview.webp" width="720" alt="A voxel pagoda garden that Strata's model wrote, running in the browser"></a><br>
-<sub>A voxel pagoda garden, 1 shot prompt running on an RTX 5070 with Strata (IQ3_S, 128K context) ·
-<a href="https://github.com/Niko1221/Strata/releases/download/v0.1.10/Pagoda.mp4">full video (49 s)</a></sub></p>
+## 中文
 
-Strata runs **[Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)** on a normal PC. This is a
-large, smart AI model that usually needs a server. It chats, writes code, reads pictures and works with your apps
-and coding agents. Nothing leaves your PC.
+基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.39** 的优化分支，让
+**Qwen3.8-Flash-Next** 在个人电脑上更合理地使用显存与系统内存。
+我们重点保留经过本机验证的内存规划改动，并沿用上游的计算内核、FP8 ngram、服务接口与会话缓存。
 
-## How fast is it?
+### 分支与设备
 
-We measured it on two ordinary gaming PCs. A token is about ¾ of a word.
+| 分支 | 定位 | 实测设备 |
+| --- | --- | --- |
+| [`main`](https://github.com/spideytznn/Strata/tree/main) | 单卡内存规划与上游 RAM 多会话缓存配合 | Windows，RTX 5090 32 GiB 显存，48 GB 系统内存 |
+| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | 双卡权重分配、RAM 专家常驻与动态交换（基于 v0.1.35） | Linux，两张扩容至 22 GiB 的 RTX 2080 Ti，32 GB 系统内存 |
 
-- **Writes answers:** how fast the reply appears in a short chat. 60 tokens per second is faster than you can read.
-- **Reads your prompt:** how fast it takes in what you send (here a 32K-token document, code or chat history).
+双卡测试使用扩容卡，普通 11 GiB RTX 2080 Ti 的容量与性能需要另行验证。
+两个分支的优化和测试范围各自独立。
 
-<table>
-<tr><th>NVIDIA: RTX 5070 (12 GB), Ryzen 5 7600, 64 GB RAM</th><th>AMD: RX 9070 XT (16 GB), Ryzen 9 3900X, 47 GB RAM</th></tr>
-<tr><td>
+### 我们优化了什么
 
-| Size | Writes answers | Reads your prompt |
-| --- | ---: | ---: |
-| **Q2_0** | 94 tokens/s | 2,650 tokens/s |
-| **IQ2_XS** | 79 tokens/s | 2,090 tokens/s |
-| **IQ3_XXS** | 62 tokens/s | 1,750 tokens/s |
-| **IQ3_S** | 53 tokens/s | 1,620 tokens/s |
-| **Coder** | 55 tokens/s | 2,180 tokens/s |
+**主分支保留两项改动：**
 
-</td><td>
+1. **独立 prefill 缓冲选择。** 填满专家缓存后，根据剩余显存估算独立预填充缓冲。
+   保留配置的显存余量，且批量不小于上游借用缓冲方案时才启用。无需移出专家来腾空间；
+   显存不足时自动沿用上游借用路径。正式配置仍使用 `--expert-cache auto`。
+2. **专家与会话的 RAM 预算配合。** 启用 RAM 常驻专家和多会话缓存时，专家加载至少为
+   会话缓存预算、最低空闲 RAM 和额外 256 MiB 留出空间，避免两者分别按同一份空闲内存做预算。
+   已有更大的专家 headroom 会被保留；会话缓存关闭时，维持上游预算。
 
-| Size | Writes answers | Reads your prompt |
-| --- | ---: | ---: |
-| **Q2_0** | 60 tokens/s | 1,160 tokens/s |
-| **IQ2_XS** | 52 tokens/s | 1,110 tokens/s |
-| **Coder** | 44 tokens/s | 1,420 tokens/s |
+本机部署沿用上游的 **RAM 多会话保存、恢复、隔离与淘汰**，配置为 **2 GiB、最多 2 个缓存槽**，
+最低空闲 RAM 2560 MiB；对应至少 4.75 GiB 的专家 headroom。配置不是安装器的全局默认值，
+缓存可容纳的会话数量还取决于长度。前缀检查点与多会话缓存均来自上游。
 
-</td></tr>
-</table>
+**双卡分支的改动：** dense 权重按所属 GPU 的层加载；在 RAM 常驻两张 GPU 的专家补集；
+动态交换在确认两张卡上传完成后提交专家归属。该分支配合上游的专用 prefill 缓冲与按层状态分配。
+详见 [双卡实现与测试记录](https://github.com/spideytznn/Strata/blob/strata-2080tix2/docs/RTX2080TI_DUAL.md)。
 
-NVIDIA: Q2_0 with engine 0.1.36, the other rows with 0.1.26 (4K answers, 32K prompts). The full tables are in
-[DETAILS.md](docs/DETAILS.md#speed-measured). A card with more VRAM is faster: an RTX 3090 (24 GB) should write
-about 100-140 tokens per second. Long chats and other cards: [speed of each model](docs/MODELS.md#how-fast-is-each-size),
-[community results](docs/COMMUNITY_BENCHMARKS.md).
+### 实测结果
 
-<p align="center"><a href="https://buymeacoffee.com/strataengine"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a><br>
-<sub>Strata is free. If it runs well on your PC, a coffee keeps the work on it going.</sub></p>
+以下性能数据基于 v0.1.35；v0.1.39 的速度需重新测量。
 
-## What you need
+主分支：2026-10-02，RTX 5090 / 48 GB RAM，IQ3_S、FP8 ngram、INT8 KV，配置上下文 262144。
+以下是顺序对照，文件缓存与运行状态会影响结果。
 
-| | |
-| --- | --- |
-| **Graphics card** | **NVIDIA** GeForce RTX 20, 30, 40 or 50 series, or **AMD** Radeon RX 7900 XT / XTX, RX 7800 XT / 7700 XT, RX 9060 XT, RX 9070 / 9070 XT, Radeon AI PRO R9700 or RX 6800 / 6900 series. It needs **12 GB of VRAM or more**. |
-| **RAM** | 32 GB or more. Your RAM decides [which model](#which-model-should-i-pick) fits. 64 GB runs every size. |
-| **Disk** | About 80 GB free. Use an SSD if you can: the first start is much faster. |
-| **System** | Windows 10 / 11 or Linux, and a current graphics driver from NVIDIA or AMD. |
+| 测试 | 对照 | 优化版 | 含义 |
+| --- | ---: | ---: | --- |
+| 17944-token 完整 prefill，自动专家缓存、暖文件 | 上游 2925 tok/s | 2919 tok/s | 默认配置预填充速度接近 |
+| 17944-token 完整 prefill，较小专家缓存、同一二进制 | 借用缓冲 2312 tok/s | 独立缓冲 2902 tok/s | 独立缓冲在有显存余量时值得保留 |
+| 切回相同的 17944-token 提示 | — | 复用 17937 tokens，只重读 7 tokens | 上游多会话恢复有效 |
 
-The installer sets up everything else. Two or three cards can share the model ([multi-GPU](docs/MULTI_GPU.md)).
+独立缓冲对照使用 `--expert-cache 5400`，引擎实报 7056 槽、13.39 GiB 实际分配；
+两组 prefill 批量均为 8192，独立缓冲约 3805 MiB，显存余量 1536 MiB。
+这是一次顺序测试，不代表默认配置或所有提示都有同等收益。
+解码复测波动较大，**尚未证明主分支有稳定的解码提速**。
 
-Experimental, written and tested by community members on their own machines:
+双卡分支在上述扩容双卡上，单轮同提示测试中，13K prefill 从旧改造版的 **1040.5** 提升至
+**1207.4 tok/s**，1024-token decode 从 **40.3** 提升至 **51.5 tok/s**。
+没有清空 OS 文件缓存；详细条件与限制见双卡文档。
 
-- **Older graphics cards** (Tesla P40 / V100, GTX 10, Radeon VII / MI50, RX 6700 XT, RX 5500 XT): [Older GPUs](docs/OLDER_GPUS.md).
-- **Intel Arc**, built from source on Linux: [Intel Arc](docs/INTEL_ARC.md).
-- **AMD Ryzen AI Max (Strix Halo)**, built from source on Linux: [Strix Halo](docs/STRIX_HALO.md).
-- **Older processors without AVX2**: they work, but slowly. [Older CPUs](docs/INSTALL.md#older-cpus-experimental).
+主分支已通过 11 项内存规划边界检查、30 项上游会话缓存测试，以及真实模型 A→B→A 状态一致性检查。
+完整服务包含 GPU 视觉编码器的启动与 HTTP 会话恢复也已验证。
+更多参数、测量和范围见 [主分支优化说明](docs/LOCAL_VARIANT.md)。
 
-The full list: [docs/INSTALL.md](docs/INSTALL.md#what-you-need).
+### 多会话与并发
 
-## Install
+当前本机配置接收多个客户端请求并排队，**同一时刻执行 1 条推理**。
+上游另提供显式开启的并发槽；本地 SSD 热专家升级暂限单请求路径，不能与 `--batch` 混用。
+RAM 多会话缓存加速不同历史之间的切换，不增加同时推理数量。
+当前没有应用层队列长度上限或推理限流；已验证排队、断连取消与请求交接，尚未做高并发容量评测。
+本机 SSD 自动会话缓存已实现，切换时分块保存完整状态；缓存随本次引擎运行结束而清理。
+上游 v0.1.40 新增独立的磁盘会话保存/恢复 API，可跨兼容引擎重启复用，需要主动调用。
+详见 [SSD 自动缓存](docs/SSD_CONVERSATION_CACHE.md) 与 [上游会话文件](docs/DETAILS.md#using-it)。
 
-### Let your AI set it up
+### 安装与配置
 
-Do you use an AI coding assistant (Claude Code, Cursor, Codex, GitHub Copilot, ...)? Paste this into it:
-
-```text
-Set up Strata on this PC for me: https://github.com/Niko1221/Strata - follow docs/AI_SETUP.md in that repository.
+```sh
+git clone https://github.com/spideytznn/Strata.git
+cd Strata
 ```
 
-It checks your graphics card, RAM and disk and picks the model that fits. Then it installs and starts it and tells
-you how to connect your apps. AI tools can also install, start and stop Strata through its
-[MCP server](docs/MCP_SERVER.md).
+使用自定义改动需要从源码编译：Windows 运行 `START-HERE.bat --build`，Linux 运行
+`./setup.sh --build`。已有安装调整构建时可加 `--setup`。安装器准备依赖与模型，并按设备构建引擎；
+仅使用上游预编译引擎不会包含本仓库的 C++ 改动。
+主分支自定义改动的实测平台为 Windows / CUDA；Linux 双卡使用对应分支。
 
-### Or do it yourself
+本机已验证配置使用 IQ3_S、FP8 ngram、INT8 KV、MTP4、GPU 视觉与 262144 上下文上限；
+上下文上限是配置值，不代表已填满 262K 实测。硬件、后台内存占用与模型大小都会影响可运行配置。
+保留自己的模型路径，并在生成配置的 `args` 中按需加入：
 
-[Download Strata](https://github.com/Niko1221/Strata/archive/refs/heads/main.zip) and unzip it (or `git clone` it).
-**Windows:** double-click **`START-HERE.bat`**. **Linux:** run **`./setup.sh`** in the Strata folder.
+```text
+--conversation-cache-mib 2048
+--conversation-cache-slots 2
+--conversation-cache-min-free-mib 2560
+```
 
-The steps are the same for NVIDIA and AMD. The installer finds your card and sets up the right engine for it. It
-asks you a few questions:
+`STRATA_PREFILL_OWN_AUTO=0` 可关闭本地独立缓冲选择，用于对照。
+安装步骤见 [AI_SETUP](docs/AI_SETUP.md)，模型选择见 [MODELS](docs/MODELS.md)，
+服务接口与完整参数见 [DETAILS](docs/DETAILS.md)。模型、机器专用配置与编译产物不随源码上传。
 
-- which model and which size,
-- how much context (how much text the model keeps in mind),
-- whether it should read pictures.
+### 致谢与许可
 
-Press Enter each time for the recommended answer. Then it downloads the model (about 70 GB) and starts it. If the
-download stops, run it again: it continues where it left off. Your browser opens the Strata app at
-`http://127.0.0.1:8080`.
+原作者 [Niko1221/Strata](https://github.com/Niko1221/Strata) 提供基础引擎、计算内核、服务层、
+前缀检查点与 RAM 多会话缓存。FP8 ngram 使用上游读取与打包实现，本仓库没有把这些功能标为自研。
+模型来自 [Qwen](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)，量化版本来自
+[ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF)；
+底层还使用 [llama.cpp / ggml](https://github.com/ggml-org/llama.cpp)。
+源码遵循 [MIT License](LICENSE)，模型和依赖遵循各自许可。
 
-> **While the model starts, your PC can be slow or stop responding for 1-3 minutes** (longest the first time).
-> Strata loads 35-55 GB into your RAM and locks part of it for the graphics card. This is normal. Wait, and don't
-> close the window. The window shows what Strata is doing.
+---
 
-**Next time**, run `START-HERE.bat` (or `./setup.sh`) again. It starts right away and downloads nothing twice. Close
-its window to stop the model. `UPDATE.bat` (`./update.sh`) updates Strata without starting it. Updating, Docker,
-several cards, where the files go and every option: [docs/INSTALL.md](docs/INSTALL.md).
+<a id="english"></a>
 
-## Which model should I pick?
+## English
 
-The installer recommends one for your RAM. The same model comes in several sizes, compressed more or less. Smaller
-sizes are faster. Larger sizes are a bit smarter.
+An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.39** for running
+**Qwen3.8-Flash-Next** on personal computers with a practical balance of VRAM and system RAM.
+We retain measured memory-planning changes while using upstream compute kernels, FP8 ngram support,
+service APIs, and conversation caching.
 
-| Your RAM | Take | Why |
+### Branches and hardware
+
+| Branch | Focus | Tested hardware |
 | --- | --- | --- |
-| **32 GB** | **Coder** | it fits 32 GB, and it is made for code (with a 24 GB card, Q2_0 and IQ2_XS run too) |
-| **48 GB** | **IQ2_XS** (or Q2_0, the fastest) | the larger sizes do not fit |
-| **64 GB** | **IQ2_XS** (recommended), or IQ3_XXS / IQ3_S | every size fits; IQ3_S is the best and the slowest |
-| **96 GB or more** | **IQ3_S**, or Unsloth's UD-IQ4_XS (~4-bit) | room for the largest sizes with everything else open |
+| [`main`](https://github.com/spideytznn/Strata/tree/main) | Single-GPU memory planning with upstream RAM conversation caching | Windows, RTX 5090 with 32 GiB VRAM, 48 GB system RAM |
+| [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | Dual-GPU weight placement, resident RAM experts, and dynamic exchange (based on v0.1.35) | Linux, two RTX 2080 Ti cards modified to 22 GiB each, 32 GB system RAM |
 
-- **[Coder](docs/MODELS.md#coder):** a coding version with half of the experts removed. It reaches 91% of the full
-  model's SWE-bench Verified score (measured by its authors) and fits 32 GB of RAM. It is weaker outside code,
-  including Chinese and other CJK text (#438). For those, take Q2_0, IQ2_XS or IQ3_S, which keep every expert.
-- **[Swift 1.5](docs/MODELS.md#swift-15):** a fine-tune that thinks for a much shorter time before it answers. You
-  get the answer sooner, at about the same quality.
-- **[Unsloth UD-IQ4_XS](docs/MODELS.md#unsloth-ud-iq4_xs):** Unsloth's ~4-bit version, between IQ3_S and
-  UD-Q4_K_XL in quality. A 94 GB download. With less than ~80 GB of RAM, Strata reads part of it from the SSD
-  while it answers, so it is slower there (an NVMe SSD helps).
-- **[Unsloth UD-Q4_K_XL](docs/MODELS.md#unsloth-ud-q4_k_xl-experimental)** (experimental): the closest to the full
-  model. But Strata reads most of it from the SSD while it answers, so it writes only 7-8.5 tokens/s on a 64 GB PC.
-- **[OrcaRouter's Uncensored IQ3_XXS](docs/MODELS.md#orcarouter-uncensored-iq3_xxs):** you set it up by hand. It is
-  not in the installer's menu.
+The dual-GPU measurements use modified cards. Capacity and performance on ordinary 11 GiB RTX 2080 Ti
+cards require separate validation. Each branch has its own implementation and test scope.
 
-Sizes, downloads and what fits where: [docs/MODELS.md](docs/MODELS.md). To add another model later, run
-`SETUP.bat` (Linux: `./setup.sh --setup`).
+### What we optimized
 
-## Using it
+**Main retains two changes:**
 
-<p align="center"><img src="docs/media/runpagoda.png" width="900" alt="The Strata app's Monitor tab next to a coding agent"><br>
-<sub>The Strata app's <b>Monitor</b> (left) while a coding agent writes the pagoda garden from the video (right)</sub></p>
+1. **Independent prefill buffer selection.** After filling the expert cache, the planner prices independent
+   buffers against remaining free VRAM. It preserves the configured VRAM reserve and selects them only if
+   the batch is at least as large as upstream's borrowed-buffer option. It does not evict experts to make
+   room. If free VRAM is insufficient, upstream borrowing remains active. Production keeps `--expert-cache auto`.
+2. **Coordinated expert and conversation RAM budgets.** With resident RAM experts and conversation caching
+   enabled, expert loading reserves at least the conversation budget plus the minimum free-RAM floor plus
+   256 MiB, so both allocations do not budget against the same free memory independently. Larger existing
+   expert headroom is respected. Disabling conversation caching preserves upstream headroom.
 
-- **In the browser:** open `http://127.0.0.1:8080`. It has **Chat**, a live **Monitor** of the model and your
-  GPU/CPU/RAM, and **About** with the settings and addresses.
-- **Your apps and coding agents:** add an "OpenAI-compatible" provider with the base URL
-  **`http://127.0.0.1:8080/v1`**. Any API key and any model name work.
-  - Apps that use Anthropic's API: `http://127.0.0.1:8080/v1/messages` (Claude Code:
-    `ANTHROPIC_BASE_URL=http://127.0.0.1:8080`).
-  - Codex CLI and other apps that use the OpenAI Responses API: `/v1/responses`
-    ([setup](docs/DETAILS.md#the-responses-api-and-codex-cli)).
-- **Thinking:** choose **off, low, medium or high** in the chat menu or in your app's "reasoning effort". Off is the
-  fastest. High is best for hard questions.
-- **Pictures:** say yes to "Images?" in setup. Then click **Picture** in the chat, or attach pictures in your app.
-  AMD cards read pictures on Linux through the processor; on Windows they can't yet.
-- **From your phone or another PC:** `START-HERE.bat --setup --host 0.0.0.0 --api-key <secret>`. Always set a key.
-- **One request at a time:** by default Strata answers one request, and the others wait. To answer several at once,
-  set `"parallel": 2` ([BATCHING.md](docs/BATCHING.md)). On a 12 GB card this makes each answer slower.
-- **Long prompts:** Strata reads the first message of a chat in full, about 1 minute per 30,000 tokens. Follow-up
-  messages start in seconds.
+Our local deployment uses upstream **RAM conversation parking, restoration, isolation, and eviction** with
+a **2 GiB budget and up to 2 slots**, plus a 2560 MiB free-RAM floor. This implies at least 4.75 GiB of expert
+headroom. These are deployment settings, not installer-wide defaults. The number of conversations that fit
+depends on their lengths. Prefix checkpoints and conversation caching are upstream features.
 
-More: [where your chats are stored](docs/INSTALL.md#where-things-are-stored), [the API](docs/DETAILS.md#using-it).
+**The dual-GPU branch** loads dense weights for each GPU's assigned layers, keeps the combined expert
+complement resident in RAM, and commits dynamic-exchange ownership only after both GPUs confirm uploads.
+It uses upstream dedicated prefill buffers and layer-owned state allocation. See the
+[dual-GPU implementation and measurements](https://github.com/spideytznn/Strata/blob/strata-2080tix2/docs/RTX2080TI_DUAL.md).
 
-## Something went wrong?
+### Measurements
 
-- **My PC froze the first time Strata started.** This is normal while it loads the model. Wait, and don't close the
-  window. Still frozen after 10 minutes? Restart the PC, close other programs and try again, or pick a smaller size.
-- **It stopped while downloading or installing.** Run `START-HERE.bat` (or `./setup.sh`) again. It continues where
-  it stopped.
-- **It's very slow and the disk light keeps blinking, or it says "the engine stopped unexpectedly".** Your PC does
-  not have enough free RAM. Close other programs (browsers use a lot), or pick a smaller size (Q2_0 or IQ2_XS).
-- **It says port 8080 is already in use.** Strata is already running. Look for its window.
+The performance figures below were measured on v0.1.35; v0.1.38 speed requires new measurements.
 
-More problems and their fixes: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md). Still stuck? Open an
-[issue](https://github.com/Niko1221/Strata/issues) and attach `strata-<model>.log` from the Strata folder. Found a
-security problem? Report it privately: [SECURITY.md](SECURITY.md).
+Main: 2026-10-02, RTX 5090 / 48 GB RAM, IQ3_S, FP8 ngram, INT8 KV, configured context limit 262144.
+These are sequential comparisons affected by file caching and runtime conditions.
 
-## How does it work?
+| Test | Reference | Optimized | Interpretation |
+| --- | ---: | ---: | --- |
+| Full 17944-token prefill, auto expert cache, warm files | Upstream 2925 tok/s | 2919 tok/s | Similar default prefill speed |
+| Full 17944-token prefill, smaller expert cache, same binary | Borrowed buffers 2312 tok/s | Independent buffers 2902 tok/s | The independent option is useful when free VRAM permits |
+| Return to the same 17944-token prompt | — | 17937 tokens reused, only 7 reread | Upstream conversation restoration works |
 
-Models like this one usually run on servers with hundreds of gigabytes of graphics memory. Your graphics card has
-12-24 GB. Strata makes the model fit by **sharing the work across your whole PC**. Think of a kitchen: the things
-you use all the time stay on the counter, and the rest waits in the pantry.
+The independent-buffer comparison used `--expert-cache 5400`; the engine reported 7056 slots and
+13.39 GiB of actual allocation. Both arms used 8192-token batches; independent buffers used about 3805 MiB,
+preserving a 1536 MiB VRAM reserve. This single sequential pair does not establish the same improvement
+for default settings or all prompts. Repeated decode measurements varied substantially;
+**a stable main-branch decode speedup has not been established**.
 
-<p align="center"><img src="docs/media/how-it-works.svg" width="860" alt="The model's 24,576 experts: the busiest on the graphics card, all of them in RAM, a lookup table on the SSD"></p>
+On the modified dual-GPU machine, one matched-prompt run improved 13K prefill from **1040.5** in the old
+custom version to **1207.4 tok/s**, and 1024-token decode from **40.3** to **51.5 tok/s**.
+OS file caches were not cleared. Conditions and limitations are documented on that branch.
 
-- **The model is a team of 24,576 small specialists ("experts").** Each word needs only 10 of them.
-- **Your graphics card** keeps the few thousand experts that are used most often. **Your RAM** holds all of them,
-  and **your processor** works on the rest at the same time. **Your SSD** holds a big lookup table.
+Main passes 11 planner boundary checks, 30 upstream conversation-cache tests, and real-model A→B→A state
+parity checks. Full-service startup with the GPU vision encoder and HTTP conversation restoration also pass.
+See [main-branch implementation and validation](docs/LOCAL_VARIANT.md) for detailed parameters and scope.
 
-<p align="center"><img src="docs/media/guess-and-check.svg" width="860" alt="A small helper guesses the next words; the big model checks them all at once and keeps the right ones"></p>
+### Conversations and concurrency
 
-- **Guess, then check:** a small helper guesses the next few words. The big model checks them all at once. You get
-  the same answer, 1.6-1.8x sooner.
-- **Long texts are read in big pieces** (up to 8,192 tokens at a time), at over 1,000 tokens per second.
+Multiple clients can submit requests and wait in the queue; **one inference request runs at a time**.
+RAM conversation caching speeds up switching histories without adding parallel inference slots.
+There is currently no application-level queue-length cap or inference rate limit. Queueing, disconnect
+cancellation, and request handover are checked; high-concurrency capacity has not been measured.
+**SSD session caching is deferred.** RAM snapshots are lost when the engine exits.
 
-The longer explanation: [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md). Every part and its numbers:
-[the details](docs/DETAILS.md#how-it-works) and the [paper](docs/paper/Strata-Paper.pdf).
+### Install and configure
 
-## Credits and license
+```sh
+git clone https://github.com/spideytznn/Strata.git
+cd Strata
+```
 
-The model is [Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next) by the Qwen team. It was
-compressed by [ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF), UkisAI (Swift 1.5)
-and Unsloth. Strata uses parts of [llama.cpp / ggml](https://github.com/ggml-org/llama.cpp). All credits:
-[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#credits). Strata is open source under the [MIT License](LICENSE). A few
-parts and every model have their own licenses ([which ones](docs/HOW_IT_WORKS.md#license)).
+Build from source to use the custom changes: run `START-HERE.bat --build` on Windows or `./setup.sh --build`
+on Linux. Add `--setup` when changing an existing installation's build/settings. Setup prepares dependencies
+and the model and builds for your GPU. An upstream prebuilt engine does not contain this fork's C++ changes.
+Main's custom changes are tested on Windows / CUDA; use the separate branch for the tested Linux dual-GPU setup.
 
-## Support Strata
+The local validated deployment uses IQ3_S, FP8 ngram, INT8 KV, MTP4, GPU vision, and a 262144 context limit.
+The context limit is configured, not a full-262K input measurement. Hardware, background RAM use, and model
+size determine what fits. Keep your own model paths and optionally add these engine `args` to the generated config:
 
-Strata is free and open source. If it is useful to you, you can support its development:
+```text
+--conversation-cache-mib 2048
+--conversation-cache-slots 2
+--conversation-cache-min-free-mib 2560
+```
 
-<p align="center"><a href="https://buymeacoffee.com/strataengine"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a></p>
+`STRATA_PREFILL_OWN_AUTO=0` disables the local independent-buffer choice for comparison.
+See [AI_SETUP](docs/AI_SETUP.md) for installation, [MODELS](docs/MODELS.md) for model choices, and
+[DETAILS](docs/DETAILS.md) for service APIs and all options. Models, machine-specific configs, and build
+artifacts are not included in the source repository.
+
+### Credits and license
+
+[Niko1221/Strata](https://github.com/Niko1221/Strata) provides the base engine, compute kernels, service layer,
+prefix checkpoints, and RAM conversation cache. FP8 ngram uses upstream readers and packing tools;
+these are credited to upstream rather than presented as our additions.
+The model is from [Qwen](https://huggingface.co/Qwen/Qwen3.8-Flash-Next), with quantized versions from
+[ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF).
+Strata also uses [llama.cpp / ggml](https://github.com/ggml-org/llama.cpp).
+Source is under the [MIT License](LICENSE); models and dependencies retain their own licenses.
+
+本机融合基线：v0.1.40.1；保留独立 prefill、热专家 RAM 升级、外部 FP8 ngram 与 SSD 自动会话缓存。
+本次实现与验证范围见 [v0.1.40.1 本机融合说明](docs/LOCAL_FUSION_V0401.md)。

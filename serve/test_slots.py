@@ -197,7 +197,9 @@ class Slots(unittest.TestCase):
             cwd = os.getcwd()
             try:
                 os.chdir(base)
-                self.assertEqual(slot_save_dir("rel"), os.path.join(os.path.realpath(base), "rel"))
+                # Windows getcwd may return an 8.3 alias (SPIDEY~1), while
+                # realpath expands it. Both names must identify the same directory.
+                self.assertTrue(os.path.samefile(slot_save_dir("rel"), os.path.join(os.path.realpath(base), "rel")))
             finally:
                 os.chdir(cwd)
             for bad in ("", "  ", None, 3, "a\nb"):
