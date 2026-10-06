@@ -28,6 +28,12 @@ executable lives separately at `engine/fusion-v0401/strata.exe`; the old
 executable is retained. Close the existing server and use the same desktop
 launcher to activate the new build. Installation does not start/restart it.
 
+The remote dual-2080-Ti launcher uses the same 32 GiB / 64-record SSD policy
+at `/home/test/Strata-fusion-20261002/conversation-cache`. It keeps IQ3_S,
+262144 context, prefill 4096, INT8 KV, MTP 4, layers 24+24, strict resident
+expert RAM and GPU vision. The draft K/V belongs to the last stage. Both
+installations retain the automatic cache's per-engine-run lifetime.
+
 ## What is saved
 
 Saved state includes main-layer and draft-layer K/V and scales, pooled indexer
@@ -108,8 +114,13 @@ checkpoints for FP16, INT8, Q4_0 and identity-layout K8V4. These use small fixtu
 not a second full-model service. CPU tests cover multi-chunk nonaligned extents,
 image/steering isolation, corruption/truncation, quota, pinned-incoming eviction,
 failed publication, directory isolation and orphan cleanup. Server tests cover
-SSD metrics separately from RAM metrics. Linux and actual multi-GPU SSD runtime
-have not been validated in this task.
+SSD metrics separately from RAM metrics. On 2026-10-07 the Linux/CUDA 12.8 build on two RTX 2080 Ti cards also passed
+4,259 GPU snapshot checks, including 120 additional checks on two distinct
+devices with carved layer ranges, the last stage's draft ring, borrowed
+checkpoint chains and direct SSD-backed K/V. All 12 selected C++ test targets
+passed there, including 60 SSD CPU checks, file corruption/limits and injected
+CUDA-transfer failures. This validates small fixtures, not a full-model
+long-context switch or decode-throughput measurement.
 
 A synthetic 512 MiB payload on G: took 478.2 ms to write, 149.6 ms to verify/load
 metadata, and 150.1 ms for a second sequential read. That isolated CPU process's
