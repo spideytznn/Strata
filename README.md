@@ -1,4 +1,6 @@
 <!-- Local integration: upstream v0.1.39 plus memory planning and SSD-to-RAM promotion. -->
+
+This branch retains the dual RTX 2080 Ti installation and automatic SSD conversation parking. See [the v0.1.40.1 integration and measured validation](docs/REMOTE_FUSION_V0401.md).
 # Strata · 本地推理优化 / Local inference optimizations
 
 [中文](#zh-cn) · [English](#english)

@@ -309,6 +309,121 @@ void full_session(int fmt, int mode, int experts) {
     check(spare==a.checkpoints[0].dead,"checkpoint rebuilds spare row over a later completed block");
     check(ss.ple_prev[0]==2 && ss.ple_prev[1]==3,"checkpoint PLE token window");
 }
+// Runs only on two distinct CUDA devices. Same carved layout as the serving path:
+// stage 0 has no draft; the last stage owns the draft ring.
+void dual_ssd_session(int fmt) {
+    cuda_check(cudaSetDevice(0));
+    auto first=std::make_unique<Fixture>(fmt,0);
+    cuda_check(cudaSetDevice(1));
+    auto second=std::make_unique<Fixture>(fmt,0);
+    auto draft=std::make_unique<Fixture>(fmt,2);
+    Fixture* f[2]={first.get(),second.get()};
+    SessionState ss[2];
+    QsaState global[2][2];
+    ConversationStateSizes z[2];
+    std::vector<int32_t> ids(65);
+    for(size_t i=0;i<ids.size();++i) ids[i]=int32_t(i+1);
+    std::vector<ConversationImageKey> images;
+    std::vector<ConversationCheckpoint> checkpoints[2];
+    const std::vector<ConversationCheckpoint> empty;
+    std::string err;
+    for(int dev=0;dev<2;++dev) {
+        cuda_check(cudaSetDevice(dev));
+        auto& g=f[dev]->g;
+        g.n_layers=8;g.ssm_state_size=2;g.ssm_v_heads=2;g.ssm_conv_channels=8;
+        auto& s=ss[dev];
+        s.max_cells=96;s.layer_lo=dev*4;s.layer_hi=(dev+1)*4;
+        s.gdn_alloc=3;s.qsa_ord0=dev;s.qsa_alloc=1;
+        s.qsa_states=global[dev];
+        check(conversation_session_sizes(g,s,z[dev],err),"dual carved geometry");
+        f[dev]->alloc(s.gdn_state,z[dev].gdn);f[dev]->alloc(s.ple_hist,z[dev].ple);
+        f[dev]->alloc(f[dev]->state.idx_tail,z[dev].tail);
+        f[dev]->alloc(f[dev]->state.idx_dead,z[dev].dead);
+        f[dev]->alloc(f[dev]->state.idx_block_pos,z[dev].block_pos);
+        global[dev][dev]=f[dev]->state;
+    }
+    auto fill=[&](int dev,uint8_t salt) {
+        cuda_check(cudaSetDevice(dev));f[dev]->fill(salt);
+        if(dev==1) draft->fill(salt);
+        for(const auto& [p,n]:std::vector<std::pair<void*,size_t>>{
+            {ss[dev].gdn_state,z[dev].gdn},{ss[dev].ple_hist,z[dev].ple},
+            {f[dev]->state.idx_tail,z[dev].tail},{f[dev]->state.idx_dead,z[dev].dead},
+            {f[dev]->state.idx_block_pos,z[dev].block_pos}})
+            cuda_check(cudaMemset(p,salt,n));
+        cuda_check(cudaMemcpy(f[dev]->state.idx_pooled+(ids.size()/4)*f[dev]->g.idx_key_dim,
+                   f[dev]->state.idx_dead,z[dev].dead,cudaMemcpyDeviceToDevice));
+        cuda_check(cudaDeviceSynchronize());
+    };
+    auto capture=[&](SavedConversation& out,int dev,bool with_checks) {
+        cuda_check(cudaSetDevice(dev));
+        const ConversationView v{ids,images,with_checks?checkpoints[dev]:empty,true};
+        check(conversation_snapshot_save(out,v,ss[dev],f[dev]->g,dev?&draft->state:nullptr,err),
+              "dual capture on owning card");
+    };
+    SavedConversation expected[2];
+    size_t estimate=0;
+    for(int dev=0;dev<2;++dev) {
+        fill(dev,uint8_t(13+dev*29));
+        ConversationCheckpoint c;c.ids.assign(ids.begin(),ids.begin()+3);
+        check(conversation_checkpoint_save(c,ss[dev],f[dev]->g,err),"dual earlier checkpoint");
+        checkpoints[dev].push_back(std::move(c));capture(expected[dev],dev,true);
+        size_t bytes=0;const ConversationView v{ids,images,checkpoints[dev],true};
+        check(conversation_snapshot_bytes(v,ss[dev],f[dev]->g,dev?&draft->state:nullptr,bytes,err),
+              "dual disk estimate");estimate+=bytes;
+    }
+    const auto dir=std::filesystem::temp_directory_path()/("strata-ssd-dual-"+std::to_string(checks));
+    {
+        ConversationDiskCache disk(dir.string(),64ull*1024*1024,4);
+        check(disk.enabled(),"dual SSD directory");
+        auto pending=disk.begin(estimate,err);check(bool(pending),"dual SSD admission");
+        SavedConversation image;
+        {
+            auto factory=pending->factory();ConversationStorageScope scope(factory);
+            capture(image,0,false);SavedConversation part;capture(part,1,false);
+            image.stage_images.push_back(std::move(part));
+        }
+        check(image.kv[0].k.external() && image.stage_images[0].kv[0].k.external(),
+              "both GPUs stream into disk without full RAM KV copies");
+        check(disk.put(*pending,image,{&checkpoints[0],&checkpoints[1]},err),"dual atomic publication");
+        auto next=ids;next.push_back(888);auto match=disk.best(next,images,true);
+        check(match.live && match.tokens==65,"dual live prefix selected");
+        check(disk.verify(match.index,err),"dual checksum before GPU writes");
+        SavedConversation loaded;check(disk.load(match.index,loaded,err),"dual metadata load");
+        check(loaded.stage_images.size()==1,"dual stage count preserved");
+        SavedConversation* parts[2]={&loaded,&loaded.stage_images[0]};
+        // Validate every carve before overwriting either GPU.
+        for(int dev=0;dev<2;++dev) {
+            cuda_check(cudaSetDevice(dev));
+            check(conversation_snapshot_validate(*parts[dev],ss[dev],f[dev]->g,
+                       dev?&draft->state:nullptr,err),"dual prevalidate owning carve");
+        }
+        for(int dev=0;dev<2;++dev) {
+            fill(dev,uint8_t(177+dev*17));
+            check(conversation_snapshot_restore(*parts[dev],ss[dev],f[dev]->g,
+                       dev?&draft->state:nullptr,err)==ConversationRestore::restored,"dual SSD restore A over B");
+            SavedConversation back;capture(back,dev,true);
+            const auto& a=expected[dev];
+            check(back.live.gdn==a.live.gdn && back.live.ple==a.live.ple &&
+                  back.live.tails==a.live.tails && back.live.dead==a.live.dead &&
+                  back.live.block_pos==a.live.block_pos,"dual exact GDN PLE indexer state");
+            check(back.kv.size()==a.kv.size(),"dual exact layer count");
+            for(size_t j=0;j<a.kv.size();++j) {
+                check(equal(back.kv[j],a.kv[j]),"dual byte exact main/draft KV and scales");
+                uint64_t fingerprint=0;
+                check(conversation_kv_verify(parts[dev]->kv[j],j?draft->state:f[dev]->state,
+                     f[dev]->g,65,j==0,fingerprint,err),"dual authoritative pool and draft ring readback");
+            }
+            check(parts[dev]->checkpoints.size()==1,"dual checkpoint chain preserved");
+            check(conversation_checkpoint_restore(parts[dev]->checkpoints[0],ss[dev],f[dev]->g,err),
+                  "dual earlier-turn restore");
+            check(ss[dev].ple_prev[0]==2 && ss[dev].ple_prev[1]==3,"dual checkpoint PLE tokens");
+        }
+    }
+    std::filesystem::remove(dir/".strata-ssd.lock");std::filesystem::remove(dir);
+    cuda_check(cudaSetDevice(1));draft.reset();second.reset();
+    cuda_check(cudaSetDevice(0));first.reset();
+}
+
 }
 
 int main() {
@@ -414,5 +529,6 @@ int main() {
     for (int fmt : {kKvF16,kKvInt8,kKvQ4}) for (int mode : {0,1}) for (int experts : {256,512})
         full_session(fmt,mode,experts);
     for (int experts : {256,512}) full_session(3,0,experts);
+    if (devices >= 2) for (int fmt : {kKvF16,kKvInt8,kKvQ4}) dual_ssd_session(fmt);
     std::printf("conversation_snapshot_test: %d checks passed\n",checks);
 }

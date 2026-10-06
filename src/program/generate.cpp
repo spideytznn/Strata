@@ -1,3 +1,4 @@
+#include "strata/core/resident_swap.hpp"
 // src/program/generate.cpp - P2.S6: `strata generate`.
 //
 // THE DRIVER, and the first program in this project that answers a question.  Everything below it is a
@@ -255,59 +256,8 @@ static const char* pipe_dbg_env(const char* name) {
 // owning card's cache on that card's stream: `locate(layer)` names them (cache, stream, device; -1 = CUDA0).  Reading
 // a later stage's slot number out of CUDA0's cache copied another expert's bytes into RAM - the resident mode with a
 // split then computed some experts from the wrong weights after the first adaptive swaps (garbage output).
-struct SwapHome {
-    strata::core::ExpertCache* cache;
-    cudaStream_t stream;
-    int dev;
-};
-template <class Swap, class Locate>
-bool resident_stage_swaps(strata::core::FileExpertSource& src, const std::vector<int32_t>& host_res,
-                          int64_t n_expert, std::vector<Swap>& swaps, Locate locate) {
-    if (!src.complement_ready() || swaps.empty()) return true;
-    struct Staged { int32_t layer, in, out; int64_t q; };
-    std::vector<Staged> staged;
-    std::vector<SwapHome> used;
-    std::vector<Swap> kept;
-    kept.reserve(swaps.size());
-    for (const Swap& s : swaps) {
-        if (!src.has_resident(s.layer, s.in) || src.has_resident(s.layer, s.out)) { kept.push_back(s); continue; }
-        const int64_t q = (int64_t) staged.size();
-        if (q >= src.exchange_capacity()) continue;
-        const int32_t slot = host_res[(size_t) s.layer * (size_t) n_expert + (size_t) s.out];
-        if (slot < 0) continue;
-        const SwapHome home = locate(s.layer);
-        const strata::core::OnDevice on(home.dev);
-        if (const cudaError_t e = cudaMemcpyAsync(src.exchange_buffer(q), home.cache->device_slot(slot),
-                            (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer), cudaMemcpyDeviceToHost,
-                            home.stream); e != cudaSuccess) {
-            std::fprintf(stderr, "strata: copy back of layer %d slot %d (device %d) failed: %s\n", (int) s.layer,
-                         (int) slot, home.dev, cudaGetErrorString(e));
-            return false;
-        }
-        bool seen = false;
-        for (const SwapHome& u : used) seen = seen || u.stream == home.stream;
-        if (!seen) used.push_back(home);
-        staged.push_back({s.layer, s.in, s.out, q});
-        kept.push_back(s);
-    }
-    if (!staged.empty()) {
-        for (const SwapHome& u : used) {
-            const strata::core::OnDevice on(u.dev);
-            if (const cudaError_t e = cudaStreamSynchronize(u.stream); e != cudaSuccess) {
-                std::fprintf(stderr, "strata: copy back sync (device %d) failed: %s\n", u.dev, cudaGetErrorString(e));
-                return false;
-            }
-        }
-        for (const Staged& x : staged)
-            if (!src.stage_exchange(x.layer, x.in, x.out, x.q)) {
-                std::fprintf(stderr, "strata: stage_exchange refused layer %d in %d out %d\n", (int) x.layer,
-                             (int) x.in, (int) x.out);
-                return false;
-            }
-    }
-    swaps.swap(kept);
-    return true;
-}
+using strata::core::SwapHome;
+using strata::core::resident_stage_swaps;
 
 struct Options {
     std::string pack = "pack/full";
@@ -1695,7 +1645,7 @@ int main(int argc, char** argv) {
         else if (a == "--spec") o.spec = std::atoi(next("--spec"));
         else if (a == "--batch") o.batch = std::atoi(next("--batch"));
         else if (a == "--slots") o.batch = std::atoi(next("--slots"));   // the same as --batch
-        else if (a == "--trim-stage-weights") o.trim_stage_weights = true;
+        else if (a == "--trim-stage-weights" || a == "--stage-weights") o.trim_stage_weights = true;
         else if (a == "--batch-groups") o.batch_groups = std::atoi(next("--batch-groups"));
         else if (a == "--batch-mtp") o.batch_mtp = true;
         else if (a == "--spec-oracle") o.spec_oracle = next("--spec-oracle");
@@ -1822,8 +1772,9 @@ int main(int argc, char** argv) {
         else if (a == "--mmap-experts") o.mmap_experts = true;
         else if (a == "--shared-expert-arena") o.shared_expert_arena = next("--shared-expert-arena");
         else if (a == "--resident-cpu-experts") o.resident_cpu_experts = o.resident_cpu_explicit = true;
-        else if (a == "--resident-experts") {
-            o.mmap_experts = o.resident_cpu_experts = o.resident_pin = o.resident_soft = true;
+        else if (a == "--resident-experts" || a == "--resident-experts-strict") {
+            o.mmap_experts = o.resident_cpu_experts = o.resident_pin = true;
+            o.resident_soft = a != "--resident-experts-strict";
             o.resident_headroom = 4ull << 30;
             // A/B arms: STRATA_RESIDENT_PIN=0 keeps the copy pageable (the --resident-cpu-experts form);
             // STRATA_RESIDENT_HEADROOM_GIB=N leaves N GiB of the available RAM free instead of 4

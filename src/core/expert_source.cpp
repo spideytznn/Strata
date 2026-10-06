@@ -2139,7 +2139,7 @@ bool FileExpertSource::reserve_exchanges(int64_t n, std::string& err) {
                           complement_host_ && complement_device_ && complement_bytes_ > 0;
     const size_t total = (size_t) n * (size_t) blob;
     void* p = nullptr;
-    if (cudaHostAlloc(&p, total, eligible ? cudaHostAllocMapped : cudaHostAllocDefault) == cudaSuccess && p != nullptr) {
+    if (cudaHostAlloc(&p, total, cudaHostAllocPortable | (eligible ? cudaHostAllocMapped : cudaHostAllocDefault)) == cudaSuccess && p != nullptr) {
         xstage_pinned_ = true;
     } else {
         (void) cudaGetLastError();

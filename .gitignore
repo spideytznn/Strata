@@ -61,3 +61,6 @@ build-vision-cuda12.bat
 
 /.ccache/
 /.rocm-win/
+
+# Local automatic conversation snapshots contain private tokens and model state.
+/conversation-cache/
