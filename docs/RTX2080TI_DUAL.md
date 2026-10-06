@@ -10,7 +10,7 @@
 - 分层权重加载改用上游 `--trim-stage-weights`，保留 CUDA0 的 router 以供预取。旧 `--stage-weights` 仅作为兼容别名，不再维护第二套 loader。
 - 解码内核、服务层和会话处理采用 v0.1.39。并行会话需要单独配置与验证；本次单请求提速没有开启 `parallel > 1`，没有实现 SSD 会话缓存。
 
-当前 Q3XL 保留 `--max-context 262144`、INT8 KV、24/24 层划分、4096 prefill、MTP4 和 CPU 视觉。RAM 预算与实际可用 RAM 应同时检查：修复全局排序后，同一个预算会真正用于两张卡，不能根据旧版只分配约一半预算的表现推断内存安全。
+当前服务器已切回 IQ3_S，保留 `--max-context 262144`、INT8 KV、24/24 层划分、4096 prefill、MTP4 和原有 GPU 视觉配置。专家使用完整 RAM 补集与严格驻留检查，启动预留 4 GiB 系统余量。Q3XL 模型及专用运行文件已删除。v0.1.39 的 IQ3_S 尚未重新实测性能。
 
 构建沿用上游固定的 llama.cpp revision。配置 `STRATA_BUILD_FUSION_TESTS=ON`，构建目标 `strata fusion_resident_swap_test file_expert_source_test`；GPU 架构为 75。旧的自定义 weight-stage loader 测试已随重复实现移除。
 
@@ -24,14 +24,14 @@ This branch merges official **v0.1.39** (`6f32ec070f23ced9f50e704d854d775da52591
 - Uses upstream stage weight trimming, including CUDA0 router retention for prefetch. `--stage-weights` is a compatibility alias for `--trim-stage-weights`; the duplicate loader was removed.
 - Uses upstream decode kernels, server and conversation handling. Concurrent slots are not enabled by this single-request configuration. SSD session storage is not implemented.
 
-The Q3XL configuration retains 262144 context, INT8 KV, a 24/24 layer split, 4096 prefill, MTP4 and CPU vision. Check actual available RAM as well as the requested budget: global ranking now fills a budget across both GPUs, unlike the previous underfilled allocation.
+The server is configured for IQ3_S again, retaining 262144 context, INT8 KV, a 24/24 layer split, 4096 prefill, MTP4 and the original GPU vision setting. It uses a complete RAM expert complement with strict residency and 4 GiB startup headroom. Q3XL weights and dedicated runtime files have been removed. IQ3_S performance on v0.1.39 has not been remeasured.
 
 Build for CUDA architecture 75 with `STRATA_BUILD_FUSION_TESTS=ON`; targets are `strata fusion_resident_swap_test file_expert_source_test`. The duplicate weight-loader test was retired with that implementation.
 
 ## 历史记录：v0.1.35 / Historical v0.1.35 results
 
-下面记录仅属于 2026-10-02 的 v0.1.35、IQ3_S 配置，不代表 v0.1.39 或 Q3XL 的性能。
-The following measurements describe the October 2 v0.1.35 IQ3_S configuration, not v0.1.39 or Q3XL.
+下面记录仅属于 2026-10-02 的 v0.1.35、IQ3_S 配置，不代表 v0.1.39 的性能。
+The following measurements describe the October 2 v0.1.35 IQ3_S configuration, not v0.1.39.
 
 
 本分支采用上游 **0.1.35**（`d9ab8435f654c368c586340d490915f6addf56a3`）加实测双卡改动。设备为两张扩容至 **22 GiB** 的 RTX 2080 Ti、双 Xeon E5-2682 v4、32 GB DDR4，CUDA 12.8，Linux。普通 11 GiB 卡需要另行规划容量。
