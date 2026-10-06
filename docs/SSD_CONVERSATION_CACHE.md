@@ -119,7 +119,8 @@ SSD metrics separately from RAM metrics. On 2026-10-07 the Linux/CUDA 12.8 build
 devices with carved layer ranges, the last stage's draft ring, borrowed
 checkpoint chains and direct SSD-backed K/V. All 12 selected C++ test targets
 passed there, including 60 SSD CPU checks, file corruption/limits and injected
-CUDA-transfer failures. This validates small fixtures, not a full-model
+CUDA-transfer failures. The Linux server suite also passed 453 tests
+(8 environment/platform skips). This validates small fixtures, not a full-model
 long-context switch or decode-throughput measurement.
 
 A synthetic 512 MiB payload on G: took 478.2 ms to write, 149.6 ms to verify/load

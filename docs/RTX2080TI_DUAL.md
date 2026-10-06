@@ -1,5 +1,7 @@
 # 双 RTX 2080 Ti / strata-2080tix2
 
+当前 v0.1.40.1 部署与 SSD 缓存验证见 [REMOTE_FUSION_V0401.md](REMOTE_FUSION_V0401.md)。下文保留此前版本的改造和实测记录，性能数据及末尾二进制 hash 不代表当前版本。
+
 本分支融合官方 **v0.1.39**（`6f32ec070f23ced9f50e704d854d775da52591ab`）。目标机器是两张扩容至 **22 GiB** 的 RTX 2080 Ti、32 GB 系统 RAM，Linux / CUDA 12.8；普通 11 GiB 卡不能直接照抄容量配置。
 
 ## 保留与采用的实现
