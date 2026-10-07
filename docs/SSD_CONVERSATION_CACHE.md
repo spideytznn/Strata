@@ -24,7 +24,7 @@ conversations fit. Disk admission also keeps 2 GiB of free disk space.
 
 The normal 262144 context, prefill 8192, INT8 KV, MTP, external FP8 ngram, CPU
 vision, single concurrency and 33 GiB expert RAM request are preserved. The new
-executable lives separately at `engine/fusion-v0401/strata.exe`; the old
+executable lives separately at `engine/fusion-v0402/strata.exe`; the old
 executable is retained. Close the existing server and use the same desktop
 launcher to activate the new build. Installation does not start/restart it.
 
@@ -131,3 +131,9 @@ full-model switch benchmark and not a decode-speed guarantee.
 The local MSVC installation's localized include prefix was previously recorded
 incorrectly by Ninja. The build helper probes the compiler's actual output bytes
 to repair dependency tracking; all affected conversation sources were rebuilt.
+
+## Upstream integration (2026-10-08)
+
+Official v0.1.40.2 is merged. Shared-prefix sibling requests skip parking, while
+SSD restores still preserve the outgoing conversation. Current tests and deployment
+are documented in [LOCAL_FUSION_V0402.md](LOCAL_FUSION_V0402.md).
