@@ -8,24 +8,12 @@
 #pragma once
 
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <fstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace strata {
-
-// Local Atomic Q5 test: its verified shard 2 contains only PLE. The test launcher
-// supplies an independent FP8 table; all weight-bearing shards remain mandatory.
-inline bool external_atomic_ple(const std::string& path) {
-    const char* value = std::getenv("STRATA_EXTERNAL_PLE_SHARD2");
-    const size_t start = path.find_last_of("/\\");
-    const std::string name = path.substr(start == std::string::npos ? 0 : start + 1);
-    return value && std::strcmp(value, "1") == 0 &&
-           name.find("Qwen3.8-Flash-Next-AD-5.00bpw-Q5_K_M-M64-") == 0;
-}
 
 // Split models: `<name>-00001-of-0000N.gguf` ... `<name>-0000N-of-0000N.gguf`, as llama.cpp's gguf-split names
 // them.  Given ANY shard's path, the shards in split order (the metadata shard, 00001, first); a file without that
@@ -53,11 +41,9 @@ inline std::vector<std::string> gguf_split_paths(const std::string& any) {
         std::snprintf(num, sizeof num, "%05d", i);
         std::string p = any;
         p.replace(at - 5, 5, num);
-        if (!std::ifstream(p, std::ios::binary)) {
-            if (i == 2 && n == 33 && external_atomic_ple(any)) continue;
+        if (!std::ifstream(p, std::ios::binary))
             throw std::runtime_error("missing model shard " + p + " (shard " + std::to_string(i) + " of " +
                                      std::to_string(n) + "; is the download complete?)");
-        }
         out.push_back(std::move(p));
     }
     return out;

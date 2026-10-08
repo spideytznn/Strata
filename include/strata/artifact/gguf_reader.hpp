@@ -549,29 +549,19 @@ private:
             throw std::runtime_error("GGUF: " + shards_[0]->path() + " has no general.architecture; the first shard "
                                      "of a split model carries the metadata");
         const MetaValue* total = shards_[0]->get("split.tensors.count");
-        const bool external_ple = n == 32 && count0 && count0->u == 33 &&
-                                  external_atomic_ple(shards_[0]->path());
-        const size_t declared_n = external_ple ? n + 1 : n;
         uint64_t tensors = 0;
         for (size_t i = 0; i < n; ++i) {
             const GgufFile& g = *shards_[i];
             const MetaValue* count = g.get("split.count");
             const MetaValue* no = g.get("split.no");
             const MetaValue* tc = g.get("split.tensors.count");
-            const size_t expected_no = external_ple && i > 0 ? i + 1 : i;
-            if (!count || !no || count->u != declared_n || no->u != expected_no || (total && (!tc || tc->u != total->u)))
+            if (!count || !no || count->u != n || no->u != i || (total && (!tc || tc->u != total->u)))
                 throw std::runtime_error("GGUF: " + g.path() + " does not declare itself shard " + std::to_string(i + 1) +
                                          " of " + std::to_string(n) + " of this model (split.count / split.no / "
                                          "split.tensors.count)");
             tensors += g.tensors().size();
-            if (external_ple)
-                for (const auto& t : g.tensors())
-                    if (t.name == "per_layer_token_embd.weight")
-                        throw std::runtime_error("external Atomic PLE: the omitted shard must be the PLE-only shard");
         }
-        if (external_ple && (!total || total->u != 1224 || tensors != 1223))
-            throw std::runtime_error("external Atomic PLE: expected all 1223 main tensors and only one omitted PLE tensor");
-        if (total && tensors + (external_ple ? 1 : 0) != total->u)
+        if (total && tensors != total->u)
             throw std::runtime_error("GGUF: the " + std::to_string(n) + " shards hold " + std::to_string(tensors) +
                                      " tensors, but split.tensors.count is " + std::to_string(total->u));
     }

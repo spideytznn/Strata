@@ -4,7 +4,12 @@
 
 2026-10-08：在现有 `main` 上融合官方 v0.1.40.2（`e8ca9af`），保留本地
 独立 prefill 缓冲规划、专家与会话 RAM 预算协调、热专家进入既有 RAM 槽、
-外部 FP8 ngram / GGUF 分片兼容、SSD 自动会话缓存及 Monitor 指标。
+SSD 自动会话缓存及 Monitor 指标。FP8 ngram 使用上游实现。
+
+2026-10-08 清理：移除旧 Atomic Q5 模型省略第 2 个 PLE 分片的特例，
+GGUF 分片发现、元数据校验与打包工具恢复为上游 v0.1.40.2 实现。
+启动脚本的旧环境变量清理行一并移除。官方独立 FP8 ngram 加载路径不受影响。
+本次仅更新源码与脚本，已安装的引擎二进制未重新编译；该删除在下次构建后进入引擎。
 
 上游新增的 MTP 验证窗口投影优化、固定共享前缀 `strata_prefix`、服务端启动
 与视觉请求超时、会话和 API 修复一并保留。处理共享前缀与本地 SSD 缓存的
@@ -40,8 +45,15 @@ MTP 4、33 GiB 专家 RAM 请求、CPU 视觉及 8880 端口；RAM 实际分配�
 
 On 2026-10-08, official v0.1.40.2 (`e8ca9af`) was merged into the existing `main`.
 The local independent prefill planner, coordinated RAM budgets, hot expert
-promotion into existing RAM slots, external FP8 ngram / GGUF shard compatibility,
-automatic SSD conversation cache and Monitor metrics are retained.
+promotion into existing RAM slots, automatic SSD conversation cache and Monitor
+metrics are retained. FP8 ngram uses the upstream implementation.
+
+Cleanup on 2026-10-08 removes the old Atomic Q5 exception for an omitted second
+PLE shard. GGUF shard discovery, metadata validation and packing now match
+upstream v0.1.40.2. Obsolete environment-variable cleanup is removed from the
+launchers. Official standalone FP8 ngram loading is unchanged. This cleanup
+updates source and scripts only; installed engine binaries have not been rebuilt.
+The engine change takes effect after the next build.
 
 Upstream MTP projection optimization, pinned shared prefixes (`strata_prefix`),
 engine/vision timeouts and session/API fixes are included. Sibling queries from

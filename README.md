@@ -37,8 +37,9 @@
 4. **自动 SSD 会话缓存。** 基于上游快照，将完整会话状态分块保存到 SSD，支持 A→B→A
    会话切换；当前配置为 32 GiB、最多 64 条记录，仅在本次引擎运行内复用。
 
-本机关闭 RAM 整会话缓存，保留上游前缀检查点、会话匹配与服务接口。外部 FP8 ngram
-和 GGUF 分片兼容改动也保留。当前部署与验证范围见 [v0.1.40.2 融合说明](docs/LOCAL_FUSION_V0402.md)。
+本机关闭 RAM 整会话缓存，保留上游前缀检查点、会话匹配与服务接口。FP8 ngram
+使用上游实现；已移除旧 Atomic 模型缺少 PLE 分片的特殊兼容，恢复上游完整分片检查。
+当前部署与验证范围见 [v0.1.40.2 融合说明](docs/LOCAL_FUSION_V0402.md)。
 
 **双卡分支的改动：** dense 权重按所属 GPU 的层加载；在 RAM 常驻两张 GPU 的专家补集；
 动态交换在确认两张卡上传完成后提交专家归属。该分支配合上游的专用 prefill 缓冲与按层状态分配。
@@ -155,7 +156,8 @@ cards require separate validation. Each branch has its own implementation and te
    switching. The installed limit is 32 GiB and 64 records, reusable only within the current engine run.
 
 The local deployment disables full RAM conversation snapshots and retains upstream prefix checkpoints,
-matching and service APIs. External FP8 ngram and GGUF shard compatibility are retained too.
+matching and service APIs. FP8 ngram uses the upstream implementation. The old Atomic exception
+for an omitted PLE shard has been removed, restoring upstream checks for complete shard sets.
 See the [v0.1.40.2 integration notes](docs/LOCAL_FUSION_V0402.md) for deployment and validation scope.
 
 **The dual-GPU branch** loads dense weights for each GPU's assigned layers, keeps the combined expert

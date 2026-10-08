@@ -2186,16 +2186,6 @@ int main(int argc, char** argv) {
     strata::core::layer_set_shared_early(!o.shared_late);
     if (!o.native_preset.empty()) {
         try {
-            if (strata::external_atomic_ple(o.native_preset)) {
-                if (o.no_ple || o.ple_gguf.empty())
-                    throw std::runtime_error("external Atomic PLE requires an explicit --ple-gguf FP8 table");
-                const strata::GgufFile external(o.ple_gguf);
-                const auto* arch = external.get("general.architecture");
-                const auto* format = external.get("strata.ple.format");
-                if (!arch || arch->s != "strata-ple" || !format || format->s != "f8_e4m3")
-                    throw std::runtime_error("external Atomic PLE requires the standalone FP8 strata-ple table");
-                std::fprintf(stderr, "strata generate: Atomic PLE-only shard 2 replaced by explicit FP8 table\n");
-            }
             // every shard of the model (<name>-0000N-of-0000M.gguf beside --native).  A missing shard is an error
             // here: it used to be skipped, leaving a model with some tensors absent and a later error, or none.
             o.native_shards = strata::gguf_split_paths(o.native_preset);
