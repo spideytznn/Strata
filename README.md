@@ -1,4 +1,4 @@
-<!-- Local integration: upstream v0.1.40.2 plus memory planning, hot RAM and SSD sessions. -->
+<!-- Local integration: upstream v0.1.41 plus memory planning, hot RAM and SSD sessions. -->
 # Strata · 本地推理优化 / Local inference optimizations
 
 [中文](#zh-cn) · [English](#english)
@@ -7,7 +7,7 @@
 
 ## 中文
 
-基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.40.2** 的优化分支，让
+基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.41** 的优化分支，让
 **Qwen3.8-Flash-Next** 在个人电脑上更合理地使用显存与系统内存。
 我们重点保留经过本机验证的内存规划改动，并沿用上游的计算内核、FP8 ngram、服务接口与会话缓存。
 
@@ -15,7 +15,7 @@
 
 | 分支 | 定位 | 实测设备 |
 | --- | --- | --- |
-| [`main`](https://github.com/spideytznn/Strata/tree/main) | 单卡内存规划、热专家 RAM 升级与 SSD 会话缓存 | Windows，RTX 5090 32 GiB 显存，48 GB 系统内存 |
+| [`main`](https://github.com/spideytznn/Strata/tree/main) | 单卡内存规划、热专家 RAM 升级与 SSD 会话缓存 | Windows，RTX 5090 32 GiB 显存，96 GB 系统内存 |
 | [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | 双卡权重分配、RAM 专家常驻与动态交换（基于 v0.1.35） | Linux，两张扩容至 22 GiB 的 RTX 2080 Ti，32 GB 系统内存 |
 
 双卡测试使用扩容卡，普通 11 GiB RTX 2080 Ti 的容量与性能需要另行验证。
@@ -39,7 +39,7 @@
 
 本机关闭 RAM 整会话缓存，保留上游前缀检查点、会话匹配与服务接口。FP8 ngram
 使用上游实现；已移除旧 Atomic 模型缺少 PLE 分片的特殊兼容，恢复上游完整分片检查。
-当前部署与验证范围见 [v0.1.40.2 融合说明](docs/LOCAL_FUSION_V0402.md)。
+当前部署与验证范围见 [v0.1.41 融合说明](docs/LOCAL_FUSION_V041.md)。
 
 **双卡分支的改动：** dense 权重按所属 GPU 的层加载；在 RAM 常驻两张 GPU 的专家补集；
 动态交换在确认两张卡上传完成后提交专家归属。该分支配合上游的专用 prefill 缓冲与按层状态分配。
@@ -47,7 +47,7 @@
 
 ### 实测结果
 
-以下性能数据基于 v0.1.35，不代表 v0.1.40.2 的速度。
+以下性能数据基于 v0.1.35，不代表 v0.1.41 的速度。
 
 主分支：2026-10-02，RTX 5090 / 48 GB RAM，IQ3_S、FP8 ngram、INT8 KV，配置上下文 262144。
 以下是顺序对照，文件缓存与运行状态会影响结果。
@@ -122,7 +122,7 @@ cd Strata
 
 ## English
 
-An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.40.2** for running
+An optimized fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) **v0.1.41** for running
 **Qwen3.8-Flash-Next** on personal computers with a practical balance of VRAM and system RAM.
 We retain measured memory-planning changes while using upstream compute kernels, FP8 ngram support,
 service APIs, and conversation caching.
@@ -131,7 +131,7 @@ service APIs, and conversation caching.
 
 | Branch | Focus | Tested hardware |
 | --- | --- | --- |
-| [`main`](https://github.com/spideytznn/Strata/tree/main) | Single-GPU memory planning, hot RAM experts and SSD sessions | Windows, RTX 5090 with 32 GiB VRAM, 48 GB system RAM |
+| [`main`](https://github.com/spideytznn/Strata/tree/main) | Single-GPU memory planning, hot RAM experts and SSD sessions | Windows, RTX 5090 with 32 GiB VRAM, 96 GB system RAM |
 | [`strata-2080tix2`](https://github.com/spideytznn/Strata/tree/strata-2080tix2) | Dual-GPU weight placement, resident RAM experts, and dynamic exchange (based on v0.1.35) | Linux, two RTX 2080 Ti cards modified to 22 GiB each, 32 GB system RAM |
 
 The dual-GPU measurements use modified cards. Capacity and performance on ordinary 11 GiB RTX 2080 Ti
@@ -158,7 +158,7 @@ cards require separate validation. Each branch has its own implementation and te
 The local deployment disables full RAM conversation snapshots and retains upstream prefix checkpoints,
 matching and service APIs. FP8 ngram uses the upstream implementation. The old Atomic exception
 for an omitted PLE shard has been removed, restoring upstream checks for complete shard sets.
-See the [v0.1.40.2 integration notes](docs/LOCAL_FUSION_V0402.md) for deployment and validation scope.
+See the [v0.1.41 integration notes](docs/LOCAL_FUSION_V041.md) for deployment and validation scope.
 
 **The dual-GPU branch** loads dense weights for each GPU's assigned layers, keeps the combined expert
 complement resident in RAM, and commits dynamic-exchange ownership only after both GPUs confirm uploads.
@@ -167,7 +167,7 @@ It uses upstream dedicated prefill buffers and layer-owned state allocation. See
 
 ### Measurements
 
-The performance figures below were measured on v0.1.35 and do not describe v0.1.40.2 performance.
+The performance figures below were measured on v0.1.35 and do not describe v0.1.41 performance.
 
 Main: 2026-10-02, RTX 5090 / 48 GB RAM, IQ3_S, FP8 ngram, INT8 KV, configured context limit 262144.
 These are sequential comparisons affected by file caching and runtime conditions.
