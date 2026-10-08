@@ -15,7 +15,9 @@ STRATA_Q6K_EXPERTS 和 STRATA_MMQ_KQUANTS 均开启，IQ4_XS、Q5、Q6 复用同
 视觉程序复用已有可用版本。桌面入口不需要在启动时编译。
 
 验证：CUDA 构建完成；四组 CTest（本地内存规划、专家源、会话快照、SSD 会话文件）通过。
-服务端检查结果记录在本机 work/upgrade-v041/server-tests.log。
+服务端共完成 594 项检查，6 项按条件跳过，其余通过；日志位于本机 work/upgrade-v041/server-tests.log。
+当前模型目录仅有 UD-Q4_K_XL。官方与融合版 Q4KL 启动文件检查通过，新增融合版桌面入口
+Start-Strata-Fusion-Q4KL.bat。旧 IQ4_XS / Q5 / Q6 模型已不在配置路径，旧入口需恢复权重后使用。
 本次不启动额外的大模型，不中断正在运行的官方 Q4 服务，未进行版本间速度对照，
 也未填满 262144 上下文。因此不声明性能提升；当前运行实例在自行重启后使用对应更新。
 
@@ -38,8 +40,11 @@ RAM budgets, vision modes and access settings are preserved. Existing vision
 binaries are reused. Desktop startup performs no compilation.
 
 Validation: the CUDA build and four CTest groups (local memory planning, expert
-source, conversation snapshots and SSD conversation files) passed. Server test
-results are recorded locally in work/upgrade-v041/server-tests.log. No extra
+source, conversation snapshots and SSD conversation files) passed. The server
+suite ran 594 tests: 588 passed and 6 were skipped. Results are recorded locally
+in work/upgrade-v041/server-tests.log. Only UD-Q4_K_XL is currently available.
+Both Q4KL launchers passed file checks; the new integrated desktop entry is
+Start-Strata-Fusion-Q4KL.bat. Old IQ4_XS, Q5 and Q6 weight paths are missing. No extra
 large model was loaded, and the running official Q4 service was not interrupted.
 No comparative speed benchmark or fully populated 262144-token test was run.
 An existing process uses its replacement executable after the user restarts it.
