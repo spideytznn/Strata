@@ -177,6 +177,16 @@ the actual FP4 dispatch wrappers; SASS evidence is retained separately. These
 kernel diagnostics read the already-validated fidelity pack as an oracle;
 the inference runtime still loads only the original safetensors directory.
 
+`p5-adaptive-mtp/` combines mapped RAM and hot promotions with draft depths
+1/2/4 and, separately, 50% CPU execution of cold experts. All four cases match
+all eight reference continuations and keep expert file reads at zero. MTP
+acceptance totals are 474/542, 636/760 and 746/1,080 offered tokens. Each case
+also performs real promotions (11,827 / 8,973 / 6,624 for MTP, 18,163 for the
+CPU split). Native MTP now enforces the full checkpoint vocabulary in code,
+independently of the diagnostic environment variable or any stray subset file.
+These results still use fixed 4,499-slot caches; automatic-cache and repeated
+comparisons are recorded separately.
+
 ## Build the runtime
 
 On this machine, `START-NATIVE.bat` starts the independent quality configuration

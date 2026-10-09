@@ -35,7 +35,12 @@ def main():
     p.add_argument('--reserve-mib', type=int, default=2048)
     p.add_argument('--adapt-every', type=int, default=0)
     p.add_argument('--adapt-swaps', type=int, default=96)
+    p.add_argument('--native-mtp', type=int, choices=(0,1,2,4), default=0,
+                   help='native-only matched follow-up; common cross-backend comparison keeps MTP off')
+    p.add_argument('--reference-output', type=Path, help='native no-MTP run for exact continuation checks')
     a = p.parse_args()
+    if a.native_mtp and a.cases != 'native':
+        p.error('--native-mtp requires --cases native; do not mix MTP settings in the cross-backend comparison')
     a.output.mkdir(parents=True, exist_ok=False)
     configs = {name: json.loads(path.read_text(encoding='utf8')) for name, path in
                [('native', a.native_config), ('fidelity', a.fidelity_config), ('q4xl', a.q4xl_config)]}
@@ -49,7 +54,7 @@ def main():
         enable_thinking=False), parse_special=True)
     result = {'requests_sha256': hashlib.sha256(a.requests.read_bytes()).hexdigest(),
               'conditions': {'context': a.context, 'prefill': 8192, 'kv': 'fp16',
-                             'expert_slots_requested': a.cache_slots or 'auto', 'reserve_mib': a.reserve_mib, 'mtp': False,
+                             'expert_slots_requested': a.cache_slots or 'auto', 'reserve_mib': a.reserve_mib, 'mtp': a.native_mtp,
                              'prefill_borrow': True, 'adapt_every': a.adapt_every,
                              'adapt_swaps': a.adapt_swaps if a.adapt_every else 0}, 'cases': {}}
     def save():
@@ -79,10 +84,12 @@ def main():
             args += ['--max-context', str(a.context), '--prefill', '8192', '--kv', 'fp16',
                      '--expert-cache', str(a.cache_slots) if a.cache_slots else 'auto', '--vram-reserve-mib', str(a.reserve_mib),
                      '--expert-profile', str(ROOT / 'data/expert-profile.bin'),
-                     '--pcie-frac', '1', '--pcie-mode', 'dma', '--spec', '2', '--suffix-draft', '0',
+                     '--pcie-frac', '1', '--pcie-mode', 'dma', '--spec', str(max(2,a.native_mtp+1)), '--suffix-draft', '0',
                      '--adapt-every', str(a.adapt_every), '--adapt-swaps', str(a.adapt_swaps if a.adapt_every else 0),
                      '--conversation-cache-mib', '2048',
                      '--conversation-cache-slots', '2', '--prompt-cache', '4', '--greedy', '--stats', '--check-logits']
+            if a.native_mtp:
+                args += ['--mtp','native','--mtp-max-t',str(a.native_mtp+1),'--spec-min-p','0']
             local = {'lib_dirs': cfg.get('lib_dirs', []), 'env': configs['native'].get('env', {})}
             env = child_env(local)
             env.update({'STRATA_RESIDENT_PIN': '1', 'STRATA_RESIDENT_HEADROOM_GIB': '4',
@@ -126,6 +133,11 @@ def main():
                     r['cpu_expert_entries'] = r['lookups'] - r['hits']
                     r['routed_expert_entries'] = r['lookups'] + r['offloaded']
                     assert r['file_blobs'] == r['file_mb'] == 0, 'resident baseline unexpectedly read experts from files'
+                    if a.reference_output and case == 'native':
+                        baseline = json.loads((a.reference_output/'results.json').read_text(encoding='utf8'))['cases']['native'][repeat]
+                        expected = next(x for x in baseline['requests'] if x['name'] == name)
+                        r['tokens_equal_reference'] = out == expected['ids']
+                        assert r['tokens_equal_reference'], 'MTP changed the matched greedy continuation'
                     row['requests'].append(r)
                     save()
                     print(case, repeat, name, {k: r[k] for k in ('prompt_ms', 'decode_ms', 'ttft_s', 'cpu_expert_entries')}, flush=True)

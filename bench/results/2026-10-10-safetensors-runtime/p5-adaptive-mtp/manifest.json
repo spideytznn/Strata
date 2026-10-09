@@ -1,0 +1,76 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\matrix-p5-adaptive-mtp",
+  "status": "pass",
+  "files": [
+    {
+      "path": "pinned-adaptive-cpu50/command.json",
+      "bytes": 1274,
+      "sha256": "33c718cc4868b78705b53031db3e6197f418e25ee4fd1ea4298fa46e2aaa4bcf"
+    },
+    {
+      "path": "pinned-adaptive-cpu50/engine.log",
+      "bytes": 15485,
+      "sha256": "d487fe608074d609bdf08444828a227e6148e61b11c987b4ee30cb9e1d6da2e3"
+    },
+    {
+      "path": "pinned-adaptive-cpu50/telemetry.jsonl",
+      "bytes": 20589,
+      "sha256": "3a3e9ab03c816ed61556d08563fe364aec9f48acfd52657db88a9f71fa083da8"
+    },
+    {
+      "path": "pinned-adaptive-mtp1/command.json",
+      "bytes": 1300,
+      "sha256": "ee1dff7d8aa4d025e96f65ff45bcac9e96e628fc7c0a0bf82938e0cc3c367968"
+    },
+    {
+      "path": "pinned-adaptive-mtp1/engine.log",
+      "bytes": 15701,
+      "sha256": "af3ad176a5fdbdcd0fd9f706173b283be8c234e27aaeaf7cc0568d066d571f3f"
+    },
+    {
+      "path": "pinned-adaptive-mtp1/telemetry.jsonl",
+      "bytes": 21992,
+      "sha256": "ad79ef65d4669ec6df61fc8b2d782d80c9f12aa38834fcd2932b6abb70f73715"
+    },
+    {
+      "path": "pinned-adaptive-mtp2/command.json",
+      "bytes": 1300,
+      "sha256": "b828772cc21f784cd6d12c2eab65186d897a8552811e3b9aa71a49af25c6c9e6"
+    },
+    {
+      "path": "pinned-adaptive-mtp2/engine.log",
+      "bytes": 15891,
+      "sha256": "d445681c7663e8ed6fa7e7d57efd139e342409e0d5815db6b7170b9e3cfb7b42"
+    },
+    {
+      "path": "pinned-adaptive-mtp2/telemetry.jsonl",
+      "bytes": 20867,
+      "sha256": "be586a38698dbea006c1b2ab5777ccdf6048c37ce82f773c5eeed4bbe2ab01c5"
+    },
+    {
+      "path": "pinned-adaptive-mtp4/command.json",
+      "bytes": 1300,
+      "sha256": "a7ddd2b5a80880eee05c16609c9a94f6170b365de5be021c8d223a4c62de9b63"
+    },
+    {
+      "path": "pinned-adaptive-mtp4/engine.log",
+      "bytes": 16048,
+      "sha256": "1e853f5ccc079ae068984919bc70c68846830762476c4b81f07ffd2327f850e0"
+    },
+    {
+      "path": "pinned-adaptive-mtp4/telemetry.jsonl",
+      "bytes": 21415,
+      "sha256": "efacb6bdd4709c9555bb6d3b676a49c57b19308b4c546bbe4b17cb371515dae9"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 138221,
+      "sha256": "3f2af3e463acc47c81f531a1be4752f31e938d76dadc557309644ed0b87d7cf4"
+    }
+  ]
+}
