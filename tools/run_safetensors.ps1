@@ -9,6 +9,12 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     throw 'Create this project virtual environment and install requirements-native.txt first.'
 }
 $configPath = (Resolve-Path -LiteralPath $Config).Path
+$nativeConfig = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($nativeConfig.log) {
+    $logPath = [string]$nativeConfig.log
+    if (-not [IO.Path]::IsPathRooted($logPath)) { $logPath = Join-Path $repo $logPath }
+    New-Item -ItemType Directory -Path (Split-Path -Parent $logPath) -Force | Out-Null
+}
 Push-Location -LiteralPath $repo
 try {
     & $python -m serve.server --engine strata --config $configPath --host 127.0.0.1 --port $Port

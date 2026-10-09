@@ -5,6 +5,10 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--model',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
  p.add_argument('--context',type=int,default=32768);p.add_argument('--prefill',type=int,default=8192)
+ p.add_argument('--kv',choices=('fp16','int8'),default='fp16')
+ p.add_argument('--prefill-mode',choices=('fp16','w4a8','w4a4x2','w4a4'),default='fp16')
+ p.add_argument('--dedicated-prefill',action='store_true',help='reserve prompt workspace separately from the expert cache')
+ p.add_argument('--exe',type=Path,help='engine executable, including a staged build')
  p.add_argument('--mtp',type=int,choices=(0,1,2,4),default=2);p.add_argument('--expert-cache',type=int,default=0)
  p.add_argument('--conversation-cache-mib',type=int,default=4096)
  p.add_argument('--adapt-every',type=int,default=4);p.add_argument('--adapt-swaps',type=int,default=96)
@@ -23,18 +27,19 @@ def main():
   if not (model/name).is_file():raise FileNotFoundError(model/name)
  args=['--model',str(model),'--max-context',str(a.context),'--prefill',str(a.prefill),
        '--expert-cache',str(a.expert_cache) if a.expert_cache else 'auto','--vram-reserve-mib','2048','--spec',str(max(2,a.mtp+1)),
-       '--suffix-draft','0','--pcie-frac',str(a.pcie_frac),'--pcie-mode','dma','--kv','fp16',
+       '--suffix-draft','0','--pcie-frac',str(a.pcie_frac),'--pcie-mode','dma','--kv',a.kv,
        '--adapt-every',str(a.adapt_every),'--adapt-swaps',str(a.adapt_swaps if a.adapt_every else 0),
        '--conversation-cache-mib',str(a.conversation_cache_mib),'--conversation-cache-slots','4','--prompt-cache','6','--stats','--check-logits']
  if not a.balanced_experts:args+=['--expert-profile',str(ROOT/'data/expert-profile.bin')]
+ if a.dedicated_prefill:args+=['--no-prefill-borrow']
  if a.mtp:args+=['--mtp','native','--mtp-max-t',str(a.mtp+1),'--spec-min-p','0']
  cuda=Path(os.environ.get('CUDA_PATH',r'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0'))
  candidates=[a.cuda_bin] if a.cuda_bin else [cuda/'bin'/'x64',cuda/'bin']
  libs=[str(x.resolve()) for x in candidates if x and x.is_dir()]
- config={'exe':str(ROOT/'build-native-engine'/'strata.exe'),'args':args,'cwd':str(ROOT),
+ config={'exe':str(a.exe.resolve() if a.exe else ROOT/'build-native-engine'/'strata.exe'),'args':args,'cwd':str(ROOT),
          'tokenizer':str(model),'tokenizer_format':'safetensors','chat_template':str(ROOT/'config/native/froggeric-v22.5.jinja'),
          'model_name':'Qwen3.8-Flash-Next-NVFP4-Native','lib_dirs':libs,'allowed_hosts':['*'],
-         'env':{'STRATA_NVFP4_F32':'1','STRATA_NVFP4_TC':'0','STRATA_PREFILL_NVFP4':'fp16',
+         'env':{'STRATA_NVFP4_F32':'1','STRATA_NVFP4_TC':'0','STRATA_PREFILL_NVFP4':a.prefill_mode,
                 'STRATA_PREFILL_CPU_SHARE':'0','STRATA_PREFILL_BF16X2':'1','STRATA_SPEC_STOP_BOUNDARY':'1',
                 'STRATA_NATIVE_ALLOC_PINNED':'0' if a.staging else '1'}}
  output.parent.mkdir(parents=True,exist_ok=True)

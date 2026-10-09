@@ -289,15 +289,39 @@ native cold prefill and explaining latency tails remain optimization work.
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`. That launcher selects
 `config/native/rtx5090-262k-mtp2.json`: 262,144 context capacity, 8,192-token
-prefill, native MTP2, FP16 KV and the same FP32/BF16x2 quality settings, served
+prefill, native MTP2, INT8 KV, W4A8 expert prefill and dedicated prompt workspace, served
 at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. Native server
 configs and the generator set `allowed_hosts: ["*"]` to accept any HTTP Host
 header. Changes to this setting take effect on the next start. The context
 limit includes input and generated tokens. Capacity is separate from tested
 long-context quality: the completed retrieval suite above reaches 32K. The
-262K desktop profile changes only the context limit from the measured MTP2
-profile; it has not completed a separate acceptance run. The user is testing
-it interactively. No second engine is started alongside that service.
+262K desktop profile now also changes KV and expert-prefill precision and reserves
+workspace beside the expert cache. FP32 decode activations and BF16x2 dense
+prefill remain enabled. This combination has not completed GPU acceptance or
+end-to-end timing. The user is testing the service interactively; no second
+engine is started alongside it. Restart the desktop launcher to load the staged
+`build-native-engine/strata-int8.exe`. Diagnostics append to
+`logs/native-262k-int8.log`; the launcher creates its directory.
+
+The native loader previously replaced every explicit `--kv` with FP16. It now
+honours `--kv int8` and keeps FP16 when unspecified. Native Q4/hybrid KV are
+rejected rather than silently replaced. INT8 reuses the existing rotated-KV
+prefill, decode, MTP and conversation-cache paths; FP8 KV is not implemented.
+`--no-prefill-borrow` reserves separate buffers before automatic expert cache
+sizing, so prefill does not evict and refill the expert-cache tail for workspace.
+The conservative existing reservation for 8,192 rows is 5,600 MiB, in addition
+to the 2,048 MiB reserve. It is an allocation budget, not a measured workspace
+size. Startup traces report actual allocated bytes and effective chunk capacity;
+`INFO` also exposes `prefill_chunk` and `prefill_workspace`. The existing fallback
+can reduce the chunk if other VRAM use prevents it fitting; check these fields
+before claiming an 8,192-row run.
+
+The pre-change user-service metrics recorded a cold 24,115-token request at
+27,792.4 ms (867.7 tok/s), with zero expert source reads. This is evidence of the
+reported slowdown, not a benchmark of the new profile. Earlier W4A8 results
+above used FP16 KV and different context/cache conditions; they do not establish
+the speed or quality of this combined INT8 profile. Repeat cold prefill, cached
+follow-up, cache restore, MTP parity and expert-source-I/O checks after switching.
 
 On this machine, `START-NATIVE.bat` starts the independent MTP2 quality configuration
 at `127.0.0.1:8097`. It uses this checkout's Python environment and engine;
@@ -311,6 +335,9 @@ and a 4 GiB conversation cache. MTP stays off in this reference config;
 `config/native/rtx5090-mtp2.json` is the startup profile with native MTP2 enabled.
 `--staging`, `--adapt-every 0`, `--balanced-experts`, `--pcie-frac 0|0.5|1` and
 `--mtp 0|1|2|4` on the generator expose the measured alternatives explicitly.
+`--kv fp16|int8`, `--prefill-mode fp16|w4a8|w4a4x2|w4a4`,
+`--dedicated-prefill` and `--exe` select precision, workspace ownership and a
+staged executable. Generator defaults retain the FP16 reference settings.
 CPU fractions apply only to cold experts. The smaller reference diagnostic
 config remains in `config/native/reference.json`.
 
@@ -329,6 +356,25 @@ cd G:\Strata\Strata-Safetensors
 .\.venv-native\Scripts\python.exe -m serve.server --engine strata `
   --config build-native-engine\native.json --host 127.0.0.1 --port 8097
 ```
+
+To rebuild the desktop profile without overwriting the reference executable:
+
+```powershell
+.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-int8
+```
+
+The build script refuses to overwrite a running engine with the selected name.
+It configures the existing build directory and reuses unchanged CUDA libraries.
+On 2026-10-10 this staged SM120 CUDA build succeeded. The five CPU safetensors
+CTest checks and 16 offline conversation-cache harness tests passed. Explicit
+INT8/default FP16 config generation, overwrite refusal, desktop profile and
+port settings, PowerShell parsing and `--help` with GPUs hidden passed. The
+reference `strata.exe` hash remains
+`841835c525a2598e8d9f7d12f4bc85a264e04cb7ff5df0ab12c7de9780fa7a53`;
+the staged `strata-int8.exe` hash is
+`9cb530d67529e076013e58d9ff89184f417c0432eaa1c9f2222edef4ebf910d6`.
+These checks do not validate INT8 GPU inference. No GPU kernel sources changed;
+HIP and SYCL builds remain untested on this Windows CUDA setup.
 
 The config generator refuses writes inside the model directory and refuses to
 overwrite an existing config. Its CUDA DLL paths refer to the installed toolkit;

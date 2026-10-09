@@ -568,6 +568,8 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
   endif()
 
   add_executable(strata src/program/generate.cpp)
+  set(STRATA_EXECUTABLE_NAME "strata" CACHE STRING "Engine output name (allows staging beside a running binary)")
+  set_target_properties(strata PROPERTIES OUTPUT_NAME "${STRATA_EXECUTABLE_NAME}")
   target_include_directories(strata PRIVATE ${_strata_gpu_include_directories})
   target_link_libraries(strata PRIVATE strata_engine strata_prefill strata_spec ${_strata_gpu_runtime_target})
 

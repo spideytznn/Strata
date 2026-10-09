@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-int8.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -20,7 +20,8 @@
     "--pcie-mode",
     "dma",
     "--kv",
-    "fp16",
+    "int8",
+    "--no-prefill-borrow",
     "--adapt-every",
     "4",
     "--adapt-swaps",
@@ -43,6 +44,7 @@
     "0"
   ],
   "cwd": "G:\\Strata\\Strata-Safetensors",
+  "log": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-int8.log",
   "tokenizer": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
   "tokenizer_format": "safetensors",
   "chat_template": "G:\\Strata\\Strata-Safetensors\\config\\native\\froggeric-v22.5.jinja",
@@ -54,7 +56,8 @@
   "env": {
     "STRATA_NVFP4_F32": "1",
     "STRATA_NVFP4_TC": "0",
-    "STRATA_PREFILL_NVFP4": "fp16",
+    "STRATA_PREFILL_NVFP4": "w4a8",
+    "STRATA_PREFILL_TRACE": "1",
     "STRATA_PREFILL_CPU_SHARE": "0",
     "STRATA_PREFILL_BF16X2": "1",
     "STRATA_SPEC_STOP_BOUNDARY": "1",

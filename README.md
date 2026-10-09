@@ -19,14 +19,18 @@ This startup does not modify the existing deployment. Native vision and
 multi-GPU are unsupported; HIP and SYCL have not been built or validated.
 
 The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 context,
-8,192-token prefill and `127.0.0.1:8880`**, with the same quality arithmetic and
-native MTP2. Its config is `config/native/rtx5090-262k-mtp2.json`. The desktop
+8,192-token prefill and `127.0.0.1:8880`**, with INT8 KV, W4A8 expert prefill,
+dedicated prefill workspace and native MTP2. FP32 decode activations and BF16x2
+dense prefill remain enabled. Its config is `config/native/rtx5090-262k-mtp2.json`. The desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 The 32K profile and its repeated benchmark settings remain available separately.
 262K is this profile's configured capacity. The completed long-context
 acceptance suite reaches 32K; this desktop profile has not completed a separate
-262K acceptance run.
+262K acceptance run. This INT8 KV / dedicated-workspace combination has been
+built but still needs GPU acceptance and end-to-end timing. Restarting the
+desktop launcher selects the new `strata-int8.exe`; an already-running engine
+keeps its previous settings. Engine diagnostics append to `logs/native-262k-int8.log`.
 
 ## Inherited Strata NVFP4 baseline
 

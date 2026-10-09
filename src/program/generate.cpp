@@ -2125,7 +2125,12 @@ int strata_main(int argc, char** argv) {
         o.stream_token = o.gr_native_mmvf = o.native_bf16 = o.native_bf16_extra = true;
         o.native_moe_combine = o.native_gdn = o.native_router = o.native_qsa = o.native_qsa_indexer = true;
         o.native_rope = o.native_ple_postops = true;
-        o.kv = "fp16"; o.gr_fp32_activations = true;
+        // Options defaults to FP16 KV. Honour an explicit --kv int8 instead of
+        // silently replacing it when loading native safetensors.
+        if (o.kv != "fp16" && o.kv != "int8") {
+            std::fprintf(stderr,"--safetensors supports --kv fp16 or --kv int8\n"); return 2;
+        }
+        o.gr_fp32_activations = true;
         o.pack.clear();
         if (!o.mtp.empty()) {
             if (o.mtp != "native" || !o.mtp_q4.empty() || !o.mtp_draft_vocab.empty()) {
@@ -6860,7 +6865,8 @@ int strata_main(int argc, char** argv) {
                              (long long) pf_parts[i].cache->slots(),
                              (double) part_bytes(pf_parts[i], pf_parts[i].first) / 1073741824.0);
         } else {
-            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)\n");
+            std::fprintf(stderr, "strata serve: the prompt path allocates its own buffers (%s)\n",
+                         o.no_prefill_borrow ? "dedicated workspace: --no-prefill-borrow" : "too few cache slots to borrow");
         }
         rss_probe("the prompt path set up");
         // layer split across GPUs: a prompt path per stage, each handing its chunk's rows to the next.
@@ -8740,9 +8746,11 @@ int strata_main(int argc, char** argv) {
                                        " batch_groups=" + std::to_string(o.batch_groups)).c_str() : "");
             if (safetensors)
                 std::printf("INFO weight_source=safetensors native_adapter=1 expert_ram_bytes=%llu "
-                            "expert_cuda_pinned_bytes=%llu expert_os_locked_bytes=%llu\n",
+                            "expert_cuda_pinned_bytes=%llu expert_os_locked_bytes=%llu "
+                            "prefill_chunk=%lld prefill_workspace=%s\n",
                             (unsigned long long) src.resident_bytes(), (unsigned long long) src.pinned_bytes(),
-                            (unsigned long long) src.locked_bytes());
+                            (unsigned long long) src.locked_bytes(), (long long) sp.chunk(),
+                            borrow != nullptr ? "borrowed" : "dedicated");
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
         // a flag nobody will raise - end the engine with where it was, so the server starts it again instead of the
