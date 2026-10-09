@@ -134,6 +134,10 @@ void native_iq4_nl_f32(const void* weights, const float* x, void* scratch_q8_1,
 // Q6_K=14, IQ4_NL=20, IQ4_XS=23, Q2_0=42. Unsupported IDs throw in the byte-count
 // and launch helpers; only the
 // capability query returns false.
+// BF16 is served only by native_projection_f32, with unquantized activations.
+void native_projection_f32(int type, const void* weights, const float* x, const void* x_q8_1,
+                           float* y, int n_in, int n_out, int ncols, void* stream);
+bool native_projection_supported(int ggml_type) noexcept;
 bool native_mmvq_supported(int ggml_type) noexcept;
 std::size_t native_mmvq_weight_bytes(int ggml_type, int n_in, int n_out);
 void native_mmvq(int ggml_type, const void* weights, const void* x_q8_1, float* y,

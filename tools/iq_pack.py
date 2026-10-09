@@ -56,6 +56,12 @@ sys.path.insert(0, str(HERE))
 import gguf_reader as G  # noqa: E402
 
 FLOAT = {"BF16", "F32", "F16"}
+def fidelity_native(name):
+    return name in ("output.weight", "token_embd.weight") or name.endswith((
+        ".attn_qkv.weight", ".attn_gate.weight", ".ssm_out.weight", ".attn_q.weight",
+        ".attn_k.weight", ".attn_v.weight", ".attn_output.weight", ".ffn_gate_shexp.weight",
+        ".ffn_up_shexp.weight", ".ffn_down_shexp.weight"))
+
 ROUTERS = ("ffn_gate_inp.weight", "ffn_gate_inp_shexp.weight")
 NOT_IN_PACK = {"per_layer_token_embd.weight"}      # the 28.8 GB PLE table: read from its GGUF by the engine
 
@@ -272,7 +278,7 @@ def convert(name: str, type_name: str, raw: np.ndarray, compat_bf16: bool):
     return "2", data, len(data), rec
 
 
-def index_standalone(src, out, model: Model, compat_bf16: bool = False) -> int:
+def index_standalone(src, out, model: Model, compat_bf16: bool = False, fidelity: bool = False) -> int:
     """Every non-expert tensor of the model: the floats the engine reads from the pack into dense.bin in the form it
     reads them (FORM; converted when stored otherwise, see above), quantized ones served natively from the GGUF."""
     todo, problems = [], []
@@ -285,7 +291,7 @@ def index_standalone(src, out, model: Model, compat_bf16: bool = False) -> int:
         # quantized: served from the GGUF unless the engine reads it from the pack (FORM), which takes
         # --compat-bf16 to dequantize - except the native PLE key encodings
         form = form_of(name)
-        native = t.type_name not in FLOAT and (form is None or (
+        native = (fidelity and fidelity_native(name)) or t.type_name not in FLOAT and (form is None or (
             name == "blk.1.ple_key.weight" and t.type_name in NATIVE_PLE_KEY))
         if t.type_name not in FLOAT and not native and not compat_bf16:
             problems.append(f"{name} is {t.type_name}, but the engine requires {form}; use --compat-bf16")
@@ -516,7 +522,11 @@ def main() -> int:
                          "(rounds weights; leaves experts and the PLE table unchanged)")
     ap.add_argument("--experts-bin", action="store_true",
                     help="also write experts.bin (the engine otherwise reads the experts from the GGUF itself)")
+    ap.add_argument("--fidelity", action="store_true", help="exact BF16 native projections; requires the adapted engine and dense sidecar")
     a = ap.parse_args()
+    if a.fidelity:
+        if a.base or a.compat_bf16: ap.error("--fidelity cannot use --base or --compat-bf16")
+        FORM["ple_conv1d.weight"] = "BF16"
     if a.compat_bf16 and a.base:
         ap.error("--compat-bf16 cannot reuse --base dense weights")
     # HF snapshot files are symlinks to hash-named blobs. Keep the shard filename for discovery: .absolute(), not
@@ -598,7 +608,7 @@ def main() -> int:
         (out / "native_experts.txt").unlink(missing_ok=True)
         rc = index_from_base(a, src, base, out, g, {t.name: t for t in g.tensors}, mm)
     else:
-        rc = index_standalone(src, out, model, a.compat_bf16)
+        rc = index_standalone(src, out, model, a.compat_bf16, a.fidelity)
     if rc:
         return rc
     if not (out / "tokenizer" / "vocab.json").exists() or not (out / "tokenizer" / "chat_template.jinja").exists():

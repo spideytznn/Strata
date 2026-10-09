@@ -5,6 +5,10 @@
 // MIT license, third_party/ggml/LICENSE).  The block structs and codebook grids come from its ggml-common.h,
 // included unchanged.
 #include "strata/kernels/iq_kernels.hpp"
+#include <stdexcept>
+#ifdef STRATA_NVFP4_TC
+#include "strata/kernels/nvfp4_tensor.hpp"
+#endif
 #include "strata/kernels/dp4a.hpp"
 #include "strata/kernels/q8_1_finite.hpp"
 #include "s26_tsum.cuh"
@@ -2890,6 +2894,10 @@ NativeExpertLayout native_expert_layout(int gu_type, int d_type, int64_t n_embd,
 }
 
 size_t native_expert_scratch_bytes(int64_t cap, int64_t n_ff) {
+#ifdef STRATA_NVFP4_TC
+    const char* tc=std::getenv("STRATA_NVFP4_TC");
+    if(tc && std::atoi(tc)>0) return size_t(cap)*(size_t(n_ff)*20+4096)+1024;
+#endif
     const size_t f = (size_t) cap * (size_t) n_ff * sizeof(float);
     return 3 * ((f + 255) & ~(size_t) 255) + (((size_t) cap * (size_t) (n_ff / 32) * sizeof(block_q8_1) + 255) & ~(size_t) 255);
 }
@@ -3526,10 +3534,54 @@ bool g_grouped_v1 = env_on("STRATA_GROUPED_V1");
 
 void native_grouped_set_v1(bool v1) { g_grouped_v1 = v1; }
 
+namespace {
+// Reference decode: original NVFP4 bytes and global scales, FP32 input/intermediate/accumulation.
+// Each warp owns one row; no activation quantization or FP16 weight conversion.
+__device__ float nvfp4_value(const uint8_t* row, int k) {
+    const block_nvfp4* b = (const block_nvfp4*) row + k / 64;
+    const int j = k % 64, sub = j / 16, q = j % 16;
+    const uint8_t byte = b->qs[sub * 8 + (q & 7)];
+    const int code = q < 8 ? (byte & 15) : (byte >> 4);
+    return float(kvalues_fp4[code]) * ue4m3_to_f32_half(b->d[sub]);
+}
+template<bool DOWN>
+__global__ void nvfp4_f32_grouped_kernel(NativeExpertLayout L, const unsigned long long* ptr,
+    const int32_t* starts, const int32_t* ng, const int32_t* dst, const int32_t* tok,
+    const float* x, float* h, float* out) {
+    const int lane = threadIdx.x & 31, row = blockIdx.x * 8 + threadIdx.x / 32;
+    const int nrow = DOWN ? int(L.n_embd) : int(L.n_ff);
+    if (row >= nrow) return;
+    for (int g = blockIdx.y; g < *ng; g += gridDim.y) {
+        const uint8_t* blob = (const uint8_t*) ptr[g];
+        const float* tail = (const float*) (blob + L.tail_off);
+        const uint8_t* w = blob + (DOWN ? L.down_off : 0) + size_t(row) * (DOWN ? L.d_row : L.gu_row);
+        const uint8_t* u = blob + L.up_off + size_t(row) * L.gu_row;
+        for (int e = starts[g]; e < starts[g+1]; ++e) {
+            const float* input = DOWN ? h + size_t(e) * L.n_ff : x + size_t(tok[e]) * L.n_embd;
+            const int kmax = DOWN ? int(L.n_ff) : int(L.n_embd);
+            float a=0.0f, b=0.0f;
+            for (int k=lane; k<kmax; k+=32) {
+                a += nvfp4_value(w,k) * input[k];
+                if constexpr (!DOWN) b += nvfp4_value(u,k) * input[k];
+            }
+            a=warp_sum(a);
+            if constexpr (!DOWN) b=warp_sum(b);
+            if (lane==0) {
+                if constexpr (DOWN) out[size_t(dst[e])*L.n_embd+row]=a*tail[2];
+                else {
+                    const float gate=a*tail[0], up=b*tail[1];
+                    h[size_t(e)*L.n_ff+row]=(gate/(1.0f+expf(-gate)))*up;
+                }
+            }
+        }
+    }
+}
+}
+
 void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long* grp_ptr, const int32_t* grp_start,
                            const int32_t* n_groups, const int32_t* ent_dst, const int32_t* ent_tok, int64_t cap_groups,
                            int64_t cap_entries, const void* x_q8_1, void* scratch, float* out, void* stream,
-                           int64_t grid_groups) {
+                           int64_t grid_groups, const float* x_f32) {
     if (cap_groups <= 0 || cap_entries <= 0) return;
     if (L.n_ff % 32 != 0) { std::fprintf(stderr, "native_expert_grouped: n_ff %lld\n", (long long) L.n_ff); std::exit(1); }
     cudaStream_t s = (cudaStream_t) stream;
@@ -3538,6 +3590,23 @@ void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long
     float* up = (float*) ((uint8_t*) scratch + fa);
     float* h = (float*) ((uint8_t*) scratch + 2 * fa);
     block_q8_1* hq = (block_q8_1*) ((uint8_t*) scratch + 3 * fa);
+#ifdef STRATA_NVFP4_TC
+    static const int tensor_terms=[] { const char* v=std::getenv("STRATA_NVFP4_TC"); return v ? std::atoi(v) : 0; }();
+    if(tensor_terms && L.gu_type==40 && L.d_type==40) {
+        if(tensor_terms<1 || tensor_terms>3) throw std::invalid_argument("STRATA_NVFP4_TC must be 1, 2 or 3");
+        nvfp4_tensor_grouped(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,grid_groups>0?grid_groups:cap_groups,cap_entries,x_f32,scratch,out,stream,tensor_terms);
+        return;
+    }
+#endif
+    static const bool fidelity_f32 = [] { const char* v=std::getenv("STRATA_NVFP4_F32"); return v && v[0]=='1'; }();
+    if (fidelity_f32 && L.gu_type==40 && L.d_type==40) {
+        if (!x_f32 || !L.tail_off) throw std::invalid_argument("STRATA_NVFP4_F32 requires original FP32 activations and scale tails");
+        const unsigned gy=unsigned(grid_groups>0 ? grid_groups : cap_groups);
+        nvfp4_f32_grouped_kernel<false><<<dim3(unsigned((L.n_ff+7)/8),gy),256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+        nvfp4_f32_grouped_kernel<true><<<dim3(unsigned((L.n_embd+7)/8),gy),256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+        check("NVFP4 FP32 reference decode");
+        return;
+    }
     const auto* X = (const block_q8_1*) x_q8_1;
     static const bool v2 = [] { const char* v = std::getenv("STRATA_EXPERT_V2"); return v && v[0] == '1'; }();
     if (v2 && L.gu_type == 21 && L.d_type == 20 && L.n_embd == 2560 && L.n_ff == 640) {   // S26: see s26_gu_l_kernel

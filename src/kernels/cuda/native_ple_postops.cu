@@ -70,14 +70,14 @@ __global__ void broadcast_kernel(const float* value, const float* gate, float* g
 }
 __global__ void conv_residual_kernel(const float* history, const float* normalized,
                                     const uint16_t* weights, const float* hidden,
-                                    const float* gated, float* conv, float* result) {
+                                    const float* gated, float* conv, float* result, bool bf16_weights) {
     const int c = blockIdx.x * blockDim.x + threadIdx.x;
     if (c >= D) return;
     float sum = 0;
 #pragma unroll
     for (int k = 0; k < 4; ++k) {
         const float x = k == 3 ? normalized[c] : history[c * HISTORY + 3 * k];
-        const float w = __half2float(__ushort_as_half(weights[c * 4 + k]));
+        const float w = (bf16_weights ? __uint_as_float(uint32_t(weights[c * 4 + k]) << 16) : __half2float(__ushort_as_half(weights[c * 4 + k])));
         const float term = __fmul_rn(x, w);
         sum = k == 0 ? term : __fadd_rn(sum, term);
     }
@@ -154,7 +154,7 @@ __global__ void broadcast_batch_kernel(const float* value, const float* gate, fl
 }
 // the dilated conv (taps 9, 6, 3 tokens back and this one) and the residual; a tap before the chunk reads the history
 __global__ void conv_residual_batch_kernel(const float* history, const float* normalized, const uint16_t* weights,
-                                           float* hidden, const float* gated, int T) {
+                                           float* hidden, const float* gated, int T, bool bf16_weights) {
     const size_t i = size_t(blockIdx.x) * blockDim.x + threadIdx.x;
     if (i >= size_t(T) * D) return;
     const int t = int(i / D), c = int(i % D);
@@ -163,7 +163,7 @@ __global__ void conv_residual_batch_kernel(const float* history, const float* no
     for (int k = 0; k < 4; ++k) {
         const int p = t - 9 + 3 * k;             // the token this tap reads (k == 3: this one)
         const float x = p >= 0 ? normalized[size_t(p) * D + c] : history[size_t(c) * HISTORY + (9 + p)];
-        const float wk = __half2float(__ushort_as_half(weights[c * 4 + k]));
+        const float wk = (bf16_weights ? __uint_as_float(uint32_t(weights[c * 4 + k]) << 16) : __half2float(__ushort_as_half(weights[c * 4 + k])));
         const float term = __fmul_rn(x, wk);
         sum = k == 0 ? term : __fadd_rn(sum, term);
     }
@@ -249,7 +249,7 @@ void native_ple_postops(const float* projected_key, const float* hidden,
     broadcast_kernel<<<D/256,256,0,st>>>(value,b.gate,b.gated);
     launch_check();
     native_gr_rms_norm_weighted(b.gated,w.norm_conv,b.normalized,N,H,NG_RMS_EPS,stream);
-    conv_residual_kernel<<<D/256,256,0,st>>>(history,b.normalized,w.conv1d_f16,hidden,b.gated,b.conv,b.result);
+    conv_residual_kernel<<<D/256,256,0,st>>>(history,b.normalized,w.conv1d_f16,hidden,b.gated,b.conv,b.result,w.conv1d_bf16);
     launch_check();
 }
 
@@ -265,7 +265,7 @@ void native_ple_postops_batch(float* key, float* hidden, const float* value, flo
     gate_kernel<<<rows, 512, 0, st>>>(key, query_norm, gate, 1.0f / std::sqrt(float(N)));
     broadcast_batch_kernel<<<blocks, 256, 0, st>>>(value, gate, gated, T);
     rms_rep_kernel<<<rows, 1024, 0, st>>>(gated, w.norm_conv, query_norm);
-    conv_residual_batch_kernel<<<blocks, 256, 0, st>>>(history, query_norm, w.conv1d_f16, hidden, gated, T);
+    conv_residual_batch_kernel<<<blocks, 256, 0, st>>>(history, query_norm, w.conv1d_f16, hidden, gated, T, w.conv1d_bf16);
     history_batch_kernel<<<D / 256, 256, 0, st>>>(history, query_norm, T);
     launch_check();
 }
@@ -282,7 +282,7 @@ void native_ple_postops_batch_snap(float* key, float* hidden, const float* value
     gate_kernel<<<rows, 512, 0, st>>>(key, query_norm, gate, 1.0f / std::sqrt(float(N)));
     broadcast_batch_kernel<<<blocks, 256, 0, st>>>(value, gate, gated, T);
     rms_rep_rt_kernel<<<rows, 1024, 0, st>>>(gated, w.norm_conv, query_norm, N, NG_RMS_EPS);
-    conv_residual_batch_kernel<<<blocks, 256, 0, st>>>(history, query_norm, w.conv1d_f16, hidden, gated, T);
+    conv_residual_batch_kernel<<<blocks, 256, 0, st>>>(history, query_norm, w.conv1d_f16, hidden, gated, T, w.conv1d_bf16);
     history_batch_snap_kernel<<<D / 256, 256, 0, st>>>(history, query_norm, T, snap);
     launch_check();
 }

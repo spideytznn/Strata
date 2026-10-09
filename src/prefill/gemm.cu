@@ -11,6 +11,7 @@
 
 #include <cublas_v2.h>
 #include <cuda_fp16.h>
+#include <cuda_bf16.h>
 #include <cuda_runtime.h>
 
 #include <algorithm>
@@ -853,6 +854,33 @@ void Gemm::f16_inplace(const uint16_t* X, const uint16_t* W, float* Y, int64_t T
 #else
     (void) X; (void) W; (void) Y; (void) T; (void) N; (void) K; (void) ldy;
 #endif
+}
+
+namespace {
+__global__ void split_f32_bf16(const float* x, uint16_t* hi, uint16_t* lo, uint16_t* tail, int64_t n) {
+    const int64_t i = (int64_t) blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        const __nv_bfloat16 h = __float2bfloat16_rn(x[i]);
+        hi[i] = __bfloat16_as_ushort(h);
+        const float rem = x[i] - __bfloat162float(h);
+        const __nv_bfloat16 l = __float2bfloat16_rn(rem);
+        lo[i] = __bfloat16_as_ushort(l);
+        tail[i] = __bfloat16_as_ushort(__float2bfloat16_rn(rem - __bfloat162float(l)));
+    }
+}
+}
+void Gemm::bf16_f32(const float* X, const uint16_t* W, float* Y, int64_t T, int64_t N, int64_t K, int64_t ldy) {
+    if (ldy <= 0) ldy = N;
+    const int64_t rows = scratch_elems_ / (3 * K);
+    if (rows < 1) { std::fprintf(stderr, "fidelity prefill scratch too small\n"); std::exit(1); }
+    for (int64_t t = 0; t < T; t += rows) {
+        const int64_t n = std::min(rows, T - t), count = n * K;
+        uint16_t* lo = scratch_ + count;
+        split_f32_bf16<<<unsigned((count + 255) / 256), 256, 0, (cudaStream_t) stream_>>>(X + t * K, scratch_, lo, lo + count, count);
+        bf16(scratch_, W, Y + t * ldy, n, N, K, ldy);
+        bf16(lo, W, Y + t * ldy, n, N, K, ldy, 1.0f);
+        bf16(lo + count, W, Y + t * ldy, n, N, K, ldy, 1.0f);
+    }
 }
 
 void Gemm::native(const uint16_t* X, int ggml_type, const void* W_blocks, float* Y, int64_t T, int64_t N, int64_t K,

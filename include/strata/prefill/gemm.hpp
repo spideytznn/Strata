@@ -36,6 +36,10 @@ public:
     /// shape (so the caller falls back to bf16(), with the same ldx).
     bool bf16_hcd_exact(const uint16_t* X, int64_t ldx, const uint16_t* W, float* Y, int64_t T, int64_t N, int64_t K);
 
+    /// BF16 weights, FP32 activations split into three BF16 components; no weight narrowing.
+    void bf16_f32(const float* X, const uint16_t* W, float* Y, int64_t T, int64_t N, int64_t K,
+                  int64_t ldy = 0);
+
     /// Y = X . W^T with both in FP16 (bits).
     void f16(const uint16_t* X, const uint16_t* W, float* Y, int64_t T, int64_t N, int64_t K, int64_t ldy = 0,
              float beta = 0.0f);

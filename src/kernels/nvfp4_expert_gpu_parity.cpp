@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         ck(cudaMalloc(&ddst, 4 * T), "d"); ck(cudaMemcpy(ddst, ids, 4 * T, cudaMemcpyHostToDevice), "d");
         ck(cudaMalloc(&dtok, 4 * T), "t"); ck(cudaMemcpy(dtok, ids, 4 * T, cudaMemcpyHostToDevice), "t");
         k::quantize_q8_1_rows(dx, T, N, dxq, nullptr);
-        k::native_expert_grouped(L, dptr, dstart, dng, ddst, dtok, 1, T, dxq, scr, dout, nullptr);
+        k::native_expert_grouped(L, dptr, dstart, dng, ddst, dtok, 1, T, dxq, scr, dout, nullptr, 0, dx);
         ck(cudaDeviceSynchronize(), "run");
         std::vector<float> got((size_t) T * N);
         ck(cudaMemcpy(got.data(), dout, got.size() * 4, cudaMemcpyDeviceToHost), "out");
@@ -99,9 +99,9 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < got.size(); ++i) { num += (got[i] - ref[i]) * (got[i] - ref[i]); den += ref[i] * ref[i]; }
         const double rel = std::sqrt(num / den);
         worst = std::fmax(worst, rel);
-        std::printf("layer %2d expert %3d: s_gate %.3g s_up %.3g s_down %.3g -> expert output rel. error %.3f%%\n", layer,
+        std::printf("layer %2d expert %3d: s_gate %.3g s_up %.3g s_down %.3g -> expert output rel. error %.6f%%\n", layer,
                     e, tail[0], tail[1], tail[2], 100 * rel);
     }
-    std::printf("RESULT: %s (worst %.3f%%)\n", worst < 0.03 ? "ok" : "TOO FAR", 100 * worst);
-    return worst < 0.03 ? 0 : 1;
+    std::printf("RESULT: %s (worst %.6f%%)\n", worst < (std::getenv("STRATA_NVFP4_F32") ? 1e-4 : 0.03) ? "ok" : "TOO FAR", 100 * worst);
+    return worst < (std::getenv("STRATA_NVFP4_F32") ? 1e-4 : 0.03) ? 0 : 1;
 }

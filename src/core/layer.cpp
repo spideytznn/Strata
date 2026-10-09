@@ -149,8 +149,8 @@ bool gemv_quantized(const WeightRef& w, const Planes& p, const strata::kernels::
         try {
             // Plan v0.3 P3: a caller whose previous native projection quantized the SAME x into the shared
             // scratch, with no native projection in between, passes x_q8_1_ready and the quantize is skipped.
-            if (!x_q8_1_ready) native_quantize_q8_1(x_f32, w.native_q8_1, (int) n_in, 1, stream);
-            native_mmvq(w.native_type, w.native_data, w.native_q8_1, y,
+            if (w.native_type != 30 && !x_q8_1_ready) native_quantize_q8_1(x_f32, w.native_q8_1, (int) n_in, 1, stream);
+            native_projection_f32(w.native_type, w.native_data, x_f32, w.native_q8_1, y,
                         (int) n_in, (int) n_out, 1, stream);
         } catch (const std::exception& error) {
             err = name + ": " + error.what();

@@ -24,6 +24,7 @@
 // SOFTWARE.
 
 #include "strata/kernels/native_mmvq.hpp"
+#include "strata/kernels/bf16_gemv.hpp"
 #include "strata/kernels/dp4a.hpp"
 #include "strata/kernels/q8_1_finite.hpp"
 #include "strata/kernels/iq_kernels.hpp"
@@ -2522,6 +2523,22 @@ void native_iq4_nl_f32(const void* weights, const float* x, void* scratch_q8_1,
     small_f32<IQ4NLBlock, 4>(weights, x, scratch_q8_1, y, n_in, n_out, ncols, stream);
 }
 
+void native_projection_f32(int type, const void* weights, const float* x, const void* x_q8_1,
+                           float* y, int n_in, int n_out, int ncols, void* stream) {
+    if (type == 30) {
+        if (!x || !weights || !y || !stream || ncols < 1 || ncols > 8)
+            throw std::invalid_argument("BF16 projection requires FP32 input, weights and 1..8 columns");
+        bf16_gemv_fp32_mmvf_multi(x, n_in, static_cast<const uint16_t*>(weights), y, n_out,
+                                 n_in, n_out, ncols, stream);
+    } else {
+        native_mmvq(type, weights, x_q8_1, y, n_in, n_out, ncols, stream);
+    }
+}
+
+bool native_projection_supported(int ggml_type) noexcept {
+    return ggml_type == 30 || native_mmvq_supported(ggml_type);
+}
+
 bool native_mmvq_supported(int ggml_type) noexcept {
     return ggml_type == 2 || ggml_type == 6 || ggml_type == 7 || ggml_type == 8 || ggml_type == 11 ||
            ggml_type == 12 || ggml_type == 13 || ggml_type == 14 || ggml_type == 20 ||
@@ -2532,6 +2549,7 @@ bool native_mmvq_supported(int ggml_type) noexcept {
 std::size_t native_mmvq_weight_bytes(int ggml_type, int n_in, int n_out) {
     int block_elems, block_bytes;
     switch (ggml_type) {
+    case 30: block_elems = 1; block_bytes = 2; break;
     case 2: block_elems = 32; block_bytes = 18; break;
     case 6: block_elems = 32; block_bytes = 22; break;
     case 7: block_elems = 32; block_bytes = 24; break;

@@ -33,7 +33,7 @@ bool NativeHead::load(const std::vector<std::string>& shards, int64_t n_in, int6
         size_t at = 0;
         const strata::TensorInfo* tensor = model.find("output.weight", &at);
         const strata::GgufFile& gguf = model.shard(at);
-        if (!tensor || !strata::kernels::native_mmvq_supported((int) tensor->type) || tensor->shape.size() != 2 ||
+        if (!tensor || !strata::kernels::native_projection_supported((int) tensor->type) || tensor->shape.size() != 2 ||
             tensor->shape[0] != (uint64_t) n_in || tensor->shape[1] != (uint64_t) n_out) {
             err = "native head: expected a natively supported output.weight with the canonical head dimensions";
             return false;
@@ -79,7 +79,9 @@ bool NativeHead::run(const float* mixed, float* logits, void* stream, std::strin
         return false;
     }
     try {
-        if (type_ == 13) {
+        if (type_ == 30) {
+            strata::kernels::native_projection_f32(type_, weights_, mixed, nullptr, logits, n_in_, n_out_, 1, stream);
+        } else if (type_ == 13) {
             strata::kernels::native_q5_k_f32(weights_, mixed, scratch_, logits, n_in_, n_out_, 1, stream);
         } else {
             strata::kernels::native_quantize_q8_1(mixed, scratch_, n_in_, 1, stream);

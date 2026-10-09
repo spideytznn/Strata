@@ -146,7 +146,7 @@ __global__ void bcast_kernel(const float* __restrict__ value, const float* __res
 /// (`ggml_view_2d(model.layers[il].ple_conv1d, 1, hc_dim, nb[1], k*nb[0])`) settles which one is meant.
 __global__ void conv_kernel(const float* __restrict__ hist, const float* __restrict__ norm,
                             const uint16_t* __restrict__ kW, float* __restrict__ out, int hc_dim, int kern,
-                            int dil, int nhist) {
+                            int dil, int nhist, bool bf16_weights) {
     const int c = blockIdx.x * blockDim.x + threadIdx.x;
     if (c >= hc_dim) return;
     float acc = 0.0f;
@@ -157,7 +157,7 @@ __global__ void conv_kernel(const float* __restrict__ hist, const float* __restr
         // Channel-slowest (`row*hc_dim + c`) is the natural thing to write and would read a transposed state -
         // `ple_layer_xcheck.cpp` L79-83 records getting this wrong once already.
         const float v = (row == nhist) ? norm[c] : hist[(size_t) row + (size_t) nhist * c];
-        acc += f32_from_f16(kW[k + kern * c]) * v;
+        acc += (bf16_weights ? bf16_float(kW[k + kern * c]) : f32_from_f16(kW[k + kern * c])) * v;
     }
     out[c] = silu_f(acc);
 }
@@ -345,7 +345,7 @@ void ple_block(const float* emb, const float* hidden, const float* hist_rows, co
         gnorm_kernel<<<hc, THREADS, 0, st>>>(d_gated, w.norm_conv, d_norm, n_embd, NG_RMS_EPS);
         conv_kernel<<<(hc_dim + THREADS - 1) / THREADS, THREADS, 0, st>>>(hist_rows, d_norm, w.conv1d_f16, d_conv,
                                                                          hc_dim, PLE_CONV_KERNEL, NGRAM_SIZE,
-                                                                         NG_HIST);
+                                                                         NG_HIST, w.conv1d_bf16);
         add3_kernel<<<(hc_dim + THREADS - 1) / THREADS, THREADS, 0, st>>>(hidden, d_gated, d_conv, out.result,
                                                                          hc_dim);
     }

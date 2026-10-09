@@ -58,6 +58,7 @@ struct PleWeights {
     const float* norm_key = nullptr;       // hc_dim
     const float* norm_query = nullptr;     // hc_dim
     const float* norm_conv = nullptr;      // hc_dim
+    bool conv1d_bf16 = false;  // opt-in fidelity pack: interpret conv1d_f16 as BF16
     const uint16_t* conv1d_f16 = nullptr;  // PLE_CONV_KERNEL * hc_dim, flat index k + 4*c
 
     /// Optional unchanged GGUF Q2_0 [2560,10240] key projection. Nonnull data

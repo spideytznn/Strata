@@ -3229,13 +3229,15 @@ int main(int argc, char** argv) {
         // (verbatim 2-byte F16) in the canonical Q2_0 pack; BF16 (kind 4) has the same size and is not F16.
         const bool f16 = wc->kind == strata::core::WeightKind::F16InF32 ||
                          (wc->kind == strata::core::WeightKind::Verbatim && wc->code_bits == 0);
-        if (!f16 || wc->bytes != (uint64_t) wc->elements * 2) {
+        const bool bf16_conv = wc->kind == strata::core::WeightKind::Bf16InF32;
+        if ((!f16 && !bf16_conv) || wc->bytes != (uint64_t) wc->elements * 2) {
             std::fprintf(stderr, "strata generate: blk.1.ple_conv1d.weight is not stored as F16 (pack index kind %d, "
                                  "%llu B for %lld values); the PLE conv1d kernel reads F16 - repack with "
                                  "tools/iq_pack.py\n",
                          (int) wc->kind, (unsigned long long) wc->bytes, (long long) wc->elements);
             return 1;
         }
+        ss.ple.w.conv1d_bf16 = bf16_conv;
         ss.ple.w.conv1d_f16 = (const uint16_t*) wc->data;
         ss.ple.consts = strata::kernels::ple_artifact_consts();
         if (o.ple_delay_us > 0) ple_table.set_injected_delay_us(o.ple_delay_us);
@@ -4321,7 +4323,8 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "strata generate: %s%s\n", err.c_str(), vram_free_note().c_str());
             return 1;
         }
-        std::fprintf(stderr, "strata generate: experimental native Q5_K head, %llu bytes, in %.1f s\n",
+        std::fprintf(stderr, "strata generate: native %s head, %llu bytes, in %.1f s\n",
+                     strata::ggml_type_name((uint32_t) native_head.type()),
                      (unsigned long long) native_head.weight_bytes(),
                      std::chrono::duration<double>(std::chrono::steady_clock::now() - head_t0).count());
     }
@@ -11306,6 +11309,20 @@ int main(int argc, char** argv) {
                 // (--adapt-async 1: the asynchronous tier above instead, ticked before the window)
                 if (!drive.d.usage.empty() && !ajob && ((rounds + 1) % o.adapt_every) == 0)
                     adapt_thr = std::thread([&] { adapt_ok = adapt(); });
+                // Opt-in: do not commit accepted lookahead beyond the reply's visible stop.
+                // Otherwise live contains tokens after EOS that the next chat template cannot
+                // reproduce, forcing a rewind and reread of the entire assistant turn.
+                static const bool stop_boundary = [] {
+                    const char* v = std::getenv("STRATA_SPEC_STOP_BOUNDARY"); return v && std::atoi(v) != 0;
+                }();
+                if (stop_boundary) {
+                    a = std::min<int64_t>(a, max_new - produced_n - 1);
+                    for (int i = 0; i < a; ++i)
+                        if (std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) outv[(size_t) i]) != o.eos_ids.end()) {
+                            a = i;
+                            break;
+                        }
+                }
                 if (!ver.commit(a + 1, err)) {
                     if (adapt_thr.joinable()) adapt_thr.join();
                     std::printf("ERR %s\n", err.c_str());
