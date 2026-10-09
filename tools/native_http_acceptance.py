@@ -38,6 +38,26 @@ def validate_http(engine,tokenizer,template,output):
                {'role':'user','content':'What is the code? Reply with the code only.'}]
   follow=json.loads(request('/v1/chat/completions',{**common,'messages':messages,'tools':tools,'tool_choice':'none'}))
   assert 'ZEBRA-417' in follow['choices'][0]['message']['content']
+  thinking={**common,'max_tokens':192,'reasoning_effort':'low',
+            'chat_template_kwargs':{'enable_thinking':True,'preserve_reasoning':True}}
+  history=[{'role':'user','content':'Compute 3 + 4. Put only the number in the final answer.'}]
+  first=json.loads(request('/v1/chat/completions',{**thinking,'messages':history}))
+  message=first['choices'][0]['message']
+  assert message.get('reasoning_content') and message.get('content','').strip()=='7',first
+  history += [message,{'role':'user','content':'Multiply that result by 2. Put only the number in the final answer.'}]
+  second=json.loads(request('/v1/chat/completions',{**thinking,'messages':history}))
+  assert second['choices'][0]['message'].get('content','').strip()=='14',second
+  reused=second['usage'].get('prompt_tokens_details',{}).get('cached_tokens',0)
+  expected_prefix=first['usage']['prompt_tokens']+first['usage']['completion_tokens']
+  assert reused>=expected_prefix-8,('reasoning/answer prefix was not preserved',reused,expected_prefix)
+  result['reasoning_history']={'previous_tokens':expected_prefix,'cached_tokens':reused}
+  # froggeric v22.5 explicitly renders later system messages; ensure they are
+  # retained by the HTTP normalization as well, rather than silently dropped.
+  late=json.loads(request('/v1/chat/completions',{**common,'messages':[
+    {'role':'user','content':'Remember the instructions that follow.'},
+    {'role':'system','content':'The secret code is SIGMA-682.'},
+    {'role':'user','content':'What is the secret code? Reply with the code only.'}]}))
+  assert 'SIGMA-682' in late['choices'][0]['message']['content']
   request('/v1/chat/completions',{**common,'messages':[{'role':'user','content':[{'type':'image_url','image_url':{'url':'data:image/png;base64,AA=='}}]}]},expect=400)
   request('/v1/chat/completions',{**body,'max_tokens':engine.max_context+1},expect=400)
   result['status']='pass';output.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')

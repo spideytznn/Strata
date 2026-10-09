@@ -1471,6 +1471,10 @@ if(STRATA_NATIVE_EXPERTS)
   add_test(NAME nvfp4_cpu_parity COMMAND nvfp4_avx512_parity)   # random blocks; the AVX2 rows bit-equal to ggml's
   set_tests_properties(nvfp4_cpu_parity PROPERTIES TIMEOUT 120)
   if(STRATA_ENABLE_CUDA)   # the NVFP4 decode kernels vs ggml's reference
+    # Manual diagnostic, never a CTest: it locks the full 63 GiB expert budget.
+    add_executable(native-registration-probe EXCLUDE_FROM_ALL tools/native_registration_probe.cu src/platform/memory.cpp)
+    target_include_directories(native-registration-probe PRIVATE include)
+    target_link_libraries(native-registration-probe PRIVATE CUDA::cudart)
     add_executable(qsa_commit_spare_test src/weights/qsa_commit_spare_test.cpp)
     target_link_libraries(qsa_commit_spare_test PRIVATE strata_kernels CUDA::cudart)
     add_test(NAME qsa_commit_spare_test COMMAND qsa_commit_spare_test)

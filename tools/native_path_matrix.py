@@ -1,5 +1,5 @@
 """End-to-end native path matrix. One resident engine at a time; preserve raw evidence."""
-import argparse,hashlib,json,os,sys,time,threading,platform,subprocess
+import argparse,hashlib,json,os,re,sys,time,threading,platform,subprocess
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
@@ -13,6 +13,21 @@ CASES={
  'reference':{},'host16':{'STRATA_NATIVE_REGISTER_GIB':'16'},
  'host24':{'STRATA_NATIVE_REGISTER_GIB':'24'},'host32':{'STRATA_NATIVE_REGISTER_GIB':'32'},
  'host40':{'STRATA_NATIVE_REGISTER_GIB':'40'},
+ 'pinned':{'STRATA_NATIVE_ALLOC_PINNED':'1'},
+ 'pinned-cpu50':{'STRATA_NATIVE_ALLOC_PINNED':'1','pcie':0.5},
+ 'pinned-cpu100':{'STRATA_NATIVE_ALLOC_PINNED':'1','pcie':0},
+ 'pinned-tc3':{'STRATA_NATIVE_ALLOC_PINNED':'1','STRATA_NVFP4_TC':'3'},
+ 'pinned-adaptive':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True},
+ 'pinned-adaptive-cpu50':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True,'pcie':0.5},
+ 'pinned-adaptive-cpu100':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True,'pcie':0},
+ 'pinned-adaptive-mtp1':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True,'mtp':1},
+ 'pinned-adaptive-mtp2':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True,'mtp':2},
+ 'pinned-adaptive-mtp4':{'STRATA_NATIVE_ALLOC_PINNED':'1','adapt':True,'mtp':4},
+ 'pinned-mtp1':{'STRATA_NATIVE_ALLOC_PINNED':'1','mtp':1},
+ 'pinned-mtp2':{'STRATA_NATIVE_ALLOC_PINNED':'1','mtp':2},
+ 'pinned-mtp4':{'STRATA_NATIVE_ALLOC_PINNED':'1','mtp':4},
+ 'cpu100-adaptive':{'pcie':0,'adapt':True},
+ 'cpu100-mtp1':{'pcie':0,'mtp':1},'cpu100-mtp2':{'pcie':0,'mtp':2},'cpu100-mtp4':{'pcie':0,'mtp':4},
  'tc1':{'STRATA_NVFP4_TC':'1'},'tc2':{'STRATA_NVFP4_TC':'2'},'tc3':{'STRATA_NVFP4_TC':'3'},
  # Percentages concern cold experts only; hot experts remain on the GPU.
  'cpu50':{'pcie':0.5},'cpu100':{'pcie':0},
@@ -106,8 +121,10 @@ def main():
     if case!='reference' and ref_results.exists():
      reference=json.loads(ref_results.read_text(encoding='utf8')).get('cases',{}).get('reference',{}).get('requests',[])
      if j<len(reference):r['tokens_equal_reference']=out==reference[j]['ids']
-    if (case.startswith('host') or case=='adaptive') and 'logits' in r:
+    if (case.startswith('host') or case in ('pinned','adaptive','pinned-adaptive')) and 'logits' in r:
      assert r['logits']['max_abs']==0 and r.get('tokens_equal_reference'),f'{case}: data movement changed arithmetic'
+    if opts.get('mtp') and opts.get('pcie',1)==1 and 'tokens_equal_reference' in r:
+     assert r['tokens_equal_reference'],f'{case}: MTP changed the greedy output'
     row['requests'].append(r);save()
     print(case,name,{k:r[k] for k in ('generated','prompt_read','prompt_ms','decode_ms','ttft_s','cpu_expert_entries','file_blobs')},flush=True)
    if a.http:
@@ -118,7 +135,10 @@ def main():
   log=(folder/'engine.log').read_text(encoding='utf8')
   assert 'post-residency expert source bytes=0' in log
   if a.long:assert 'strata prefill executed: tokens=8192 max_chunk=8192' in log,'8192 was allocated but not executed'
-  if case.startswith('tc'):assert '[nvfp4-tensor] SM120 native FP4 MMA enabled' in log
+  if opts.get('STRATA_NVFP4_TC','0')!='0':assert '[nvfp4-tensor] SM120 native FP4 MMA enabled' in log
+  promotions=[int(v) for v in re.findall(r'safetensors residency metrics:.*?promotions=(\d+)',log)]
+  if promotions:row['promotions']=max(promotions)
+  if opts.get('adapt'):assert promotions and max(promotions)>0,'adaptive mode did not actually promote experts'
   row['status']='pass';save()
  result['status']='pass';save()
 if __name__=='__main__':main()

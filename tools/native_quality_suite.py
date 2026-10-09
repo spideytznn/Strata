@@ -23,6 +23,7 @@ def main():
  p.add_argument('--cases',default='reference,tc3');p.add_argument('--reference-output',type=Path)
  p.add_argument('--oracle-config',type=Path,help='read-only fidelity GGUF config for the fidelity case')
  p.add_argument('--teacher',action='store_true');p.add_argument('--lengths',default='');p.add_argument('--http',action='store_true')
+ p.add_argument('--conversation-cache-mib',type=int,default=4096)
  p.add_argument('--expert-cache',type=int,default=4500);p.add_argument('--bare-model',action='store_true');a=p.parse_args()
  a.output.mkdir(parents=True,exist_ok=False);cfg=json.loads(a.config.read_text(encoding='utf8'))
  tok=SafetensorsTokenizer.from_directory(cfg['tokenizer']);template=ChatTemplate(Path(cfg['chat_template']))
@@ -48,7 +49,8 @@ def main():
   context=((max(lengths)+256+8191)//8192)*8192 if lengths else 4096
   setting('--max-context',context);setting('--prefill',8192 if lengths else 256)
   setting('--expert-cache',a.expert_cache);setting('--adapt-every',0);setting('--adapt-swaps',0)
-  setting('--pcie-frac',opts.get('pcie',1));setting('--prompt-cache',6);setting('--conversation-cache-mib',2048)
+  setting('--pcie-frac',opts.get('pcie',1));setting('--prompt-cache',6)
+  setting('--conversation-cache-mib',a.conversation_cache_mib);setting('--conversation-cache-slots',4)
   k=opts.get('mtp',0);setting('--spec',max(2,k+1));setting('--mtp-max-t',max(1,k+1));setting('--spec-min-p',0)
   if k:args+=['--mtp','native']
   if a.bare_model and case!='fidelity':
@@ -105,6 +107,7 @@ def main():
        mean_nll_delta=row['teacher_summary']['mean_nll']-baseline['mean_nll'])
     save()
    for size in lengths:
+    first_continuation=None
     for depth in (0.1,0.9):
      code=f'ZEBRA-{size}-D{int(depth*100)}'
      head=tok.encode('<|im_start|>user\nRead the following archive.\n',parse_special=True)
@@ -118,6 +121,11 @@ def main():
      suffix=tok.encode('<|im_start|>user\nRepeat the same access code only.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n',parse_special=True)
      r2=generate(f'needle-{size}-{depth}-cached',ids+r['ids']+suffix,32);r2['expected']=code;r2['correct']=code in r2['text'];save()
      assert r2['reused']>=size-256,'long prefix was not reused'
+     if first_continuation is None:first_continuation=(ids+r['ids']+suffix,code)
+    # Return to A after B, not just to the immediately active conversation.
+    r3=generate(f'needle-{size}-return-A',first_continuation[0],32)
+    r3['expected']=first_continuation[1];r3['correct']=first_continuation[1] in r3['text'];save()
+    assert r3['reused']>=size-256,'parked long conversation was not reused after interleaving'
    if a.http:row['http']=validate_http(engine,tok,template,folder/'http.json');save()
   finally:
    row['telemetry']=tel.close();save();engine.close()

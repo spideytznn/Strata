@@ -13,8 +13,10 @@ codes and scales, ordinary BF16 weights, FP8 ngram data and original FP8 MTP
 experts. There is no required GGUF, expert pack or converted MTP artifact.
 A 63.282 GiB owned expert arena is physically locked in system RAM, including
 copies of experts currently in VRAM. Failure to lock the whole arena aborts
-startup. A separate 337.5 MiB pinned staging arena bridges WDDM's smaller host
-registration budget. Model expert and MTP source reads are sealed after loading;
+startup. The initial path uses a separate 337.5 MiB pinned staging arena.
+`STRATA_NATIVE_ALLOC_PINNED=1` instead allocates the whole arena with
+`cudaHostAllocMapped`, eliminating that host staging copy. It remains explicit
+while end-to-end default selection is in progress. Model expert and MTP source reads are sealed after loading;
 only the segmented ngram table remains demand-read during inference. Source
 counters measure requested bytes, not physical SSD activity; physical locking
 prevents the owned expert arena from being paged out.
@@ -89,6 +91,24 @@ incorrectly left Anthropic thinking enabled while expecting a short answer;
 the corrected test explicitly disables thinking. No engine change was needed.
 These results establish the reference path only. The FP4, mixed CPU/GPU,
 adaptive, MTP timing and longer-context quality matrix remains in progress.
+
+`p5-pinned/` repeats the same eight requests with full `cudaHostAllocMapped`
+residency. All first-token logits and all 128-token continuations are bit-identical
+to `p5-reference/`; HTTP checks and executed 8192 prefill also pass. This changes
+allocation and data movement, not the expert representation or arithmetic. The
+same requests are in `p5-reference/requests.json`; binary hashes and raw GPU
+samples are included with each run. Repeated default selection remains pending.
+
+The manual `native-registration-probe` target reproduces the allocation order
+without any model files (it uses 63.282 GiB host memory and 20 GiB VRAM). On this
+machine, registering a prefix of an already locked allocation succeeds at
+16/24 GiB but fails at 32/40 GiB when a later GPU operation synchronizes, despite
+the allocation calls returning success. Reversing the order and splitting the
+whole registration into 16 GiB pieces also fail. Directly allocating the whole
+arena with `cudaHostAllocMapped` passes, including device reads and copies.
+These are observations on this driver, not a general CUDA size limit. Raw logs
+and the original 40 GiB model-start failure are in `registration/`. The probe is
+excluded from ordinary builds and CTest; run it with no inference engine alive.
 
 ## Build the runtime
 

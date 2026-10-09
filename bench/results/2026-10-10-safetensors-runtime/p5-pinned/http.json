@@ -1,0 +1,51 @@
+{
+  "url": "http://127.0.0.1:3182",
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200,
+      "response": "{\"status\": \"ok\", \"max_context\": 16384, \"model\": \"native-test\", \"images\": false, \"api_key\": false, \"loaded\": true, \"service\": \"strata\"}"
+    },
+    {
+      "path": "/v1/models",
+      "status": 200,
+      "response": "{\"object\": \"list\", \"data\": [{\"id\": \"native-test\", \"object\": \"model\", \"status\": {\"value\": \"loaded\"}, \"meta\": {\"n_ctx\": 16384}, \"architecture\": {\"input_modalities\": [\"text\"], \"output_modalities\": [\"text\"]}}]}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-ed018ef9e76d4352887282c9\", \"object\": \"chat.completion\", \"created\": 1791568509, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"Blue\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 17, \"prompt_ms\": 571.4, \"prompt_per_token_ms\": 33.612, \"prompt_per_second\": 29.8, \"predicted_n\": 2, \"predicted_ms\": 68.5, \"predicted_per_token_ms\": 34.25, \"predicted_per_second\": 29.2, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "data: {\"id\": \"chatcmpl-e1e9db35570a4035879d4122\", \"object\": \"chat.completion.chunk\", \"created\": 1791568510, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"finish_reason\": null}]}\n\n: keep-alive\n\ndata: {\"id\": \"chatcmpl-e1e9db35570a4035879d4122\", \"object\": \"chat.completion.chunk\", \"created\": 1791568510, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"Blue\"}, \"finish_reason\": null}]}\n\ndata: {\"id\": \"chatcmpl-e1e9db35570a4035879d4122\", \"object\": \"chat.completion.chunk\", \"created\": 1791568510, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 10}}, \"timings\": {\"cache_n\": 10, \"prompt_n\": 7, \"prompt_ms\": 224.3, \"prompt_per_token_ms\": 32.043, \"prompt_per_second\": 31.2, \"predicted_n\": 2, \"predicted_ms\": 68.6, \"predicted_per_token_ms\": 34.3, \"predicted_per_second\": 29.2, \"draft_n\": 0, \"draft_n_accepted\": 0}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "path": "/v1/messages",
+      "status": 200,
+      "response": "{\"id\": \"msg_c97de31e03fe4601a2b507a3\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"native-test\", \"content\": [{\"type\": \"text\", \"text\": \"Green\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 17, \"output_tokens\": 2, \"cache_read_input_tokens\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-f60c6df2103440eea13144d1\", \"object\": \"chat.completion\", \"created\": 1791568511, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"call_e50420791aff4fe5b4c737b4\", \"type\": \"function\", \"function\": {\"name\": \"lookup_code\", \"arguments\": \"{\\\"name\\\":\\\"Alice\\\"}\"}}]}, \"finish_reason\": \"tool_calls\"}], \"usage\": {\"prompt_tokens\": 338, \"completion_tokens\": 17, \"total_tokens\": 355, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 338, \"prompt_ms\": 2460.3, \"prompt_per_token_ms\": 7.279, \"prompt_per_second\": 137.4, \"predicted_n\": 17, \"predicted_ms\": 611.8, \"predicted_per_token_ms\": 35.988, \"predicted_per_second\": 27.8, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-0a9801bad1b245b5b3394221\", \"object\": \"chat.completion\", \"created\": 1791568514, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"ZEBRA-417\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 93, \"completion_tokens\": 8, \"total_tokens\": 101, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 93, \"prompt_ms\": 1002.8, \"prompt_per_token_ms\": 10.783, \"prompt_per_second\": 92.7, \"predicted_n\": 8, \"predicted_ms\": 290.8, \"predicted_per_token_ms\": 36.35, \"predicted_per_second\": 27.5, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"this server was started without the vision encoder (run setup again and choose 'vision'), so it cannot read images\"}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"prompt (17 tokens) + max tokens (16385) exceeds the context (16384); requests are never truncated. Send a smaller max_tokens (at most 16359 here), or add \\\"fit_max_tokens\\\": true to the model's strata-<model>.json to shorten it to the room left (#545)\"}}"
+    }
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,51 @@
+step=device status=0 message="no error" free_bytes=32496418816 total_bytes=34162016256 mem_status=0
+available_ram_bytes=86557077504 available_commit_bytes=223751184384
+device="NVIDIA GeForce RTX 5090" registered_gib=16 arena_bytes=67948118016 late=0 chunks=1
+step=dense_allocate status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86539198464 available_commit_bytes=215143665664
+step=dense_zero status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86539198464 available_commit_bytes=215143665664
+step=dense_commit status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86537019392 available_commit_bytes=215142518784
+locked_bytes=67948118016 lock_ok=1 note="locked 64800 MiB via working-set minimum + VirtualLock"
+step=host_register status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=17257467904
+available_ram_bytes=18503237632 available_commit_bytes=147089944576
+step=host_alias status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=17257467904
+available_ram_bytes=18503098368 available_commit_bytes=147089944576
+alias_offset=0 contiguous=1
+step=host_register status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=34437341184
+available_ram_bytes=18462265344 available_commit_bytes=147035443200
+step=host_alias status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=34437341184
+available_ram_bytes=18459394048 available_commit_bytes=147032285184
+alias_offset=17179869184 contiguous=0
+step=host_register status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=51617214464
+available_ram_bytes=18407813120 available_commit_bytes=146969763840
+step=host_alias status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=51617214464
+available_ram_bytes=18407116800 available_commit_bytes=146969763840
+alias_offset=34359738368 contiguous=0
+step=host_register status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=68025729024
+available_ram_bytes=18371514368 available_commit_bytes=146918264832
+step=host_alias status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=68025729024
+available_ram_bytes=18370875392 available_commit_bytes=146916159488
+alias_offset=51539607552 contiguous=0
+step=cache_allocate status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=68025729024
+available_ram_bytes=18327662592 available_commit_bytes=133992398848
+step=cache_zero status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=68025729024
+available_ram_bytes=18327793664 available_commit_bytes=133992796160
+step=cache_commit status=2 message="out of memory" free_bytes=0 total_bytes=0 mem_status=2
+shared_budget_bytes=81326138982 shared_usage_bytes=68025729024
+available_ram_bytes=18307911680 available_commit_bytes=133960900608
+probe failed at cache_commit

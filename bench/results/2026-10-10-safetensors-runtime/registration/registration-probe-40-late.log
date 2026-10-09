@@ -1,0 +1,32 @@
+step=device status=0 message="no error" free_bytes=32496418816 total_bytes=34162016256 mem_status=0
+available_ram_bytes=86584393728 available_commit_bytes=223745572864
+device="NVIDIA GeForce RTX 5090" registered_gib=40 arena_bytes=67948118016 late=1
+step=dense_allocate status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86567432192 available_commit_bytes=215136403456
+step=dense_zero status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86567231488 available_commit_bytes=215136403456
+step=dense_commit status=0 message="no error" free_bytes=23906484224 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86566694912 available_commit_bytes=215136382976
+step=cache_allocate status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86547570688 available_commit_bytes=202224562176
+step=cache_zero status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86547431424 available_commit_bytes=202224562176
+step=cache_commit status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=77594624
+available_ram_bytes=86556045312 available_commit_bytes=202233892864
+locked_bytes=67948118016 lock_ok=1 note="locked 64800 MiB via working-set minimum + VirtualLock"
+step=host_register status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=43027271680
+available_ram_bytes=18419707904 available_commit_bytes=134097444864
+step=host_alias status=0 message="no error" free_bytes=11021582336 total_bytes=34162016256 mem_status=0
+shared_budget_bytes=81326138982 shared_usage_bytes=43027271680
+available_ram_bytes=18419707904 available_commit_bytes=134097444864
+step=cache_fill status=2 message="out of memory" free_bytes=0 total_bytes=0 mem_status=2
+shared_budget_bytes=81326138982 shared_usage_bytes=43027271680
+available_ram_bytes=18251558912 available_commit_bytes=133898338304
+probe failed at cache_fill

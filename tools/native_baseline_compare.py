@@ -28,7 +28,9 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--cases', default='native,fidelity,q4xl')
     p.add_argument('--rounds', type=int, default=3)
-    p.add_argument('--cache-slots', type=int, default=7000)
+    p.add_argument('--cache-slots', type=int, default=0, help='0 sizes each quantization to the same VRAM reserve')
+    p.add_argument('--context', type=int, default=32768)
+    p.add_argument('--reserve-mib', type=int, default=2048)
     a = p.parse_args()
     a.output.mkdir(parents=True, exist_ok=False)
     configs = {name: json.loads(path.read_text(encoding='utf8')) for name, path in
@@ -38,8 +40,8 @@ def main():
     # a warm measurement. Each process still tests cold/warm pairs in order.
     tok = SafetensorsTokenizer.from_directory(configs['native']['tokenizer'])
     result = {'requests_sha256': hashlib.sha256(a.requests.read_bytes()).hexdigest(),
-              'conditions': {'context': 16384, 'prefill': 8192, 'kv': 'fp16',
-                             'expert_slots_requested': a.cache_slots, 'mtp': False,
+              'conditions': {'context': a.context, 'prefill': 8192, 'kv': 'fp16',
+                             'expert_slots_requested': a.cache_slots or 'auto', 'reserve_mib': a.reserve_mib, 'mtp': False,
                              'prefill_borrow': True}, 'cases': {}}
     def save():
         (a.output / 'results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf8')
@@ -67,8 +69,9 @@ def main():
                     if flag in cfg['args']:
                         args += [flag, cfg['args'][cfg['args'].index(flag) + 1]]
                 args += ['--resident-experts']
-            args += ['--max-context', '16384', '--prefill', '8192', '--kv', 'fp16',
-                     '--expert-cache', str(a.cache_slots), '--expert-profile', str(ROOT / 'data/expert-profile.bin'),
+            args += ['--max-context', str(a.context), '--prefill', '8192', '--kv', 'fp16',
+                     '--expert-cache', str(a.cache_slots) if a.cache_slots else 'auto', '--vram-reserve-mib', str(a.reserve_mib),
+                     '--expert-profile', str(ROOT / 'data/expert-profile.bin'),
                      '--pcie-frac', '1', '--pcie-mode', 'dma', '--spec', '2', '--suffix-draft', '0',
                      '--adapt-every', '0', '--adapt-swaps', '0', '--conversation-cache-mib', '2048',
                      '--conversation-cache-slots', '2', '--prompt-cache', '4', '--greedy', '--stats', '--check-logits']

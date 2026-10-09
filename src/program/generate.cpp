@@ -7822,6 +7822,7 @@ int strata_main(int argc, char** argv) {
         }
         // plan v0.3 P6: swaps in flight - (residency index, slot) admitted when adapt_ev has completed
         std::vector<std::pair<int32_t, int32_t>> pending;
+        uint64_t native_completed_promotions = 0;
         int pending_age = 0;   // the windows the pending swaps have waited (adapt_lag)
         std::vector<void*> pin_live;   // the swaps' locked arena pages (pin_blob), unlocked once they have landed
         cudaEvent_t adapt_ev = nullptr;
@@ -7856,6 +7857,7 @@ int strata_main(int argc, char** argv) {
             }
             for (const auto& pr : pending) drive.d.res_dirty_idx.push_back(pr.first);   // a failed upload leaves them to the hook
             drive.d.res_dirty = true;
+            if (safetensors) native_completed_promotions += pending.size();
             pending.clear();
             pending_age = 0;
             if (res_upload() == cudaSuccess) {   // the whole table: the hook has nothing left
@@ -11731,6 +11733,17 @@ int strata_main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: asynchronous adaptive tier: %lld rounds, %lld experts swapped in, "
                                      "%.1f ms per round (start to flip, between windows)\n",
                              (long long) a_rounds, (long long) a_swapped, a_rounds > 0 ? a_ms / (double) a_rounds : 0.0);
+            if (safetensors) {
+                const uint64_t promoted = native_completed_promotions + (uint64_t) a_swapped +
+                                          (uint64_t) drive.d.fetch_admitted;
+                std::fprintf(stderr, "safetensors residency metrics: ram_bytes=%llu os_locked_bytes=%llu "
+                                     "cuda_pinned_bytes=%llu promotions=%llu promoted_payload_bytes=%llu "
+                                     "expert_file_bytes=%llu (cumulative; payload is not a physical PCIe counter)\n",
+                             (unsigned long long) src.resident_bytes(), (unsigned long long) src.locked_bytes(),
+                             (unsigned long long) src.pinned_bytes(), (unsigned long long) promoted,
+                             (unsigned long long) (promoted * strata::kernels::cpu::expert_layout().max_blob),
+                             (unsigned long long) src.file_read_bytes());
+            }
             if (src.exchange_rotation())
                 std::fprintf(stderr, "strata serve: exchange rotation: %llu blocks, %llu host memcpy bytes avoided (cumulative payload)\n",
                              (unsigned long long)src.rotated_exchanges(),
