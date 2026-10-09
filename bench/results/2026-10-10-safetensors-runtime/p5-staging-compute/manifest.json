@@ -1,0 +1,106 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\matrix-p5-compute",
+  "status": "interrupted_between_cases",
+  "files": [
+    {
+      "path": "adaptive/command.json",
+      "bytes": 1248,
+      "sha256": "7e37d911c1bdae5da53b0e5bdbf8fb7b88c5d5d1b4a8fab576fad5b832ad1d40"
+    },
+    {
+      "path": "adaptive/engine.log",
+      "bytes": 665,
+      "sha256": "22d78fcc11cea94fde8ad3e933a84a604a4e3c0d2a7d743cf895be22bf1e6fec"
+    },
+    {
+      "path": "adaptive/telemetry.jsonl",
+      "bytes": 1237,
+      "sha256": "73e7b8c44717013b0be9ef3ec62e3c743a4c0223a347343526cc069614163a3e"
+    },
+    {
+      "path": "cpu100/command.json",
+      "bytes": 1245,
+      "sha256": "b60ce3b79adcf2f70788bdb06941ed5399866d96e1393b2df063f70fe73cf5e5"
+    },
+    {
+      "path": "cpu100/engine.log",
+      "bytes": 10905,
+      "sha256": "b5a0941b7adaaabaf0549c7c9f56b2bf9c79fd98a1be5234b0e01c40ee1be08c"
+    },
+    {
+      "path": "cpu100/telemetry.jsonl",
+      "bytes": 25992,
+      "sha256": "1519018250e6118c6b4115b62ca40d1062e4d6b153a0395dafe5c9a75ae4a1ad"
+    },
+    {
+      "path": "cpu50/command.json",
+      "bytes": 1246,
+      "sha256": "47f3a7c41b962fa45483c9848ef08b42ca706700f3d240cd2dcfb2f3ad0f0981"
+    },
+    {
+      "path": "cpu50/engine.log",
+      "bytes": 11597,
+      "sha256": "3e7a677a1bf9ef407489d3cb42435b893ed97067e4a82addebf154b5135f9cfb"
+    },
+    {
+      "path": "cpu50/telemetry.jsonl",
+      "bytes": 33771,
+      "sha256": "c549341920bb61e1dad20491403ace3ca165f6d74cbb3f622004740f9fa8dbcf"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 172669,
+      "sha256": "0b03992e41ef25daa2cb7e4df3cb820b862f7d634ef2ae862f5c01813d143668"
+    },
+    {
+      "path": "tc1/command.json",
+      "bytes": 1242,
+      "sha256": "5ee96fdd52651350911ece4298d666c7db0bcc9d9ef9f3cf547ee367d8e228e6"
+    },
+    {
+      "path": "tc1/engine.log",
+      "bytes": 11726,
+      "sha256": "1d1adfe8eb2e6a74d0b44868e40f274b78b61037c90409afd1da5479e778dc91"
+    },
+    {
+      "path": "tc1/telemetry.jsonl",
+      "bytes": 35731,
+      "sha256": "fb3e623a06bb6a25b4f1af2b2ca70761c5af63a0747fab985ebfb9c4d456b4a1"
+    },
+    {
+      "path": "tc2/command.json",
+      "bytes": 1242,
+      "sha256": "082a87d1f0751c07692ca6d9898c929ac7a87bf7c96bfd02fc1e6aa7d4a1b9ba"
+    },
+    {
+      "path": "tc2/engine.log",
+      "bytes": 11725,
+      "sha256": "38486d03d78687a9c1d91f36446aee6d3e97888ce4f67e0d5d5421bf72d67cde"
+    },
+    {
+      "path": "tc2/telemetry.jsonl",
+      "bytes": 35927,
+      "sha256": "a173c22d67249664a1cc42d9ee0af91ec7287f640cf211ae62b70bdc8ba42358"
+    },
+    {
+      "path": "tc3/command.json",
+      "bytes": 1242,
+      "sha256": "0c3dfe609bf3a3de54448054a6a68151685f9927642a1bb58af9ae5b8b6ef5c9"
+    },
+    {
+      "path": "tc3/engine.log",
+      "bytes": 11726,
+      "sha256": "2ea85f498f3bdf674f751ee1400cb016df29428fd3bca5e84c2fc61f02812df0"
+    },
+    {
+      "path": "tc3/telemetry.jsonl",
+      "bytes": 37149,
+      "sha256": "5792e450f844285d346b6e53dd052327723135aa64cdab4becc4ab06209ddf3e"
+    }
+  ]
+}

@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / 'tools')]
 from serve.server import StrataEngine, child_env
+from serve.frontend import ChatTemplate
 from safetensors_tokenizer import SafetensorsTokenizer
 from native_telemetry import Telemetry
 
@@ -31,6 +32,8 @@ def main():
     p.add_argument('--cache-slots', type=int, default=0, help='0 sizes each quantization to the same VRAM reserve')
     p.add_argument('--context', type=int, default=32768)
     p.add_argument('--reserve-mib', type=int, default=2048)
+    p.add_argument('--adapt-every', type=int, default=0)
+    p.add_argument('--adapt-swaps', type=int, default=96)
     a = p.parse_args()
     a.output.mkdir(parents=True, exist_ok=False)
     configs = {name: json.loads(path.read_text(encoding='utf8')) for name, path in
@@ -39,10 +42,15 @@ def main():
     # One fresh process per round: a repeated prompt must not silently become
     # a warm measurement. Each process still tests cold/warm pairs in order.
     tok = SafetensorsTokenizer.from_directory(configs['native']['tokenizer'])
+    template = ChatTemplate(Path(configs['native']['chat_template']))
+    warmup = tok.encode(template.render([{'role':'user','content':
+        'Explain in detail how CPU caches and main memory interact. Include several concrete examples.'}],
+        enable_thinking=False), parse_special=True)
     result = {'requests_sha256': hashlib.sha256(a.requests.read_bytes()).hexdigest(),
               'conditions': {'context': a.context, 'prefill': 8192, 'kv': 'fp16',
                              'expert_slots_requested': a.cache_slots or 'auto', 'reserve_mib': a.reserve_mib, 'mtp': False,
-                             'prefill_borrow': True}, 'cases': {}}
+                             'prefill_borrow': True, 'adapt_every': a.adapt_every,
+                             'adapt_swaps': a.adapt_swaps if a.adapt_every else 0}, 'cases': {}}
     def save():
         (a.output / 'results.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf8')
     for case in a.cases.split(','):
@@ -54,9 +62,7 @@ def main():
             original = json.loads((Path(configs['native']['tokenizer']) / 'tokenizer.json').read_text(encoding='utf8'))
             expected = dict(original['model']['vocab'])
             expected.update({v['content']: v['id'] for v in original.get('added_tokens', [])})
-            used = {v for _, ids, _ in requests for v in ids}
-            reverse = {v: k for k, v in expected.items()}
-            assert all(vocab.get(reverse[v]) == v for v in used), 'baseline input vocabulary differs'
+            assert all(vocab.get(token) == i for token, i in expected.items()), 'baseline vocabulary differs'
         rows = result['cases'][case] = []
         for repeat in range(a.rounds):
             folder = a.output / f'{case}-{repeat}'
@@ -73,7 +79,8 @@ def main():
                      '--expert-cache', str(a.cache_slots) if a.cache_slots else 'auto', '--vram-reserve-mib', str(a.reserve_mib),
                      '--expert-profile', str(ROOT / 'data/expert-profile.bin'),
                      '--pcie-frac', '1', '--pcie-mode', 'dma', '--spec', '2', '--suffix-draft', '0',
-                     '--adapt-every', '0', '--adapt-swaps', '0', '--conversation-cache-mib', '2048',
+                     '--adapt-every', str(a.adapt_every), '--adapt-swaps', str(a.adapt_swaps if a.adapt_every else 0),
+                     '--conversation-cache-mib', '2048',
                      '--conversation-cache-slots', '2', '--prompt-cache', '4', '--greedy', '--stats', '--check-logits']
             local = {'lib_dirs': cfg.get('lib_dirs', []), 'env': configs['native'].get('env', {})}
             env = child_env(local)
@@ -93,8 +100,16 @@ def main():
                 tel.pid = engine.proc.pid
                 row['startup_s'] = time.monotonic() - start
                 row['info'] = dict(engine.info)
+                begin = time.monotonic()
+                warm_ids = [v for v in engine.generate(warmup, 128, {'temperature':0}, threading.Event()) if v is not None]
+                row['unmeasured_warmup'] = {'input_ids':warmup, 'output_ids':warm_ids,
+                                            'wall_s':time.monotonic()-begin, **engine.last}
+                assert len(warm_ids) >= 64, 'warmup unexpectedly ended before sustained generation'
+                assert engine.last['file_blobs'] == engine.last['file_mb'] == 0
+                save()
                 for name, ids, limit in requests:
                     start = time.monotonic()
+                    started_unix = time.time()
                     out = []
                     first = last = None
                     for v in engine.generate(ids, limit, {'temperature': 0}, threading.Event()):
@@ -103,7 +118,7 @@ def main():
                             if first is None:
                                 first = last
                             out.append(v)
-                    r = {'name': name, 'input_tokens': len(ids), 'ids': out, 'text': tok.decode(out),
+                    r = {'name': name, 'input_tokens': len(ids), 'ids': out, 'text': tok.decode(out), 'started_unix_s':started_unix,
                          'ttft_s': first, 'wall_s': time.monotonic() - start, **engine.last}
                     assert r['generated'] == len(out) and 0 < len(out) <= limit
                     r['after_first_token_per_s'] = (len(out) - 1) / (last - first) if len(out) > 1 else None

@@ -1,0 +1,22 @@
+{
+  "observed_at": "2026-10-10T02:13:23.8882880+08:00",
+  "memory": [
+    {
+      "Capacity": 51539607552,
+      "ConfiguredClockSpeed": 6600,
+      "Speed": 6600
+    },
+    {
+      "Capacity": 51539607552,
+      "ConfiguredClockSpeed": 6600,
+      "Speed": 6600
+    }
+  ],
+  "cpu": [
+    {
+      "Name": "AMD Ryzen 9 9950X3D 16-Core Processor          ",
+      "NumberOfCores": 16,
+      "NumberOfLogicalProcessors": 32
+    }
+  ]
+}

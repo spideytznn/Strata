@@ -8738,6 +8738,11 @@ int strata_main(int argc, char** argv) {
                         o.batch > 0 ? (" batch_slots=" + std::to_string(o.batch) +
                                        " slot_cache=" + std::to_string(o.prompt_cache > 0 ? 1 : 0) +
                                        " batch_groups=" + std::to_string(o.batch_groups)).c_str() : "");
+            if (safetensors)
+                std::printf("INFO weight_source=safetensors native_adapter=1 expert_ram_bytes=%llu "
+                            "expert_cuda_pinned_bytes=%llu expert_os_locked_bytes=%llu\n",
+                            (unsigned long long) src.resident_bytes(), (unsigned long long) src.pinned_bytes(),
+                            (unsigned long long) src.locked_bytes());
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
         // a flag nobody will raise - end the engine with where it was, so the server starts it again instead of the
@@ -11743,6 +11748,10 @@ int strata_main(int argc, char** argv) {
                              (unsigned long long) src.pinned_bytes(), (unsigned long long) promoted,
                              (unsigned long long) (promoted * strata::kernels::cpu::expert_layout().max_blob),
                              (unsigned long long) src.file_read_bytes());
+                if (o.stats) {
+                    const std::string io = ple_table.io_report();
+                    if (!io.empty()) std::fprintf(stderr, "safetensors ngram metrics: %s\n", io.c_str());
+                }
             }
             if (src.exchange_rotation())
                 std::fprintf(stderr, "strata serve: exchange rotation: %llu blocks, %llu host memcpy bytes avoided (cumulative payload)\n",

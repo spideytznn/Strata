@@ -110,6 +110,39 @@ These are observations on this driver, not a general CUDA size limit. Raw logs
 and the original 40 GiB model-start failure are in `registration/`. The probe is
 excluded from ordinary builds and CTest; run it with no inference engine alive.
 
+`p5-pinned-combinations/` adds seven completed eight-request runs: adaptive hot
+experts, 50%/100% CPU execution of cold experts, original MTP depths 1/2/4 and
+three-term FP4 decode. Hot cache hits still run on the GPU in the CPU cases.
+Adaptive exchange completed 18,165 promotions with 50,222,882,640 payload bytes;
+this counts promoted weights, not measured physical PCIe traffic. All first
+logits and continuations for the allocation/exchange-only path match the
+reference exactly. The three short warm runs decoded 128 tokens in
+2,572.3 / 2,314.9 / 2,157.9 ms. They benefit from both prefix reuse and learned
+expert placement; these are not repeated measurements of a universal speed.
+MTP depths 1/2/4 also match all eight 128-token reference continuations,
+including after actual 8192-token prefill. Expert source reads remain zero.
+FP4 decode has not shown an end-to-end advantage in these measurements.
+
+`p5-long-context/` uses the original directory through `--model`, a balanced
+expert cache without a profile file, 4,499 GPU slots, 32,768 context, full pinned
+expert RAM, FP16 KV and a 4 GiB conversation cache. All 20 retrieval, follow-up
+and A/B/A requests at 2,048 / 8,192 / 25,000 / 32,000 input tokens return the
+expected code. Returning to the 32K A conversation reuses 32,025 tokens, reads
+seven new tokens and has 0.458 s TTFT. The first 32K request takes 13.952 s of
+prompt processing; the other 32K request automatically reuses a 16,384-token
+common prefix and is **not** a full cold-prefill timing. Peak process working
+set is 76,716,089,344 bytes. All expert source counters stay zero.
+The extended HTTP checks preserve reasoning history (89 of 90 prior tokens
+reused), accept the template's later system message, and pass the existing
+OpenAI, Anthropic, tool, streaming and rejection checks. These small retrieval
+tasks do not establish general long-context reasoning quality.
+
+`p5-staging-compute/` retains the earlier FP4/CPU comparison with host staging.
+Its adaptive case was deliberately interrupted during startup before the full
+pinned experiments; the archive is marked `interrupted_between_cases`, not a
+completed adaptive result. Each evidence archive includes a file hash manifest.
+Hardware and firmware-reported memory settings are in `hardware.json`.
+
 ## Build the runtime
 
 ```powershell

@@ -1,0 +1,31 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\quality-p5-long-reference",
+  "status": "completed",
+  "files": [
+    {
+      "path": "reference/command.json",
+      "bytes": 1200,
+      "sha256": "35ca7096f3e2475ed3f7008c53a469a964c594129a4244afdfd014a7fa2e2b69"
+    },
+    {
+      "path": "reference/engine.log",
+      "bytes": 38100,
+      "sha256": "a2200be3f56a6e2fea61c48cfdd6906952ca7f48a9cdfeffa6c0ebac47fff3bf"
+    },
+    {
+      "path": "reference/http.json",
+      "bytes": 8191,
+      "sha256": "35532fd8a72de690bc68141b1b85cd669c86d02b145b00b418bbe8378019b33b"
+    },
+    {
+      "path": "reference/telemetry.jsonl",
+      "bytes": 39275,
+      "sha256": "f2c2158c462bc2c288040ae1398c4bd60ceb662802970d17f30e885a83b82b00"
+    },
+    {
+      "path": "results.json",
+      "bytes": 33410,
+      "sha256": "55aaf88ef2da3cd6e4e92c2d22ce5052b7c30dcf455f12219d609a299989cdd1"
+    }
+  ]
+}

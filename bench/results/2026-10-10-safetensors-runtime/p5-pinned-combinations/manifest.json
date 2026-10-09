@@ -1,0 +1,121 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\matrix-p5-pinned-combinations",
+  "status": "pass",
+  "files": [
+    {
+      "path": "pinned-adaptive/command.json",
+      "bytes": 1307,
+      "sha256": "be20d5998d0169b808e8b99816c72b165c91eddc45aee94c9cba5ccb2aa6a1cf"
+    },
+    {
+      "path": "pinned-adaptive/engine.log",
+      "bytes": 13638,
+      "sha256": "a8413580bf6cd66bbf8f9ad488a15e25faee16ef3bfb22888e4d254d64c8deaa"
+    },
+    {
+      "path": "pinned-adaptive/telemetry.jsonl",
+      "bytes": 22122,
+      "sha256": "3b27e3da41ecb1c7e1d785246507e720bafb0d5ccc8c736238a3fdc7c3a95cc6"
+    },
+    {
+      "path": "pinned-cpu100/command.json",
+      "bytes": 1304,
+      "sha256": "59124313701d1d544c635de96371ce1b59cbfcaf189abf2563a5a8b9efadb5f0"
+    },
+    {
+      "path": "pinned-cpu100/engine.log",
+      "bytes": 12649,
+      "sha256": "8147396840189169e9b36aadb17705e399c3e56b70a000ef2dae268a6abf8442"
+    },
+    {
+      "path": "pinned-cpu100/telemetry.jsonl",
+      "bytes": 22970,
+      "sha256": "72cd7ee9fab71177be6d6c311141e5a295007099ad7920bbc7459496393ce69f"
+    },
+    {
+      "path": "pinned-cpu50/command.json",
+      "bytes": 1305,
+      "sha256": "7918260adc70a31ce80d80ab8859f670c09b874a98f5ee8d3118ee11b189c4ea"
+    },
+    {
+      "path": "pinned-cpu50/engine.log",
+      "bytes": 13340,
+      "sha256": "1910b8d35f3058f19faebd3034d9ec7efa9449b4eedcf47d49814fc4ec41ee2c"
+    },
+    {
+      "path": "pinned-cpu50/telemetry.jsonl",
+      "bytes": 23937,
+      "sha256": "5bf8ba51cc1176e7e789aed7775b124927b24de0e53e1d61208107e56f4f31b6"
+    },
+    {
+      "path": "pinned-mtp1/command.json",
+      "bytes": 1331,
+      "sha256": "48c9f60ef158eac3e7ce574fb54a3988da6e05e2bf713b4103d34f1b28ff540a"
+    },
+    {
+      "path": "pinned-mtp1/engine.log",
+      "bytes": 13545,
+      "sha256": "b7299491c568004542e0dd5142b0dcc0f3352f29c7bcd99b8ea397b9234bc700"
+    },
+    {
+      "path": "pinned-mtp1/telemetry.jsonl",
+      "bytes": 23188,
+      "sha256": "bdafc3060d24f1ca48179dd38ebe8c109710d30fedf593918155ab1ec54322d9"
+    },
+    {
+      "path": "pinned-mtp2/command.json",
+      "bytes": 1331,
+      "sha256": "c4ceef254e5a0795390b844902f0509abc7a4e0cc8f240daef71ac30078eea0e"
+    },
+    {
+      "path": "pinned-mtp2/engine.log",
+      "bytes": 13692,
+      "sha256": "f420f6ed98a69110c284d7b74df295e19dd278cb95b4f71e3af334b601c8085a"
+    },
+    {
+      "path": "pinned-mtp2/telemetry.jsonl",
+      "bytes": 22106,
+      "sha256": "355343d689c9632d4de821ce8fda1d07f434c854936b29481ca7d9e5bdbc028f"
+    },
+    {
+      "path": "pinned-mtp4/command.json",
+      "bytes": 1331,
+      "sha256": "72c7c3f74770da991e85d5773ed6f3086c8ea57eadb21ec8a9e7dc49370b9192"
+    },
+    {
+      "path": "pinned-mtp4/engine.log",
+      "bytes": 13844,
+      "sha256": "217cbe8f484bf583348c09845ce7e2953d7d437e5f74d6c2d7482e14ceab3d77"
+    },
+    {
+      "path": "pinned-mtp4/telemetry.jsonl",
+      "bytes": 22278,
+      "sha256": "aca15bac49f5180bd31ac9c27a31063c9a51266eeb98bb78355541f7e86a8543"
+    },
+    {
+      "path": "pinned-tc3/command.json",
+      "bytes": 1301,
+      "sha256": "d7a0137bb0aca188f487564b8be3e151af2969d0f92ac532fe1a5e065844610a"
+    },
+    {
+      "path": "pinned-tc3/engine.log",
+      "bytes": 13469,
+      "sha256": "8390b6791a955f8db03e6358edbb541fb99284d24a5acb92276cd2c86589187e"
+    },
+    {
+      "path": "pinned-tc3/telemetry.jsonl",
+      "bytes": 25080,
+      "sha256": "92d612650562fc4237d37663fdf2905455f4935a79d22bd2bb5e6c1948c1d58d"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 239385,
+      "sha256": "d3ae4ff0d278583561b5d490c109dee35a8ada4b2a0f62c9ebc799f2c84f1128"
+    }
+  ]
+}

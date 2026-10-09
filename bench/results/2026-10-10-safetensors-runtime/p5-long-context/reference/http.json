@@ -1,0 +1,70 @@
+{
+  "url": "http://127.0.0.1:6597",
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200,
+      "response": "{\"status\": \"ok\", \"max_context\": 32768, \"model\": \"native-test\", \"images\": false, \"api_key\": false, \"loaded\": true, \"service\": \"strata\"}"
+    },
+    {
+      "path": "/v1/models",
+      "status": 200,
+      "response": "{\"object\": \"list\", \"data\": [{\"id\": \"native-test\", \"object\": \"model\", \"status\": {\"value\": \"loaded\"}, \"meta\": {\"n_ctx\": 32768}, \"architecture\": {\"input_modalities\": [\"text\"], \"output_modalities\": [\"text\"]}}]}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-6f563b94574d45e8867b66da\", \"object\": \"chat.completion\", \"created\": 1791569951, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"Blue\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 17, \"prompt_ms\": 549.9, \"prompt_per_token_ms\": 32.347, \"prompt_per_second\": 30.9, \"predicted_n\": 2, \"predicted_ms\": 77.1, \"predicted_per_token_ms\": 38.55, \"predicted_per_second\": 25.9, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "data: {\"id\": \"chatcmpl-946c52f2425a465caf1d3b71\", \"object\": \"chat.completion.chunk\", \"created\": 1791569952, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"finish_reason\": null}]}\n\n: keep-alive\n\ndata: {\"id\": \"chatcmpl-946c52f2425a465caf1d3b71\", \"object\": \"chat.completion.chunk\", \"created\": 1791569952, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"Blue\"}, \"finish_reason\": null}]}\n\ndata: {\"id\": \"chatcmpl-946c52f2425a465caf1d3b71\", \"object\": \"chat.completion.chunk\", \"created\": 1791569952, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 10}}, \"timings\": {\"cache_n\": 10, \"prompt_n\": 7, \"prompt_ms\": 213.5, \"prompt_per_token_ms\": 30.5, \"prompt_per_second\": 32.8, \"predicted_n\": 2, \"predicted_ms\": 86.0, \"predicted_per_token_ms\": 43.0, \"predicted_per_second\": 23.3, \"draft_n\": 0, \"draft_n_accepted\": 0}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "path": "/v1/messages",
+      "status": 200,
+      "response": "{\"id\": \"msg_62227d15e18e46a6b9cac6ca\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"native-test\", \"content\": [{\"type\": \"text\", \"text\": \"Green\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 17, \"output_tokens\": 2, \"cache_read_input_tokens\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-4977fdd524f74d38813db585\", \"object\": \"chat.completion\", \"created\": 1791569953, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"call_8997ddc3477a4474a31ca4d7\", \"type\": \"function\", \"function\": {\"name\": \"lookup_code\", \"arguments\": \"{\\\"name\\\":\\\"Alice\\\"}\"}}]}, \"finish_reason\": \"tool_calls\"}], \"usage\": {\"prompt_tokens\": 338, \"completion_tokens\": 17, \"total_tokens\": 355, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 338, \"prompt_ms\": 2483.9, \"prompt_per_token_ms\": 7.349, \"prompt_per_second\": 136.1, \"predicted_n\": 17, \"predicted_ms\": 650.5, \"predicted_per_token_ms\": 38.265, \"predicted_per_second\": 26.1, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-dcfb5e1d8302475d8e861470\", \"object\": \"chat.completion\", \"created\": 1791569956, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"ZEBRA-417\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 93, \"completion_tokens\": 8, \"total_tokens\": 101, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 93, \"prompt_ms\": 1075.4, \"prompt_per_token_ms\": 11.563, \"prompt_per_second\": 86.5, \"predicted_n\": 8, \"predicted_ms\": 306.6, \"predicted_per_token_ms\": 38.325, \"predicted_per_second\": 26.1, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-bc959792d70a4004882e83cd\", \"object\": \"chat.completion\", \"created\": 1791569957, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"7\", \"reasoning_content\": \"The user wants me to compute 3 + 4 and put only the number in the final answer.\\n\\n3 + 4 = 7\\n\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 56, \"completion_tokens\": 34, \"total_tokens\": 90, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 56, \"prompt_ms\": 1753.9, \"prompt_per_token_ms\": 31.32, \"prompt_per_second\": 31.9, \"predicted_n\": 34, \"predicted_ms\": 1306.5, \"predicted_per_token_ms\": 38.426, \"predicted_per_second\": 26.0, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-385c224f2e2347bdb4893156\", \"object\": \"chat.completion\", \"created\": 1791569960, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"14\", \"reasoning_content\": \"The previous result was 7. Multiply by 2: 7 × 2 = 14.\\n\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 117, \"completion_tokens\": 28, \"total_tokens\": 145, \"prompt_tokens_details\": {\"cached_tokens\": 89}}, \"timings\": {\"cache_n\": 89, \"prompt_n\": 28, \"prompt_ms\": 836.1, \"prompt_per_token_ms\": 29.861, \"prompt_per_second\": 33.5, \"predicted_n\": 28, \"predicted_ms\": 1090.0, \"predicted_per_token_ms\": 38.929, \"predicted_per_second\": 25.7, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-a1ddf015ee354db5979f661e\", \"object\": \"chat.completion\", \"created\": 1791569962, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"SIGMA-682\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 51, \"completion_tokens\": 7, \"total_tokens\": 58, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 51, \"prompt_ms\": 1494.0, \"prompt_per_token_ms\": 29.294, \"prompt_per_second\": 34.1, \"predicted_n\": 7, \"predicted_ms\": 268.7, \"predicted_per_token_ms\": 38.386, \"predicted_per_second\": 26.1, \"draft_n\": 0, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"this server was started without the vision encoder (run setup again and choose 'vision'), so it cannot read images\"}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"prompt (17 tokens) + max tokens (32769) exceeds the context (32768); requests are never truncated. Send a smaller max_tokens (at most 32743 here), or add \\\"fit_max_tokens\\\": true to the model's strata-<model>.json to shorten it to the room left (#545)\"}}"
+    }
+  ],
+  "reasoning_history": {
+    "previous_tokens": 90,
+    "cached_tokens": 89
+  },
+  "status": "pass"
+}
