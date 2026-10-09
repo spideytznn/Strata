@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <chrono>
 #include <stdexcept>
 
 namespace strata::core {
@@ -126,6 +127,23 @@ bool SafetensorsModel::open_ple(strata::kernels::PleTable& table,const strata::k
 }
 bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
     try {
+        using Clock = std::chrono::steady_clock;
+        const auto start = Clock::now();
+        auto elapsed = [&] { return std::chrono::duration<double>(Clock::now()-start).count(); };
+        auto setting = [](const char* key, long fallback, long upper) {
+            const char* value = std::getenv(key);
+            if (!value) return fallback;
+            char* end = nullptr;
+            const long parsed = std::strtol(value, &end, 10);
+            if (!*value || *end || parsed < 1 || parsed > upper)
+                throw std::runtime_error(std::string(key) + " must be an integer in [1," + std::to_string(upper) + "]");
+            return parsed;
+        };
+        const int batch = static_cast<int>(setting("STRATA_NATIVE_LOAD_BATCH", 1, 128));
+        const unsigned workers = static_cast<unsigned>(setting("STRATA_NATIVE_LOAD_WORKERS", 1, 16));
+        double read_ms = 0, pack_ms = 0;
+        uint64_t scratch_peak = 0;
+        weights::Nvfp4LoadScratch load_scratch;
         s.close();
         const auto& l=strata::kernels::cpu::expert_layout();
         if (!l.native || l.total != plan_.expert_arena_bytes) throw std::runtime_error("native expert layout mismatch");
@@ -146,6 +164,8 @@ bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
         }
         if (allocate_pinned && register_gib)
             throw std::runtime_error("native pinned allocation and partial registration are mutually exclusive");
+        std::fprintf(stderr,"safetensors: allocating %.3f GiB expert RAM (%s); startup batch=%d workers=%u\n",
+                     double(l.total)/(1ull<<30), allocate_pinned ? "CUDA pinned" : "OS locked", batch, workers);
         // Both choices own every expert, including RAM mirrors of hot GPU slots.
         // Windows cudaHostAlloc and cudaHostRegister have different measured
         // admission behavior; do not infer one's limit from the other.
@@ -167,10 +187,27 @@ bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
             cuda_check(cudaHostAlloc(reinterpret_cast<void**>(&s.native_stage_host_),128*l.max_blob,cudaHostAllocMapped));
             cuda_check(cudaHostGetDevicePointer(reinterpret_cast<void**>(&s.native_stage_device_),s.native_stage_host_,0));
         }
+        std::fprintf(stderr,"safetensors: expert RAM allocated and locked in %.2f s\n",elapsed());
         s.complement_offsets_.resize(static_cast<size_t>(s.blobs_));
         input_scales_.resize(static_cast<size_t>(s.blobs_));
         for (int layer=0;layer<48;++layer) {
-            for (int id=0;id<512;++id) {
+            for (int first=0;first<512;first+=batch) {
+                const int count = std::min(batch, 512-first);
+                if (batch > 1) {
+                    std::vector<weights::Nvfp4ExpertBuffer> targets;
+                    for (int id=first;id<first+count;++id) {
+                        const auto off = l.blob_offset(layer,id);
+                        const auto index = layer*512+id;
+                        s.complement_offsets_[index] = off;
+                        targets.push_back({&plan_.expert(layer,id),
+                            {static_cast<uint8_t*>(s.complement_arena_)+off,static_cast<size_t>(l.blob_bytes(layer))},&input_scales_[index]});
+                    }
+                    const auto stats = weights::load_nvfp4_expert_batch(source_,targets,workers,&load_scratch);
+                    read_ms += stats.read_ms; pack_ms += stats.pack_ms;
+                    scratch_peak = std::max(scratch_peak,stats.scratch_bytes);
+                    continue;
+                }
+                const int id = first;
                 auto expert=weights::load_nvfp4_expert(source_,plan_.expert(layer,id),layer,false);
                 const auto off=l.blob_offset(layer,id);
                 const auto index=layer*512+id;
@@ -183,7 +220,8 @@ bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
             for (int id=1;id<512;++id) uniform=uniform && input_scales_[layer*512+id] == scales;
             if (!uniform) throw std::runtime_error("per-expert activation scales need a grouped ABI extension");
             strata::kernels::cpu::expert_layout_nvfp4_scales(layer,scales[0],scales[2]);
-            std::fprintf(stderr,"safetensors: resident experts %d/48 layers\n",layer+1);
+            std::fprintf(stderr,"safetensors: resident experts %d/48 layers (elapsed %.2f s, read %.2f s, pack %.2f s)\n",
+                         layer+1,elapsed(),batch>1 ? read_ms/1000 : -1,batch>1 ? pack_ms/1000 : -1);
         }
         if(register_gib>0) {
                 // Keep the full owned/locked copy. Register only a bounded prefix
@@ -207,6 +245,10 @@ bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
         source_.seal_expert_reads();
         sealed_mtp_bytes_=source_.io_stats().data_bytes[static_cast<size_t>(weights::Family::Mtp)];
         sealed_expert_bytes_=source_.io_stats().data_bytes[static_cast<size_t>(weights::Family::Expert)];
+        std::fprintf(stderr,"safetensors: expert startup complete: %.2f s, batch=%d workers=%u scratch_peak_mib=%.2f "
+                            "read_s=%.2f pack_s=%.2f source_read_calls=%llu\n",elapsed(),batch,workers,
+                     double(scratch_peak)/(1ull<<20),batch>1 ? read_ms/1000 : -1,batch>1 ? pack_ms/1000 : -1,
+                     static_cast<unsigned long long>(source_.io_stats().data_calls));
         return true;
     } catch (const std::exception& e) { err=e.what(); s.close(); return false; }
 }

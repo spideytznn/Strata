@@ -9,6 +9,8 @@ def main():
  p.add_argument('--prefill-mode',choices=('fp16','w4a8','w4a4x2','w4a4'),default='fp16')
  p.add_argument('--dedicated-prefill',action='store_true',help='reserve prompt workspace separately from the expert cache')
  p.add_argument('--exe',type=Path,help='engine executable, including a staged build')
+ p.add_argument('--load-batch',type=int,default=1,help='startup expert batch size, 1..128; 1 keeps the reference loader')
+ p.add_argument('--load-workers',type=int,default=1,help='startup byte-packing workers, 1..16')
  p.add_argument('--mtp',type=int,choices=(0,1,2,4),default=2);p.add_argument('--expert-cache',type=int,default=0)
  p.add_argument('--conversation-cache-mib',type=int,default=4096)
  p.add_argument('--adapt-every',type=int,default=4);p.add_argument('--adapt-swaps',type=int,default=96)
@@ -20,6 +22,7 @@ def main():
  if a.context<256 or a.prefill not in (256,512,1024,2048,4096,8192):
   p.error('context must be at least 256; prefill must be 256/512/1024/2048/4096/8192')
  if min(a.expert_cache,a.conversation_cache_mib,a.adapt_every,a.adapt_swaps)<0:p.error('cache and adaptation values must be nonnegative')
+ if not 1<=a.load_batch<=128 or not 1<=a.load_workers<=16:p.error('load batch must be 1..128; load workers must be 1..16')
  model=a.model.resolve(strict=True);output=a.output.resolve()
  if output==model or model in output.parents:raise ValueError('output must be outside the original model directory')
  if output.exists():raise FileExistsError(output)
@@ -41,7 +44,8 @@ def main():
          'model_name':'Qwen3.8-Flash-Next-NVFP4-Native','lib_dirs':libs,'allowed_hosts':['*'],
          'env':{'STRATA_NVFP4_F32':'1','STRATA_NVFP4_TC':'0','STRATA_PREFILL_NVFP4':a.prefill_mode,
                 'STRATA_PREFILL_CPU_SHARE':'0','STRATA_PREFILL_BF16X2':'1','STRATA_SPEC_STOP_BOUNDARY':'1',
-                'STRATA_NATIVE_ALLOC_PINNED':'0' if a.staging else '1'}}
+                'STRATA_NATIVE_ALLOC_PINNED':'0' if a.staging else '1',
+                'STRATA_NATIVE_LOAD_BATCH':str(a.load_batch),'STRATA_NATIVE_LOAD_WORKERS':str(a.load_workers)}}
  output.parent.mkdir(parents=True,exist_ok=True)
  with output.open('x',encoding='utf8') as f:json.dump(config,f,ensure_ascii=False,indent=2)
  print(output)

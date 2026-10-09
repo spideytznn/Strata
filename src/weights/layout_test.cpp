@@ -1,5 +1,6 @@
 #include "strata/weights/nvfp4.hpp"
 #include <cmath>
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
@@ -11,9 +12,11 @@ struct MockSource : w::WeightSource {
     std::map<std::string,w::TensorDesc> descriptors;
     std::map<std::string,std::vector<uint8_t>> data;
     w::IoStats stats;
+    size_t batches = 0;
     const w::TensorDesc& tensor(const std::string& name) const override { return descriptors.at(name); }
     const w::IoStats& io_stats() const override { return stats; }
     void read_many(std::span<const w::ReadRequest> reads) override {
+        ++batches;
         for (const auto& r : reads) {
             const auto& b=data.at(r.tensor->name);
             check(r.relative_offset<=b.size() && r.destination.size()<=b.size()-r.relative_offset,"mock bounds");
@@ -59,6 +62,71 @@ void projection_test() {
     try { w::nvfp4_projection(source,"0","bad",640,2560); } catch(const std::runtime_error&) { refused=true; }
     check(refused,"transposed HF shape accepted");
 }
+void batch_test() {
+    MockSource source;
+    constexpr size_t count = 5, bytes = 2764816;
+    std::array<std::array<w::Nvfp4Projection,3>,count> projections;
+    std::array<w::NativeExpert,count> expected;
+    for (size_t e=0;e<count;++e) {
+        for (size_t p=0;p<3;++p) {
+            const auto prefix=std::to_string(e)+"/"+std::to_string(p);
+            const uint64_t rows=p==2?2560:640,cols=p==2?640:2560;
+            std::vector<uint8_t> weights(rows*cols/2),scales(rows*cols/16);
+            for (size_t i=0;i<weights.size();++i) weights[i]=static_cast<uint8_t>((i*73+e*31+p*7)&255);
+            for (size_t i=0;i<scales.size();++i) scales[i]=static_cast<uint8_t>((i+e+p)%127);
+            source.add(prefix+".weight",w::DType::U8,{rows,cols/2},std::move(weights));
+            source.add(prefix+".weight_scale",w::DType::F8_E4M3,{rows,cols/16},std::move(scales));
+            source.scale(prefix+".weight_scale_2",std::ldexp(static_cast<float>(e+p+1),-130));
+            source.scale(prefix+".input_scale",static_cast<float>(e*3+p+1));
+            projections[e][p]=w::nvfp4_projection(source,prefix,prefix,rows,cols);
+        }
+        expected[e]=w::load_nvfp4_expert(source,projections[e],0,true);
+    }
+    std::vector<uint8_t> arena(count*bytes+2,0xcd);
+    std::array<std::array<float,3>,count> scales;
+    std::vector<w::Nvfp4ExpertBuffer> targets;
+    for (size_t e=0;e<count;++e)
+        targets.push_back({&projections[e],{arena.data()+1+e*bytes,bytes},&scales[e]});
+    w::Nvfp4LoadScratch scratch;
+    for (unsigned workers : {1u,4u,16u}) {
+        std::fill(arena.begin(),arena.end(),uint8_t(0xcd));
+        const auto before=source.batches;
+        const auto stats=w::load_nvfp4_expert_batch(source,targets,workers,&scratch);
+        check(source.batches==before+1,"batch did not combine source requests");
+        check(stats.scratch_bytes==count*(2764800+24),"batch scratch bound");
+        check(arena.front()==0xcd && arena.back()==0xcd,"batch overwrote destination canary");
+        for (size_t e=0;e<count;++e) {
+            check(std::memcmp(targets[e].bytes.data(),expected[e].bytes.data(),bytes)==0,"batch differs from roundtrip oracle");
+            check(scales[e]==expected[e].input_scales,"batch changed or mixed input scales");
+        }
+    }
+    std::fill(arena.begin(),arena.end(),uint8_t(0xcd));
+    const std::span<const w::Nvfp4ExpertBuffer> spans(targets);
+    w::load_nvfp4_expert_batch(source,spans.first(3),4,&scratch);
+    w::load_nvfp4_expert_batch(source,spans.subspan(3),4,&scratch);
+    for (size_t e=0;e<count;++e)
+        check(std::memcmp(targets[e].bytes.data(),expected[e].bytes.data(),bytes)==0,"short final batch changed bytes");
+    auto rejects=[&](auto action) {
+        bool refused=false;
+        try { action(); } catch (const std::runtime_error&) { refused=true; }
+        check(refused,"invalid startup batch accepted");
+    };
+    auto before=source.batches;
+    rejects([&]{ w::load_nvfp4_expert_batch(source,{},1); });
+    rejects([&]{ w::load_nvfp4_expert_batch(source,targets,0); });
+    rejects([&]{ w::load_nvfp4_expert_batch(source,targets,17); });
+    auto overlapping=targets;
+    overlapping[1].bytes=overlapping[0].bytes;
+    rejects([&]{ w::load_nvfp4_expert_batch(source,overlapping,4); });
+    check(source.batches==before,"invalid destination batch read source data");
+    // Errors in worker threads must reach the loader instead of terminating or
+    // leaving another worker writing into an arena the caller has already freed.
+    source.data.at("4/2.weight_scale")[0]=0xff;
+    rejects([&]{ w::load_nvfp4_expert_batch(source,targets,4); });
+    source.data.at("4/2.weight_scale")[0]=1;
+    source.scale("4/2.input_scale",NAN);
+    rejects([&]{ w::load_nvfp4_expert_batch(source,targets,4); });
+}
 double fp4(unsigned code) {
     constexpr double magnitude[] = {0,0.5,1,1.5,2,3,4,6};
     return (code & 8 ? -1 : 1) * magnitude[code & 7];
@@ -97,7 +165,7 @@ void test(uint64_t rows, uint64_t cols) {
 }
 int main() {
     try {
-        test(7,128); test(640,2560); test(2560,640); projection_test();
+        test(7,128); test(640,2560); test(2560,640); projection_test(); batch_test();
         std::cout << "PASS: byte roundtrip, independent FP64 decode, signed zero, all finite micro scales, invalid scales\n";
         return 0;
     } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }

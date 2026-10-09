@@ -1,0 +1,98 @@
+{
+  "byte_exact": true,
+  "experts": 64,
+  "layer": 0,
+  "rounds": [
+    [
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "legacy",
+        "ms": 84.8902,
+        "ngram_source_bytes": 0,
+        "pack_ms": 0.0,
+        "read_ms": 0.0,
+        "scratch_bytes": 0,
+        "source_read_calls": 192
+      },
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "batch",
+        "ms": 34.0344,
+        "ngram_source_bytes": 0,
+        "pack_ms": 9.1897,
+        "read_ms": 24.7067,
+        "scratch_bytes": 176948736,
+        "source_read_calls": 141
+      }
+    ],
+    [
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "batch",
+        "ms": 34.7159,
+        "ngram_source_bytes": 0,
+        "pack_ms": 8.8738,
+        "read_ms": 25.7458,
+        "scratch_bytes": 176948736,
+        "source_read_calls": 141
+      },
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "legacy",
+        "ms": 84.8692,
+        "ngram_source_bytes": 0,
+        "pack_ms": 0.0,
+        "read_ms": 0.0,
+        "scratch_bytes": 0,
+        "source_read_calls": 192
+      }
+    ],
+    [
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "legacy",
+        "ms": 85.5164,
+        "ngram_source_bytes": 0,
+        "pack_ms": 0.0,
+        "read_ms": 0.0,
+        "scratch_bytes": 0,
+        "source_read_calls": 192
+      },
+      {
+        "expert_source_bytes": 176948736,
+        "mode": "batch",
+        "ms": 35.5494,
+        "ngram_source_bytes": 0,
+        "pack_ms": 9.3168,
+        "read_ms": 26.1026,
+        "scratch_bytes": 176948736,
+        "source_read_calls": 141
+      }
+    ]
+  ],
+  "scope": "CPU-only bounded warm expert-loading sample; not cold full-engine startup",
+  "sealed_expert_reads": true,
+  "warmup": [
+    {
+      "expert_source_bytes": 176948736,
+      "mode": "legacy",
+      "ms": 75.5297,
+      "ngram_source_bytes": 0,
+      "pack_ms": 0.0,
+      "read_ms": 0.0,
+      "scratch_bytes": 0,
+      "source_read_calls": 192
+    },
+    {
+      "expert_source_bytes": 176948736,
+      "mode": "batch",
+      "ms": 56.5813,
+      "ngram_source_bytes": 0,
+      "pack_ms": 11.1772,
+      "read_ms": 25.6442,
+      "scratch_bytes": 176948736,
+      "source_read_calls": 141
+    }
+  ],
+  "workers": 4
+}

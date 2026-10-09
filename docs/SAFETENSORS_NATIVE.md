@@ -284,6 +284,56 @@ quality suite establishes migration fidelity and cache/MTP consistency, not
 general model quality or equivalence to an unquantized BF16 model. Improving
 native cold prefill and explaining latency tails remain optimization work.
 
+## Startup loading
+
+The original native loader reads and packs 24,576 experts one at a time and
+copies each temporary blob into the final 63.282 GiB locked arena. A GGUF/pack
+has already arranged those bytes before startup; native safetensors adapts them
+in RAM on each start. Reading the original files, physically locking the arena,
+packing and GPU setup all contribute; the existing logs did not time them
+separately, so they do not establish which accounts for the full startup gap.
+
+The opt-in startup loader now sorts a bounded batch's reads through the existing
+source, packs directly into disjoint final arena spans and reuses host scratch
+between batches. Source I/O stays serial; CPU workers only permute bytes and
+retain FP32 scales. No conversion cache is written, no ngram data is pulled into
+the batch, and the existing expert/MTP source-read barrier remains in force.
+`STRATA_NATIVE_LOAD_BATCH=1` keeps the original loader. Batch sizes 2..128 use
+the new path; `STRATA_NATIVE_LOAD_WORKERS=1..16` sets CPU packing workers.
+The desktop profile opts into batch 64 / four workers. Its raw scratch is
+168.75 MiB plus the source's at-most-8-MiB coalescing buffer and small metadata;
+scratch is freed when expert startup finishes, before inference.
+
+On 2026-10-10, a CPU-only sample on the Ryzen 9950X3D / 96 GB Windows machine
+read 64 layer-0 experts from the original checkpoint on D: (BIWIN X570 PRO).
+After warming the sample, three rounds alternating mode order measured medians
+84.8902 ms for the legacy loader and 34.7159 ms for batch 64 / four workers
+with reusable scratch. The source's read calls fell from 192 to 141 per mode
+invocation, with the same 176,948,736 expert bytes and zero ngram bytes. All
+destination bytes and input scales match in every round; reads after sealing
+are refused. The test ran alongside the user's service, allocated no GPU
+context and did not restart it. These are warm bounded-sample results, not
+cold SSD throughput or a full-engine startup speedup. Raw evidence is in
+`bench/results/2026-10-10-safetensors-runtime/p6-startup-sample/`.
+
+The five CPU CTest checks also pass with new tests for batch/serial equality,
+signed FP4 zero, tiny FP32 scales, destination canaries, worker counts 1/4/16,
+overlap refusal and worker-error propagation. The staged CUDA executable
+builds with the unchanged GPU kernels; HIP/SYCL remain unbuilt here.
+The desktop executable is now `strata-startup.exe`, retaining the previous
+`strata-int8.exe` for comparison. A user restart is required. Full cold startup
+has not been measured with the new loader. Logs now time arena allocation,
+reading, packing and total engine startup; `INFO startup_ms` measures main-entry
+to ready, excluding Python setup and process/DLL loading. Read/pack values of
+-1 on the reference loader mean unmeasured. All-expert residency is still
+required before ready; the optimization does not trade startup time for expert
+SSD reads during inference.
+
+```powershell
+.\tools\build_safetensors.ps1
+.\build-safetensors\safetensors_batch_bench.exe D:\迅雷下载\Qwen3.8-flash-next-nvfp4 0 64 4
+```
+
 ## Build the runtime
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
@@ -300,7 +350,7 @@ workspace beside the expert cache. FP32 decode activations and BF16x2 dense
 prefill remain enabled. This combination has not completed GPU acceptance or
 end-to-end timing. The user is testing the service interactively; no second
 engine is started alongside it. Restart the desktop launcher to load the staged
-`build-native-engine/strata-int8.exe`. Diagnostics append to
+`build-native-engine/strata-startup.exe`. Diagnostics append to
 `logs/native-262k-int8.log`; the launcher creates its directory.
 
 The native loader previously replaced every explicit `--kv` with FP16. It now
@@ -338,6 +388,8 @@ and a 4 GiB conversation cache. MTP stays off in this reference config;
 `--kv fp16|int8`, `--prefill-mode fp16|w4a8|w4a4x2|w4a4`,
 `--dedicated-prefill` and `--exe` select precision, workspace ownership and a
 staged executable. Generator defaults retain the FP16 reference settings.
+`--load-batch 64 --load-workers 4` selects the measured startup sample's loader;
+both generator defaults are 1, retaining the reference startup path.
 CPU fractions apply only to cold experts. The smaller reference diagnostic
 config remains in `config/native/reference.json`.
 
@@ -360,12 +412,12 @@ cd G:\Strata\Strata-Safetensors
 To rebuild the desktop profile without overwriting the reference executable:
 
 ```powershell
-.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-int8
+.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-startup
 ```
 
 The build script refuses to overwrite a running engine with the selected name.
 It configures the existing build directory and reuses unchanged CUDA libraries.
-On 2026-10-10 this staged SM120 CUDA build succeeded. The five CPU safetensors
+On 2026-10-10 the earlier INT8 staged SM120 CUDA build succeeded. The five CPU safetensors
 CTest checks and 16 offline conversation-cache harness tests passed. Explicit
 INT8/default FP16 config generation, overwrite refusal, desktop profile and
 port settings, PowerShell parsing and `--help` with GPUs hidden passed. The

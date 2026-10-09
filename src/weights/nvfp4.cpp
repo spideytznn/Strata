@@ -2,6 +2,10 @@
 #include "json_checked.hpp"
 #include <cmath>
 #include <cstring>
+#include <algorithm>
+#include <chrono>
+#include <future>
+#include <set>
 #if defined(_M_X64) || defined(__SSE2__)
 #include <emmintrin.h>
 #endif
@@ -132,5 +136,87 @@ NativeExpert load_nvfp4_expert(WeightSource& source, const std::array<Nvfp4Proje
     if (result.input_scales[0] == result.input_scales[1]) l.input_scale_gu = result.input_scales[0];
     l.input_scale_down = result.input_scales[2];
     return result;
+}
+
+Nvfp4BatchStats load_nvfp4_expert_batch(WeightSource& source,
+        std::span<const Nvfp4ExpertBuffer> targets, unsigned workers, Nvfp4LoadScratch* scratch) {
+    require(!targets.empty() && targets.size() <= 128, "NVFP4 startup batch must contain 1..128 experts");
+    require(workers > 0 && workers <= 16, "NVFP4 startup workers must be in [1,16]");
+    constexpr uint64_t projection_bytes = 2560ull * 640 / 64 * 36;
+    constexpr uint64_t blob_bytes = 3 * projection_bytes + 16;
+    // Check all output ranges before reading or launching workers. Overlapping
+    // destinations would race, even if the input checkpoint itself were valid.
+    std::vector<std::pair<uintptr_t, uintptr_t>> ranges;
+    std::set<std::array<float,3>*> scale_outputs;
+    for (const auto& target : targets) {
+        require(target.projections && target.input_scales && target.bytes.data() && target.bytes.size() == blob_bytes,
+                "invalid NVFP4 batch destination");
+        const uintptr_t begin = reinterpret_cast<uintptr_t>(target.bytes.data());
+        require(begin <= UINTPTR_MAX - blob_bytes, "NVFP4 destination address overflow");
+        ranges.emplace_back(begin, begin + blob_bytes);
+        require(scale_outputs.insert(target.input_scales).second, "overlapping NVFP4 scale destinations");
+        for (size_t p = 0; p < 3; ++p) {
+            const auto& projection = (*target.projections)[p];
+            require(projection.logical_shape == (p == 2 ? std::array<uint64_t,2>{2560,640} :
+                                                        std::array<uint64_t,2>{640,2560}), "unsupported expert geometry");
+            require(projection.weight && projection.micro_scale && projection.weight_scale && projection.input_scale,
+                    "null NVFP4 projection tensor");
+            check_sizes(projection.logical_shape[0], projection.logical_shape[1],
+                        projection.weight->bytes, projection.micro_scale->bytes, projection_bytes);
+            require(projection.weight_scale->bytes == 4 && projection.input_scale->bytes == 4,
+                    "invalid NVFP4 scalar byte size");
+        }
+    }
+    std::sort(ranges.begin(), ranges.end());
+    for (size_t i = 1; i < ranges.size(); ++i)
+        require(ranges[i-1].second <= ranges[i].first, "overlapping NVFP4 batch destinations");
+
+    Nvfp4LoadScratch local;
+    auto& raw = scratch ? scratch->experts : local.experts;
+    raw.resize(targets.size());
+    std::vector<ReadRequest> reads;
+    Nvfp4BatchStats stats;
+    reads.reserve(targets.size() * 12);
+    for (size_t i = 0; i < targets.size(); ++i) for (size_t p = 0; p < 3; ++p) {
+        const auto& projection = (*targets[i].projections)[p];
+        const TensorDesc* parts[] = {projection.weight, projection.micro_scale, projection.weight_scale, projection.input_scale};
+        for (size_t j = 0; j < 4; ++j) {
+            raw[i][p][j].resize(static_cast<size_t>(parts[j]->bytes));
+            stats.scratch_bytes += parts[j]->bytes;
+            reads.push_back({parts[j], 0, raw[i][p][j]});
+        }
+    }
+    using Clock = std::chrono::steady_clock;
+    const auto read_start = Clock::now();
+    source.read_many(reads); // the source sorts and coalesces only adjacent ranges of this family
+    const auto pack_start = Clock::now();
+    stats.read_ms = std::chrono::duration<double,std::milli>(pack_start-read_start).count();
+    workers = std::min(workers, static_cast<unsigned>(targets.size()));
+    auto pack = [&](unsigned worker) {
+        for (size_t i = worker; i < targets.size(); i += workers) {
+            const auto& target = targets[i];
+            for (size_t p = 0; p < 3; ++p) {
+                const auto& projection = (*target.projections)[p];
+                const float global = scalar(raw[i][p][2]);
+                (*target.input_scales)[p] = scalar(raw[i][p][3]);
+                pack_nvfp4(raw[i][p][0], raw[i][p][1], projection.logical_shape[0], projection.logical_shape[1],
+                           target.bytes.subspan(p * projection_bytes, projection_bytes));
+                std::memcpy(target.bytes.data() + 3 * projection_bytes + p * 4, &global, 4);
+            }
+            // Match the zero-initialized legacy NativeExpert vector's unused tail.
+            std::memset(target.bytes.data() + 3 * projection_bytes + 12, 0, 4);
+        }
+    };
+    if (workers == 1) pack(0);
+    else {
+        std::vector<std::future<void>> jobs;
+        for (unsigned worker = 0; worker < workers; ++worker)
+            jobs.push_back(std::async(std::launch::async, pack, worker));
+        // Future destruction joins the other workers even if a worker throws.
+        // No reader thread touches WeightSource or its counters.
+        for (auto& job : jobs) job.get();
+    }
+    stats.pack_ms = std::chrono::duration<double,std::milli>(Clock::now()-pack_start).count();
+    return stats;
 }
 } // namespace strata::weights

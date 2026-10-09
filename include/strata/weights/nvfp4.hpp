@@ -27,4 +27,22 @@ struct NativeExpert {
 };
 NativeExpert load_nvfp4_expert(WeightSource&, const std::array<Nvfp4Projection, 3>&,
                                int layer, bool verify_roundtrip);
+// Bounded startup scatter: read a batch in file order, then pack directly into
+// disjoint final arena spans. Source I/O stays serial; only byte packing runs in
+// parallel. No on-disk cache or requantization. Invalid batches never become resident.
+struct Nvfp4ExpertBuffer {
+    const std::array<Nvfp4Projection, 3>* projections;
+    std::span<uint8_t> bytes;
+    std::array<float, 3>* input_scales;
+};
+struct Nvfp4BatchStats {
+    uint64_t scratch_bytes = 0;
+    double read_ms = 0, pack_ms = 0;
+};
+// Reuse bounded host buffers across batches; released before inference starts.
+struct Nvfp4LoadScratch {
+    std::vector<std::array<std::array<std::vector<uint8_t>,4>,3>> experts;
+};
+Nvfp4BatchStats load_nvfp4_expert_batch(WeightSource&, std::span<const Nvfp4ExpertBuffer>, unsigned workers = 1,
+                                      Nvfp4LoadScratch* scratch = nullptr);
 } // namespace strata::weights

@@ -29,8 +29,12 @@ The 32K profile and its repeated benchmark settings remain available separately.
 acceptance suite reaches 32K; this desktop profile has not completed a separate
 262K acceptance run. This INT8 KV / dedicated-workspace combination has been
 built but still needs GPU acceptance and end-to-end timing. Restarting the
-desktop launcher selects the new `strata-int8.exe`; an already-running engine
+desktop launcher selects the new `strata-startup.exe`; an already-running engine
 keeps its previous settings. Engine diagnostics append to `logs/native-262k-int8.log`.
+The desktop profile batches 64 experts and uses four CPU packing workers during
+startup, then frees that scratch memory. Weights remain bit-preserved and fully
+resident; no converted model cache is written. See the bounded CPU loading
+measurement and the remaining full-startup timing check in the native-backend docs.
 
 ## Inherited Strata NVFP4 baseline
 

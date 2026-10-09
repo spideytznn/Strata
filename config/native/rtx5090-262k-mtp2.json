@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-int8.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-startup.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -61,7 +61,9 @@
     "STRATA_PREFILL_CPU_SHARE": "0",
     "STRATA_PREFILL_BF16X2": "1",
     "STRATA_SPEC_STOP_BOUNDARY": "1",
-    "STRATA_NATIVE_ALLOC_PINNED": "1"
+    "STRATA_NATIVE_ALLOC_PINNED": "1",
+    "STRATA_NATIVE_LOAD_BATCH": "64",
+    "STRATA_NATIVE_LOAD_WORKERS": "4"
   },
   "allowed_hosts": [
     "*"

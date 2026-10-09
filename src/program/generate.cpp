@@ -1661,6 +1661,7 @@ double pcie_frac_for_gbps(double gbps, double base) {
 }  // namespace
 
 int strata_main(int argc, char** argv) {
+    const auto engine_start = std::chrono::steady_clock::now();
     // **UNBUFFERED, BECAUSE THE INTERESTING OUTPUT IS THE OUTPUT BEFORE A CRASH.**  `stdout` redirected to a
     // pipe or a file is block-buffered, so a program that dies loses every line it had already printed - which
     // turns "it crashed at step 7" into "it crashed somewhere", and the difference is a debugging session.
@@ -8804,6 +8805,12 @@ int strata_main(int argc, char** argv) {
                         std::abort();
                     }
                 }).detach();
+        }
+        if (safetensors) {
+            const auto startup_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now()-engine_start).count();
+            std::fprintf(stderr,"safetensors: engine ready after %.2f s from main entry\n",startup_ms/1000.0);
+            std::printf("INFO startup_ms=%lld\n",static_cast<long long>(startup_ms));
         }
         std::printf("READY %lld stop\n", (long long) o.max_context);   // "stop": this engine honours STOP
         std::fflush(stdout);
