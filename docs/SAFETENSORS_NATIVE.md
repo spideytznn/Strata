@@ -5,7 +5,7 @@
 `strata --model <original HF directory>` now runs text inference directly from
 NVIDIA safetensors. `--safetensors` is an alias. The independent branch remains
 `codex/safetensors-native`, based on `d167eb89301a02e0d6299f49d35494ba5096bc10`.
-The original checkpoint and existing deployments are read-only inputs.
+The original checkpoint and Q4XL deployments are read-only inputs.
 
 The loader validates the fixed Qwen3.8-Flash-Next geometry and binds the existing
 Strata forward, scheduler, cache and prefill code. It preserves NVFP4 weight
@@ -335,6 +335,15 @@ child engine. Install the native Python requirements into this checkout's own
 virtual environment. Do not invoke the inherited installer to set up this path.
 
 ## Historical P0/P1 record
+
+On 2026-10-10 the user retired the local fidelity GGUF directory, its
+`Strata-data/packs/nvidia-nvfp4-fidelity` pack, the `Strata-NVFP4-Fusion`
+checkout and the old NVFP4 desktop launcher, freeing approximately 156.5 GiB
+of file bytes. Original safetensors, Q4XL, shared ngram/MTP files and this
+independent checkout remain. The native repository was fetched completely
+from GitHub and passed Git connectivity checks before the old checkout was
+removed. Archived comparison results remain available; rerunning diagnostics
+that name those retired GGUF/pack oracles requires rebuilding the oracles.
 
 The remaining sections document the first committed adapter milestone. Their
 "not yet" statements apply to that milestone only; current runtime status is above.
