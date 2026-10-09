@@ -33,7 +33,7 @@ def main():
  libs=[str(x.resolve()) for x in candidates if x and x.is_dir()]
  config={'exe':str(ROOT/'build-native-engine'/'strata.exe'),'args':args,'cwd':str(ROOT),
          'tokenizer':str(model),'tokenizer_format':'safetensors','chat_template':str(ROOT/'config/native/froggeric-v22.5.jinja'),
-         'model_name':'Qwen3.8-Flash-Next-NVFP4-Native','lib_dirs':libs,
+         'model_name':'Qwen3.8-Flash-Next-NVFP4-Native','lib_dirs':libs,'allowed_hosts':['*'],
          'env':{'STRATA_NVFP4_F32':'1','STRATA_NVFP4_TC':'0','STRATA_PREFILL_NVFP4':'fp16',
                 'STRATA_PREFILL_CPU_SHARE':'0','STRATA_PREFILL_BF16X2':'1','STRATA_SPEC_STOP_BOUNDARY':'1',
                 'STRATA_NATIVE_ALLOC_PINNED':'0' if a.staging else '1'}}

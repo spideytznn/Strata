@@ -22,6 +22,7 @@ The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 context,
 8,192-token prefill and `127.0.0.1:8880`**, with the same quality arithmetic and
 native MTP2. Its config is `config/native/rtx5090-262k-mtp2.json`. The desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
+Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 The 32K profile and its repeated benchmark settings remain available separately.
 262K is this profile's configured capacity. The completed long-context
 acceptance suite reaches 32K; this desktop profile has not completed a separate

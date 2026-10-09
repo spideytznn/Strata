@@ -290,7 +290,9 @@ The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`. That launcher selects
 `config/native/rtx5090-262k-mtp2.json`: 262,144 context capacity, 8,192-token
 prefill, native MTP2, FP16 KV and the same FP32/BF16x2 quality settings, served
-at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. The context
+at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. Native server
+configs and the generator set `allowed_hosts: ["*"]` to accept any HTTP Host
+header. Changes to this setting take effect on the next start. The context
 limit includes input and generated tokens. Capacity is separate from tested
 long-context quality: the completed retrieval suite above reaches 32K. The
 262K desktop profile changes only the context limit from the measured MTP2

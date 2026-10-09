@@ -39,5 +39,8 @@
   },
   "lib_dirs": [
     "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.0\\bin\\x64"
+  ],
+  "allowed_hosts": [
+    "*"
   ]
 }

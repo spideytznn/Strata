@@ -53,5 +53,8 @@
     "STRATA_PREFILL_BF16X2": "1",
     "STRATA_SPEC_STOP_BOUNDARY": "1",
     "STRATA_NATIVE_ALLOC_PINNED": "1"
-  }
+  },
+  "allowed_hosts": [
+    "*"
+  ]
 }
