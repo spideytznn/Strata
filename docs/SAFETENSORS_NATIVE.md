@@ -286,6 +286,17 @@ native cold prefill and explaining latency tails remain optimization work.
 
 ## Build the runtime
 
+The desktop `Start-Strata-Safetensors.bat` calls this checkout's
+`START-NATIVE-262K.bat`. That launcher selects
+`config/native/rtx5090-262k-mtp2.json`: 262,144 context capacity, 8,192-token
+prefill, native MTP2, FP16 KV and the same FP32/BF16x2 quality settings, served
+at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. The context
+limit includes input and generated tokens. Capacity is separate from tested
+long-context quality: the completed retrieval suite above reaches 32K. The
+262K desktop profile changes only the context limit from the measured MTP2
+profile; it has not completed a separate acceptance run. The user is testing
+it interactively. No second engine is started alongside that service.
+
 On this machine, `START-NATIVE.bat` starts the independent MTP2 quality configuration
 at `127.0.0.1:8097`. It uses this checkout's Python environment and engine;
 the original model and other deployments are unchanged. The server runs in the
