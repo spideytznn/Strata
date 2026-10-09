@@ -2117,7 +2117,7 @@ int strata_main(int argc, char** argv) {
             setenv("STRATA_VERIFY_STAGING_BLOBS", "128", 0);
 #endif
         }
-        if (!o.native_preset.empty() || !o.native_dense_gguf.empty() || !o.native_head_gguf.empty() ||
+        if (!o.native_preset.empty() || !o.native_dense_gguf.empty() || !o.native_head_gguf.empty() || !o.embd_gguf.empty() ||
             !o.ple_gguf.empty() || !o.layer_split.empty() || o.vision || o.no_ple || o.keep_canonical ||
             o.pipeline_windows > 1 || o.batch > 0) {
             std::fprintf(stderr,"--safetensors requires the native single-GPU text path without GGUF overrides\n"); return 2;

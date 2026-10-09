@@ -1,0 +1,70 @@
+{
+  "url": "http://127.0.0.1:9184",
+  "checks": [
+    {
+      "path": "/health",
+      "status": 200,
+      "response": "{\"status\": \"ok\", \"max_context\": 32768, \"model\": \"native-test\", \"images\": false, \"api_key\": false, \"loaded\": true, \"service\": \"strata\"}"
+    },
+    {
+      "path": "/v1/models",
+      "status": 200,
+      "response": "{\"object\": \"list\", \"data\": [{\"id\": \"native-test\", \"object\": \"model\", \"status\": {\"value\": \"loaded\"}, \"meta\": {\"n_ctx\": 32768}, \"architecture\": {\"input_modalities\": [\"text\"], \"output_modalities\": [\"text\"]}}]}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-2e233b7cce604362b25464ea\", \"object\": \"chat.completion\", \"created\": 1791571945, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"Blue\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 17, \"prompt_ms\": 401.3, \"prompt_per_token_ms\": 23.606, \"prompt_per_second\": 42.4, \"predicted_n\": 2, \"predicted_ms\": 88.7, \"predicted_per_token_ms\": 44.35, \"predicted_per_second\": 22.5, \"draft_n\": 2, \"draft_n_accepted\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "data: {\"id\": \"chatcmpl-c451a94d27554f1f8223df30\", \"object\": \"chat.completion.chunk\", \"created\": 1791571946, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"finish_reason\": null}]}\n\n: keep-alive\n\ndata: {\"id\": \"chatcmpl-c451a94d27554f1f8223df30\", \"object\": \"chat.completion.chunk\", \"created\": 1791571946, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"Blue\"}, \"finish_reason\": null}]}\n\ndata: {\"id\": \"chatcmpl-c451a94d27554f1f8223df30\", \"object\": \"chat.completion.chunk\", \"created\": 1791571946, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"delta\": {}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 17, \"completion_tokens\": 2, \"total_tokens\": 19, \"prompt_tokens_details\": {\"cached_tokens\": 10}}, \"timings\": {\"cache_n\": 10, \"prompt_n\": 7, \"prompt_ms\": 155.3, \"prompt_per_token_ms\": 22.186, \"prompt_per_second\": 45.1, \"predicted_n\": 2, \"predicted_ms\": 90.2, \"predicted_per_token_ms\": 45.1, \"predicted_per_second\": 22.2, \"draft_n\": 2, \"draft_n_accepted\": 0}}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "path": "/v1/messages",
+      "status": 200,
+      "response": "{\"id\": \"msg_3c9eed46eb2c461da38bf01f\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"native-test\", \"content\": [{\"type\": \"text\", \"text\": \"Green\"}], \"stop_reason\": \"end_turn\", \"stop_sequence\": null, \"usage\": {\"input_tokens\": 17, \"output_tokens\": 2, \"cache_read_input_tokens\": 0}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-1b9ff98f38c84ad98bce6e35\", \"object\": \"chat.completion\", \"created\": 1791571947, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"call_861ed232d55241a9aef62a22\", \"type\": \"function\", \"function\": {\"name\": \"lookup_code\", \"arguments\": \"{\\\"name\\\":\\\"Alice\\\"}\"}}]}, \"finish_reason\": \"tool_calls\"}], \"usage\": {\"prompt_tokens\": 338, \"completion_tokens\": 17, \"total_tokens\": 355, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 338, \"prompt_ms\": 2207.8, \"prompt_per_token_ms\": 6.532, \"prompt_per_second\": 153.1, \"predicted_n\": 17, \"predicted_ms\": 412.5, \"predicted_per_token_ms\": 24.265, \"predicted_per_second\": 41.2, \"draft_n\": 12, \"draft_n_accepted\": 10}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-6049857c0cb94e1391827dc1\", \"object\": \"chat.completion\", \"created\": 1791571949, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"ZEBRA-417\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 93, \"completion_tokens\": 8, \"total_tokens\": 101, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 93, \"prompt_ms\": 992.4, \"prompt_per_token_ms\": 10.671, \"prompt_per_second\": 93.7, \"predicted_n\": 8, \"predicted_ms\": 235.3, \"predicted_per_token_ms\": 29.413, \"predicted_per_second\": 34.0, \"draft_n\": 6, \"draft_n_accepted\": 4}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-3711f38cd0ec4fd4a763231f\", \"object\": \"chat.completion\", \"created\": 1791571951, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"7\", \"reasoning_content\": \"The user wants me to compute 3 + 4 and put only the number in the final answer.\\n\\n3 + 4 = 7\\n\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 56, \"completion_tokens\": 34, \"total_tokens\": 90, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 56, \"prompt_ms\": 1583.6, \"prompt_per_token_ms\": 28.279, \"prompt_per_second\": 35.4, \"predicted_n\": 34, \"predicted_ms\": 535.2, \"predicted_per_token_ms\": 15.741, \"predicted_per_second\": 63.5, \"draft_n\": 22, \"draft_n_accepted\": 22}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-f8b3ecd038954f9cb2069679\", \"object\": \"chat.completion\", \"created\": 1791571953, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"14\", \"reasoning_content\": \"The previous result was 7. Multiply by 2: 7 × 2 = 14.\\n\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 117, \"completion_tokens\": 28, \"total_tokens\": 145, \"prompt_tokens_details\": {\"cached_tokens\": 89}}, \"timings\": {\"cache_n\": 89, \"prompt_n\": 28, \"prompt_ms\": 385.0, \"prompt_per_token_ms\": 13.75, \"prompt_per_second\": 72.7, \"predicted_n\": 28, \"predicted_ms\": 477.9, \"predicted_per_token_ms\": 17.068, \"predicted_per_second\": 58.6, \"draft_n\": 18, \"draft_n_accepted\": 18}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 200,
+      "response": "{\"id\": \"chatcmpl-c7cd2c7da17846ec95b405ad\", \"object\": \"chat.completion\", \"created\": 1791571954, \"model\": \"native-test\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": \"SIGMA-682\"}, \"finish_reason\": \"stop\"}], \"usage\": {\"prompt_tokens\": 51, \"completion_tokens\": 7, \"total_tokens\": 58, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"timings\": {\"cache_n\": 0, \"prompt_n\": 51, \"prompt_ms\": 839.7, \"prompt_per_token_ms\": 16.465, \"prompt_per_second\": 60.7, \"predicted_n\": 7, \"predicted_ms\": 153.0, \"predicted_per_token_ms\": 21.857, \"predicted_per_second\": 45.8, \"draft_n\": 4, \"draft_n_accepted\": 4}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"the native safetensors backend currently supports text only; images are not supported\"}}"
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "response": "{\"error\": {\"type\": \"invalid_request_error\", \"message\": \"prompt (17 tokens) + max tokens (32769) exceeds the context (32768); requests are never truncated. Send a smaller max_tokens (at most 32743 here), or add \\\"fit_max_tokens\\\": true to the model's strata-<model>.json to shorten it to the room left (#545)\"}}"
+    }
+  ],
+  "reasoning_history": {
+    "previous_tokens": 90,
+    "cached_tokens": 89
+  },
+  "status": "pass"
+}

@@ -1,0 +1,31 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\operator-p5-auto-mtp2",
+  "status": "pass",
+  "files": [
+    {
+      "path": "command.json",
+      "bytes": 1171,
+      "sha256": "8230a36c11f971e4b6c753f710f19958db1d8329fc230111a80ad8e61ce3ed3d"
+    },
+    {
+      "path": "engine.log",
+      "bytes": 25604,
+      "sha256": "64bf5cb7c7cd524b8eab74b562d312e20ae84101c8dfe9e48417a04a40264d48"
+    },
+    {
+      "path": "http.json",
+      "bytes": 8166,
+      "sha256": "7c3114d32366a9641d94afcd0ad971541042c5e6faa1a7a74fd042664d53f065"
+    },
+    {
+      "path": "results.json",
+      "bytes": 35480,
+      "sha256": "f275d76bf31ab1f4c58768e89a218ef56589058966ebf130765a1e17bc0f5824"
+    },
+    {
+      "path": "telemetry.jsonl",
+      "bytes": 22435,
+      "sha256": "871d79847c15e54d216a0528cffa3719268a3f1451a67cc5b425ba663aae5944"
+    }
+  ]
+}
