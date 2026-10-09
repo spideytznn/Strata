@@ -1,0 +1,6 @@
+# Private runtime dependencies; install into this checkout's .venv-native.
+# CUDA remains supplied by the installed toolkit or explicit config lib_dirs.
+numpy==2.5.3
+jinja2==3.1.6
+regex==2026.9.29
+tokenizers==0.23.3

@@ -88,6 +88,9 @@ void act_quant_any(const float* x, int n, ActQ& a);
 
 /// The process-wide layout (canonical Q2_0 until `expert_layout_load` finds a native pack).
 const ExpertLayout& expert_layout();
+// Native safetensors adapter; validated fixed Qwen4 NVFP4 geometry, no manifest.
+bool expert_layout_nvfp4(std::string& err);
+void expert_layout_nvfp4_scales(int layer, float gate_up, float down);
 /// Reads `<pack_dir>/native_experts.txt` when it exists (a native pack), else sets the canonical layout.
 /// Versions up to kExpertLayoutVersion are read; a newer one is refused (a newer packer wrote it).
 bool expert_layout_load(const std::string& pack_dir, int64_t n_layers, int64_t n_expert, std::string& err);

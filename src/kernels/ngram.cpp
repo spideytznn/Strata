@@ -229,6 +229,32 @@ struct PleTable::Impl {
 PleTable::PleTable() : impl_(new Impl) {}
 PleTable::~PleTable() { close(); delete impl_; }
 
+bool PleTable::open_fp8_segments(const std::string& path,
+    const std::vector<strata::ngram::PleReader::Segment>& segments, float scale,
+    std::string& err, const PleIoOptions& io) {
+    close();
+    if (segments.empty() || !std::isfinite(scale) || scale <= 0 || io.mode != PleIo::Direct || io.lock) {
+        err = "native PLE requires FP8 segments, a positive scale and direct I/O"; return false;
+    }
+    impl_->mode = PleIo::Direct;
+    impl_->fmt = &ple_format_info(PleFormat::F8_E4M3);
+    impl_->rb = PLE_ROW_BYTES_FP8;
+    impl_->scale = scale;
+    const auto& last = segments.back();
+    impl_->n_rows = last.first_row+last.rows;
+    if (!impl_->reader.open(path,0,impl_->n_rows,io.max_inflight,io.cache_rows,err,io.io_thread,impl_->rb,segments)) {
+        close(); return false;
+    }
+    impl_->reader.set_keepalive(io.keepalive_ms,io.keepalive_window_s);
+    int readers = io.batch_readers;
+    if (readers < 0) {
+        const char* v = std::getenv("STRATA_PLE_READERS");
+        readers = v && *v ? std::clamp(std::atoi(v),0,64) : 8;
+    }
+    if (readers && !impl_->reader.set_batch_readers(static_cast<unsigned>(readers),err)) { close(); return false; }
+    return true;
+}
+
 bool PleTable::open(const std::string& gguf_path, std::string& err) {
     return open(gguf_path, err, PleIoOptions{});
 }

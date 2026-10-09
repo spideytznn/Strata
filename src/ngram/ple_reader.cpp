@@ -29,6 +29,15 @@ double ReaderStats::percentile(double q) const {
 
 namespace {
 
+uint64_t row_address(uint64_t row, uint64_t base, uint32_t rb,
+                     const std::vector<PleReader::Segment>& segments) {
+    if (segments.empty()) return base + row * rb;
+    auto it = std::upper_bound(segments.begin(),segments.end(),row,
+        [](uint64_t r,const PleReader::Segment& s) { return r < s.first_row; });
+    --it; // open validates complete logical coverage; callers validate row bounds
+    return it->file_offset + (row-it->first_row)*rb;
+}
+
 constexpr size_t LATENCY_RING = 65536;
 constexpr uint32_t WAYS = 8;
 constexpr uint32_t EMPTY = 0xFFFFFFFFu;
@@ -99,6 +108,7 @@ struct BatchJobs {
     uint8_t* out = nullptr;
     uint32_t rb = 0;
     uint64_t table_offset = 0;
+    const std::vector<PleReader::Segment>* segments = nullptr;
     const uint64_t* off = nullptr;
     const uint32_t* begin = nullptr;
     const uint32_t* uses = nullptr;
@@ -131,6 +141,7 @@ struct BatchReader {
 struct PleReader::Impl {
     DirectFile file;
     uint64_t table_offset = 0;
+    std::vector<Segment> segments;
     uint64_t n_rows = 0;
     uint32_t row_bytes = ROW_BYTES;
     uint32_t max_inflight = 0;
@@ -229,7 +240,7 @@ struct PleReader::Impl {
                 for (uint32_t u = b.begin[j]; ok && u < b.begin[j + 1]; ++u) {
                     // the part of the row this page holds (all of it, or one side of a page boundary)
                     const uint32_t i_row = b.uses[u];
-                    const uint64_t at = b.table_offset + (uint64_t) b.rows[i_row] * b.rb;
+                    const uint64_t at = row_address(b.rows[i_row],b.table_offset,b.rb,*b.segments);
                     const uint64_t a = std::max(at, lo), e = std::min(at + b.rb, lo + PAGE);
                     if (e > lo + got[i].bytes) { fail("PleReader: short read inside the table"); ok = false; break; }
                     std::memcpy(b.out + (size_t) i_row * b.rb + (a - at), buf + (a - lo), (size_t) (e - a));
@@ -325,7 +336,8 @@ struct PleReader::Impl {
         rng ^= rng << 17;
         const uint64_t first = table_offset / PAGE, end = (table_offset + n_rows * (uint64_t) row_bytes) / PAGE;
         Job j;
-        j.offset = (first + (end > first ? rng % (end - first) : 0)) * PAGE;
+        j.offset = segments.empty() ? (first + (end > first ? rng % (end - first) : 0)) * PAGE :
+            row_address(rng % n_rows,table_offset,row_bytes,segments) / PAGE * PAGE;
         j.length = PAGE;
         j.keepalive = true;
         queue.push_back(std::move(j));
@@ -468,18 +480,29 @@ PleReader::~PleReader() {
 }
 
 bool PleReader::open(const std::string& path, uint64_t table_offset, uint64_t n_rows, uint32_t max_inflight,
-                     uint64_t cache_rows, std::string& err, bool io_thread, uint32_t row_bytes) {
+                     uint64_t cache_rows, std::string& err, bool io_thread, uint32_t row_bytes,
+                     const std::vector<Segment>& segments) {
     close();
     if (max_inflight == 0 || max_inflight > 1024) { err = "PleReader: max_inflight must be 1..1024"; return false; }
     if (row_bytes == 0 || row_bytes > PAGE) { err = "PleReader: row_bytes must be 1..4096"; return false; }
     if (!impl_->file.open(path, err)) return false;
     impl_->path = path;
     impl_->row_bytes = row_bytes;
-    if (table_offset + n_rows * (uint64_t) row_bytes > impl_->file.size()) {
+    if (segments.empty() && (table_offset > impl_->file.size() || n_rows > (impl_->file.size()-table_offset)/row_bytes)) {
         err = "PleReader: the table extends past the end of " + path;
         close();
         return false;
     }
+    uint64_t covered = 0;
+    for (const auto& s : segments) {
+        if (s.first_row != covered || !s.rows || s.rows > n_rows-covered ||
+            s.file_offset > impl_->file.size() || s.rows > (impl_->file.size()-s.file_offset)/row_bytes) {
+            err = "PleReader: invalid segment coverage or file bounds"; close(); return false;
+        }
+        covered += s.rows;
+    }
+    if (!segments.empty() && covered != n_rows) { err = "PleReader: incomplete segments"; close(); return false; }
+    impl_->segments = segments;
     impl_->table_offset = table_offset;
     impl_->n_rows = n_rows;
     impl_->max_inflight = max_inflight;
@@ -532,7 +555,7 @@ void PleReader::close() {
     // Outstanding reads must finish before their buffers are released (caller-thread mode, or a worker that
     // stopped on an error).
     if (m.file.is_open()) {
-        while (m.free_slots.size() < m.max_inflight) {
+        while (m.free_slots.size() < m.inflight.size()) {
             Completion c[64];
             const int n = m.file.wait(c, 64, -1);
             if (n == 0) break;
@@ -541,6 +564,7 @@ void PleReader::close() {
         }
     }
     m.file.close();
+    m.segments.clear();
     DirectFile::free_aligned(m.slab);
     m.slab = nullptr;
     m.queue.clear();
@@ -583,7 +607,7 @@ PleReader::Ticket PleReader::issue(const uint32_t* rows, size_t n, uint8_t* out_
             ++m.stats.cache_hits;
             continue;
         }
-        const uint64_t at = m.table_offset + (uint64_t) rows[i] * rb;
+        const uint64_t at = row_address(rows[i],m.table_offset,rb,m.segments);
         const uint64_t first = at / PAGE * PAGE;
         const uint32_t length = (uint32_t) ((at + rb - 1) / PAGE * PAGE - first + PAGE);
         auto f = by_page.find(first);
@@ -696,7 +720,7 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     std::unique_lock<std::mutex> call(m.bcall);
     // (pages and rows are 32-bit in the request's tables)
     if (m.readers.empty() || 2 * (uint64_t) n >= 0xFFFFFFFFull ||
-        (m.table_offset + m.n_rows * (uint64_t) m.row_bytes) / PAGE >= 0xFFFFFFFFull) {
+        m.file.size() / PAGE >= 0xFFFFFFFFull) {
         call.unlock();
         const Ticket t = issue(rows, n, out_raw);
         if (!collect(t, err)) return false;
@@ -731,7 +755,7 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     // them took the 32K prompt's reads from ~970K to ~735K a second)
     const size_t nm = m.b_missed.size();
     size_t ne = nm;   // (row, page) uses: a row on two pages counts twice
-    for (size_t k = 0; k < nm; ++k) ne += (m.table_offset + (uint64_t) rows[m.b_missed[k]] * rb) % PAGE + rb > PAGE;
+    for (size_t k = 0; k < nm; ++k) ne += row_address(rows[m.b_missed[k]],m.table_offset,rb,m.segments) % PAGE + rb > PAGE;
     int bits = 1;
     while (((size_t) 1 << bits) < 2 * ne) ++bits;   // the page map stays at most half full
     const size_t cap = (size_t) 1 << bits;
@@ -742,7 +766,7 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     m.b_job_of.resize(ne);
     uint64_t dedup = 0;
     for (size_t k = 0, e = 0; k < nm; ++k) {
-        const uint64_t at = m.table_offset + (uint64_t) rows[m.b_missed[k]] * rb;
+        const uint64_t at = row_address(rows[m.b_missed[k]],m.table_offset,rb,m.segments);
         for (uint64_t page = at / PAGE; page <= (at + rb - 1) / PAGE; ++page, ++e) {
             size_t h = (size_t) ((page * 0x9E3779B97F4A7C15ull) >> (64 - bits));
             while (m.b_map[h] != ~0ull && (m.b_map[h] >> 32) != page) h = (h + 1) & (cap - 1);
@@ -781,6 +805,7 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     b.out = out_raw;
     b.rb = rb;
     b.table_offset = m.table_offset;
+    b.segments = &m.segments;
     b.off = m.b_off.data();
     b.begin = m.b_begin.data();
     b.uses = m.b_uses.data();

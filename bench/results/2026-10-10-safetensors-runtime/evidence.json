@@ -1,0 +1,21 @@
+{
+  "base_commit": "d167eb89301a02e0d6299f49d35494ba5096bc10",
+  "branch": "codex/safetensors-native",
+  "hardware": "RTX 5090 32 GB / Ryzen 9950X3D / 96 GB RAM / Windows",
+  "scope": "Correctness gates P2-P4; not a completed performance or BF16 quality evaluation.",
+  "mtp_command": "python tools/native_runtime_acceptance.py --config config/native/reference.json --output build-safetensors/runtime-acceptance-p4c",
+  "mtp_note": "Four independent sequential engines. 17 completed requests per variant; interruption itself excluded from main-state equality, completed continuation included. Raw logs include the zero expert/MTP source-read barriers.",
+  "snapshot_fix": "Disk sessions omit an unloaded draft. QSA commit restores the moving spare row and last completed block position in the native opt-in path.",
+  "binary_sha256_current": "f80397b61f0553d2a734110c0200fce32194dcabd3215f4c11da4c07c1d29854",
+  "binary_note": "Current build adds prefill tracing, cache precision identity and optional host registration after the P4c run; its core forward and commit kernels are unchanged.",
+  "checks": [
+    "5 standalone CTests passed",
+    "3 CUDA snapshot/validation/commit CTests passed",
+    "HF tokenizer parity 43 cases + 30 incremental cases",
+    "SSE2 FP4 layout verify-set roundtrip passed"
+  ],
+  "not_built": [
+    "HIP",
+    "SYCL"
+  ]
+}

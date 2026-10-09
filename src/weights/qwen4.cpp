@@ -69,6 +69,9 @@ Qwen4WeightPlan::Qwen4WeightPlan(SafetensorsSource& source) : config(Qwen4Config
     ngram_scale = &source.tensor(ple + "ngram_embedding.weight_scale");
     ngram_offsets = &source.tensor(ple + "ngram_heads_offsets");
     ngram_vocab_sizes = &source.tensor(ple + "ngram_heads_vocab_sizes");
+    ngram_multipliers = &source.tensor(ple + "layer_multipliers");
+    require(ngram_multipliers->dtype == DType::I64 && ngram_multipliers->physical_shape == std::vector<uint64_t>{3},
+            "invalid ngram multiplier descriptor");
     require(ngram_scale->dtype == DType::BF16 && ngram_scale->physical_shape == std::vector<uint64_t>{1},
             "invalid ngram scale descriptor");
     for (const auto* t : {ngram_offsets, ngram_vocab_sizes})

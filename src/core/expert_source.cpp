@@ -899,6 +899,9 @@ bool FileExpertSource::open(const std::string& pack_dir, int64_t n_layers, int64
 }
 
 void FileExpertSource::close() {
+    if (native_stage_host_) cudaFreeHost(native_stage_host_);
+    native_stage_host_=native_stage_device_=nullptr;
+    native_stage_stride_=0; native_stage_layer_=-1; native_stage_experts_.clear();
     io_stop();
     inputs_.clear();
     if (complement_arena_ != nullptr) {
@@ -983,16 +986,16 @@ void FileExpertSource::close() {
     io_pf_used_.store(0); io_pf_unused_.store(0); io_crit_us_.store(0); io_crit_n_.store(0);
 #if defined(_WIN32)
     if (base_ != nullptr && !unmapped_) UnmapViewOfFile((LPCVOID) base_);
-    unmapped_ = false;
     if (mapping_ != nullptr) CloseHandle((HANDLE) mapping_);
     if (file_ != nullptr) CloseHandle((HANDLE) file_);
     mapping_ = nullptr;
     file_ = nullptr;
 #else
-    if (base_ != nullptr) munmap((void*) base_, (size_t) mapped_bytes_);
+    if (base_ != nullptr && !unmapped_) munmap((void*) base_, (size_t) mapped_bytes_);
     if (fd_ >= 0) ::close(fd_);
     fd_ = -1;
 #endif
+    unmapped_ = false;
     base_ = nullptr;
     blobs_ = 0;
     n_layers_ = 0;
@@ -3092,6 +3095,10 @@ bool FileExpertSource::pinned(int64_t layer, int64_t expert) const {
 }
 
 const uint8_t* FileExpertSource::device_alias(int64_t layer, int64_t expert) const {
+    if (native_stage_device_ && layer == native_stage_layer_) {
+        for (size_t i=0;i<native_stage_experts_.size();++i)
+            if (native_stage_experts_[i] == expert) return native_stage_device_+i*native_stage_stride_;
+    }
     if (!pinned(layer, expert) || complement_device_ == nullptr) return nullptr;
     const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) expert;
     if (exchange_storage_.active()) return exchange_storage_.resident(index).device;
@@ -3099,9 +3106,25 @@ const uint8_t* FileExpertSource::device_alias(int64_t layer, int64_t expert) con
 }
 
 bool FileExpertSource::pcie_layer(int64_t layer) const {
+    if (native_stage_host_) return layer >= 0 && layer < n_layers_;
     if (complement_ready_ && complement_pinned_ && complement_device_ != nullptr)
         return layer >= 0 && layer < n_layers_;
     return device_alias(layer, 0) != nullptr;
+}
+
+const uint8_t* FileExpertSource::stage_for_gpu(int64_t layer,int64_t expert) {
+    if (!native_stage_host_ || pinned(layer,expert)) return pinned(layer,expert) ? blob(layer,expert) : nullptr;
+    if (layer != native_stage_layer_) { native_stage_layer_=layer; native_stage_experts_.clear(); }
+    for (size_t i=0;i<native_stage_experts_.size();++i)
+        if (native_stage_experts_[i] == expert) return native_stage_host_+i*native_stage_stride_;
+    if (native_stage_experts_.size() >= 128) return nullptr;
+    const auto* src=resident_blob(layer,expert);
+    if (!src) return nullptr;
+    ram_reads_.fetch_add(1,std::memory_order_relaxed);
+    auto* dst=native_stage_host_+native_stage_experts_.size()*native_stage_stride_;
+    std::memcpy(dst,src,layer_blob_bytes_[static_cast<size_t>(layer)]);
+    native_stage_experts_.push_back(expert);
+    return dst;
 }
 
 // ================================ THE ADAPTER ================================
@@ -3344,7 +3367,7 @@ void expert_pool_dispatch_multi(ExpertDispatch& d, const float* x_f, const int32
                 } else {
                     if (d.fs != nullptr) d.fs->note_miss(d.src, d.layers, e);
                     if ((fetch_on ? pick[q] : miss_rank >= nmiss - m) && fetches < P.staging_cap && fetches < 64) {
-                        const uint8_t* src = d.src->pinned(d.layers, e) ? d.src->blob(d.layers, e) : nullptr;
+                        const uint8_t* src = d.src->stage_for_gpu(d.layers, e);
                         if (src != nullptr) {
                             kd = 1;
                             dma_src[fetches] = src;

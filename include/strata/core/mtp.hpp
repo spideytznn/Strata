@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+namespace strata::weights { class SafetensorsSource; }
 namespace strata::core {
 
 class NativeHead;
@@ -43,7 +44,8 @@ public:
     /// Loads `rt_dir` (from tools/mtp_rt.py) and allocates the layer's K/V and buffers for up to `max_t` rows.
     /// Call before the VRAM expert tier is sized: this takes ~0.9 GB.
     bool load(const std::string& rt_dir, const ModelGeometry& g, SessionState& ss, int max_t, std::string& err,
-              int64_t window = 32768, const MtpDrafter* shared = nullptr);
+              int64_t window = 32768, const MtpDrafter* shared = nullptr,
+              weights::SafetensorsSource* native_source = nullptr);
     /// The prompt's length: prefill() skips the cells the attention window can never reach again.
     void set_prompt_len(int64_t n) { prompt_len_ = n; }
     /// At most this many drafts per round (below max_t - 1): a window longer than the MTP's comes from elsewhere.
@@ -154,6 +156,9 @@ public:
     }
 
 private:
+    bool load_safetensors(weights::SafetensorsSource&, std::string& err);
+    bool native_fp8_ = false;
+    float* fp8_hidden_ = nullptr;
     bool record_forward(int T, int step_row0, cudaStream_t cs, std::string& err);
     /// The layer's front for T rows at step rows [row0, +T): the embedding, the fc projections, the attention
     /// hyper-connection read (R_, inj_, mixed_) and the K/V appended.

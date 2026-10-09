@@ -2,9 +2,9 @@
 
 Experimental native safetensors weight backend for the NVIDIA Qwen3.8-Flash-Next
 checkpoint, starting at the verified Strata NVFP4 fidelity commit
-`d167eb89301a02e0d6299f49d35494ba5096bc10`. The current milestone is a C++ metadata
-reader, weight-source interface and lossless expert adapter. Full text inference
-from a model directory is **not connected yet**. See
+`d167eb89301a02e0d6299f49d35494ba5096bc10`. The native path now runs text inference directly from the original model
+directory, with resident NVFP4 experts, segmented ngram reads, native FP8 MTP
+and session caching. Full acceptance and tuning are in progress. See
 [the implementation status and reproducible checks](docs/SAFETENSORS_NATIVE.md).
 
 ## Inherited Strata NVFP4 baseline

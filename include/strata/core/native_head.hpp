@@ -30,6 +30,7 @@ public:
     size_t row_bytes() const { return n_out_ > 0 ? (size_t) (bytes_ / (uint64_t) n_out_) : 0; }
 
 private:
+    friend class SafetensorsModel;
     void* weights_ = nullptr;
     void* scratch_ = nullptr;
     uint64_t bytes_ = 0;
@@ -55,6 +56,7 @@ public:
     int type() const { return type_; }
 
 private:
+    friend class SafetensorsModel;
     void* host_ = nullptr;
     const void* dev_ = nullptr;
     uint64_t bytes_ = 0;

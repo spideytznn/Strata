@@ -103,11 +103,13 @@ bool q8k_avx2(int type) {
 }  // namespace
 
 void native_quant_act(const NativeFmt& f, const float* x, void* dst) {
+    if (f.fp32_activations) { std::memcpy(dst,x,f.n_embd*sizeof(float)); return; }
     if (q8k_avx2(f.gu_act)) { q8k_quant_avx2(x, dst, f.n_embd); return; }
     traits(f.gu_act)->from_float(x, dst, f.n_embd);
 }
 
 void native_quant_h(const NativeFmt& f, const float* h, void* dst) {
+    if (f.fp32_activations) { std::memcpy(dst,h,f.n_ff*sizeof(float)); return; }
     if (q8k_avx2(f.d_act)) { q8k_quant_avx2(h, dst, f.n_ff); return; }
     traits(f.d_act)->from_float(h, dst, f.n_ff);
 }
@@ -183,6 +185,20 @@ void native_gu_rows(const NativeFmt& f, const uint8_t* blob, const void* const* 
     // NVFP4 in 512-bit lanes: ggml's arithmetic, blocks decoded once per window; 1.8x at one token, 3.7x at seven
     // (nvfp4_avx512_parity). STRATA_NO_NVFP4_512 falls back to ggml-cpu.
     static const bool nvfp4_512 = cpu_avx512_ok() && std::getenv("STRATA_NO_NVFP4_512") == nullptr;
+    if (f.fp32_activations) {
+        if (nvfp4_512) { nvfp4_512_f32_gu_rows(blob,f.gu_row,f.up_off,n,act,nt,ff,r0,r1,sg,su); return; }
+        float gw[2560],uw[2560];
+        const auto deq=ggml_get_type_traits((ggml_type)f.gu_type)->to_float;
+        for(int r=r0;r<r1;++r) {
+            deq(blob+r*f.gu_row,gw,n); deq(blob+f.up_off+r*f.gu_row,uw,n);
+            for(int t=0;t<nt;++t) {
+                const float* a=static_cast<const float*>(act[t]); float g=0,u=0;
+                for(int c=0;c<n;++c) { g=std::fma(gw[c],a[c],g); u=std::fma(uw[c],a[c],u); }
+                g*=sg; ff[t][r]=(g/(1.f+std::exp(-g)))*(u*su);
+            }
+        }
+        return;
+    }
     if (f.gu_type == kNvfp4Type && nvfp4_512 && nvfp4_512_fits(n)) {
         nvfp4_512_gu_rows(blob, f.gu_row, f.up_off, n, act, nt, ff, r0, r1, sg, su);
         return;
@@ -230,6 +246,21 @@ void native_down_rows(const NativeFmt& f, const uint8_t* blob, const void* const
     const int n = (int) f.n_ff;
     float sd = 1.f;                                   // NVFP4: the expert's s_down (see native_gu_rows)
     if (f.tail_off) std::memcpy(&sd, blob + f.tail_off + 2 * sizeof(float), sizeof sd);
+    if (f.fp32_activations) {
+        if(cpu_avx512_ok() && std::getenv("STRATA_NO_NVFP4_512")==nullptr) {
+            nvfp4_512_f32_rows(blob+f.down_off,f.d_row,n,hq,nt,out,r0,r1,sd); return;
+        }
+        float w[640]; const auto deq=ggml_get_type_traits((ggml_type)f.d_type)->to_float;
+        for(int r=r0;r<r1;++r) {
+            deq(blob+f.down_off+r*f.d_row,w,n);
+            for(int t=0;t<nt;++t) {
+                const float* a=static_cast<const float*>(hq[t]); float y=0;
+                for(int c=0;c<n;++c) y=std::fma(w[c],a[c],y);
+                out[t][r]=y*sd;
+            }
+        }
+        return;
+    }
     static const bool nvfp4_512 = cpu_avx512_ok() && std::getenv("STRATA_NO_NVFP4_512") == nullptr;
     if (f.d_type == kNvfp4Type && nvfp4_512 && nvfp4_512_fits(n)) {
         nvfp4_512_rows(blob + f.down_off, f.d_row, n, hq, nt, out, r0, r1, sd);

@@ -2,6 +2,9 @@
 #include "json_checked.hpp"
 #include <cmath>
 #include <cstring>
+#if defined(_M_X64) || defined(__SSE2__)
+#include <emmintrin.h>
+#endif
 
 namespace strata::weights {
 using namespace detail;
@@ -36,10 +39,24 @@ void pack_nvfp4(std::span<const uint8_t> w, std::span<const uint8_t> s,
                 uint64_t rows, uint64_t cols, std::span<uint8_t> dst) {
     const auto blocks = check_sizes(rows, cols, w.size(), s.size(), dst.size());
     // Validate first, so failure never leaves a partially valid destination.
-    for (auto scale : s) require(scale <= 0x7e, "NVFP4 micro scale is negative or NaN; UE4M3 cannot preserve it");
+    for (auto scale : s) if (scale > 0x7e)
+        throw std::runtime_error("NVFP4 micro scale is negative or NaN; UE4M3 cannot preserve it");
     for (uint64_t b = 0; b < blocks; ++b) {
         auto* out = dst.data() + b * 36;
         std::memcpy(out, s.data() + b * 4, 4);
+#if defined(_M_X64) || defined(__SSE2__)
+        // Two adjacent 16-value subblocks per register. Shuffle bytes only:
+        // no floating-point decode or requantization enters the owned layout.
+        const auto mask=_mm_set1_epi8(15);
+        for(int half=0;half<2;++half) {
+            const auto input=_mm_loadu_si128(reinterpret_cast<const __m128i*>(w.data()+b*32+half*16));
+            const auto lo=_mm_shuffle_epi32(input,_MM_SHUFFLE(2,0,2,0));
+            const auto hi=_mm_shuffle_epi32(input,_MM_SHUFFLE(3,1,3,1));
+            const auto even=_mm_or_si128(_mm_and_si128(lo,mask),_mm_slli_epi16(_mm_and_si128(hi,mask),4));
+            const auto odd=_mm_or_si128(_mm_and_si128(_mm_srli_epi16(lo,4),mask),_mm_andnot_si128(mask,hi));
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(out+4+half*16),_mm_unpacklo_epi8(even,odd));
+        }
+#else
         for (uint64_t sub = 0; sub < 4; ++sub) {
             const auto* in = w.data() + b * 32 + sub * 8;
             for (uint64_t j = 0; j < 8; ++j) {
@@ -48,6 +65,7 @@ void pack_nvfp4(std::span<const uint8_t> w, std::span<const uint8_t> s,
                 out[4 + sub * 8 + j] = lo | (hi << 4);
             }
         }
+#endif
     }
 }
 void unpack_nvfp4(std::span<const uint8_t> p, uint64_t rows, uint64_t cols,

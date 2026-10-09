@@ -427,6 +427,17 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
     hits_ = hits;
     head_ = head;
     max_t_ = max_t;
+    if (const char* p = std::getenv("STRATA_DUMP_VERIFY_DIAGNOSTICS")) diagnostic_path_ = p;
+    diagnostic_stride_ = g.hc*g.n_embd+g.n_embd+g.hc+ss.k*g.n_embd+ss.k;
+    if (const char* capacity = std::getenv("STRATA_VERIFY_STAGING_BLOBS")) {
+        char* end = nullptr;
+        const long value = std::strtol(capacity, &end, 10);
+        if (!*capacity || *end || value < 16 || value > 128 || value % 2) {
+            err = "STRATA_VERIFY_STAGING_BLOBS must be an even integer in [16,128]";
+            return false;
+        }
+        staging_blobs_ = value;
+    }
     sampling_.greedy = true;      // a fresh verifier samples greedily until set_sampling says otherwise
     sampling_.temperature = 0.0f;
     if (max_t < 2 || max_t > strata::kernels::kVerifyMaxT || max_t > strata::kernels::cpu::MAXT) {
@@ -503,13 +514,13 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         bal_->on = true;
     }
     // the GPU plan: counts(4) | start(cap+1) | dst(cap) | tok(cap) | pad | ptr(cap u64) | ptr2(cap u64) | start2(cap+1)
-    // | pad | dst2(kStagingBlobs u64)
+    // | pad | dst2(staging_blobs_ u64)
     {
         const int64_t cap = (int64_t) (T * K);
         const int64_t i32 = 4 + (cap + 1) + cap + cap;
         const int64_t ptr_off = (i32 + 1) & ~1ll;
         dst2_off_ = (ptr_off + 4 * cap + (cap + 1) + 1 + 1) & ~1ll;
-        plan_i32_ = dst2_off_ + 2 * kStagingBlobs;
+        plan_i32_ = dst2_off_ + 2 * staging_blobs_;
         if (!mapped((size_t) plan_i32_ * 4 * 2 + 64, (void**) &h_plan_, (void**) &m_plan_)) {
             err = "verify: mapped plan allocation failed";
             return false;
@@ -553,7 +564,8 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         shared_ = b.take<float>(T * N); parts_ = b.take<float>(T * K * N); hit_out_ = b.take<float>(T * K * N);
         hit_slot_ = b.take<int32_t>(T * K); hit_dst_ = b.take<int32_t>(T * K); hit_count_ = b.take<int32_t>(4);
         plan_ = b.take<int32_t>(2 * ((uint64_t) plan_i32_ + 16));
-        staging_ = b.take<uint8_t>((uint64_t) kStagingBlobs * strata::kernels::cpu::expert_layout().max_blob);
+        staging_ = b.take<uint8_t>((uint64_t) staging_blobs_ * strata::kernels::cpu::expert_layout().max_blob);
+        if (!diagnostic_path_.empty()) diagnostic_ = b.take<float>(g.n_layers*diagnostic_stride_);
         hit_xq_ = b.take<uint8_t>(T * (N / 32) * 34); hit_xs_ = b.take<float>(T * (N / 32));
         nat_xq_ = b.take<uint8_t>(T * (N / 32) * 36);
         hit_scratch_ = b.take<uint8_t>(std::max<uint64_t>(
@@ -609,7 +621,7 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         }
     }
     sink_.staging = (unsigned long long) staging_;
-    sink_.staging_cap = kStagingBlobs;
+    sink_.staging_cap = staging_blobs_;
     (void) TS;
     if (cudaStreamCreateWithFlags(&copy_, cudaStreamNonBlocking) != cudaSuccess) {
         err = "verify: copy stream create failed";
@@ -1461,6 +1473,8 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
                 const auto& f = lay.fmt[(size_t) l];
                 NativeExpertLayout L = native_expert_layout(f.gu_type, f.d_type, f.n_embd, f.n_ff);
                 L.layer = int(l);
+                L.input_scale_gu = f.input_scale_gu;
+                L.input_scale_down = f.input_scale_down;
                 native_expert_grouped(L, gp, gs, gn, p_dst, p_tok, cap, cap,
                                       nat_xq_ + (size_t) tb * (N / 32) * 36, hit_scratch_, dst_buf, cs, gy, mixed_ + (size_t) tb * N);
             } else {
@@ -1491,7 +1505,7 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
                 wait_flag_ge_stamped(m_flagB_, ring, m_bal_ + ((l - lb_) * 2 + grp) * 4 + 1, nullptr, cs);
             else wait_flag_ge(m_flagB_, ring, cs);                 // the PCIe share is in staging (DMA) or mapped
             if (sink_.pcie_mode == 2) {                            // stage it with a copy kernel, then point at staging
-                const int64_t per = G == 2 ? kStagingBlobs / 2 : kStagingBlobs;
+                const int64_t per = G == 2 ? staging_blobs_ / 2 : staging_blobs_;
                 uint8_t* stage = staging_ + (size_t) (grp * per) * lay.max_blob;
                 const unsigned long long* p_dst2 = (const unsigned long long*) (pl + dst2_off_);   // STRATA_ADAPT_FETCH
                 fetch_blobs(p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), (int) per, cs, p_dst2);
@@ -1545,6 +1559,14 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
         if (remote_opt_) remote_opt_->combine(bo_ + tb * N, y_dummy_ + tb * N, tb, n,
                               device_plan_ ? skip_ + grp : nullptr, ring, cs);
         stamp(l, 24, grp);
+        if (diagnostic_ && tb == 0) {
+            float* dest=diagnostic_+l*diagnostic_stride_;
+            cudaMemcpyAsync(dest,Rt(0),HC*N*4,cudaMemcpyDeviceToDevice,cs); dest+=HC*N;
+            cudaMemcpyAsync(dest,bo_,N*4,cudaMemcpyDeviceToDevice,cs); dest+=N;
+            cudaMemcpyAsync(dest,inj2_,HC*4,cudaMemcpyDeviceToDevice,cs); dest+=HC;
+            cudaMemcpyAsync(dest,parts_,K*N*4,cudaMemcpyDeviceToDevice,cs); dest+=K*N;
+            cudaMemcpyAsync(dest,ids_,K*4,cudaMemcpyDeviceToDevice,cs);
+        }
         if (l == g.n_layers - 1) {
             if (!fuse_head_gr) {
                 if (dec_batch && !g_no_multi_gr) gr_write_multi(Rt(tb), bo_ + tb * N, inj2_ + tb * HC, gs, Rt(tb), n, cs);
@@ -1857,6 +1879,11 @@ bool Verifier::capture_commit(std::string& err) {
                                                   (const float*) wikn->data, EPS, ib, s, st.max_cells,
                                                   rope_scaling(), cs_);
                 }
+                static const bool canonical = [] {
+                    const char* v=std::getenv("STRATA_SPEC_CANONICAL_STATE"); return v && std::atoi(v)!=0;
+                }();
+                if(canonical) qsa_commit_spare(st.idx_pooled,st.idx_dead,st.idx_block_pos,commit_,
+                                              (int)ID,(int)s.idx_block,(int)st.max_cells,cs_);
                 ++qsa_index;
             }
         }
@@ -2101,6 +2128,18 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     const cudaError_t se = cudaStreamSynchronize(cs_);
     trace_ev("SYNCED", -1, -1, (int64_t) se);
     if (se != cudaSuccess) { err = std::string("verify: ") + cudaGetErrorString(se); return false; }
+    if (diagnostic_ && !diagnostic_written_) {
+        std::vector<float> rows(g.n_layers*diagnostic_stride_);
+        if (cudaMemcpy(rows.data(),diagnostic_,rows.size()*4,cudaMemcpyDeviceToHost)!=cudaSuccess) {
+            err="verify: diagnostic copy failed"; return false;
+        }
+        std::FILE* f=std::fopen(diagnostic_path_.c_str(),"wb");
+        if (!f) { err="verify: cannot open diagnostic output"; return false; }
+        const bool written=std::fwrite(rows.data(),4,rows.size(),f)==rows.size();
+        const int closed=std::fclose(f);
+        if (!written || closed) { err="verify: diagnostic write failed"; return false; }
+        diagnostic_written_=true;
+    }
     if (ar_on() && h_plan_err_ != nullptr && *(volatile uint32_t*) h_plan_err_ != 0) {   // #871: refresh_ar saw the table whole
         *(volatile uint32_t*) h_plan_err_ = 0;
         err = "verify: the all-resident plan met an expert that is not in VRAM (the residency table changed during the window)";
@@ -2209,7 +2248,7 @@ void Verifier::set_plan_slot(int grp) {
     sink_.start2 = base + ptr_off + 4 * cap;
     sink_.dst2 = (unsigned long long*) (base + dst2_off_);
     const int G = last_batch_ ? 1 : (groups_[last_t_] > 0 ? groups_[last_t_] : 1);
-    const int64_t per = G == 2 ? kStagingBlobs / 2 : kStagingBlobs;
+    const int64_t per = G == 2 ? staging_blobs_ / 2 : staging_blobs_;
     sink_.staging = (unsigned long long) (staging_ + (size_t) (grp * per) * strata::kernels::cpu::expert_layout().max_blob);
     sink_.staging_cap = per;
 }

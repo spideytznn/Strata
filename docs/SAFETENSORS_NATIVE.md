@@ -1,4 +1,98 @@
-# Native safetensors backend: P0/P1
+# Native safetensors backend
+
+## Current runtime
+
+`strata --model <original HF directory>` now runs text inference directly from
+NVIDIA safetensors. `--safetensors` is an alias. The independent branch remains
+`codex/safetensors-native`, based on `d167eb89301a02e0d6299f49d35494ba5096bc10`.
+The original checkpoint and existing deployments are read-only inputs.
+
+The loader validates the fixed Qwen3.8-Flash-Next geometry and binds the existing
+Strata forward, scheduler, cache and prefill code. It preserves NVFP4 weight
+codes and scales, ordinary BF16 weights, FP8 ngram data and original FP8 MTP
+experts. There is no required GGUF, expert pack or converted MTP artifact.
+A 63.282 GiB owned expert arena is physically locked in system RAM, including
+copies of experts currently in VRAM. Failure to lock the whole arena aborts
+startup. A separate 337.5 MiB pinned staging arena bridges WDDM's smaller host
+registration budget. Model expert and MTP source reads are sealed after loading;
+only the segmented ngram table remains demand-read during inference. Source
+counters measure requested bytes, not physical SSD activity; physical locking
+prevents the owned expert arena from being paged out.
+
+Native CPU experts use FP32 activations and intermediates with the unchanged
+NVFP4 codes. The default GPU path uses the inherited FP32-activation reference
+kernels. `STRATA_NVFP4_TC=1`, `2`, or `3` selects the existing SM120 FP4 MMA path
+with one, two or three activation terms. These are explicit test choices until
+end-to-end measurements establish a quality and latency case for a default.
+The original GGUF/pack path retains its defaults.
+
+`--mtp native` loads this checkpoint's 29 BF16/F32 draft tensors and 512 FP8
+experts. The draft reuses Strata's attention, rollback, sampling and verification;
+the main model verifies every proposed token. Draft attention currently follows
+Strata's dense/window path; the saved MTP indexer weights are validated and kept
+but are not used for sparse draft selection. Multi-GPU, batching, pipeline >1,
+vision, cross-model drafts and MTP requantization are refused by this native path.
+The HF tokenizer and all added tokens are used directly. The supplied froggeric
+v22.5 template is retained in `config/native/froggeric-v22.5.jinja`.
+
+## Runtime evidence recorded so far
+
+These are correctness checks on the RTX 5090 / Ryzen 9950X3D / 96 GB machine,
+not a completed throughput comparison. Raw summaries are under
+`bench/results/2026-10-10-safetensors-runtime/`.
+
+- All 1,079 dense bindings, 4,947,698,560 values, were compared with the same
+  checkpoint's fidelity GGUF and exact BF16 sidecar. Source bits and prescribed
+  layout/norm transformations match, except 11 `-exp(A_log)` values differing
+  by at most two FP32 ULPs between implementations.
+- Full forward first-token diagnostics: all 48 router top-10 ID lists match.
+  Layer 0 residual and expert output are bit-identical. Final 248,320 logits
+  have maximum absolute difference 0.00377691, RMS 0.00058715 and cosine
+  0.9999999425. Argmax and all 32 continuation tokens match. This does not claim
+  full-model bit equality or equivalence to an unquantized BF16 checkpoint.
+- A/B/A with conversation caching disabled versus enabled produces identical
+  tokens and byte-identical committed main-model state. Prefix reuse was
+  249 and 264 tokens for a 271-token continuation. Expert file reads remain zero.
+- Original MTP FP8 GPU kernels against a CPU FP64 oracle, real experts 0 and
+  511: relative L2 error 2.84e-7 over 10,240 outputs. CPU NVFP4 FP32 activation
+  tests give relative L2 below 3.5e-7 with AVX-512 and 1.4e-6 with the generic
+  fallback; one- and four-token grouping is bit-identical within each backend.
+- Fixed disk session save/restore for a main model with no loaded MTP draft.
+  GPU snapshot tests and CPU validation tests pass. An exhaustive 792-case
+  visible-output boundary test covers accepted drafts, output caps and EOS.
+
+The native MTP matrix now passes at draft depths 0, 1, 2 and 4: 68 completed
+requests cover English, Chinese, code, arithmetic, EOS, seeded sampling, caps
+1/2/3/7/9, A/B/A, disk restore and cancel/resume. Completed main-model states
+match bit-for-bit across draft depths, including the QSA spare row and block
+position; the deliberately interrupted request itself may end at different
+window boundaries and is excluded, but its resumed continuation must match.
+Raw logs and tokens are in `mtp-cache/`. CPU/GPU scheduling, adaptive swaps,
+actual 8192-token prefill, HTTP integration and repeated comparative timings
+are still being validated. No complete acceptance or performance claim is made
+until their raw results are recorded.
+
+## Build the runtime
+
+```powershell
+cd G:\Strata\Strata-Safetensors
+.\tools\build_safetensors_engine.ps1
+.\.venv-native\Scripts\python.exe tools\native_config.py `
+  --model D:\迅雷下载\Qwen3.8-flash-next-nvfp4 --output build-native-engine\native.json
+.\.venv-native\Scripts\python.exe -m serve.server --engine strata `
+  --config build-native-engine\native.json --host 127.0.0.1 --port 8097
+```
+
+The config generator refuses writes inside the model directory and refuses to
+overwrite an existing config. Its CUDA DLL paths refer to the installed toolkit;
+`--cuda-bin` overrides that location. The server uses a private port and its own
+child engine. Install the native Python requirements into this checkout's own
+virtual environment. Do not invoke the inherited installer to set up this path.
+
+## Historical P0/P1 record
+
+The remaining sections document the first committed adapter milestone. Their
+"not yet" statements apply to that milestone only; current runtime status is above.
 
 This independent checkout starts at fidelity commit
 `d167eb89301a02e0d6299f49d35494ba5096bc10`, on branch

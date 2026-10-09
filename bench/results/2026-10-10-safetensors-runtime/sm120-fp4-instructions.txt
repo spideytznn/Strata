@@ -1,0 +1,38 @@
+arch = sm_120a
+arch = sm_120a
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb1ELi3EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0d00*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R24, R28, R26, RZ, R40, R25, URZ ;   /* 0x7190281a1c18747f */
+        /*0d20*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R24, R28, R48, R24, R40, R45, URZ ;  /* 0x72d028301c18747f */
+        /*0d40*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R28, R46, R24, R40, R41, URZ ;  /* 0x7290282e1c1c747f */
+        /*13c0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R24, R48, R28, R51, R58, URZ ;  /* 0x73a03330181c747f */
+        /*1430*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R24, R46, R28, R51, R54, URZ ;  /* 0x7360332e181c747f */
+        /*14b0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R24, R48, R28, R51, R60, URZ ;  /* 0x73c03330181c747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb1ELi3EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb0ELi3EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0d60*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R32, R30, RZ, R49, R28, URZ ;   /* 0x71c0311e201c747f */
+        /*0d80*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R28, R32, R54, R28, R49, R52, URZ ;  /* 0x73403136201c747f */
+        /*0da0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R32, R32, R50, R28, R49, R48, URZ ;  /* 0x730031322020747f */
+        /*13f0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R32, R28, R56, R32, R54, R55, URZ ;  /* 0x737036381c20747f */
+        /*14b0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R32, R28, R56, R32, R54, R55, URZ ;  /* 0x737036381c20747f */
+        /*1570*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R32, R28, R56, R32, R54, R55, URZ ;  /* 0x737036381c20747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb0ELi3EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb1ELi2EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0c30*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R16, R20, R42, RZ, R34, R17, URZ ;   /* 0x7110222a1410747f */
+        /*0c50*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R20, R20, R40, R16, R34, R37, URZ ;  /* 0x725022281414747f */
+        /*1270*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R20, R16, R44, R20, R34, R49, URZ ;  /* 0x7310222c1014747f */
+        /*1350*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R20, R16, R44, R20, R34, R51, URZ ;  /* 0x7330222c1014747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb1ELi2EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb0ELi2EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0c90*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R20, R24, R22, RZ, R6, R21, URZ ;    /* 0x715006161814747f */
+        /*0cb0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R24, R24, R52, R20, R6, R51, URZ ;   /* 0x733006341818747f */
+        /*12d0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R24, R20, R54, R24, R6, R61, URZ ;   /* 0x73d006361418747f */
+        /*13d0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R24, R20, R54, R24, R6, R44, URZ ;   /* 0x72c006361418747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb0ELi2EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb1ELi1EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0b50*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R12, R12, R18, RZ, R5, R32, URZ ;    /* 0x720005120c0c747f */
+        /*1170*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R12, R16, R32, R12, R5, R30, URZ ;   /* 0x71e00520100c747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb1ELi1EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec097productILb0ELi1EEEvNS0_18NativeExpertLayoutEPKyPKiS7_S7_PKNS1_6QBlockEPfPKf
+        /*0b80*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R4, R4, R8, RZ, R11, R10, URZ ;      /* 0x70a00b080404747f */
+        /*11a0*/                   OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X R4, R8, R50, R4, R57, R56, URZ ;     /* 0x738039320804747f */
+		Function : _ZN6strata7kernels48_GLOBAL__N__e2a384cc_15_nvfp4_tensor_cu_9d8eec0913quantize_rowsILb0ELi1EEEvPKfPNS1_6QBlockEPKiS8_S8_iifPf

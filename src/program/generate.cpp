@@ -38,6 +38,8 @@
 #include "strata/kernels/cpu/pool.hpp"
 #include "strata/kernels/cpu/expert_layout.hpp"
 #include "strata/kernels/ngram.hpp"
+#include "strata/core/safetensors_model.hpp"
+#include "strata/core/spec_visible.hpp"
 #include "strata/kernels/iq_kernels.hpp"
 #include "strata/kernels/s2_expert_grouped.hpp"
 #include "strata/kernels/sampler.hpp"
@@ -371,6 +373,7 @@ struct Options {
     /// combination recorded in bench/results/2026-09-23-attention-ple plus the native indexer, and never the
     /// <=256-token attention adapter. It becomes the default once P0 shows it is not slower.
     std::string native_preset;
+    std::string safetensors;
     /// The token embedding from this GGUF instead of --native's (tools/embd_bf16_pack.py: BF16 as shipped)
     std::string embd_gguf;
     /// Plan v0.3 P2: how the n-gram table is read. Direct (default) = unbuffered SSD reads, table never in RAM.
@@ -663,6 +666,8 @@ void usage() {
                  "strata generate --pack DIR --tokens \"1,2,3\" [options]\n"
                  "\n"
                  "  --pack DIR           the pack directory (default pack/full)\n"
+                 "  --model DIR          original NVIDIA Qwen4 NVFP4 safetensors directory (alias --safetensors)\n"
+                 "                       all experts stay in locked RAM/VRAM; --mtp native uses this checkpoint\n"
                  "  --tokens LIST        the prompt as comma-separated token IDS (required)\n"
                  "  --tokens-file PATH   pretokenized prompt, commas or whitespace (alternative to --tokens)\n"
                  "  --gpu LIST           run on these GPUs, comma-separated nvidia-smi/PCI indices (default: every\n"
@@ -1655,7 +1660,7 @@ double pcie_frac_for_gbps(double gbps, double base) {
 
 }  // namespace
 
-int main(int argc, char** argv) {
+int strata_main(int argc, char** argv) {
     // **UNBUFFERED, BECAUSE THE INTERESTING OUTPUT IS THE OUTPUT BEFORE A CRASH.**  `stdout` redirected to a
     // pipe or a file is block-buffered, so a program that dies loses every line it had already printed - which
     // turns "it crashed at step 7" into "it crashed somewhere", and the difference is a debugging session.
@@ -1726,6 +1731,7 @@ int main(int argc, char** argv) {
         if (a == "--help" || a == "-h") { usage(); return 0; }
         else if (a == "--gpu") { (void) next("--gpu"); }   // applied at startup, before any CUDA call
         else if (a == "--pack") o.pack = next("--pack");
+        else if (a == "--safetensors" || a == "--model") o.safetensors = next("--model");
         else if (a == "--tokens") {
             if (have_tokens) { std::fprintf(stderr, "supply one token input only\n"); return 2; }
             std::string e;
@@ -2086,6 +2092,56 @@ int main(int argc, char** argv) {
             cudaSetDevice(0);               // mapping lands on the register itself, whose sliced-pin fallback
         }                                   // (#243 / STRATA_ARENA_PIN_GIB) can already take over.
     }
+    if (!o.safetensors.empty()) {
+        auto native_default = [](const char* key,const char* value) {
+            if (std::getenv(key)) return;
+#if defined(_WIN32)
+            _putenv_s(key,value);
+#else
+            setenv(key,value,0);
+#endif
+        };
+        native_default("STRATA_NVFP4_F32","1");
+        native_default("STRATA_NVFP4_TC","0");
+        native_default("STRATA_PREFILL_NVFP4","fp16");
+        native_default("STRATA_PREFILL_CPU_SHARE","0");
+        native_default("STRATA_PREFILL_BF16X2","1");
+        native_default("STRATA_SPEC_STOP_BOUNDARY","1");
+        native_default("STRATA_SPEC_CANONICAL_STATE","1");
+        // The reference path must have room for every miss in either verify group.
+        // Existing GGUF configurations keep their previous 16-slot default.
+        if (!std::getenv("STRATA_VERIFY_STAGING_BLOBS")) {
+#if defined(_WIN32)
+            _putenv_s("STRATA_VERIFY_STAGING_BLOBS", "128");
+#else
+            setenv("STRATA_VERIFY_STAGING_BLOBS", "128", 0);
+#endif
+        }
+        if (!o.native_preset.empty() || !o.native_dense_gguf.empty() || !o.native_head_gguf.empty() ||
+            !o.ple_gguf.empty() || !o.layer_split.empty() || o.vision || o.no_ple || o.keep_canonical ||
+            o.pipeline_windows > 1 || o.batch > 0) {
+            std::fprintf(stderr,"--safetensors requires the native single-GPU text path without GGUF overrides\n"); return 2;
+        }
+        o.stream_token = o.gr_native_mmvf = o.native_bf16 = o.native_bf16_extra = true;
+        o.native_moe_combine = o.native_gdn = o.native_router = o.native_qsa = o.native_qsa_indexer = true;
+        o.native_rope = o.native_ple_postops = true;
+        o.kv = "fp16"; o.gr_fp32_activations = true;
+        o.pack.clear();
+        if (!o.mtp.empty()) {
+            if (o.mtp != "native" || !o.mtp_q4.empty() || !o.mtp_draft_vocab.empty()) {
+                std::fprintf(stderr,"--safetensors MTP requires --mtp native with original precision and full vocabulary\n"); return 2;
+            }
+            o.mtp = o.safetensors;
+        }
+        o.mmap_experts = true; // reuse the resident ExpertSource and dispatch interface
+        o.resident_cpu_experts = true; // fully resident at load; reuse the adaptive scheduler
+        if (o.expert_profile.empty()) o.expert_profile = "@native-balanced";
+        if (o.pcie_frac < 0) o.pcie_frac = 1.0; // quality reference; measured alternatives stay explicit
+        if (!o.vram_reserve_given) o.vram_reserve_mib = 2048;
+        if (!o.adapt_given) o.adapt_every = 0;
+        if (o.spec < 2) o.spec = 2;
+        if (o.prefill_chunk <= 0) o.prefill_chunk = 256;
+    }
     if (o.serve && o.conversation_cache_mib > 0 && (o.prompt_cache == 0 || o.conversation_cache_slots == 0))
         std::fprintf(stderr, "strata serve: warning: conversation caching is disabled by %s\n",
                      o.prompt_cache == 0 ? "--prompt-cache 0" : "--conversation-cache-slots 0");
@@ -2198,7 +2254,7 @@ int main(int argc, char** argv) {
 #endif
     // the adaptive tier's faster settings were measured with every expert in RAM; with a RAM tier a swap can read
     // an expert from the drive (a 64 GB run: the tier's host time 1.4 -> 2.7 ms a round, the round no shorter)
-    if (o.resident_cpu_experts && !o.adapt_given) {
+    if (o.resident_cpu_experts && !o.adapt_given && o.safetensors.empty()) {
         o.adapt_every = 4;
         o.adapt_swaps = 96;
         o.adapt_decay = 0.7f;
@@ -2426,7 +2482,7 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: --native-ple-postops requires PLE enabled\n");
         return 2;
     }
-    if (!o.no_ple && o.ple_gguf.empty()) {
+    if (!o.no_ple && o.ple_gguf.empty() && o.safetensors.empty()) {
         std::fprintf(stderr, "strata generate: --ple-gguf is required; --no-ple explicitly enables a diagnostic ablation\n");
         return 2;
     }
@@ -2576,6 +2632,11 @@ int main(int argc, char** argv) {
     }
 
     std::string err;
+    std::unique_ptr<strata::core::SafetensorsModel> safetensors;
+    if (!o.safetensors.empty()) {
+        try { safetensors = std::make_unique<strata::core::SafetensorsModel>(o.safetensors); }
+        catch (const std::exception& e) { std::fprintf(stderr,"safetensors: %s\n",e.what()); return 1; }
+    }
     if (!o.native_head_gguf.empty() && !o.stream_token) {
         std::fprintf(stderr, "--native-head-gguf requires --stream-token\n");
         return 2;
@@ -2585,7 +2646,8 @@ int main(int argc, char** argv) {
     // come from the model file) and runs its experts in verify windows only (--spec).
     {
         const strata::core::ModelGeometry g0;
-        if (!strata::kernels::cpu::expert_layout_load(o.pack, g0.n_layers, g0.n_expert, err)) {
+        if (!(safetensors ? strata::kernels::cpu::expert_layout_nvfp4(err) :
+              strata::kernels::cpu::expert_layout_load(o.pack, g0.n_layers, g0.n_expert, err))) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
             return 1;
         }
@@ -2765,7 +2827,7 @@ int main(int argc, char** argv) {
     }
     strata::core::NativeEmbed native_embed;
     if (native_pack) {
-        if (o.native_preset.empty() || o.spec < 2 || o.keep_canonical ||
+        if ((!safetensors && o.native_preset.empty()) || o.spec < 2 || o.keep_canonical ||
             (o.prefill_chunk <= 0 && o.tokens.size() > 1)) {
             std::fprintf(stderr, "strata generate: %s is a native (IQ) pack: it needs --native SHARD1, --spec T (T >= 2) "
                                  "and --prefill CHUNK\n", o.pack.c_str());
@@ -2773,8 +2835,9 @@ int main(int argc, char** argv) {
         }
         const strata::core::ModelGeometry g0;
         const auto embed_t0 = std::chrono::steady_clock::now();
-        if (!native_embed.load(o.embd_gguf.empty() ? o.native_shards : std::vector<std::string>{o.embd_gguf}, g0.n_embd,
-                               248320, err)) {
+        if (!(safetensors ? safetensors->load_embed(native_embed,err) :
+              native_embed.load(o.embd_gguf.empty() ? o.native_shards : std::vector<std::string>{o.embd_gguf}, g0.n_embd,
+                               248320, err))) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
             return 1;
         }
@@ -2798,7 +2861,7 @@ int main(int argc, char** argv) {
         // the PLE module validates its canonical key at construction (8 MB); a native pack has none to load
         if (!native_pack) skip.erase("blk.1.ple_key.weight");
         // #326: a --compat-bf16 pack (OrcaRouter IQ3_XXS) keeps its BF16 key in the arena
-        if (native_pack && !strata::core::NativeDense::keep_unquantized_ple_key(o.pack, skip, err)) {
+        if (native_pack && !safetensors && !strata::core::NativeDense::keep_unquantized_ple_key(o.pack, skip, err)) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
             return 1;
         }
@@ -2851,7 +2914,8 @@ int main(int argc, char** argv) {
                      (long long) split_at[0] - 1);
     }
     uint64_t pool_bytes = 0;
-    if (!strata::core::WeightTable::pool_bytes(o.pack, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
+    if (safetensors) pool_bytes = safetensors->dense_bytes();
+    if (!safetensors && !strata::core::WeightTable::pool_bytes(o.pack, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
         std::fprintf(stderr, "strata generate: %s\n", err.c_str());
         return 1;
     }
@@ -2894,7 +2958,8 @@ int main(int argc, char** argv) {
         return s;
     };
     strata::core::WeightTable wt;
-    if (!wt.load(o.pack, arena, pool_bytes, err, skip.empty() ? nullptr : &skip)) {
+    if (!(safetensors ? safetensors->load_dense(wt,arena,pool_bytes,err) :
+          wt.load(o.pack, arena, pool_bytes, err, skip.empty() ? nullptr : &skip))) {
         std::fprintf(stderr, "strata generate: %s\n", err.c_str());
         return 1;
     }
@@ -3143,7 +3208,7 @@ int main(int argc, char** argv) {
     std::vector<float> ple_emb_host((size_t) strata::kernels::NG_N_EMBD);
     float* ple_emb_dev = nullptr;
     float* ple_scratch = nullptr;
-    if (!o.ple_gguf.empty()) {
+    if (!o.ple_gguf.empty() || safetensors) {
         strata::kernels::PleIoOptions pio;
         pio.mode = o.ple_io == "mmap" || o.ple_io == "ram" ? strata::kernels::PleIo::Mmap : strata::kernels::PleIo::Direct;
         pio.lock = o.ple_io == "ram";
@@ -3162,7 +3227,7 @@ int main(int argc, char** argv) {
             pio.keepalive_window_s = kw != nullptr && *kw ? std::clamp(std::atof(kw), 1.0, 86400.0) : 60.0;
             if (pio.mode != strata::kernels::PleIo::Direct || !pio.io_thread) pio.keepalive_ms = 0;
         }
-        if (!ple_table.open(o.ple_gguf, err, pio)) {
+        if (!(safetensors ? safetensors->open_ple(ple_table,pio,err) : ple_table.open(o.ple_gguf, err, pio))) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
             return 1;
         }
@@ -3239,7 +3304,7 @@ int main(int argc, char** argv) {
         }
         ss.ple.w.conv1d_bf16 = bf16_conv;
         ss.ple.w.conv1d_f16 = (const uint16_t*) wc->data;
-        ss.ple.consts = strata::kernels::ple_artifact_consts();
+        ss.ple.consts = safetensors ? safetensors->ple_constants() : strata::kernels::ple_artifact_consts();
         if (o.ple_delay_us > 0) ple_table.set_injected_delay_us(o.ple_delay_us);
         ss.ple.table = &ple_table;
         ss.ple.token = &ss.ple_token;
@@ -3436,7 +3501,10 @@ int main(int argc, char** argv) {
     std::vector<std::pair<int32_t, int32_t>> profile;
     if (!o.expert_profile.empty()) {
         int64_t pslots = 0;
-        if (!strata::core::read_expert_profile(o.expert_profile, g.n_layers, g.n_expert, profile, pslots, err)) {
+        if (safetensors && o.expert_profile == "@native-balanced") {
+            for (int e=0;e<g.n_expert;++e) for (int l=0;l<g.n_layers;++l) profile.emplace_back(l,e);
+            pslots = profile.size();
+        } else if (!strata::core::read_expert_profile(o.expert_profile, g.n_layers, g.n_expert, profile, pslots, err)) {
             std::fprintf(stderr, "strata generate: %s\n", err.c_str());
             return 1;
         }
@@ -4291,7 +4359,7 @@ int main(int argc, char** argv) {
         // the next window's drafts), and the round/step graphs carry the forcing kernel
         const int mtp_t = o.pipeline_windows >= 2 ? strata::kernels::kVerifyMaxT : o.spec;
         if (o.pipeline_windows >= 2) mtp.set_force_capture(true);
-        if (!o.mtp.empty() && !mtp.load(o.mtp, draft_geometry, last_st ? last_st->ss : ss, mtp_t, err, o.mtp_window)) { std::fprintf(stderr, "strata generate: %s%s\n", err.c_str(), vram_free_note().c_str()); return 1; }
+        if (!o.mtp.empty() && !mtp.load(o.mtp, draft_geometry, last_st ? last_st->ss : ss, mtp_t, err, o.mtp_window, nullptr, safetensors ? &safetensors->source() : nullptr)) { std::fprintf(stderr, "strata generate: %s%s\n", err.c_str(), vram_free_note().c_str()); return 1; }
         mtp.set_ple_session(&ss);
         if (batch_mtp) {
             for (int b = 0; b < o.batch; ++b) {
@@ -4317,9 +4385,9 @@ int main(int argc, char** argv) {
     if (wo == nullptr) { std::fprintf(stderr, "strata generate: output.weight is missing\n"); return 1; }
     const int64_t n_vocab = wo->ne1;
     strata::core::NativeHead native_head;
-    if (!o.native_head_gguf.empty() && !multi_gpu) {   // a layer split's head is on its last stage
+    if ((!o.native_head_gguf.empty() || safetensors) && !multi_gpu) {   // a layer split's head is on its last stage
         const auto head_t0 = std::chrono::steady_clock::now();
-        if (!native_head.load(o.native_head_shards, g.n_embd, n_vocab, err)) {
+        if (!(safetensors ? safetensors->load_head(native_head,err) : native_head.load(o.native_head_shards, g.n_embd, n_vocab, err))) {
             std::fprintf(stderr, "strata generate: %s%s\n", err.c_str(), vram_free_note().c_str());
             return 1;
         }
@@ -4369,7 +4437,11 @@ int main(int argc, char** argv) {
     // note in `pinned.cu`.
     strata::core::FileExpertSource src;
     strata::core::ExpertSource* srcp = nullptr;
-    if (o.mmap_experts) {
+    if (safetensors) {
+        if (!safetensors->load_experts(src,err)) { std::fprintf(stderr,"safetensors: %s\n",err.c_str()); return 1; }
+        srcp = &src;
+        std::fprintf(stderr,"safetensors: all expert weights in locked RAM; expert source reads sealed\n");
+    } else if (o.mmap_experts) {
         // FileExpertSource maps the pack's experts.bin: a canonical pack has it; a native (IQ) pack has it when
         // built with `tools/iq_pack.py --experts-bin` (the per-layer blob sizes of its layout, PR #121).  The low-RAM
         // mode: the experts come from the file through the OS cache instead of a pinned copy in RAM, for a PC whose
@@ -6402,7 +6474,7 @@ int main(int argc, char** argv) {
                 for (int64_t e = 0; e < g.n_expert; ++e)
                     if (st->cache.slot_of(l, e) >= 0) stage_pairs.emplace_back((int32_t) l, (int32_t) e);
         const std::vector<std::pair<int32_t, int32_t>>& rank_all = profile_all.empty() ? profile : profile_all;
-        bool resident_ok = src.pin_cache_complement(xcache, err, o.resident_pin, stage_pairs, lend_from,
+        bool resident_ok = safetensors || src.pin_cache_complement(xcache, err, o.resident_pin, stage_pairs, lend_from,
                                                     o.resident_headroom, o.resident_budget, &rank_all);
         std::string whole_err;
         if (!resident_ok && o.resident_soft) {
@@ -7287,6 +7359,7 @@ int main(int argc, char** argv) {
         std::optional<uint64_t> model_fp, config_fp;
         auto session_identity = [&](strata::core::SessionFileIdentity& id, std::string& e,
                                     const std::function<void()>& next_file) -> bool {
+            if (!model_fp && safetensors) model_fp = safetensors->session_identity();
             if (!model_fp) {
                 // what the loaders actually resolved: the CLI inputs, the pack's files and - from the expert source
                 // itself - every file its experts were read from (native_experts.txt can name GGUFs per layer/role)
@@ -7348,6 +7421,20 @@ int main(int argc, char** argv) {
                     {"keep_canonical", o.keep_canonical}, {"no_fused_gr", o.no_fused_gr},
                     {"no_fast_attn", o.no_fast_attn}, {"no_fused_gdn", o.no_fused_gdn},
                     {"no_fast_select", o.no_fast_select}, {"vision", o.vision}};
+                if (safetensors) {
+                    // A native snapshot must not silently cross activation precision
+                    // or adapter revisions. Hash strings (including explicit zero)
+                    // deterministically; leave the legacy identity contract unchanged.
+                    c.switches.emplace_back("safetensors_adapter",1);
+                    for (const char* name : {"STRATA_NVFP4_F32","STRATA_NVFP4_TC","STRATA_PREFILL_NVFP4",
+                                             "STRATA_PREFILL_BF16X2","STRATA_SPEC_STOP_BOUNDARY",
+                                             "STRATA_SPEC_CANONICAL_STATE"}) {
+                        uint64_t hash=1469598103934665603ull;
+                        if(const char* value=std::getenv(name))
+                            for(const unsigned char* p=(const unsigned char*)value;*p;++p) hash=(hash^*p)*1099511628211ull;
+                        c.switches.emplace_back(name,static_cast<int64_t>(hash));
+                    }
+                }
                 config_fp = strata::core::session_config_fingerprint(c);
             }
             id.model = *model_fp;
@@ -9373,7 +9460,7 @@ int main(int argc, char** argv) {
                             sl.state_bytes = state;
                             sl.tokens = live.size();
                             sl.images = live_imgs.size();
-                            sl.kv_layers = (uint64_t) std::max<int64_t>(ss.qsa_alloc, 0) + 1;
+                            sl.kv_layers = (uint64_t) std::max<int64_t>(ss.qsa_alloc, 0) + (use_mtp ? 1 : 0);
                         }
                         const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
                         auto admit = [&](uint64_t need, std::string& why) {
@@ -9398,7 +9485,7 @@ int main(int argc, char** argv) {
                         std::vector<strata::core::SessionKvSource> sources;
                         // the live running state comes off the device in one synchronous copy
                         blocking("capture", sl.state_bytes == UINT64_MAX ? 0 : sl.state_bytes);
-                        if (!strata::core::conversation_snapshot_sources(meta, sources, view, ss, g, mtp.kv_state(),
+                        if (!strata::core::conversation_snapshot_sources(meta, sources, view, ss, g, use_mtp ? &mtp.kv_state() : nullptr,
                                                                          err)) {
                             refuse(err, strata::core::SessionError::io);
                             continue;
@@ -9443,7 +9530,7 @@ int main(int argc, char** argv) {
                             return false;
                         };
                         if (!strata::core::conversation_session_read_limits(
-                                limits, ss, g, mtp.kv_state(), (uint64_t) o.max_context,
+                                limits, ss, g, use_mtp ? &mtp.kv_state() : nullptr, (uint64_t) o.max_context,
                                 (uint64_t) std::max(o.prompt_cache, 1), err)) {
                             refuse(err, strata::core::SessionError::io);
                             continue;
@@ -9460,7 +9547,11 @@ int main(int argc, char** argv) {
                     const double read_ms = ms();
                     // the whole image against this engine, still without any device write
                     blocking("validate", bytes);
-                    if (!strata::core::conversation_snapshot_validate(image, ss, g, mtp.kv_state(), err)) {
+                    if (!image.stage_images.empty()) {
+                        refuse("a layer split session cannot restore as a single session");
+                        continue;
+                    }
+                    if (!strata::core::conversation_snapshot_validate(image, ss, g, use_mtp ? &mtp.kv_state() : nullptr, err)) {
                         refuse(err);
                         continue;
                     }
@@ -9473,7 +9564,7 @@ int main(int argc, char** argv) {
                     live_ok = false;
                     // host -> device in synchronous copies of the whole state: one bounded allowance
                     blocking("transfer", bytes);
-                    if (strata::core::conversation_snapshot_restore(image, ss, g, mtp.kv_state(), err) !=
+                    if (strata::core::conversation_snapshot_restore(image, ss, g, use_mtp ? &mtp.kv_state() : nullptr, err) !=
                         strata::core::ConversationRestore::restored) {
                         // validated above: a failure here is a transfer failure, after device writes began - never
                         // decode from a partial state; the server starts the engine again
@@ -11316,12 +11407,7 @@ int main(int argc, char** argv) {
                     const char* v = std::getenv("STRATA_SPEC_STOP_BOUNDARY"); return v && std::atoi(v) != 0;
                 }();
                 if (stop_boundary) {
-                    a = std::min<int64_t>(a, max_new - produced_n - 1);
-                    for (int i = 0; i < a; ++i)
-                        if (std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) outv[(size_t) i]) != o.eos_ids.end()) {
-                            a = i;
-                            break;
-                        }
+                    a = strata::core::visible_accepted(a,outv.data(),max_new-produced_n,o.eos_ids,true);
                 }
                 if (!ver.commit(a + 1, err)) {
                     if (adapt_thr.joinable()) adapt_thr.join();
@@ -11479,7 +11565,7 @@ int main(int argc, char** argv) {
                 // pooled= keeps its 0.1.29 meaning: the completed rows [0, L / idx_block) only.  pooled_full= adds the
                 // spare row at L / idx_block (the `dead` key the next block completion overwrites), which a
                 // conversation restore writes back; dead= is the spare key itself
-                uint64_t h_dead = h_tail, h_pool_full = h_tail;
+                uint64_t h_dead = h_tail, h_pool_full = h_tail, h_block_pos = h_tail;
                 const int64_t kvb = qs.head_dim, scb = (qs.head_dim / 64) * 2;
                 // a state's K/V arrays and their bytes per (cell, head) row: the host copy when it has one
                 auto kv_arrays = [&](const strata::core::QsaState& st) {
@@ -11507,6 +11593,7 @@ int main(int argc, char** argv) {
                     const strata::core::QsaState& st = ss.qsa_states[ss.qsa_ord0 + j];
                     h_tail = hash_dev(st.idx_tail, z.tail, h_tail);
                     h_dead = hash_dev(st.idx_dead, z.dead, h_dead);
+                    h_block_pos = hash_dev(st.idx_block_pos, sizeof(int32_t), h_block_pos);
                     h_pool = hash_dev(st.idx_pooled, (size_t) (L / qs.idx_block) * qs.idx_dim * 4, h_pool);
                     h_pool_full = hash_dev(st.idx_pooled, (size_t) (L > 0 ? L / qs.idx_block + 1 : 0) * qs.idx_dim * 4,
                                            h_pool_full);
@@ -11528,11 +11615,11 @@ int main(int argc, char** argv) {
                     return 1;
                 }
                 std::fprintf(stderr, "strata serve: STATE_HASH L=%lld gdn=%016llx ple=%016llx tail=%016llx pooled=%016llx "
-                                     "kv=%016llx mtp=%016llx stale=%016llx dead=%016llx pooled_full=%016llx ple_prev=%d,%d\n", (long long) L,
+                                     "kv=%016llx mtp=%016llx stale=%016llx dead=%016llx pooled_full=%016llx block_pos=%016llx ple_prev=%d,%d\n", (long long) L,
                              (unsigned long long) h_gdn, (unsigned long long) h_ple, (unsigned long long) h_tail,
                              (unsigned long long) h_pool, (unsigned long long) h_kv, (unsigned long long) h_mtp,
                              (unsigned long long) h_stale, (unsigned long long) h_dead,
-                             (unsigned long long) h_pool_full, ss.ple_prev[0], ss.ple_prev[1]);
+                             (unsigned long long) h_pool_full, (unsigned long long) h_block_pos, ss.ple_prev[0], ss.ple_prev[1]);
             }
             const int64_t req_hits = drive.d.cache_hits - decode_hits0;
             const int64_t req_look = (drive.d.cache_hits + drive.d.cache_admitted + drive.d.cache_refused) - decode_look0;
@@ -12563,6 +12650,8 @@ int main(int argc, char** argv) {
             }
             // plan v0.3 P6: the adaptive tier's host work (ranking, copy submission) runs on its own thread while the
             // GPU commits and drafts; it touches only the residency tables, which nothing reads until the next window
+            if (const char* boundary=std::getenv("STRATA_SPEC_STOP_BOUNDARY"); boundary && std::atoi(boundary)!=0)
+                a = strata::core::visible_accepted(a,outv.data(),max_new-static_cast<int64_t>(produced.size()),o.eos_ids,o.stop_eos);
             std::thread adapt_thr;
             bool adapt_ok = true;
             if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0)
@@ -12928,3 +13017,19 @@ int main(int argc, char** argv) {
     cudaFree(arena);
     return 0;
 }
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) {
+    std::vector<std::string> args;
+    std::vector<char*> pointers;
+    args.reserve(argc); pointers.reserve(argc);
+    for (int i=0;i<argc;++i) {
+        const auto u8=std::filesystem::path(argv[i]).u8string();
+        args.emplace_back(u8.begin(),u8.end());
+    }
+    for (auto& a:args) pointers.push_back(a.data());
+    return strata_main(argc,pointers.data());
+}
+#else
+int main(int argc,char** argv) { return strata_main(argc,argv); }
+#endif

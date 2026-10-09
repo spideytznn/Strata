@@ -1225,6 +1225,11 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
               std::to_string(o.failed_bytes >> 20) + " MiB)";
         return false;
     }
+    if (std::getenv("STRATA_PREFILL_TRACE")) {
+        size_t free_b=0,total_b=0; cudaMemGetInfo(&free_b,&total_b);
+        std::fprintf(stderr,"strata prefill allocation: requested=%lld effective=%lld capacity=%lld workspace_bytes=%llu free_vram_bytes=%llu\n",
+                     (long long)chunk,(long long)m.T,(long long)m.T_max,(unsigned long long)o.used,(unsigned long long)free_b);
+    }
     return true;
 }
 
@@ -4269,6 +4274,9 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
                      (long long) kv_prefetches);
     }
     stats_.ms_total += ms_since(t_start);
+    if (std::getenv("STRATA_PREFILL_TRACE"))
+        std::fprintf(stderr,"strata prefill executed: tokens=%lld max_chunk=%lld capacity=%lld start=%lld\n",
+                     (long long)n,(long long)std::min(m.T,n),(long long)m.T_max,(long long)pos0);
     if (pt.on) {
         pt.fold();
         double total = 0.0;

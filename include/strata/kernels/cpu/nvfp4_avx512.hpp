@@ -13,6 +13,10 @@ namespace strata::kernels::cpu {
 
 /// Whether rows of `n` values fit the kernels (whole 64-value blocks, at most 64 of them).
 bool nvfp4_512_fits(int n);
+void nvfp4_512_f32_gu_rows(const uint8_t*, size_t, size_t, int, const void* const*, int,
+                          float* const*, int, int, float, float);
+void nvfp4_512_f32_rows(const uint8_t*, size_t, int, const void* const*, int,
+                       float* const*, int, int, float);
 
 /// Gate/up rows [r0, r1) of an NVFP4 expert blob for `nt` tokens: ff[t][r] = silu(s_gate * g) * (s_up * u), where g
 /// and u are the raw NVFP4 dot products of gate row r and up row r (at `up_off`) with activation t (Q8_0, `n` values).

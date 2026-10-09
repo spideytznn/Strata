@@ -234,6 +234,23 @@ void full_session(int fmt, int mode, int experts) {
         check(stage.kv.size()==a.kv.size()-1 && equal(stage.kv[0],a.kv[0]) && stage.live.gdn==a.live.gdn,
               "a stage image holds the session's own layers, no draft");
         check(stage.bytes()<a.bytes(),"a stage image is smaller by the draft ring");
+        SavedConversation disk_meta;
+        std::vector<SessionKvSource> disk_sources;
+        check(conversation_snapshot_sources(disk_meta,disk_sources,view,ss,g,nullptr,err),
+              "disk save without an MTP draft");
+        check(disk_sources.size()==stage.kv.size(),"disk save excludes an unloaded draft");
+        for (size_t j=0;j<disk_sources.size();++j) {
+            std::vector<uint8_t> bytes(disk_sources[j].sizes[0]);
+            check(disk_sources[j].read(0,0,bytes.data(),bytes.size()),"read draft-free disk K source");
+            check(stage.kv[j].k.visit(0,bytes.size(),[&](const uint8_t* p,size_t n,size_t at) {
+                return std::memcmp(p,bytes.data()+at,n)==0;
+            }),"draft-free disk K equals captured K");
+        }
+        SessionReadLimits disk_limits;
+        check(conversation_session_read_limits(disk_limits,ss,g,nullptr,65,4,err) &&
+              disk_limits.max_kv_layers==stage.kv.size() && disk_limits.max_kv_bytes.size()==stage.kv.size(),
+              "disk restore bounds omit an unloaded draft");
+
         check(conversation_snapshot_validate(stage,ss,g,nullptr,err),"validate a stage image without a draft");
         check(!conversation_snapshot_validate(stage,ss,g,draft.state,err),"a stage image is refused where a draft is expected");
         check(!conversation_snapshot_validate(a,ss,g,nullptr,err),"an image with a draft is refused where none is expected");

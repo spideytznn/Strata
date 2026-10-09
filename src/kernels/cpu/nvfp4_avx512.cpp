@@ -183,4 +183,41 @@ void nvfp4_512_rows(const uint8_t* w, size_t row_bytes, int n, const void* const
     });
 }
 
+namespace {
+// Same original blocks, with unquantized activations. Decode each weight tile
+// once for all tokens; each token retains an independent FP32 accumulator.
+void f32_dot(const uint8_t* row,int n,const void* const* acts,int nt,float* out) {
+    const __m512 lut=_mm512_setr_ps(0,.5f,1,1.5f,2,3,4,6,-0.f,-.5f,-1,-1.5f,-2,-3,-4,-6);
+    __m512 acc[8];
+    for(int t=0;t<nt;++t) acc[t]=_mm512_setzero_ps();
+    const auto* w=reinterpret_cast<const block_nvfp4*>(row);
+    for(int b=0;b<n/64;++b) {
+        alignas(64) uint8_t codes[64];
+        _mm512_store_si512(codes,codes64(w[b].qs));
+        for(int sub=0;sub<4;++sub) {
+            const __m512i idx=_mm512_cvtepu8_epi32(_mm_load_si128(reinterpret_cast<const __m128i*>(codes+16*sub)));
+            const __m512 v=_mm512_mul_ps(_mm512_permutexvar_ps(idx,lut),_mm512_set1_ps(kUe4m3.v[w[b].d[sub]]*2.f));
+            for(int t=0;t<nt;++t)
+                acc[t]=_mm512_fmadd_ps(v,_mm512_loadu_ps(static_cast<const float*>(acts[t])+b*64+sub*16),acc[t]);
+        }
+    }
+    for(int t=0;t<nt;++t) out[t]=_mm512_reduce_add_ps(acc[t]);
+}
+}
+void nvfp4_512_f32_gu_rows(const uint8_t* blob,size_t stride,size_t up,int n,const void* const* acts,int nt,
+                          float* const* ff,int r0,int r1,float sg,float su) {
+    float g[8],u[8];
+    for(int r=r0;r<r1;++r) {
+        f32_dot(blob+r*stride,n,acts,nt,g); f32_dot(blob+up+r*stride,n,acts,nt,u);
+        for(int t=0;t<nt;++t) { const float v=g[t]*sg; ff[t][r]=(v/(1.f+std::exp(-v)))*(u[t]*su); }
+    }
+}
+void nvfp4_512_f32_rows(const uint8_t* w,size_t stride,int n,const void* const* acts,int nt,
+                       float* const* out,int r0,int r1,float scale) {
+    float y[8];
+    for(int r=r0;r<r1;++r) {
+        f32_dot(w+r*stride,n,acts,nt,y);
+        for(int t=0;t<nt;++t) out[t][r]=y[t]*scale;
+    }
+}
 }  // namespace strata::kernels::cpu

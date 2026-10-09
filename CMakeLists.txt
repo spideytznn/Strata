@@ -9,6 +9,16 @@
 # and is wrong about its own performance, which is the worst of both outcomes.
 cmake_minimum_required(VERSION 3.24)
 project(strata VERSION 0.1.41 LANGUAGES CXX)
+if(MSVC AND CMAKE_CXX_CL_SHOWINCLUDES_PREFIX MATCHES "娉ㄦ剰")
+  set(CMAKE_CL_SHOWINCLUDES_PREFIX "注意: 包含文件: ")
+endif()
+add_library(strata_safetensors STATIC src/weights/safetensors.cpp src/weights/nvfp4.cpp
+  src/weights/qwen4.cpp src/weights/dense.cpp)
+target_include_directories(strata_safetensors PUBLIC include PRIVATE third_party)
+target_compile_features(strata_safetensors PUBLIC cxx_std_20)
+if(MSVC)
+  target_compile_options(strata_safetensors PRIVATE /utf-8)
+endif()
 # EXPERIMENTAL: the Intel Arc engine, the SYCL port in sycl/ (PR #423; icpx + oneMKL, docs/INTEL_ARC.md). It is its
 # own project that takes the unported sources from src/; with this on, nothing below is configured.
 option(STRATA_ENABLE_SYCL "EXPERIMENTAL: build the Intel Arc (SYCL) engine from sycl/ - docs/INTEL_ARC.md" OFF)
@@ -349,6 +359,7 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
                           src/kernels/cuda/qsa_select.cu
                           src/kernels/cuda/verify_kernels.cu
                           src/kernels/cuda/iq_kernels.cu
+                          src/kernels/cuda/mtp_fp8.cu
                           src/kernels/ngram.cpp
                           src/ngram/ple_reader.cpp
                           src/platform/direct_file.cpp)
@@ -455,11 +466,11 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
   # about arithmetic, and this one knows the ORDER the arithmetic happens in.
   add_library(strata_engine STATIC src/core/layer.cpp src/core/session.cpp src/core/expert_source.cpp src/core/remote_experts.cpp
     src/core/remote_expert_opt.cu
-    src/core/expert_cache.cpp src/core/native_head.cpp src/core/native_dense.cpp src/core/verify.cpp src/core/mtp.cpp
+    src/core/expert_cache.cpp src/core/native_head.cpp src/core/native_dense.cpp src/core/verify.cpp src/core/mtp.cpp src/core/safetensors_mtp.cpp
     src/core/conversation_snapshot.cpp src/core/conversation_state.cpp src/core/conversation_memory.cpp src/core/peer_experts.cpp
-    src/core/arch_defaults.cpp src/core/vmm.cpp src/core/conversation_file.cpp)
+    src/core/arch_defaults.cpp src/core/vmm.cpp src/core/conversation_file.cpp src/core/safetensors_model.cpp)
   target_include_directories(strata_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(strata_engine PUBLIC strata_core strata_kernels strata_kernels_cpu ${_strata_gpu_runtime_target})
+  target_link_libraries(strata_engine PUBLIC strata_core strata_kernels strata_kernels_cpu strata_safetensors ${_strata_gpu_runtime_target})
   if(STRATA_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/core/exchange_storage_test.cpp")
     add_executable(exchange_storage_test tests/core/exchange_storage_test.cpp)
     target_include_directories(exchange_storage_test PRIVATE include)
@@ -1454,10 +1465,17 @@ if(STRATA_NATIVE_EXPERTS)
   endif()
   # the NVFP4 AVX-512 and AVX2 rows vs ggml-cpu's vec_dot, and their speed (CPU only; optional arg: a pack's experts.bin)
   add_executable(nvfp4_avx512_parity src/kernels/cpu/nvfp4_avx512_parity.cpp)
+  add_executable(nvfp4_cpu_f32_test src/weights/nvfp4_cpu_f32_test.cpp)
+  target_link_libraries(nvfp4_cpu_f32_test PRIVATE strata_kernels_cpu)
   target_link_libraries(nvfp4_avx512_parity PRIVATE strata_kernels_cpu)
   add_test(NAME nvfp4_cpu_parity COMMAND nvfp4_avx512_parity)   # random blocks; the AVX2 rows bit-equal to ggml's
   set_tests_properties(nvfp4_cpu_parity PROPERTIES TIMEOUT 120)
   if(STRATA_ENABLE_CUDA)   # the NVFP4 decode kernels vs ggml's reference
+    add_executable(qsa_commit_spare_test src/weights/qsa_commit_spare_test.cpp)
+    target_link_libraries(qsa_commit_spare_test PRIVATE strata_kernels CUDA::cudart)
+    add_test(NAME qsa_commit_spare_test COMMAND qsa_commit_spare_test)
+    add_executable(mtp_fp8_test src/weights/mtp_fp8_test.cpp)
+    target_link_libraries(mtp_fp8_test PRIVATE strata_kernels strata_safetensors CUDA::cudart)
     if(STRATA_NVFP4_TC)
         add_executable(nvfp4_tensor_test src/kernels/nvfp4_tensor_test.cpp)
         target_link_libraries(nvfp4_tensor_test PRIVATE strata_kernels ggml-base CUDA::cudart)
@@ -1632,4 +1650,10 @@ if(STRATA_ENABLE_CUDA AND NOT STRATA_HIP_GFX906 AND STRATA_BUILD_TESTS)
   add_executable(fidelity_projection_test src/kernels/fidelity_projection_test.cpp)
   target_link_libraries(fidelity_projection_test PRIVATE strata_prefill strata_kernels CUDA::cudart)
   add_test(NAME fidelity_projection_test COMMAND fidelity_projection_test)
+endif()
+
+# ggml enables C after the root project's CXX probe; it can restore the broken
+# localized prefix. Set it after all subdirectories so Ninja tracks headers.
+if(MSVC AND CMAKE_CXX_CL_SHOWINCLUDES_PREFIX MATCHES "娉ㄦ剰")
+  set(CMAKE_CL_SHOWINCLUDES_PREFIX "注意: 包含文件: ")
 endif()

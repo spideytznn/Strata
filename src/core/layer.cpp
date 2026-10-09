@@ -52,7 +52,12 @@ uint64_t q8k_bytes(int64_t n) { return (uint64_t) (n / Q8K_ELEMS_PER_BLOCK) * Q8
 /// `s_gemv_q8k` takes the canonical-form attributes; a `WeightRef` carries them, and a tensor that is NOT
 /// quantized has none.  Returns false and names the tensor rather than building a form out of zeroes - which
 /// would decode every code as `0 + bias` and produce a perfectly finite wrong answer.
-bool sform_of(const WeightRef& r, strata::kernels::SForm& f, const std::string& name, std::string& err) {    if (!r.quantized()) {        err = name + " is not a quantized tensor, so it has no S-form";        return false;    }    f.code_bits = r.code_bits;    f.code_bias = r.code_bias;    f.group_elems = r.group_elems;    f.codebook = r.codebook_iq4nl ? strata::kernels::Codebook::Iq4Nl : strata::kernels::Codebook::Affine;    f.has_offset = r.has_offset;    f.act_kind = r.act_kind;
+bool sform_of(const WeightRef& r, strata::kernels::SForm& f, const std::string& name, std::string& err) {
+    if (r.native_data && !r.quantized()) { f = {}; return true; } // native BF16 has no canonical planes
+    if (!r.quantized()) { err = name + " is not a quantized tensor, so it has no S-form"; return false; }
+    f.code_bits = r.code_bits; f.code_bias = r.code_bias; f.group_elems = r.group_elems;
+    f.codebook = r.codebook_iq4nl ? strata::kernels::Codebook::Iq4Nl : strata::kernels::Codebook::Affine;
+    f.has_offset = r.has_offset; f.act_kind = r.act_kind;
 // carried, not derived - see the note on `SForm::act_kind`
 return true;}
 /// The three canonical planes of a quantized tensor, located INSIDE the loaded region.
@@ -82,6 +87,7 @@ struct Planes {    const uint8_t* codes = nullptr;    const float* scales = null
 ///< null when the form has none
 };
 bool plane_ptrs(const WeightRef& r, const std::string& name, Planes& out, std::string& err) {
+    if (r.native_data && !r.quantized()) { out = {}; return true; }
 // S2, S4 AND S8 ALL SPLIT THE SAME WAY.  The plane LOCATION does not depend on the code width - the three
 // sizes come from the index and are checked against the tensor below - so the guard is here to catch a
 // tensor that is not quantized at all, not to pick a decoder.  WHICH KERNEL reads the planes is the

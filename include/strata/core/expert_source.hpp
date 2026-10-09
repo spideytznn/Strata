@@ -170,6 +170,11 @@ public:
     /// checked with `pinned`).  The arena answers per layer through its expert 0; the resident RAM mode's compact
     /// copy has no expert 0 when the GPU cache holds it, so it answers for the whole copy.
     virtual bool pcie_layer(int64_t layer) const { return device_alias(layer, 0) != nullptr; }
+    // A physically locked but unregistered native arena uses a small pinned
+    // staging ring. Its RAM source is never replaced with a file fallback.
+    virtual const uint8_t* stage_for_gpu(int64_t layer, int64_t expert) {
+        return pinned(layer,expert) ? blob(layer,expert) : nullptr;
+    }
 
     /// CS-T: whether `blob(layer, expert)` would be assembled into a short-lived buffer (a native pack read from its
     /// GGUF shards in place, where an expert's gate, up and down rows are three separate slices).  Such a pointer
@@ -746,6 +751,7 @@ public:
     bool pinned(int64_t layer, int64_t expert) const override;
     const uint8_t* device_alias(int64_t layer, int64_t expert) const override;
     bool pcie_layer(int64_t layer) const override;
+    const uint8_t* stage_for_gpu(int64_t layer, int64_t expert) override;
     bool transient(int64_t layer, int64_t expert) const override;
     double cached_share(int64_t samples) const override;
     bool copy_blob(int64_t layer, int64_t expert, uint8_t* dst) override;
@@ -799,6 +805,12 @@ public:
 
 private:
     const uint8_t* resident_blob(size_t index) const;
+    friend class SafetensorsModel;
+    uint8_t* native_stage_host_ = nullptr;
+    uint8_t* native_stage_device_ = nullptr;
+    uint64_t native_stage_stride_ = 0;
+    int64_t native_stage_layer_ = -1;
+    std::vector<int64_t> native_stage_experts_;
     const uint8_t* mapped_blob(int64_t layer, int64_t expert) const;
     /// The blob's bytes from the mapped file(s) - experts.bin, or the three GGUF role slices - into `dst`.
     bool copy_from_files(int64_t layer, int64_t expert, uint8_t* dst) const;

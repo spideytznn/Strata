@@ -24,6 +24,7 @@
 
 #include <cstdint>
 #include <string>
+#include "strata/ngram/ple_reader.hpp"
 
 namespace strata::kernels {
 
@@ -177,6 +178,9 @@ public:
 
     /// Open with an explicit I/O mode. The two-argument `open` below is the default (Direct).
     bool open(const std::string& gguf_path, std::string& err, const PleIoOptions& io);
+    // Validated native FP8 spans in one source shard; no whole-table mapping.
+    bool open_fp8_segments(const std::string& path, const std::vector<strata::ngram::PleReader::Segment>&,
+                           float scale, std::string& err, const PleIoOptions& io);
 
     /// The split the plan asks for: `issue` as soon as the token id is known, `collect` just before layer 1
     /// needs the rows. `gather` is `issue` followed by `collect`. In Mmap mode `issue` only prefetches.

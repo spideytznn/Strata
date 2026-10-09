@@ -20,6 +20,7 @@ public:
     std::vector<std::array<Nvfp4Projection, 3>> experts;
     std::vector<NgramSegment> ngram;
     const TensorDesc *ngram_scale, *ngram_offsets, *ngram_vocab_sizes;
+    const TensorDesc* ngram_multipliers;
     uint64_t expert_arena_bytes = 0, ngram_rows = 0;
     const std::array<Nvfp4Projection, 3>& expert(size_t layer, size_t id) const;
     ReadRequest ngram_row(uint64_t row, std::span<uint8_t> destination) const;

@@ -226,7 +226,7 @@ void SafetensorsSource::read_many(std::span<const ReadRequest> requests) {
         require(r.tensor != nullptr, "null read descriptor");
         const auto& t = tensor(r.tensor->name);
         require(&t == r.tensor, "read descriptor does not belong to this source");
-        require(!(p.experts_sealed && t.family == Family::Expert), "expert source reads sealed after residency");
+        require(!(p.experts_sealed && (t.family == Family::Expert || t.family == Family::Mtp)), "expert source reads sealed after residency");
         require(r.relative_offset <= t.bytes && r.destination.size() <= t.bytes - r.relative_offset,
                 "tensor read out of bounds");
         if (!r.destination.empty()) ordered.push_back(&r);

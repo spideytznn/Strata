@@ -38,7 +38,7 @@ def state_hashes(text):
     for line in text.splitlines():
         if 'STATE_HASH L=' in line:
             fields = dict(re.findall(r'(\w+)=([0-9a-f,-]+)', line))
-            hashes.append({key: fields[key] for key in STATE_KEYS})
+            hashes.append({key: fields[key] for key in (*STATE_KEYS, *(('block_pos',) if 'block_pos' in fields else ()))})
     return hashes
 
 
@@ -173,8 +173,12 @@ def main():
         return
     cfg = json.loads(a.config.read_text(encoding='utf-8'))
     p = Path(cfg['tokenizer'])
-    tok = load_tokenizer(p)
-    tpl = ChatTemplate(p / 'chat_template.jinja')
+    if cfg.get('tokenizer_format') == 'safetensors':
+        from safetensors_tokenizer import SafetensorsTokenizer
+        tok = SafetensorsTokenizer.from_directory(p)
+    else:
+        tok = load_tokenizer(p)
+    tpl = ChatTemplate(Path(cfg['chat_template']) if cfg.get('chat_template') else p / 'chat_template.jinja')
     def encode(text):
         return tok.encode(text, parse_special=True)
     def prompt(label):

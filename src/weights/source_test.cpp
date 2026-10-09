@@ -15,18 +15,19 @@ int main() {
     try {
         require(fs::create_directory(root), "test directory collision");
         const std::string expert = "model.language_model.layers.0.mlp.experts.0.weight";
+        const std::string mtp = "mtp.layers.0.mlp.experts.0.weight";
         Json header;
-        for (const auto& [name,offset] : std::vector<std::pair<std::string,int>>{{"a",0},{"b",4},{expert,8}})
+        for (const auto& [name,offset] : std::vector<std::pair<std::string,int>>{{"a",0},{"b",4},{expert,8},{mtp,12}})
             header[name] = {{"dtype","U8"},{"shape",{4}},{"data_offsets",{offset,offset+4}}};
         const auto text = header.dump();
         {
             std::ofstream f(root/"test.safetensors",std::ios::binary);
             const uint64_t n=text.size();
             f.write(reinterpret_cast<const char*>(&n),8); f.write(text.data(),text.size());
-            const uint8_t data[] = {0,1,2,3,4,5,6,7,8,9,10,11};
+            const uint8_t data[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
             f.write(reinterpret_cast<const char*>(data),sizeof data);
             std::ofstream index(root/"model.safetensors.index.json");
-            index << Json{{"weight_map",{{"a","test.safetensors"},{"b","test.safetensors"},{expert,"test.safetensors"}}}};
+            index << Json{{"weight_map",{{"a","test.safetensors"},{"b","test.safetensors"},{expert,"test.safetensors"},{mtp,"test.safetensors"}}}};
         }
         {
             w::SafetensorsSource source(root);
@@ -50,6 +51,9 @@ int main() {
             refused=false;
             try { source.read(source.tensor(expert)); } catch(const std::runtime_error&) { refused=true; }
             require(refused && source.io_stats().data_calls==before,"expert reads continued after sealing");
+            refused=false;
+            try { source.read(source.tensor(mtp)); } catch(const std::runtime_error&) { refused=true; }
+            require(refused && source.io_stats().data_calls==before,"MTP reads continued after sealing");
             // Reuse the owned sample after sealing; storage addresses stay fixed.
             const auto* address=e.data();
             for (int i=0;i<100;++i) require(e.data()==address && e[3]==11,"resident sample changed");

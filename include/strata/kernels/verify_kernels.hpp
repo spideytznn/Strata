@@ -80,6 +80,12 @@ void broadcast_streams(const float* x, float* R, int64_t n_embd, int hc, int n_t
 /// dst[:n] = src[(*index) * stride + :n]  (index read from device memory; a negative index copies nothing).
 void copy_indexed(float* dst, const float* src, int64_t stride, const int32_t* index, int64_t n, void* stream);
 
+/// After speculative replay, restore the moving indexer spare and last completed
+/// block position. commit = {n_keep, last_index, positions[max_t]}; no arithmetic
+/// touches completed pooled keys. Native safetensors opt-in state canonicalization.
+void qsa_commit_spare(float* pooled, const float* dead, int32_t* block_pos,
+                      const int32_t* commit, int dim, int block, int max_cells, void* stream);
+
 /// Plan v0.3 P6: copy *n (device memory) blobs of `blob_bytes` from mapped host memory (src[k], device aliases)
 /// into dst + k * blob_bytes with coalesced 16-byte loads - the PCIe share of a layer's missed experts, staged
 /// into VRAM before the grouped expert kernel reads them.  Launched for a capacity of `cap` blobs.  `dst2` (device

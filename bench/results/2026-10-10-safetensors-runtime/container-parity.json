@@ -1,0 +1,1050 @@
+{
+  "native": {
+    "returncode": 0,
+    "wall_s": 109.52039649999642,
+    "tokens": [
+      29108,
+      4009,
+      27891,
+      8964,
+      579,
+      16078,
+      321,
+      1100,
+      9872,
+      303,
+      660,
+      17425,
+      11,
+      440,
+      22602,
+      6105,
+      89661,
+      69377,
+      1691,
+      777,
+      16025,
+      1056,
+      4860,
+      2438,
+      89661,
+      4016,
+      310,
+      264,
+      24057,
+      2512,
+      12870,
+      60845
+    ]
+  },
+  "oracle": {
+    "returncode": 0,
+    "wall_s": 28.68957689999661,
+    "tokens": [
+      29108,
+      4009,
+      27891,
+      8964,
+      579,
+      16078,
+      321,
+      1100,
+      9872,
+      303,
+      660,
+      17425,
+      11,
+      440,
+      22602,
+      6105,
+      89661,
+      69377,
+      1691,
+      777,
+      16025,
+      1056,
+      4860,
+      2438,
+      89661,
+      4016,
+      310,
+      264,
+      24057,
+      2512,
+      12870,
+      60845
+    ]
+  },
+  "logits": {
+    "count": 248320,
+    "max_abs": 0.0037769079208374023,
+    "rms": 0.0005871502040310849,
+    "argmax": [
+      29108,
+      29108
+    ],
+    "cosine": 0.9999999424750219
+  },
+  "layers": [
+    {
+      "layer": 0,
+      "residual": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      "mlp_output": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      "inject": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      "expert_outputs": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 1,
+      "residual": {
+        "max_abs": 4.656612873077393e-10,
+        "relative_l2": 2.8744747658502155e-09
+      },
+      "mlp_output": {
+        "max_abs": 1.0244548320770264e-08,
+        "relative_l2": 1.863604217347147e-07
+      },
+      "inject": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      "expert_outputs": {
+        "max_abs": 3.725290298461914e-08,
+        "relative_l2": 2.1263139243688502e-07
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 2,
+      "residual": {
+        "max_abs": 2.9336661100387573e-08,
+        "relative_l2": 3.9077232574841726e-07
+      },
+      "mlp_output": {
+        "max_abs": 9.639188647270203e-08,
+        "relative_l2": 1.8622362832422304e-06
+      },
+      "inject": {
+        "max_abs": 5.7220458984375e-06,
+        "relative_l2": 2.0432812696204844e-07
+      },
+      "expert_outputs": {
+        "max_abs": 1.9650906324386597e-07,
+        "relative_l2": 2.7484557720005896e-06
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 3,
+      "residual": {
+        "max_abs": 1.8849968910217285e-06,
+        "relative_l2": 1.7003888447984672e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.3997930586338043e-06,
+        "relative_l2": 7.282369141211755e-05
+      },
+      "inject": {
+        "max_abs": 8.058547973632812e-05,
+        "relative_l2": 3.603363053142395e-06
+      },
+      "expert_outputs": {
+        "max_abs": 1.5348196029663086e-05,
+        "relative_l2": 7.815022927526399e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 4,
+      "residual": {
+        "max_abs": 3.020279109477997e-06,
+        "relative_l2": 2.813958615008013e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.5427510738372803e-06,
+        "relative_l2": 7.306560403585452e-05
+      },
+      "inject": {
+        "max_abs": 0.00018405914306640625,
+        "relative_l2": 7.446549817039632e-06
+      },
+      "expert_outputs": {
+        "max_abs": 1.066550612449646e-05,
+        "relative_l2": 8.181617043991154e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 5,
+      "residual": {
+        "max_abs": 3.713183104991913e-06,
+        "relative_l2": 3.552244858935249e-05
+      },
+      "mlp_output": {
+        "max_abs": 2.2390158846974373e-06,
+        "relative_l2": 7.271452817783156e-05
+      },
+      "inject": {
+        "max_abs": 0.0001888275146484375,
+        "relative_l2": 7.688328499181324e-06
+      },
+      "expert_outputs": {
+        "max_abs": 8.38935375213623e-06,
+        "relative_l2": 8.22878679725434e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 6,
+      "residual": {
+        "max_abs": 4.5299530029296875e-06,
+        "relative_l2": 3.759739464693586e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.7122517824172974e-06,
+        "relative_l2": 7.40670435944806e-05
+      },
+      "inject": {
+        "max_abs": 0.0001430511474609375,
+        "relative_l2": 5.688808713711292e-06
+      },
+      "expert_outputs": {
+        "max_abs": 9.709037840366364e-06,
+        "relative_l2": 7.835925133507332e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 7,
+      "residual": {
+        "max_abs": 4.252418875694275e-06,
+        "relative_l2": 4.264576419792257e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.8035213947296143e-06,
+        "relative_l2": 8.270769237228588e-05
+      },
+      "inject": {
+        "max_abs": 0.00014019012451171875,
+        "relative_l2": 8.372374029850524e-06
+      },
+      "expert_outputs": {
+        "max_abs": 9.473413228988647e-06,
+        "relative_l2": 8.700562742528557e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 8,
+      "residual": {
+        "max_abs": 6.584217771887779e-06,
+        "relative_l2": 5.001112025703535e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.5725533962249756e-06,
+        "relative_l2": 8.133414835563094e-05
+      },
+      "inject": {
+        "max_abs": 7.62939453125e-05,
+        "relative_l2": 1.926968027677108e-06
+      },
+      "expert_outputs": {
+        "max_abs": 9.998679161071777e-06,
+        "relative_l2": 8.970179767911518e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 9,
+      "residual": {
+        "max_abs": 6.047077476978302e-06,
+        "relative_l2": 4.9485637870767055e-05
+      },
+      "mlp_output": {
+        "max_abs": 2.7492642402648926e-06,
+        "relative_l2": 7.089404293368626e-05
+      },
+      "inject": {
+        "max_abs": 0.00013446807861328125,
+        "relative_l2": 5.95580849638292e-06
+      },
+      "expert_outputs": {
+        "max_abs": 9.015202522277832e-06,
+        "relative_l2": 7.216922783501341e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 10,
+      "residual": {
+        "max_abs": 5.9194862842559814e-06,
+        "relative_l2": 4.939150959487051e-05
+      },
+      "mlp_output": {
+        "max_abs": 2.5690533220767975e-06,
+        "relative_l2": 8.391228753737261e-05
+      },
+      "inject": {
+        "max_abs": 0.000194549560546875,
+        "relative_l2": 4.681312181720646e-06
+      },
+      "expert_outputs": {
+        "max_abs": 7.023685611784458e-06,
+        "relative_l2": 8.457296403994834e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 11,
+      "residual": {
+        "max_abs": 6.238697096705437e-06,
+        "relative_l2": 5.17161410849674e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.966502845287323e-06,
+        "relative_l2": 9.621278295383307e-05
+      },
+      "inject": {
+        "max_abs": 0.00011730194091796875,
+        "relative_l2": 4.6114318312652555e-06
+      },
+      "expert_outputs": {
+        "max_abs": 1.0428950190544128e-05,
+        "relative_l2": 9.387421937169434e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 12,
+      "residual": {
+        "max_abs": 6.432121153920889e-06,
+        "relative_l2": 5.3544860230669874e-05
+      },
+      "mlp_output": {
+        "max_abs": 4.468485713005066e-06,
+        "relative_l2": 9.225837674950477e-05
+      },
+      "inject": {
+        "max_abs": 0.00034332275390625,
+        "relative_l2": 1.3712767236607837e-05
+      },
+      "expert_outputs": {
+        "max_abs": 1.868605613708496e-05,
+        "relative_l2": 0.00010919114606018472
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 13,
+      "residual": {
+        "max_abs": 7.059425115585327e-06,
+        "relative_l2": 5.6381819205587495e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.7349527701735497e-06,
+        "relative_l2": 0.00010302980141572223
+      },
+      "inject": {
+        "max_abs": 0.0001964569091796875,
+        "relative_l2": 3.8029875536924883e-06
+      },
+      "expert_outputs": {
+        "max_abs": 1.0751187801361084e-05,
+        "relative_l2": 0.0001082903914357645
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 14,
+      "residual": {
+        "max_abs": 7.353723049163818e-06,
+        "relative_l2": 5.728398978168606e-05
+      },
+      "mlp_output": {
+        "max_abs": 3.4534605219960213e-06,
+        "relative_l2": 8.335661614128935e-05
+      },
+      "inject": {
+        "max_abs": 0.0001773834228515625,
+        "relative_l2": 8.29455631209323e-06
+      },
+      "expert_outputs": {
+        "max_abs": 1.3247132301330566e-05,
+        "relative_l2": 8.526583141829275e-05
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 15,
+      "residual": {
+        "max_abs": 1.030508428812027e-05,
+        "relative_l2": 8.163729723742198e-05
+      },
+      "mlp_output": {
+        "max_abs": 1.1269934475421906e-05,
+        "relative_l2": 0.00019657410603200678
+      },
+      "inject": {
+        "max_abs": 0.000213623046875,
+        "relative_l2": 1.0847906311823123e-05
+      },
+      "expert_outputs": {
+        "max_abs": 3.8702040910720825e-05,
+        "relative_l2": 0.00020466715754105332
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 16,
+      "residual": {
+        "max_abs": 8.803792297840118e-06,
+        "relative_l2": 8.073752142044463e-05
+      },
+      "mlp_output": {
+        "max_abs": 8.32253135740757e-06,
+        "relative_l2": 0.00015410466464539128
+      },
+      "inject": {
+        "max_abs": 0.00037479400634765625,
+        "relative_l2": 2.1349816077053778e-05
+      },
+      "expert_outputs": {
+        "max_abs": 3.593415021896362e-05,
+        "relative_l2": 0.00017655850791744435
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 17,
+      "residual": {
+        "max_abs": 8.903443813323975e-06,
+        "relative_l2": 8.203412501794315e-05
+      },
+      "mlp_output": {
+        "max_abs": 5.8496370911598206e-06,
+        "relative_l2": 0.00012295811782133399
+      },
+      "inject": {
+        "max_abs": 0.00021076202392578125,
+        "relative_l2": 1.8032896845852858e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.238154411315918e-05,
+        "relative_l2": 0.00013986249652576265
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 18,
+      "residual": {
+        "max_abs": 8.93324613571167e-06,
+        "relative_l2": 8.185336906231726e-05
+      },
+      "mlp_output": {
+        "max_abs": 5.334615707397461e-06,
+        "relative_l2": 0.00010549951012024059
+      },
+      "inject": {
+        "max_abs": 0.0003757476806640625,
+        "relative_l2": 1.9211490402703614e-05
+      },
+      "expert_outputs": {
+        "max_abs": 1.7195940017700195e-05,
+        "relative_l2": 0.00011595960470875307
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 19,
+      "residual": {
+        "max_abs": 1.1247582733631134e-05,
+        "relative_l2": 9.045683370216327e-05
+      },
+      "mlp_output": {
+        "max_abs": 6.897374987602234e-06,
+        "relative_l2": 0.0001563843661251404
+      },
+      "inject": {
+        "max_abs": 0.000225067138671875,
+        "relative_l2": 9.232269500759163e-06
+      },
+      "expert_outputs": {
+        "max_abs": 2.5019049644470215e-05,
+        "relative_l2": 0.00016021488627400516
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 20,
+      "residual": {
+        "max_abs": 1.0758638381958008e-05,
+        "relative_l2": 8.991696042786571e-05
+      },
+      "mlp_output": {
+        "max_abs": 1.2449920177459717e-05,
+        "relative_l2": 0.00013907426194022536
+      },
+      "inject": {
+        "max_abs": 0.00031948089599609375,
+        "relative_l2": 2.179222469430561e-05
+      },
+      "expert_outputs": {
+        "max_abs": 3.650784492492676e-05,
+        "relative_l2": 0.00015766108852669796
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 21,
+      "residual": {
+        "max_abs": 1.369137316942215e-05,
+        "relative_l2": 9.839848332995118e-05
+      },
+      "mlp_output": {
+        "max_abs": 9.509734809398651e-06,
+        "relative_l2": 0.00015464687267747302
+      },
+      "inject": {
+        "max_abs": 0.0002651214599609375,
+        "relative_l2": 1.449116159992048e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.8133392333984375e-05,
+        "relative_l2": 0.00014968452800475003
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 22,
+      "residual": {
+        "max_abs": 1.789908856153488e-05,
+        "relative_l2": 8.467750663281962e-05
+      },
+      "mlp_output": {
+        "max_abs": 8.044764399528503e-06,
+        "relative_l2": 0.0001472872217804441
+      },
+      "inject": {
+        "max_abs": 0.0005481243133544922,
+        "relative_l2": 3.001335119721847e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.6986002922058105e-05,
+        "relative_l2": 0.00014939402880246637
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 23,
+      "residual": {
+        "max_abs": 2.028048038482666e-05,
+        "relative_l2": 9.114113721349655e-05
+      },
+      "mlp_output": {
+        "max_abs": 1.531466841697693e-05,
+        "relative_l2": 0.00016070913069629847
+      },
+      "inject": {
+        "max_abs": 0.0002613067626953125,
+        "relative_l2": 1.6284720393039637e-05
+      },
+      "expert_outputs": {
+        "max_abs": 4.2557716369628906e-05,
+        "relative_l2": 0.00016762848390100638
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 24,
+      "residual": {
+        "max_abs": 2.4452805519104004e-05,
+        "relative_l2": 9.615000834962497e-05
+      },
+      "mlp_output": {
+        "max_abs": 4.8317015171051025e-06,
+        "relative_l2": 0.00013995451286132857
+      },
+      "inject": {
+        "max_abs": 0.000507354736328125,
+        "relative_l2": 1.2123566481559292e-05
+      },
+      "expert_outputs": {
+        "max_abs": 1.6232021152973175e-05,
+        "relative_l2": 0.00015499230140133278
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 25,
+      "residual": {
+        "max_abs": 2.4378299713134766e-05,
+        "relative_l2": 9.594452031594871e-05
+      },
+      "mlp_output": {
+        "max_abs": 5.432986654341221e-06,
+        "relative_l2": 0.00016326533140552363
+      },
+      "inject": {
+        "max_abs": 0.0007038116455078125,
+        "relative_l2": 3.789346638035219e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.386420965194702e-05,
+        "relative_l2": 0.00017685778099525086
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 26,
+      "residual": {
+        "max_abs": 2.4184584617614746e-05,
+        "relative_l2": 9.672118143439279e-05
+      },
+      "mlp_output": {
+        "max_abs": 5.230307579040527e-06,
+        "relative_l2": 0.00015620484774637813
+      },
+      "inject": {
+        "max_abs": 0.0005114078521728516,
+        "relative_l2": 3.1849968346014105e-05
+      },
+      "expert_outputs": {
+        "max_abs": 1.4018267393112183e-05,
+        "relative_l2": 0.0001742330716987275
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 27,
+      "residual": {
+        "max_abs": 2.450495958328247e-05,
+        "relative_l2": 0.000105757427209327
+      },
+      "mlp_output": {
+        "max_abs": 6.834277883172035e-06,
+        "relative_l2": 0.0001970360407126939
+      },
+      "inject": {
+        "max_abs": 0.000789642333984375,
+        "relative_l2": 2.170824774168463e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.070888876914978e-05,
+        "relative_l2": 0.0002020590752563203
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 28,
+      "residual": {
+        "max_abs": 2.9160641133785248e-05,
+        "relative_l2": 0.00012598352680404787
+      },
+      "mlp_output": {
+        "max_abs": 1.2857839465141296e-05,
+        "relative_l2": 0.0002461180191404817
+      },
+      "inject": {
+        "max_abs": 0.0007572174072265625,
+        "relative_l2": 3.1162162479666885e-05
+      },
+      "expert_outputs": {
+        "max_abs": 5.59687614440918e-05,
+        "relative_l2": 0.000213596262516851
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 29,
+      "residual": {
+        "max_abs": 5.6374818086624146e-05,
+        "relative_l2": 0.00013366933070581112
+      },
+      "mlp_output": {
+        "max_abs": 1.1755386367440224e-05,
+        "relative_l2": 0.00023822522292233131
+      },
+      "inject": {
+        "max_abs": 0.001201629638671875,
+        "relative_l2": 1.611977835881079e-05
+      },
+      "expert_outputs": {
+        "max_abs": 2.781301736831665e-05,
+        "relative_l2": 0.00025430081510407283
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 30,
+      "residual": {
+        "max_abs": 4.990771412849426e-05,
+        "relative_l2": 0.0001391652006810162
+      },
+      "mlp_output": {
+        "max_abs": 1.1144205927848816e-05,
+        "relative_l2": 0.00020195034352069987
+      },
+      "inject": {
+        "max_abs": 0.000514984130859375,
+        "relative_l2": 2.664270674822164e-05
+      },
+      "expert_outputs": {
+        "max_abs": 4.6953558921813965e-05,
+        "relative_l2": 0.0002059044245714347
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 31,
+      "residual": {
+        "max_abs": 6.224215030670166e-05,
+        "relative_l2": 0.00016843022862266115
+      },
+      "mlp_output": {
+        "max_abs": 1.9331462681293488e-05,
+        "relative_l2": 0.0002591034424107524
+      },
+      "inject": {
+        "max_abs": 0.000507354736328125,
+        "relative_l2": 1.82173954098382e-05
+      },
+      "expert_outputs": {
+        "max_abs": 6.166845560073853e-05,
+        "relative_l2": 0.00028614933674943045
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 32,
+      "residual": {
+        "max_abs": 7.623434066772461e-05,
+        "relative_l2": 0.0001676481590237826
+      },
+      "mlp_output": {
+        "max_abs": 1.442059874534607e-05,
+        "relative_l2": 0.00022829234754321318
+      },
+      "inject": {
+        "max_abs": 0.0006608963012695312,
+        "relative_l2": 3.088225028168142e-05
+      },
+      "expert_outputs": {
+        "max_abs": 5.264580249786377e-05,
+        "relative_l2": 0.00023594635133654252
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 33,
+      "residual": {
+        "max_abs": 0.00010608136653900146,
+        "relative_l2": 0.00017171855676211301
+      },
+      "mlp_output": {
+        "max_abs": 1.3461336493492126e-05,
+        "relative_l2": 0.00019356792966762482
+      },
+      "inject": {
+        "max_abs": 0.000881195068359375,
+        "relative_l2": 4.6062973578126755e-05
+      },
+      "expert_outputs": {
+        "max_abs": 4.06801700592041e-05,
+        "relative_l2": 0.00020237084890605044
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 34,
+      "residual": {
+        "max_abs": 0.00011882185935974121,
+        "relative_l2": 0.00016568029612821461
+      },
+      "mlp_output": {
+        "max_abs": 1.3049691915512085e-05,
+        "relative_l2": 0.0001504225763395331
+      },
+      "inject": {
+        "max_abs": 0.0010509490966796875,
+        "relative_l2": 2.9187366369949264e-05
+      },
+      "expert_outputs": {
+        "max_abs": 4.2304396629333496e-05,
+        "relative_l2": 0.00016877002260053342
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 35,
+      "residual": {
+        "max_abs": 0.00013528764247894287,
+        "relative_l2": 0.00019066107479532386
+      },
+      "mlp_output": {
+        "max_abs": 2.1373853087425232e-05,
+        "relative_l2": 0.00025442780944402775
+      },
+      "inject": {
+        "max_abs": 0.000659942626953125,
+        "relative_l2": 1.8288040674543867e-05
+      },
+      "expert_outputs": {
+        "max_abs": 7.10710883140564e-05,
+        "relative_l2": 0.00026395786539532056
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 36,
+      "residual": {
+        "max_abs": 0.00018930435180664062,
+        "relative_l2": 0.00018960442234892283
+      },
+      "mlp_output": {
+        "max_abs": 3.7250109016895294e-05,
+        "relative_l2": 0.0002069814535881248
+      },
+      "inject": {
+        "max_abs": 0.001285552978515625,
+        "relative_l2": 4.044440793583349e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.00010687112808227539,
+        "relative_l2": 0.00020965223334284876
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 37,
+      "residual": {
+        "max_abs": 0.0002090930938720703,
+        "relative_l2": 0.00018551246949668402
+      },
+      "mlp_output": {
+        "max_abs": 1.7881160601973534e-05,
+        "relative_l2": 0.00020573832604726751
+      },
+      "inject": {
+        "max_abs": 0.0006972551345825195,
+        "relative_l2": 3.632408016692517e-05
+      },
+      "expert_outputs": {
+        "max_abs": 6.29723072052002e-05,
+        "relative_l2": 0.00021402333412146393
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 38,
+      "residual": {
+        "max_abs": 0.00021034479141235352,
+        "relative_l2": 0.00018597084030095657
+      },
+      "mlp_output": {
+        "max_abs": 2.1830201148986816e-05,
+        "relative_l2": 0.00015146185909592133
+      },
+      "inject": {
+        "max_abs": 0.00078582763671875,
+        "relative_l2": 2.0804712947364698e-05
+      },
+      "expert_outputs": {
+        "max_abs": 6.861239671707153e-05,
+        "relative_l2": 0.00017267768315776106
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 39,
+      "residual": {
+        "max_abs": 0.00024808943271636963,
+        "relative_l2": 0.00018862473173561207
+      },
+      "mlp_output": {
+        "max_abs": 4.645437002182007e-05,
+        "relative_l2": 0.0002215818390627629
+      },
+      "inject": {
+        "max_abs": 0.0009002685546875,
+        "relative_l2": 2.428540143685759e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.0001882314682006836,
+        "relative_l2": 0.00022792119008522682
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 40,
+      "residual": {
+        "max_abs": 0.00026176217943429947,
+        "relative_l2": 0.0001913178904495983
+      },
+      "mlp_output": {
+        "max_abs": 3.0195340514183044e-05,
+        "relative_l2": 0.00020298247659922148
+      },
+      "inject": {
+        "max_abs": 0.0013399124145507812,
+        "relative_l2": 6.114312033292842e-05
+      },
+      "expert_outputs": {
+        "max_abs": 9.461026638746262e-05,
+        "relative_l2": 0.00019878182250631087
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 41,
+      "residual": {
+        "max_abs": 0.0002681734040379524,
+        "relative_l2": 0.00018754295968492472
+      },
+      "mlp_output": {
+        "max_abs": 3.9264559745788574e-05,
+        "relative_l2": 0.0002372278424400292
+      },
+      "inject": {
+        "max_abs": 0.0012836456298828125,
+        "relative_l2": 7.16857115721111e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.00010767579078674316,
+        "relative_l2": 0.00021711318899112994
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 42,
+      "residual": {
+        "max_abs": 0.0002905130386352539,
+        "relative_l2": 0.0001934992890750421
+      },
+      "mlp_output": {
+        "max_abs": 4.9464404582977295e-05,
+        "relative_l2": 0.00023915609152207692
+      },
+      "inject": {
+        "max_abs": 0.0014810562133789062,
+        "relative_l2": 7.681191501853254e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.00022178888320922852,
+        "relative_l2": 0.0002667818991808912
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 43,
+      "residual": {
+        "max_abs": 0.00029021501541137695,
+        "relative_l2": 0.00019241099198032095
+      },
+      "mlp_output": {
+        "max_abs": 2.820231020450592e-05,
+        "relative_l2": 0.00023369485765210407
+      },
+      "inject": {
+        "max_abs": 0.0015957355499267578,
+        "relative_l2": 6.908817074710314e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.00014314427971839905,
+        "relative_l2": 0.0002375293253408078
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 44,
+      "residual": {
+        "max_abs": 0.0007725656032562256,
+        "relative_l2": 0.00034064344738421915
+      },
+      "mlp_output": {
+        "max_abs": 4.212185740470886e-05,
+        "relative_l2": 0.00034635066365995
+      },
+      "inject": {
+        "max_abs": 0.0014944076538085938,
+        "relative_l2": 8.061690380666884e-05
+      },
+      "expert_outputs": {
+        "max_abs": 0.00015787780284881592,
+        "relative_l2": 0.0003847047852824395
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 45,
+      "residual": {
+        "max_abs": 0.0007601380348205566,
+        "relative_l2": 0.0002835574572275285
+      },
+      "mlp_output": {
+        "max_abs": 8.388608694076538e-05,
+        "relative_l2": 0.0004687939541057796
+      },
+      "inject": {
+        "max_abs": 0.0014715194702148438,
+        "relative_l2": 0.00010580766019617572
+      },
+      "expert_outputs": {
+        "max_abs": 0.00025594234466552734,
+        "relative_l2": 0.0003869115926529243
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 46,
+      "residual": {
+        "max_abs": 0.0011363029479980469,
+        "relative_l2": 0.00030707116645312224
+      },
+      "mlp_output": {
+        "max_abs": 5.951523780822754e-05,
+        "relative_l2": 0.00026145418438603226
+      },
+      "inject": {
+        "max_abs": 0.0036172866821289062,
+        "relative_l2": 0.00022954610564399517
+      },
+      "expert_outputs": {
+        "max_abs": 0.00017304718494415283,
+        "relative_l2": 0.00039321037409227556
+      },
+      "router_ids_equal": true
+    },
+    {
+      "layer": 47,
+      "residual": {
+        "max_abs": 0.0011404752731323242,
+        "relative_l2": 0.000305417112481275
+      },
+      "mlp_output": {
+        "max_abs": 0.0001373589038848877,
+        "relative_l2": 0.0001495486366354138
+      },
+      "inject": {
+        "max_abs": 0.002532958984375,
+        "relative_l2": 0.00015111303299991118
+      },
+      "expert_outputs": {
+        "max_abs": 0.00022679567337036133,
+        "relative_l2": 0.00027202299011252096
+      },
+      "router_ids_equal": true
+    }
+  ]
+}

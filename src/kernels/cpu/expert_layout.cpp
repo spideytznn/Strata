@@ -367,6 +367,24 @@ void native_gu_rows(const NativeFmt&, const uint8_t*, const void* const*, int, f
 void native_down_rows(const NativeFmt&, const uint8_t*, const void* const*, int, float* const*, int, int) { std::abort(); }
 #endif
 
+void expert_layout_nvfp4_scales(int layer, float gate_up, float down) {
+    auto& f=g_layout.fmt.at(static_cast<size_t>(layer));
+    f.input_scale_gu=gate_up; f.input_scale_down=down;
+}
+bool expert_layout_nvfp4(std::string& err) {
+    ExpertLayout l;
+    l.native = true; l.n_layers = 48; l.n_expert = 512; l.version = kExpertLayoutVersion;
+    NativeFmt f;
+    if (!native_fmt(40,40,2560,640,f,err)) return false;
+    f.fp32_activations = true;
+    f.act_bytes = 2560 * sizeof(float); f.h_bytes = 640 * sizeof(float);
+    l.fmt.assign(48,f); l.bytes.assign(48,f.bytes); l.max_blob = f.bytes;
+    for (int i=0;i<48;++i) l.offset.push_back(static_cast<uint64_t>(i)*512*f.bytes);
+    l.total = 48ull*512*f.bytes;
+    g_layout = std::move(l);
+    return true;
+}
+
 bool expert_layout_load(const std::string& pack_dir, int64_t n_layers, int64_t n_expert, std::string& err) {
     ExpertLayout L;
     L.n_layers = n_layers;

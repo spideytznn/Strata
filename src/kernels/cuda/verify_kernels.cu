@@ -490,6 +490,17 @@ __global__ void broadcast_streams_kernel(const float* __restrict__ x, float* __r
     R[(size_t) t * n * hc + i] = x[(size_t) t * n + i % n];
 }
 
+__global__ void qsa_commit_spare_kernel(float* pooled,const float* dead,int32_t* block_pos,
+                                         const int32_t* commit,int dim,int block,int max_cells) {
+    const int keep=commit[0];
+    if(keep<1 || keep>8) return;
+    const int end=commit[keep+1]+1;
+    if(end<1 || end>max_cells) return;
+    const int row=end/block;
+    for(int d=threadIdx.x;d<dim;d+=blockDim.x) pooled[(size_t)row*dim+d]=dead[d];
+    if(threadIdx.x==0) *block_pos=row>0?(row-1)*block:0;
+}
+
 __global__ void copy_indexed_kernel(float* __restrict__ dst, const float* __restrict__ src, int64_t stride,
                                     const int32_t* __restrict__ index, int64_t n) {
     const int idx = *index;
@@ -1272,6 +1283,12 @@ void broadcast_streams(const float* x, float* R, int64_t n_embd, int hc, int n_t
     broadcast_streams_kernel<<<dim3((unsigned) ((n_embd * hc + 255) / 256), (unsigned) n_tok), 256, 0,
                                (cudaStream_t) stream>>>(x, R, n_embd, hc);
     check("broadcast_streams");
+}
+
+void qsa_commit_spare(float* pooled,const float* dead,int32_t* block_pos,
+                      const int32_t* commit,int dim,int block,int max_cells,void* stream) {
+    qsa_commit_spare_kernel<<<1,128,0,(cudaStream_t)stream>>>(pooled,dead,block_pos,commit,dim,block,max_cells);
+    check("qsa_commit_spare");
 }
 
 void copy_indexed(float* dst, const float* src, int64_t stride, const int32_t* index, int64_t n, void* stream) {
