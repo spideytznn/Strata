@@ -1,5 +1,5 @@
 """End-to-end native path matrix. One resident engine at a time; preserve raw evidence."""
-import argparse,json,os,sys,time,threading,platform,subprocess
+import argparse,hashlib,json,os,sys,time,threading,platform,subprocess
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
@@ -10,8 +10,11 @@ from safetensors_tokenizer import SafetensorsTokenizer
 from native_telemetry import Telemetry
 
 CASES={
- 'reference':{},'host40':{'STRATA_NATIVE_REGISTER_GIB':'40'},
+ 'reference':{},'host16':{'STRATA_NATIVE_REGISTER_GIB':'16'},
+ 'host24':{'STRATA_NATIVE_REGISTER_GIB':'24'},'host32':{'STRATA_NATIVE_REGISTER_GIB':'32'},
+ 'host40':{'STRATA_NATIVE_REGISTER_GIB':'40'},
  'tc1':{'STRATA_NVFP4_TC':'1'},'tc2':{'STRATA_NVFP4_TC':'2'},'tc3':{'STRATA_NVFP4_TC':'3'},
+ # Percentages concern cold experts only; hot experts remain on the GPU.
  'cpu50':{'pcie':0.5},'cpu100':{'pcie':0},
  'adaptive':{'adapt':True},
  'mtp1':{'mtp':1},'mtp2':{'mtp':2},'mtp4':{'mtp':4},
@@ -47,11 +50,19 @@ def main():
   head=tok.encode('<|im_start|>user\n',parse_special=True)
   tail=tok.encode('\nSummarize this text in detail.<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n',parse_special=True)
   unit=tok.encode('Binary search repeatedly halves a sorted search interval. Compare the middle element and retain the relevant half. ')
-  count=8193-len(head)-len(tail);ids=head+(unit*((count+len(unit)-1)//len(unit)))[:count]+tail
-  assert len(ids)==8193
-  requests.extend((f'long8193-{mode}',ids,a.new) for mode in ('cold','warm'))
+  # The server checkpoints before the final assistant header. Make that
+  # boundary exactly 8192, so the completed batched segment is really 8192.
+  turn=tok.encode('<|im_start|>',parse_special=True)[0]
+  tail_turn=max(i for i,v in enumerate(tail) if v==turn)
+  count=8192-len(head)-tail_turn
+  ids=head+(unit*((count+len(unit)-1)//len(unit)))[:count]+tail
+  assert max(i for i,v in enumerate(ids) if v==turn)==8192
+  requests.extend((f'long8192chunk-{mode}',ids,a.new) for mode in ('cold','warm'))
  (a.output/'requests.json').write_text(json.dumps(requests,ensure_ascii=False,indent=2),encoding='utf8')
- result={'hardware':{'platform':platform.platform(),'processor':platform.processor()},'config':cfg,'cases':{}}
+ result={'hardware':{'platform':platform.platform(),'processor':platform.processor()},'config':cfg,
+   'binary_sha256':hashlib.sha256(Path(cfg['exe']).read_bytes()).hexdigest(),'started_unix_s':time.time(),
+   'notes':{'cpu_cases':'pcie-frac splits cold experts; GPU cache hits still run on GPU. Actual CPU entries are recorded.',
+            'rounds':'Each round is a distinct short prompt with one cold and one warm run; the long prompt has one cold/warm pair.'},'cases':{}}
  def save():(a.output/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
  for case in a.cases.split(','):
   opts=CASES[case];folder=a.output/case;folder.mkdir();args=list(cfg['args'])
@@ -69,7 +80,9 @@ def main():
   (folder/'command.json').write_text(json.dumps({'command':[cfg['exe'],*args],'env':{k:v for k,v in env.items() if k.startswith('STRATA_')}},indent=2),encoding='utf8')
   row={'requests':[]};result['cases'][case]=row;save();t=time.monotonic()
   telemetry=Telemetry(folder/'telemetry.jsonl')
-  engine=StrataEngine(cfg['exe'],args,cwd=cfg['cwd'],log=str((folder/'engine.log').resolve()),env=env)
+  try:engine=StrataEngine(cfg['exe'],args,cwd=cfg['cwd'],log=str((folder/'engine.log').resolve()),env=env)
+  except Exception as e:
+   row.update(status='failed',error=str(e),telemetry=telemetry.close());result['status']='failed';save();raise
   telemetry.pid=engine.proc.pid
   row['startup_s']=time.monotonic()-t;row['info']=dict(engine.info);save()
   try:
@@ -93,7 +106,7 @@ def main():
     if case!='reference' and ref_results.exists():
      reference=json.loads(ref_results.read_text(encoding='utf8')).get('cases',{}).get('reference',{}).get('requests',[])
      if j<len(reference):r['tokens_equal_reference']=out==reference[j]['ids']
-    if case in ('host40','adaptive') and 'logits' in r:
+    if (case.startswith('host') or case=='adaptive') and 'logits' in r:
      assert r['logits']['max_abs']==0 and r.get('tokens_equal_reference'),f'{case}: data movement changed arithmetic'
     row['requests'].append(r);save()
     print(case,name,{k:r[k] for k in ('generated','prompt_read','prompt_ms','decode_ms','ttft_s','cpu_expert_entries','file_blobs')},flush=True)
@@ -104,6 +117,7 @@ def main():
    row['telemetry']=telemetry.close();save();engine.close()
   log=(folder/'engine.log').read_text(encoding='utf8')
   assert 'post-residency expert source bytes=0' in log
+  if a.long:assert 'strata prefill executed: tokens=8192 max_chunk=8192' in log,'8192 was allocated but not executed'
   if case.startswith('tc'):assert '[nvfp4-tensor] SM120 native FP4 MMA enabled' in log
   row['status']='pass';save()
  result['status']='pass';save()

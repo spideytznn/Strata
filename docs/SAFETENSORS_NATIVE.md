@@ -67,10 +67,28 @@ requests cover English, Chinese, code, arithmetic, EOS, seeded sampling, caps
 match bit-for-bit across draft depths, including the QSA spare row and block
 position; the deliberately interrupted request itself may end at different
 window boundaries and is excluded, but its resumed continuation must match.
-Raw logs and tokens are in `mtp-cache/`. CPU/GPU scheduling, adaptive swaps,
-actual 8192-token prefill, HTTP integration and repeated comparative timings
-are still being validated. No complete acceptance or performance claim is made
-until their raw results are recorded.
+Raw logs and tokens are in `mtp-cache/`. CPU/GPU scheduling, adaptive swaps
+and repeated comparative timings are still being validated.
+
+`p5-reference/` records the next completed gate, using 4,499 hot GPU experts,
+16,384 context, FP16 KV, no MTP, FP32 decode activations and BF16x2/FP16 prefill.
+The engine actually executed `tokens=8192 max_chunk=8192`; the full request also
+includes seven assistant-header tokens. Cold prompt processing was 5,108.1 ms,
+and replay reused 8,192 tokens, processing only the seven header tokens in
+368.6 ms. This is one cold/warm long-prompt pair, not a repeated speed claim.
+Three short prompt pairs had cold TTFT 1.64–1.95 s and warm TTFT 0.425–0.429 s.
+All eight requests generated 128 tokens with zero expert file reads. Whole
+process peak working set was 73,361,530,880 bytes; raw GPU clocks, memory and
+power samples are retained. Windows total page-fault counts include soft faults
+and are not presented as SSD reads.
+
+The same private engine passed OpenAI nonstreaming/SSE parity, Anthropic text,
+forced tool arguments and tool-result continuation, plus explicit image and
+oversized-context rejection over real localhost HTTP. The earlier HTTP attempt
+incorrectly left Anthropic thinking enabled while expecting a short answer;
+the corrected test explicitly disables thinking. No engine change was needed.
+These results establish the reference path only. The FP4, mixed CPU/GPU,
+adaptive, MTP timing and longer-context quality matrix remains in progress.
 
 ## Build the runtime
 

@@ -1,0 +1,254 @@
+{"unix_s": 1791566517.727786, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 3099, 32607, 4, 300, 810, 47.22, 39", "gpu_returncode": 0}
+{"unix_s": 1791566518.7799115, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 3099, 32607, 1, 352, 810, 46.69, 39", "gpu_returncode": 0}
+{"unix_s": 1791566519.8488526, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 3094, 32607, 1, 367, 810, 47.18, 39", "gpu_returncode": 0}
+{"unix_s": 1791566520.9078276, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 3619, 32607, 1, 2445, 13801, 66.11, 40", "gpu_returncode": 0}
+{"unix_s": 1791566521.9802787, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10649, 32607, 2, 2445, 13801, 79.31, 40", "gpu_returncode": 0}
+{"unix_s": 1791566523.0477328, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10649, 32607, 3, 2445, 13801, 78.65, 40", "gpu_returncode": 0}
+{"unix_s": 1791566524.112798, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10648, 32607, 3, 2445, 13801, 78.76, 40", "gpu_returncode": 0}
+{"unix_s": 1791566525.175874, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10649, 32607, 3, 2452, 13801, 79.05, 40", "gpu_returncode": 0}
+{"unix_s": 1791566526.2315361, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10649, 32607, 3, 2460, 13801, 79.49, 40", "gpu_returncode": 0}
+{"unix_s": 1791566527.298188, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10653, 32607, 4, 832, 7001, 68.98, 40", "gpu_returncode": 0}
+{"unix_s": 1791566528.3673098, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10650, 32607, 3, 720, 7001, 59.76, 39", "gpu_returncode": 0}
+{"unix_s": 1791566529.4222085, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10650, 32607, 3, 540, 7001, 57.68, 39", "gpu_returncode": 0}
+{"unix_s": 1791566530.4894505, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 10641, 32607, 3, 450, 7001, 57.01, 39", "gpu_returncode": 0}
+{"unix_s": 1791566531.5548053, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12397, 32607, 4, 382, 7001, 57.06, 39", "gpu_returncode": 0}
+{"unix_s": 1791566532.614729, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 16, 960, 810, 56.31, 39", "gpu_returncode": 0}
+{"unix_s": 1791566533.6802995, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 735, 810, 51.48, 39", "gpu_returncode": 0}
+{"unix_s": 1791566534.740197, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 517, 810, 49.05, 39", "gpu_returncode": 0}
+{"unix_s": 1791566535.799204, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 540, 810, 48.91, 39", "gpu_returncode": 0}
+{"unix_s": 1791566536.8548656, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 412, 810, 47.46, 39", "gpu_returncode": 0}
+{"unix_s": 1791566537.9137225, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 390, 810, 46.92, 39", "gpu_returncode": 0}
+{"unix_s": 1791566538.9746737, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12389, 32607, 1, 360, 810, 46.58, 39", "gpu_returncode": 0}
+{"unix_s": 1791566540.0329113, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 3, 532, 810, 48.09, 39", "gpu_returncode": 0}
+{"unix_s": 1791566541.093557, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12396, 32607, 1, 375, 810, 47.22, 39", "gpu_returncode": 0}
+{"unix_s": 1791566542.1531954, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 367, 810, 46.78, 38", "gpu_returncode": 0}
+{"unix_s": 1791566543.216964, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12395, 32607, 1, 352, 810, 46.23, 38", "gpu_returncode": 0}
+{"unix_s": 1791566544.274403, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12395, 32607, 4, 420, 810, 47.67, 38", "gpu_returncode": 0}
+{"unix_s": 1791566545.3320475, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 322, 810, 46.02, 38", "gpu_returncode": 0}
+{"unix_s": 1791566546.3891897, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12391, 32607, 1, 352, 810, 46.59, 38", "gpu_returncode": 0}
+{"unix_s": 1791566547.4522653, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 4, 345, 810, 46.82, 38", "gpu_returncode": 0}
+{"unix_s": 1791566548.5128186, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 4, 427, 810, 47.61, 38", "gpu_returncode": 0}
+{"unix_s": 1791566549.576917, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 337, 810, 45.85, 38", "gpu_returncode": 0}
+{"unix_s": 1791566550.6569366, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12385, 32607, 1, 322, 810, 46.13, 38", "gpu_returncode": 0}
+{"unix_s": 1791566551.7152355, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 7, 330, 810, 46.94, 38", "gpu_returncode": 0}
+{"unix_s": 1791566552.776685, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 367, 810, 47.23, 38", "gpu_returncode": 0}
+{"unix_s": 1791566553.841671, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 345, 810, 46.87, 38", "gpu_returncode": 0}
+{"unix_s": 1791566554.9040532, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 390, 810, 46.75, 38", "gpu_returncode": 0}
+{"unix_s": 1791566555.968356, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 480, 810, 48.41, 38", "gpu_returncode": 0}
+{"unix_s": 1791566557.0276015, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 367, 810, 46.94, 38", "gpu_returncode": 0}
+{"unix_s": 1791566558.0878947, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 360, 810, 46.00, 38", "gpu_returncode": 0}
+{"unix_s": 1791566559.1550987, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 352, 810, 46.71, 38", "gpu_returncode": 0}
+{"unix_s": 1791566560.213142, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12396, 32607, 4, 510, 810, 48.22, 38", "gpu_returncode": 0}
+{"unix_s": 1791566561.2735288, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 315, 810, 46.86, 38", "gpu_returncode": 0}
+{"unix_s": 1791566562.3496528, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12391, 32607, 1, 315, 810, 46.39, 38", "gpu_returncode": 0}
+{"unix_s": 1791566563.429348, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12395, 32607, 3, 330, 810, 46.29, 38", "gpu_returncode": 0}
+{"unix_s": 1791566564.4907832, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12395, 32607, 1, 375, 810, 46.65, 38", "gpu_returncode": 0}
+{"unix_s": 1791566565.9757166, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12385, 32607, 1, 360, 810, 46.74, 38", "gpu_returncode": 0}
+{"unix_s": 1791566567.0373852, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12385, 32607, 1, 367, 810, 46.42, 38", "gpu_returncode": 0}
+{"unix_s": 1791566568.1107078, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 3, 495, 810, 48.01, 38", "gpu_returncode": 0}
+{"unix_s": 1791566569.1890893, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 382, 810, 46.78, 38", "gpu_returncode": 0}
+{"unix_s": 1791566570.2554874, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 322, 810, 46.32, 38", "gpu_returncode": 0}
+{"unix_s": 1791566571.3641994, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 4, 315, 810, 46.88, 38", "gpu_returncode": 0}
+{"unix_s": 1791566572.4308388, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 412, 810, 48.13, 38", "gpu_returncode": 0}
+{"unix_s": 1791566573.5208673, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 330, 810, 46.52, 38", "gpu_returncode": 0}
+{"unix_s": 1791566574.5858037, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 337, 810, 46.75, 37", "gpu_returncode": 0}
+{"unix_s": 1791566575.6799097, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 5, 367, 810, 47.06, 38", "gpu_returncode": 0}
+{"unix_s": 1791566576.7569115, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 3, 412, 810, 47.54, 38", "gpu_returncode": 0}
+{"unix_s": 1791566577.8158784, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 360, 810, 46.17, 37", "gpu_returncode": 0}
+{"unix_s": 1791566578.922022, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 345, 810, 46.66, 37", "gpu_returncode": 0}
+{"unix_s": 1791566579.9972587, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 2, 525, 810, 47.84, 37", "gpu_returncode": 0}
+{"unix_s": 1791566581.0748127, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 397, 810, 47.21, 37", "gpu_returncode": 0}
+{"unix_s": 1791566582.1520257, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 1, 375, 810, 46.14, 37", "gpu_returncode": 0}
+{"unix_s": 1791566583.2782772, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12394, 32607, 6, 337, 810, 46.37, 37", "gpu_returncode": 0}
+{"unix_s": 1791566584.338219, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12395, 32607, 4, 472, 810, 47.70, 37", "gpu_returncode": 0}
+{"unix_s": 1791566585.3964465, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12428, 32607, 1, 750, 810, 48.31, 37", "gpu_returncode": 0}
+{"unix_s": 1791566586.4614067, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12426, 32607, 3, 337, 810, 46.74, 37", "gpu_returncode": 0}
+{"unix_s": 1791566587.5247767, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12435, 32607, 5, 502, 810, 48.35, 37", "gpu_returncode": 0}
+{"unix_s": 1791566588.587209, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12427, 32607, 4, 1200, 810, 56.49, 37", "gpu_returncode": 0}
+{"unix_s": 1791566589.647934, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12416, 32607, 1, 547, 810, 50.42, 37", "gpu_returncode": 0}
+{"unix_s": 1791566590.7128005, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12423, 32607, 1, 570, 810, 48.49, 37", "gpu_returncode": 0}
+{"unix_s": 1791566591.7755153, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 3, 952, 810, 57.53, 37", "gpu_returncode": 0}
+{"unix_s": 1791566592.8424263, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12593, 32607, 3, 607, 810, 49.10, 37", "gpu_returncode": 0}
+{"unix_s": 1791566594.3054874, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12634, 32607, 1, 442, 810, 45.65, 37", "gpu_returncode": 0}
+{"unix_s": 1791566595.3731418, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12668, 32607, 5, 247, 810, 46.68, 37", "gpu_returncode": 0}
+{"unix_s": 1791566596.6109698, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12662, 32607, 2, 570, 810, 49.67, 37", "gpu_returncode": 0}
+{"unix_s": 1791566597.7033548, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12626, 32607, 0, 577, 810, 46.00, 37", "gpu_returncode": 0}
+{"unix_s": 1791566598.763584, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12626, 32607, 0, 292, 810, 43.46, 37", "gpu_returncode": 0}
+{"unix_s": 1791566599.8399715, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12628, 32607, 0, 262, 810, 42.93, 37", "gpu_returncode": 0}
+{"unix_s": 1791566600.9423969, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12420, 32607, 2, 300, 810, 43.13, 37", "gpu_returncode": 0}
+{"unix_s": 1791566602.0229795, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12417, 32607, 0, 277, 810, 43.33, 37", "gpu_returncode": 0}
+{"unix_s": 1791566603.1040778, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12459, 32607, 0, 285, 810, 43.36, 37", "gpu_returncode": 0}
+{"unix_s": 1791566604.1985893, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12364, 32607, 0, 300, 810, 45.12, 37", "gpu_returncode": 0}
+{"unix_s": 1791566605.2627878, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12496, 32607, 3, 547, 810, 45.33, 37", "gpu_returncode": 0}
+{"unix_s": 1791566606.3625398, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12440, 32607, 0, 435, 810, 47.47, 37", "gpu_returncode": 0}
+{"unix_s": 1791566607.4535377, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12440, 32607, 0, 285, 810, 43.80, 37", "gpu_returncode": 0}
+{"unix_s": 1791566608.6770775, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12440, 32607, 0, 262, 810, 43.03, 37", "gpu_returncode": 0}
+{"unix_s": 1791566609.7545645, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12450, 32607, 0, 240, 810, 43.19, 37", "gpu_returncode": 0}
+{"unix_s": 1791566610.8165898, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12447, 32607, 0, 285, 810, 43.13, 37", "gpu_returncode": 0}
+{"unix_s": 1791566612.0656326, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12344, 32607, 0, 255, 810, 43.03, 37", "gpu_returncode": 0}
+{"unix_s": 1791566613.242631, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12344, 32607, 0, 247, 810, 43.14, 37", "gpu_returncode": 0}
+{"unix_s": 1791566614.3976727, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12343, 32607, 0, 270, 810, 42.76, 37", "gpu_returncode": 0}
+{"unix_s": 1791566615.473082, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12343, 32607, 0, 247, 810, 43.30, 37", "gpu_returncode": 0}
+{"unix_s": 1791566616.588226, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12343, 32607, 0, 240, 810, 43.97, 37", "gpu_returncode": 0}
+{"unix_s": 1791566617.7642014, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12343, 32607, 0, 247, 810, 43.46, 37", "gpu_returncode": 0}
+{"unix_s": 1791566618.8336828, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12343, 32607, 0, 262, 810, 43.14, 37", "gpu_returncode": 0}
+{"unix_s": 1791566619.9306421, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12348, 32607, 0, 285, 810, 43.42, 37", "gpu_returncode": 0}
+{"unix_s": 1791566621.0582397, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12353, 32607, 0, 277, 810, 43.07, 37", "gpu_returncode": 0}
+{"unix_s": 1791566622.1526868, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12353, 32607, 0, 270, 810, 42.88, 37", "gpu_returncode": 0}
+{"unix_s": 1791566623.2149596, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12432, 32607, 4, 255, 810, 43.16, 37", "gpu_returncode": 0}
+{"unix_s": 1791566624.3083882, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12438, 32607, 0, 232, 810, 39.15, 37", "gpu_returncode": 0}
+{"unix_s": 1791566625.375404, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12438, 32607, 0, 232, 810, 38.88, 37", "gpu_returncode": 0}
+{"unix_s": 1791566626.4384563, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12448, 32607, 0, 255, 810, 38.98, 37", "gpu_returncode": 0}
+{"unix_s": 1791566627.5218363, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12458, 32607, 0, 1567, 13801, 47.65, 37", "gpu_returncode": 0}
+{"unix_s": 1791566628.641373, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12458, 32607, 0, 2407, 13801, 70.64, 38", "gpu_returncode": 0}
+{"unix_s": 1791566629.7072623, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 2407, 13801, 70.81, 38", "gpu_returncode": 0}
+{"unix_s": 1791566630.7919936, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 442, 810, 47.45, 37", "gpu_returncode": 0}
+{"unix_s": 1791566631.8545141, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 315, 810, 41.22, 37", "gpu_returncode": 0}
+{"unix_s": 1791566632.952266, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 262, 810, 39.31, 37", "gpu_returncode": 0}
+{"unix_s": 1791566634.0191288, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 262, 810, 38.74, 37", "gpu_returncode": 0}
+{"unix_s": 1791566635.1190357, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 277, 810, 38.28, 37", "gpu_returncode": 0}
+{"unix_s": 1791566636.2190928, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 262, 810, 38.56, 37", "gpu_returncode": 0}
+{"unix_s": 1791566637.2983065, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 240, 810, 38.38, 36", "gpu_returncode": 0}
+{"unix_s": 1791566638.3632076, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12424, 32607, 0, 262, 810, 38.78, 36", "gpu_returncode": 0}
+{"unix_s": 1791566639.4743207, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 240, 810, 38.47, 36", "gpu_returncode": 0}
+{"unix_s": 1791566640.5411406, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.08, 36", "gpu_returncode": 0}
+{"unix_s": 1791566641.6181972, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 240, 810, 43.50, 36", "gpu_returncode": 0}
+{"unix_s": 1791566642.728249, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.21, 36", "gpu_returncode": 0}
+{"unix_s": 1791566643.7891283, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.09, 36", "gpu_returncode": 0}
+{"unix_s": 1791566644.8745432, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 43.49, 36", "gpu_returncode": 0}
+{"unix_s": 1791566645.937299, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 270, 810, 43.07, 36", "gpu_returncode": 0}
+{"unix_s": 1791566647.0133393, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 270, 810, 43.31, 36", "gpu_returncode": 0}
+{"unix_s": 1791566648.0908792, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 42.96, 36", "gpu_returncode": 0}
+{"unix_s": 1791566649.1674352, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.13, 36", "gpu_returncode": 0}
+{"unix_s": 1791566650.2469752, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.38, 36", "gpu_returncode": 0}
+{"unix_s": 1791566651.3124585, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.19, 36", "gpu_returncode": 0}
+{"unix_s": 1791566652.4230924, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 270, 810, 43.74, 36", "gpu_returncode": 0}
+{"unix_s": 1791566653.5071285, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 42.93, 36", "gpu_returncode": 0}
+{"unix_s": 1791566654.5616274, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 232, 810, 43.25, 36", "gpu_returncode": 0}
+{"unix_s": 1791566655.6744764, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 42.94, 36", "gpu_returncode": 0}
+{"unix_s": 1791566656.7294924, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 270, 810, 43.44, 36", "gpu_returncode": 0}
+{"unix_s": 1791566657.8785481, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.04, 36", "gpu_returncode": 0}
+{"unix_s": 1791566658.9615242, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.19, 36", "gpu_returncode": 0}
+{"unix_s": 1791566660.1215606, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.28, 36", "gpu_returncode": 0}
+{"unix_s": 1791566661.1865938, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 43.61, 36", "gpu_returncode": 0}
+{"unix_s": 1791566662.2550902, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.12, 36", "gpu_returncode": 0}
+{"unix_s": 1791566663.3386922, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.24, 36", "gpu_returncode": 0}
+{"unix_s": 1791566664.4016492, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 232, 810, 43.17, 36", "gpu_returncode": 0}
+{"unix_s": 1791566665.4676576, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.27, 36", "gpu_returncode": 0}
+{"unix_s": 1791566666.5439405, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 232, 810, 42.57, 36", "gpu_returncode": 0}
+{"unix_s": 1791566667.602764, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 240, 810, 42.48, 36", "gpu_returncode": 0}
+{"unix_s": 1791566668.6831608, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 42.95, 36", "gpu_returncode": 0}
+{"unix_s": 1791566669.74753, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 42.90, 36", "gpu_returncode": 0}
+{"unix_s": 1791566670.8318772, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 42.74, 36", "gpu_returncode": 0}
+{"unix_s": 1791566671.9138412, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 42.78, 36", "gpu_returncode": 0}
+{"unix_s": 1791566672.9808197, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.00, 36", "gpu_returncode": 0}
+{"unix_s": 1791566674.0951164, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.49, 36", "gpu_returncode": 0}
+{"unix_s": 1791566675.1592553, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 43.70, 36", "gpu_returncode": 0}
+{"unix_s": 1791566676.2227464, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.54, 36", "gpu_returncode": 0}
+{"unix_s": 1791566677.2878036, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 285, 810, 43.33, 36", "gpu_returncode": 0}
+{"unix_s": 1791566678.353483, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.41, 36", "gpu_returncode": 0}
+{"unix_s": 1791566679.421475, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 232, 810, 43.11, 36", "gpu_returncode": 0}
+{"unix_s": 1791566680.477176, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.48, 36", "gpu_returncode": 0}
+{"unix_s": 1791566681.532469, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.32, 36", "gpu_returncode": 0}
+{"unix_s": 1791566682.5926661, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 240, 810, 42.92, 36", "gpu_returncode": 0}
+{"unix_s": 1791566683.6551118, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.32, 36", "gpu_returncode": 0}
+{"unix_s": 1791566684.7151623, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.29, 36", "gpu_returncode": 0}
+{"unix_s": 1791566685.932068, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 277, 810, 43.15, 36", "gpu_returncode": 0}
+{"unix_s": 1791566686.9954064, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.11, 36", "gpu_returncode": 0}
+{"unix_s": 1791566688.0775778, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 270, 810, 43.13, 36", "gpu_returncode": 0}
+{"unix_s": 1791566689.1373124, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.06, 36", "gpu_returncode": 0}
+{"unix_s": 1791566690.2002132, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.00, 36", "gpu_returncode": 0}
+{"unix_s": 1791566691.2614331, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 262, 810, 43.07, 36", "gpu_returncode": 0}
+{"unix_s": 1791566692.3299026, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.26, 36", "gpu_returncode": 0}
+{"unix_s": 1791566693.4033666, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 247, 810, 43.34, 36", "gpu_returncode": 0}
+{"unix_s": 1791566694.465582, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.30, 36", "gpu_returncode": 0}
+{"unix_s": 1791566695.5260136, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 12384, 32607, 0, 255, 810, 43.22, 36", "gpu_returncode": 0}
+{"unix_s": 1791566696.594365, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24248, 32607, 0, 240, 810, 43.58, 36", "gpu_returncode": 0}
+{"unix_s": 1791566697.6798875, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24372, 32607, 34, 2790, 13801, 86.70, 38", "gpu_returncode": 0}
+{"unix_s": 1791566698.7454417, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24408, 32607, 0, 2790, 13801, 88.65, 38", "gpu_returncode": 0}
+{"unix_s": 1791566699.8149428, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24428, 32607, 0, 1515, 7001, 77.13, 37", "gpu_returncode": 0}
+{"unix_s": 1791566700.8860784, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24438, 32607, 0, 690, 7001, 54.26, 37", "gpu_returncode": 0}
+{"unix_s": 1791566701.9482536, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24460, 32607, 0, 772, 7001, 55.89, 37", "gpu_returncode": 0}
+{"unix_s": 1791566703.0087998, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24472, 32607, 0, 427, 7001, 53.99, 36", "gpu_returncode": 0}
+{"unix_s": 1791566704.0644057, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24500, 32607, 0, 510, 7001, 55.07, 37", "gpu_returncode": 0}
+{"unix_s": 1791566705.1252587, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24520, 32607, 0, 547, 7001, 56.16, 36", "gpu_returncode": 0}
+{"unix_s": 1791566706.1764472, "pid": null, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 24542, 32607, 0, 652, 7001, 55.06, 36", "gpu_returncode": 0}
+{"unix_s": 1791566707.2354722, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28398, 32607, 100, 2355, 13801, 93.58, 39", "gpu_returncode": 0, "process_memory": {"faults": 52579768, "peak_ws": 71930994688, "ws": 71930994688, "private": 98981998592, "peak_pagefile": 98982006784}}
+{"unix_s": 1791566708.292389, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2767, 13801, 151.64, 40", "gpu_returncode": 0, "process_memory": {"faults": 52612310, "peak_ws": 72064024576, "ws": 72064024576, "private": 99115225088, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566709.3569267, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 159.07, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612313, "peak_ws": 72064036864, "ws": 72064036864, "private": 99115225088, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566710.412624, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 152.29, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612313, "peak_ws": 72064036864, "ws": 72064036864, "private": 99115225088, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566711.469791, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 152.19, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612314, "peak_ws": 72064040960, "ws": 72064040960, "private": 99107938304, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566712.527738, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 150.90, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612316, "peak_ws": 72064049152, "ws": 72064049152, "private": 99107938304, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566713.5895946, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.73, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612316, "peak_ws": 72064049152, "ws": 72064049152, "private": 99107938304, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566714.6495092, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 151.82, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612316, "peak_ws": 72064049152, "ws": 72064049152, "private": 99107938304, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566715.7179759, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 156.13, 41", "gpu_returncode": 0, "process_memory": {"faults": 52612317, "peak_ws": 72064053248, "ws": 72064053248, "private": 99107938304, "peak_pagefile": 99115225088}}
+{"unix_s": 1791566716.7804892, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 149.79, 41", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566717.8454869, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 160.00, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566718.9070334, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 152.48, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566719.9656117, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 152.29, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566721.0275185, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 151.49, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566722.0884407, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 150.71, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566723.1500044, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 151.57, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566724.2118604, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 156.31, 42", "gpu_returncode": 0, "process_memory": {"faults": 52671110, "peak_ws": 72304398336, "ws": 72304398336, "private": 99348692992, "peak_pagefile": 99348692992}}
+{"unix_s": 1791566725.2718246, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 150.05, 42", "gpu_returncode": 0, "process_memory": {"faults": 52728684, "peak_ws": 72304402432, "ws": 72186736640, "private": 99230793728, "peak_pagefile": 99348717568}}
+{"unix_s": 1791566726.333067, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 94, 2767, 13801, 153.53, 42", "gpu_returncode": 0, "process_memory": {"faults": 52757471, "peak_ws": 72304422912, "ws": 72304422912, "private": 99348692992, "peak_pagefile": 99348754432}}
+{"unix_s": 1791566727.3915951, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 154.47, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757712, "peak_ws": 72305410048, "ws": 72305410048, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566728.454475, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 152.05, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757712, "peak_ws": 72305410048, "ws": 72305410048, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566729.5143042, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 152.87, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757712, "peak_ws": 72305410048, "ws": 72305410048, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566730.5763066, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.30, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757713, "peak_ws": 72305414144, "ws": 72305414144, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566731.6392472, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 148.27, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757713, "peak_ws": 72305414144, "ws": 72305414144, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566732.70009, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 147.12, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757713, "peak_ws": 72305414144, "ws": 72305414144, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566733.7690897, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.07, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757713, "peak_ws": 72305414144, "ws": 72305414144, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566734.8269691, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 148.92, 43", "gpu_returncode": 0, "process_memory": {"faults": 52757713, "peak_ws": 72305414144, "ws": 72305414144, "private": 99349688320, "peak_pagefile": 99349688320}}
+{"unix_s": 1791566735.8880074, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 147.95, 43", "gpu_returncode": 0, "process_memory": {"faults": 52816053, "peak_ws": 72543907840, "ws": 72543907840, "private": 99588624384, "peak_pagefile": 99588624384}}
+{"unix_s": 1791566736.9500504, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 155.69, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566738.0135384, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 152.90, 43", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566739.0737891, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 153.39, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566740.1349628, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.60, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566741.2002416, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.62, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566742.2586923, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.63, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566743.3184853, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 149.75, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566744.3774343, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 150.54, 44", "gpu_returncode": 0, "process_memory": {"faults": 52816296, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589619712}}
+{"unix_s": 1791566745.4372568, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2782, 13801, 146.77, 44", "gpu_returncode": 0, "process_memory": {"faults": 52873866, "peak_ws": 72544903168, "ws": 72427229184, "private": 99471720448, "peak_pagefile": 99589623808}}
+{"unix_s": 1791566746.4958904, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2760, 13801, 157.71, 44", "gpu_returncode": 0, "process_memory": {"faults": 52902650, "peak_ws": 72544903168, "ws": 72544903168, "private": 99589619712, "peak_pagefile": 99589627904}}
+{"unix_s": 1791566747.5542634, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 158.02, 44", "gpu_returncode": 0, "process_memory": {"faults": 52902893, "peak_ws": 72545894400, "ws": 72545894400, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566748.6136076, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 161.48, 44", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72545902592, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566749.6727514, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 156.35, 44", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72545902592, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566750.734243, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 158.98, 45", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72545902592, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566751.7904844, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2767, 13801, 165.30, 45", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72545902592, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566752.8523848, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 160.74, 45", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72545902592, "private": 99590619136, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566753.9135196, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 159.74, 45", "gpu_returncode": 0, "process_memory": {"faults": 52902895, "peak_ws": 72545902592, "ws": 72385454080, "private": 99472715776, "peak_pagefile": 99590619136}}
+{"unix_s": 1791566754.971015, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 155.64, 45", "gpu_returncode": 0, "process_memory": {"faults": 52978038, "peak_ws": 72617873408, "ws": 72617873408, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566756.0322285, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 161.65, 45", "gpu_returncode": 0, "process_memory": {"faults": 53028587, "peak_ws": 72824922112, "ws": 72824922112, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566757.0943384, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 157.02, 45", "gpu_returncode": 0, "process_memory": {"faults": 53039005, "peak_ws": 72867594240, "ws": 72867594240, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566758.1577508, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2767, 13801, 159.18, 45", "gpu_returncode": 0, "process_memory": {"faults": 53039005, "peak_ws": 72867594240, "ws": 72867594240, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566759.2187893, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2767, 13801, 165.20, 45", "gpu_returncode": 0, "process_memory": {"faults": 53039005, "peak_ws": 72867594240, "ws": 72867594240, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566760.2813017, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2775, 13801, 160.72, 45", "gpu_returncode": 0, "process_memory": {"faults": 53039005, "peak_ws": 72867594240, "ws": 72867594240, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566761.3405845, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28402, 32607, 100, 2767, 13801, 159.64, 45", "gpu_returncode": 0, "process_memory": {"faults": 53039005, "peak_ws": 72867594240, "ws": 72867594240, "private": 99590619136, "peak_pagefile": 99590660096}}
+{"unix_s": 1791566762.4036095, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28448, 32607, 0, 2790, 13801, 114.99, 44", "gpu_returncode": 0, "process_memory": {"faults": 53204056, "peak_ws": 72965124096, "ws": 72965124096, "private": 99750985728, "peak_pagefile": 99750993920}}
+{"unix_s": 1791566763.4635932, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 94, 2760, 13801, 215.16, 50", "gpu_returncode": 0, "process_memory": {"faults": 53254790, "peak_ws": 73024643072, "ws": 73024643072, "private": 99839000576, "peak_pagefile": 99840598016}}
+{"unix_s": 1791566764.5381818, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 96, 2760, 13801, 306.56, 53", "gpu_returncode": 0, "process_memory": {"faults": 53254855, "peak_ws": 73024909312, "ws": 73024909312, "private": 99839275008, "peak_pagefile": 99840598016}}
+{"unix_s": 1791566765.6176553, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 94, 2760, 13801, 296.05, 51", "gpu_returncode": 0, "process_memory": {"faults": 53254855, "peak_ws": 73024909312, "ws": 73024909312, "private": 99839275008, "peak_pagefile": 99840598016}}
+{"unix_s": 1791566766.694638, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 85, 2760, 13801, 298.24, 51", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566767.7509458, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2760, 13801, 179.71, 47", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566768.8075607, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 171.62, 47", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566769.8688393, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 162.47, 47", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566770.928065, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 161.32, 46", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566771.984018, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 158.62, 46", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566773.041106, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 157.66, 46", "gpu_returncode": 0, "process_memory": {"faults": 53283959, "peak_ws": 73143861248, "ws": 73143861248, "private": 99958423552, "peak_pagefile": 99958423552}}
+{"unix_s": 1791566774.0964918, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 59, 2775, 13801, 153.90, 46", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566775.1591918, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2760, 13801, 167.53, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566776.218529, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2767, 13801, 170.63, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566777.2814667, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 164.08, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566778.3442426, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 161.37, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566779.4059803, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 158.50, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566780.4620845, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 157.09, 47", "gpu_returncode": 0, "process_memory": {"faults": 53394771, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566781.5230258, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 31, 2775, 13801, 148.49, 46", "gpu_returncode": 0, "process_memory": {"faults": 53505565, "peak_ws": 73361530880, "ws": 73243856896, "private": 100058533888, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566782.5863695, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 99, 2782, 13801, 145.52, 47", "gpu_returncode": 0, "process_memory": {"faults": 53591918, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176433152, "peak_pagefile": 100176470016}}
+{"unix_s": 1791566783.645238, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2782, 13801, 145.70, 47", "gpu_returncode": 0, "process_memory": {"faults": 53678272, "peak_ws": 73361530880, "ws": 73361530880, "private": 100176437248, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566784.7032225, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 0, 2782, 13801, 135.65, 45", "gpu_returncode": 0, "process_memory": {"faults": 53735868, "peak_ws": 73361530880, "ws": 73026367488, "private": 99840524288, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566785.7970133, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 85, 2775, 13801, 173.74, 48", "gpu_returncode": 0, "process_memory": {"faults": 53735870, "peak_ws": 73361530880, "ws": 73026375680, "private": 99840524288, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566786.8902652, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 163.71, 47", "gpu_returncode": 0, "process_memory": {"faults": 53764656, "peak_ws": 73361530880, "ws": 73144053760, "private": 99958427648, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566787.9529295, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2782, 13801, 149.99, 47", "gpu_returncode": 0, "process_memory": {"faults": 53764656, "peak_ws": 73361530880, "ws": 73144053760, "private": 99958427648, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566789.014849, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 80, 2767, 13801, 161.21, 48", "gpu_returncode": 0, "process_memory": {"faults": 53822619, "peak_ws": 73361530880, "ws": 73027989504, "private": 99842375680, "peak_pagefile": 100176498688}}
+{"unix_s": 1791566790.0824885, "pid": 51548, "gpu_csv": "0, NVIDIA GeForce RTX 5090, 617.14, 28464, 32607, 100, 2775, 13801, 148.85, 46", "gpu_returncode": 0, "process_memory": {"faults": 53851646, "peak_ws": 73361530880, "ws": 73146654720, "private": 99961274368, "peak_pagefile": 100176498688}}

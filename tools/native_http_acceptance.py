@@ -25,7 +25,7 @@ def validate_http(engine,tokenizer,template,output):
   events=[json.loads(l[6:]) for l in stream.splitlines() if l.startswith('data: ') and l!='data: [DONE]']
   text=''.join(e['choices'][0].get('delta',{}).get('content') or '' for e in events if e.get('choices'))
   assert text==answer['choices'][0]['message']['content'],(text,answer)
-  anthropic=json.loads(request('/v1/messages',{**common,'messages':[{'role':'user','content':'Reply with exactly Green.'}]}))
+  anthropic=json.loads(request('/v1/messages',{**common,'thinking':{'type':'disabled'},'messages':[{'role':'user','content':'Reply with exactly Green.'}]}))
   assert 'Green' in ''.join(x.get('text','') for x in anthropic['content'])
   tools=[{'type':'function','function':{'name':'lookup_code','description':'Look up the stored access code.',
           'parameters':{'type':'object','properties':{'name':{'type':'string'}},'required':['name'],'additionalProperties':False}}}]

@@ -1,5 +1,5 @@
 """Teacher-forced native logits, long-context recall and real HTTP acceptance."""
-import argparse,json,sys,time,threading
+import argparse,hashlib,json,sys,time,threading
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
@@ -21,6 +21,7 @@ TEXTS=[('english','Explain how to implement a least recently used cache.',
 def main():
  p=argparse.ArgumentParser();p.add_argument('--config',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
  p.add_argument('--cases',default='reference,tc3');p.add_argument('--reference-output',type=Path)
+ p.add_argument('--oracle-config',type=Path,help='read-only fidelity GGUF config for the fidelity case')
  p.add_argument('--teacher',action='store_true');p.add_argument('--lengths',default='');p.add_argument('--http',action='store_true')
  p.add_argument('--expert-cache',type=int,default=4500);p.add_argument('--bare-model',action='store_true');a=p.parse_args()
  a.output.mkdir(parents=True,exist_ok=False);cfg=json.loads(a.config.read_text(encoding='utf8'))
@@ -29,24 +30,40 @@ def main():
  result={'config':cfg,'cases':{}}
  def save():(a.output/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
  for case in a.cases.split(','):
-  folder=a.output/case;folder.mkdir();opts=CASES[case];args=list(cfg['args'])
+  folder=a.output/case;folder.mkdir();opts={} if case=='fidelity' else CASES[case];args=list(cfg['args'])
+  run_cfg=cfg
+  if case=='fidelity':
+   if not a.oracle_config:raise ValueError('fidelity requires --oracle-config')
+   run_cfg=json.loads(a.oracle_config.read_text(encoding='utf8'))
+   for flag in ('--safetensors','--model'):
+    if flag in args:
+     i=args.index(flag);del args[i:i+2]
+   for flag in ('--pack','--native','--native-dense-gguf','--native-head-gguf','--embd-gguf','--ple-gguf'):
+    if flag in run_cfg['args']:args.extend([flag,run_cfg['args'][run_cfg['args'].index(flag)+1]])
+   args.append('--resident-experts')
   def setting(flag,v):
    if flag in args:args[args.index(flag)+1]=str(v)
    else:args.extend([flag,str(v)])
-  setting('--max-context',65536 if a.lengths else 4096);setting('--prefill',8192 if a.lengths else 256)
+  lengths=[int(x) for x in a.lengths.split(',') if x]
+  context=((max(lengths)+256+8191)//8192)*8192 if lengths else 4096
+  setting('--max-context',context);setting('--prefill',8192 if lengths else 256)
   setting('--expert-cache',a.expert_cache);setting('--adapt-every',0);setting('--adapt-swaps',0)
   setting('--pcie-frac',opts.get('pcie',1));setting('--prompt-cache',6);setting('--conversation-cache-mib',2048)
   k=opts.get('mtp',0);setting('--spec',max(2,k+1));setting('--mtp-max-t',max(1,k+1));setting('--spec-min-p',0)
   if k:args+=['--mtp','native']
-  if a.bare_model:
+  if a.bare_model and case!='fidelity':
    if '--expert-profile' in args:
     i=args.index('--expert-profile');del args[i:i+2]
    if '--safetensors' in args:args[args.index('--safetensors')]='--model'
-  env=child_env(cfg);env.update({k:str(v) for k,v in opts.items() if k.startswith('STRATA_')})
+  env=child_env({'lib_dirs':run_cfg.get('lib_dirs',[]),'env':cfg.get('env',{})});env.update({k:str(v) for k,v in opts.items() if k.startswith('STRATA_')})
+  if case=='fidelity':env.update({'STRATA_RESIDENT_PIN':'1','STRATA_PARTIAL_PIN':'0','STRATA_RESIDENT_HEADROOM_GIB':'4','STRATA_STAGE_PIN':'0'})
   env.update({'STRATA_DUMP_FIRST_LOGITS':str((folder/'logits.f32').resolve()),'STRATA_PREFILL_TRACE':'1','STRATA_MTP_FULL_HEAD':'1'})
-  (folder/'command.json').write_text(json.dumps({'command':[cfg['exe'],*args],'env':{k:v for k,v in env.items() if k.startswith('STRATA_')}},indent=2),encoding='utf8')
-  row={'requests':[]};result['cases'][case]=row;save();tel=Telemetry(folder/'telemetry.jsonl');start=time.monotonic()
-  engine=StrataEngine(cfg['exe'],args,cwd=cfg['cwd'],log=str((folder/'engine.log').resolve()),env=env);tel.pid=engine.proc.pid
+  (folder/'command.json').write_text(json.dumps({'command':[run_cfg['exe'],*args],'env':{k:v for k,v in env.items() if k.startswith('STRATA_')}},indent=2),encoding='utf8')
+  row={'requests':[],'binary_sha256':hashlib.sha256(Path(run_cfg['exe']).read_bytes()).hexdigest(),'started_unix_s':time.time()};result['cases'][case]=row;save();tel=Telemetry(folder/'telemetry.jsonl');start=time.monotonic()
+  try:engine=StrataEngine(run_cfg['exe'],args,cwd=cfg['cwd'],log=str((folder/'engine.log').resolve()),env=env)
+  except Exception as e:
+   row.update(status='failed',error=str(e),telemetry=tel.close());result['status']='failed';save();raise
+  tel.pid=engine.proc.pid
   row['startup_s']=time.monotonic()-start;row['info']=dict(engine.info)
   def generate(name,ids,limit,target=None):
    start=time.monotonic();out=[];first=None
@@ -54,14 +71,21 @@ def main():
     if v is not None:
      if first is None:first=time.monotonic()-start
      out.append(v)
-   j=len(row['requests']);r={'name':name,'input_tokens':len(ids),'ids':out,'text':tok.decode(out),'ttft_s':first,'wall_s':time.monotonic()-start,**engine.last}
+   input_hash=hashlib.sha256(np.asarray(ids,dtype='<i4').tobytes()).hexdigest()
+   j=len(row['requests']);r={'name':name,'input_tokens':len(ids),'input_sha256':input_hash,'ids':out,'text':tok.decode(out),'ttft_s':first,'wall_s':time.monotonic()-start,**engine.last}
    assert r['generated']==len(out) and 0<len(out)<=limit
    assert r['file_blobs']==r['file_mb']==0
+   if case=='fidelity':assert r['lookups']==r['hits'],'CPU Q8 fallback would confound the fidelity comparison'
+   x=np.fromfile(folder/f'logits.f32.{j}',dtype='<f4').astype('float64');assert x.shape==(248320,) and np.isfinite(x).all()
    if target is not None:
-    x=np.fromfile(folder/f'logits.f32.{j}',dtype='<f4').astype('float64');assert x.shape==(248320,) and np.isfinite(x).all()
     r['target']=target;r['nll']=float(np.log(np.exp(x-x.max()).sum())+x.max()-x[target]);r['argmax']=int(x.argmax())
-    ref=(a.reference_output or a.output)/'reference'/f'logits.f32.{j}'
-    if case!='reference' and ref.exists():r['logits']=compare(np.fromfile(ref,dtype='<f4'),x)
+   reference_root=a.reference_output or a.output
+   ref=reference_root/'reference'/f'logits.f32.{j}'
+   if case!='reference' and ref.exists():
+    reference=json.loads((reference_root/'results.json').read_text(encoding='utf8'))['cases']['reference']['requests'][j]
+    assert reference['name']==name,'reference requests do not align'
+    r['same_input_as_reference']=reference['input_sha256']==input_hash
+    if r['same_input_as_reference']:r['logits']=compare(np.fromfile(ref,dtype='<f4'),x)
    row['requests'].append(r);save();return r
   try:
    if a.teacher:
@@ -70,11 +94,17 @@ def main():
      for j,target in enumerate(targets):generate(f'teacher-{category}-{j}',base+targets[:j],1,target)
      print(case,category,len(targets),'positions',flush=True)
     measured=[r for r in row['requests'] if 'nll' in r]
-    row['teacher_summary']={'positions':len(measured),'mean_nll':float(np.mean([r['nll'] for r in measured]))}
+    row['teacher_summary']={'positions':len(measured),'mean_nll':float(np.mean([r['nll'] for r in measured])),
+      'by_category':{category:{'positions':len(items),'mean_nll':float(np.mean([r['nll'] for r in items]))}
+        for category in ('english','chinese','code') if (items:=[r for r in measured if r['name'].startswith('teacher-'+category+'-')])}}
     comparisons=[r['logits'] for r in measured if 'logits' in r]
-    if comparisons:row['teacher_summary'].update(mean_kl=float(np.mean([r['kl_reference_candidate'] for r in comparisons])),top1_agreement=float(np.mean([r['argmax_equal'] for r in comparisons])))
+    if comparisons:
+     baseline=json.loads(((a.reference_output or a.output)/'results.json').read_text(encoding='utf8'))['cases']['reference']['teacher_summary']
+     row['teacher_summary'].update(mean_kl=float(np.mean([r['kl_reference_candidate'] for r in comparisons])),
+       top1_agreement=float(np.mean([r['argmax_equal'] for r in comparisons])),
+       mean_nll_delta=row['teacher_summary']['mean_nll']-baseline['mean_nll'])
     save()
-   for size in [int(x) for x in a.lengths.split(',') if x]:
+   for size in lengths:
     for depth in (0.1,0.9):
      code=f'ZEBRA-{size}-D{int(depth*100)}'
      head=tok.encode('<|im_start|>user\nRead the following archive.\n',parse_special=True)
@@ -91,7 +121,8 @@ def main():
    if a.http:row['http']=validate_http(engine,tok,template,folder/'http.json');save()
   finally:
    row['telemetry']=tel.close();save();engine.close()
-  log=(folder/'engine.log').read_text(encoding='utf8');assert 'post-residency expert source bytes=0' in log
+  log=(folder/'engine.log').read_text(encoding='utf8')
+  if case!='fidelity':assert 'post-residency expert source bytes=0' in log
   row['status']='completed';save()
  result['status']='completed';save()
 if __name__=='__main__':main()
