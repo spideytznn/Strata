@@ -20,17 +20,21 @@ multi-GPU are unsupported; HIP and SYCL have not been built or validated.
 
 The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 context,
 8,192-token prefill and `127.0.0.1:8880`**, with INT8 KV, W4A8 expert prefill,
-dedicated prefill workspace and native MTP2. FP32 decode activations and BF16x2
-dense prefill remain enabled. Its config is `config/native/rtx5090-262k-mtp2.json`. The desktop
+dedicated prefill workspace and four MTP draft tokens with Q8_0 draft projections.
+FP32 decode activations and BF16x2 dense prefill remain enabled. Its config is
+`config/native/rtx5090-262k-mtp4.json`. The desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 The 32K profile and its repeated benchmark settings remain available separately.
 262K is this profile's configured capacity. The completed long-context
 acceptance suite reaches 32K; this desktop profile has not completed a separate
-262K acceptance run. This INT8 KV / dedicated-workspace combination has been
-built but still needs GPU acceptance and end-to-end timing. Restarting the
-desktop launcher selects the new `strata-startup.exe`; an already-running engine
-keeps its previous settings. Engine diagnostics append to `logs/native-262k-int8.log`.
+262K acceptance run. This INT8 KV / Q8 MTP combination has been built but still
+needs GPU acceptance and end-to-end timing. Restarting the desktop launcher
+selects the new `strata-prefill.exe`; an already-running engine keeps its previous
+settings. Engine diagnostics append to `logs/native-262k-mtp4-q8.log`.
+The original BF16 MTP path remains the engine default and is available in the
+separate MTP2 profile. Q8 applies only to ten MTP projections; its experts retain
+their original FP8 codes and the main model retains its original NVFP4 weights.
 The desktop profile batches 64 experts and uses four CPU packing workers during
 startup, then frees that scratch memory. Weights remain bit-preserved and fully
 resident; no converted model cache is written. See the bounded CPU loading

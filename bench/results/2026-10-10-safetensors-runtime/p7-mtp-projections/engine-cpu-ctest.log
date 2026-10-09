@@ -1,0 +1,69 @@
+Start testing: Oct 10 04:06 中国标准时间
+----------------------------------------------------------
+64/71 Testing: message_boundary_test
+64/71 Test: message_boundary_test
+Command: "G:/Strata/Strata-Safetensors/build-native-engine/message_boundary_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-native-engine
+"message_boundary_test" start time: Oct 10 04:06 中国标准时间
+Output:
+----------------------------------------------------------
+message_boundary_test OK (21 checks)
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"message_boundary_test" end time: Oct 10 04:06 中国标准时间
+"message_boundary_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+65/71 Testing: conv_cache_test
+65/71 Test: conv_cache_test
+Command: "G:/Strata/Strata-Safetensors/build-native-engine/conv_cache_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-native-engine
+"conv_cache_test" start time: Oct 10 04:06 中国标准时间
+Output:
+----------------------------------------------------------
+conv_cache_test
+  over budget with fresh stamps: the oldest leaf leaves (the FIFO it was) ok
+  the root's stale stamp never makes it the victim                   ok
+  the root - the shared prefix - is never the victim                 ok
+  after a mount, the rotation takes the next least recently used leaf ok
+  a two-slot budget keeps root + newest and drops the leaf in between ok
+  a one-slot budget has no pin: the oldest leaves, the newest point stays ok
+  ties among equally stale leaves: the earlier index, deterministically ok
+  a stale tail checkpoint leaves before the oldest leaf              ok
+  the newest item, even a tail, is not the victim                    ok
+  the root is never the victim, tail flag or not                     ok
+  no tail flags: the plain policy                                    ok
+  the oldest checkpoint is pinned: the next least recently used leaves ok
+  no pin flags: the plain policy                                     ok
+  two pins: the third oldest leaves                                  ok
+  a pinned item is not taken as the tail either                      ok
+  everything pinned: the oldest pin leaves, never the root           ok
+  a one-slot budget keeps no pin: the oldest leaves                  ok
+PASS
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"conv_cache_test" end time: Oct 10 04:06 中国标准时间
+"conv_cache_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+69/71 Testing: mtp_q8_stream
+69/71 Test: mtp_q8_stream
+Command: "G:/Strata/Strata-Safetensors/build-native-engine/mtp_q8_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-native-engine
+"mtp_q8_stream" start time: Oct 10 04:06 中国标准时间
+Output:
+----------------------------------------------------------
+MTP Q8 streaming tests passed
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mtp_q8_stream" end time: Oct 10 04:06 中国标准时间
+"mtp_q8_stream" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 10 04:06 中国标准时间

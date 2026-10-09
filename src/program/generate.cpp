@@ -2135,7 +2135,7 @@ int strata_main(int argc, char** argv) {
         o.pack.clear();
         if (!o.mtp.empty()) {
             if (o.mtp != "native" || !o.mtp_q4.empty() || !o.mtp_draft_vocab.empty()) {
-                std::fprintf(stderr,"--safetensors MTP requires --mtp native with original precision and full vocabulary\n"); return 2;
+                std::fprintf(stderr,"--safetensors MTP requires --mtp native without external Q4 or draft-vocabulary overrides\n"); return 2;
             }
             o.mtp = o.safetensors;
         }
@@ -7697,11 +7697,13 @@ int strata_main(int argc, char** argv) {
             return true;
         };
         sp.on_chunk = [&](const float* R_rows, int64_t T, int64_t p0, std::string& e) -> bool {
+            const auto callback_start = Clock::now();
             std::vector<int32_t> nxt((size_t) T);
             for (int64_t t = 0; t < T; ++t) nxt[(size_t) t] = (int32_t) cur[(size_t) (p0 + t + 1)];
             // E-9: batched through the prompt path when it can (one GPU: a layer split's drafter is on the last stage)
             const bool batched = use_mtp && !multi_gpu && sp.draft_kv(mtp, R_rows, nxt.data(), T, p0, e);
             if (!e.empty() || (use_mtp && !batched && !mtp.prefill(R_rows, nxt.data(), T, p0, e))) return false;
+            const auto draft_done = Clock::now();
             if (use_mtp && std::getenv("STRATA_SNAPSHOT_VERIFY") != nullptr)
                 std::fprintf(stderr, "strata serve: DRAFT_PREFILL path=%s mode=%d cells=%lld\n",
                              batched ? "batched" : "token", mtp.kv_state().kv_mode, (long long) T);
@@ -7714,6 +7716,7 @@ int strata_main(int argc, char** argv) {
             strata::core::progress_at("reading the prompt (batched), done up to token", done);
             strata::core::progress_beat();
             std::fflush(stdout);
+            const auto checkpoint_start = Clock::now();
             const bool periodic_checkpoint = o.prompt_cache_every > 0 && done >= pp_next_check;
             // Keep the prefill's existing chunk geometry. One extra near-tail checkpoint
             // can serve a branch whose shared prefix ends before the final cached state.
@@ -7739,6 +7742,13 @@ int strata_main(int argc, char** argv) {
                 if (!saved) { e = "saving a conversation checkpoint failed" + ckpt_why; return false; }
                 if (periodic_checkpoint) pp_next_check = done + o.prompt_cache_every;
                 if (tail_checkpoint) pp_tail_saved = true;
+            }
+            if (std::getenv("STRATA_PREFILL_TRACE")) {
+                const auto callback_done = Clock::now();
+                const auto elapsed = [](auto a, auto b) { return std::chrono::duration<double, std::milli>(b-a).count(); };
+                std::fprintf(stderr,"strata prefill callback: start=%lld rows=%lld draft_path=%s draft_ms=%.3f checkpoint_ms=%.3f total_ms=%.3f\n",
+                             (long long)p0,(long long)T,!use_mtp?"off":batched?"batched":"token",
+                             elapsed(callback_start,draft_done),elapsed(checkpoint_start,callback_done),elapsed(callback_start,callback_done));
             }
             return true;
         };

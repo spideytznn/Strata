@@ -174,7 +174,10 @@ const void* MtpDrafter::q8(const char* name) const {
     return nullptr;
 }
 const void* MtpDrafter::wq(const char* name, int& type) const {
-    if (native_fp8_) { type = 30; return bf16(name); }
+    if (native_fp8_) {
+        type = native_q8_projections_ ? 8 : 30;
+        return native_q8_projections_ ? q8(name) : bf16(name);
+    }
     if (dense4_ != nullptr)
         for (const auto& e : q4_off_)
             if (e.first == name) { type = GGML_Q4_0; return dense4_ + e.second; }
@@ -262,6 +265,7 @@ bool MtpDrafter::load(const std::string& rt_dir, const ModelGeometry& g, Session
         experts_ = shared->experts_;
         tensors_ = shared->tensors_;
         native_fp8_ = shared->native_fp8_;
+        native_q8_projections_ = shared->native_q8_projections_;
         owns_weights_ = false;
         owns_draft_head_ = false;
     }
@@ -324,7 +328,7 @@ bool MtpDrafter::load(const std::string& rt_dir, const ModelGeometry& g, Session
     const char* required[] = {"fc_embedding.weight", "fc_hidden.weight", "self_attn.q_proj.weight", "self_attn.k_proj.weight",
                               "self_attn.v_proj.weight", "self_attn.o_proj.weight", "mlp.shared_expert.gate_proj.weight",
                               "mlp.shared_expert.up_proj.weight", "mlp.shared_expert.down_proj.weight"};
-    for (const char* n : required) if (native_fp8_ ? !bf16(n) : !q8(n)) { err = std::string("mtp: missing projection ") + n; return false; }
+    for (const char* n : required) if (native_fp8_ && !native_q8_projections_ ? !bf16(n) : !q8(n)) { err = std::string("mtp: missing projection ") + n; return false; }
 
     // ---- the layer's own K/V (dense attention: no indexer state is read)
     const strata::kernels::QsaShapes s = shapes_of(g);

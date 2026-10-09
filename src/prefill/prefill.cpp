@@ -4,6 +4,7 @@
 #include "mmq_resident_sort.hpp"
 #include "wmma_gemm.h"
 #include "strata/core/mtp.hpp"
+#include "strata/kernels/native_gr_postops.hpp"
 #include "strata/core/progress.hpp"
 #include "strata/core/on_device.hpp"
 
@@ -1389,6 +1390,8 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
     const core::ModelGeometry& g = *m.g;
     const int64_t Nn = g.n_embd, HCN = g.hc * g.n_embd, KV = g.n_head_kv * g.head_dim;
     constexpr int kQ8_0 = 8;   // GGML_TYPE_Q8_0
+    // Opt-in until the BF16 batch path passes draft-KV/acceptance checks.
+    static const bool bf16_batch = [] { const char* v = std::getenv("STRATA_MTP_BATCH_BF16"); return v && v[0] == '1'; }();
     const float* w_ne = mtp.tensor_f32("pre_fc_norm_embedding.weight");
     const void* w_fe = mtp.tensor_q8("fc_embedding.weight");
     const float* w_nh = mtp.tensor_f32("pre_fc_norm_hidden.weight");
@@ -1398,6 +1401,13 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
     const uint16_t* w_up = mtp.tensor_bf16("attn_hyper_connection.input_mix_weight_up.weight");
     const void* w_k = mtp.tensor_q8("self_attn.k_proj.weight");
     const void* w_v = mtp.tensor_q8("self_attn.v_proj.weight");
+    const bool original_bf16 = bf16_batch && !w_fe && !w_fh && !w_k && !w_v;
+    if (original_bf16) {
+        w_fe = mtp.tensor_bf16("fc_embedding.weight");
+        w_fh = mtp.tensor_bf16("fc_hidden.weight");
+        w_k = mtp.tensor_bf16("self_attn.k_proj.weight");
+        w_v = mtp.tensor_bf16("self_attn.v_proj.weight");
+    }
     const float* w_kn = mtp.tensor_f32("self_attn.k_norm.weight");
     if (!w_ne || !w_fe || !w_nh || !w_fh || !w_hn || !w_dn || !w_up || !w_k || !w_v || !w_kn) return false;
     const core::NativeEmbed* nemb = core::native_embed();
@@ -1413,7 +1423,7 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
     // E-9: the drafter's Q8_0 matrices through Q8_1 x Q8_0 MMQ - its own pass's integer dot products (mmvq), so
     // its K/V stay close to what the drafter computes itself; STRATA_MTP_BATCH_F16=1: FP16 GEMMs (the A/B)
     static const bool f16_only = [] { const char* v = std::getenv("STRATA_MTP_BATCH_F16"); return v && v[0] == '1'; }();
-    const bool q8 = !f16_only && mmq::built() && mmq::fits(kQ8_0, Nn) && mmq::fits(kQ8_0, KV);   // #420
+    const bool q8 = !original_bf16 && !f16_only && mmq::built() && mmq::fits(kQ8_0, Nn) && mmq::fits(kQ8_0, KV);   // #420
     const uint64_t per_row = 4 * (2 * Nn + 4 * HCN + LR + HC + Nn + 2 * KV + 1) + 2 * (Nn + 2 * HCN + LR + Nn) + 64 +
                              (q8 ? (uint64_t) mmq::q8_bytes(g.hc, Nn) + 4 * g.hc : 0);
     int64_t B = std::min<int64_t>(n - r0, (int64_t) (m.region_bytes / per_row) & ~(int64_t) 63);
@@ -1443,6 +1453,10 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
     int32_t* ident = q8 ? (int32_t*) carve((size_t) B * g.hc * 4) : nullptr;
     int32_t* bnd = q8 ? (int32_t*) carve(16) : nullptr;
     if ((uint64_t) (q - m.region) > m.region_bytes) return false;
+    if (std::getenv("STRATA_PREFILL_TRACE"))
+        std::fprintf(stderr,"strata draft batch: weights=%s math=%s start=%lld rows=%lld batch=%lld\n",
+                     original_bf16?"bf16":"q8_0",original_bf16?"bf16x3":q8?"q8_mmq":"fp16",
+                     (long long)cell0,(long long)(n-r0),(long long)B);
     static const bool timing = std::getenv("STRATA_DRAFT_TIMING") != nullptr;   // debug: where this pass's time goes
     if (timing) cudaStreamSynchronize(m.cs);
     const auto ti0 = Clock::now();
@@ -1460,6 +1474,7 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
     // y[rows, n_out] = x[rows, k] . w^T for a Q8_0 matrix: MMQ from the FP32 rows (bounds slot 0: rows, 1: rows*hc)
     auto proj = [&](const float* x, const uint16_t* x16, const void* w, float* y, int64_t rows, int64_t n_out,
                     int64_t k, int slot) {
+        if (original_bf16) { m.gemm.bf16_f32(x, static_cast<const uint16_t*>(w), y, rows, n_out, k); return; }
         if (!q8) { m.gemm.native(x16, kQ8_0, w, y, rows, n_out, k); return; }
         mmq::quantize(x, nullptr, xq, kQ8_0, k, k, rows, m.cs);
         mmq::Product p;
@@ -1494,22 +1509,32 @@ bool Prefill::draft_kv(core::MtpDrafter& mtp, const float* R_rows, const int32_t
                                                   (uint64_t) (wemb->ne0 / wemb->group_elems), emb, m.cs);
         }
         rms_rows(emb, w_ne, nb, Nn, Nn, EPS, m.cs);
-        if (!q8) to_f16(emb, en16, nb * Nn, m.cs);
+        if (!q8 && !original_bf16) to_f16(emb, en16, nb * Nn, m.cs);
         proj(emb, en16, w_fe, e2, nb, Nn, Nn, 0);
         cudaMemcpyAsync(hn, R_rows + (size_t) b0 * HCN, (size_t) nb * HCN * 4, cudaMemcpyDeviceToDevice, m.cs);
         if (mtp.hnorm_per_stream())   // --mtp-hnorm stream: as the drafter's own pass (mtp.cpp)
             strata::kernels::native_qsa_rms_norm_grouped(hn, w_nh, hn, (int) Nn, (int) g.hc, (int) (nb * g.hc), EPS, m.cs);
         else
             rms_rows(hn, w_nh, nb, HCN, HCN, EPS, m.cs);
-        if (!q8) to_f16(hn, hn16, nb * HCN, m.cs);
+        if (!q8 && !original_bf16) to_f16(hn, hn16, nb * HCN, m.cs);
         proj(hn, hn16, w_fh, h2, nb * g.hc, Nn, Nn, 1);   // every stream through fc_hidden
         strata::kernels::add_streams_broadcast(h2, e2, Rm, Nn, (int) g.hc, (int) nb, m.cs);
         // the attention hyper-connection's read (its mixed input only: this pass writes nothing back)
-        gr_norm_rs(Rm, w_hn, EPS, grs, xn16, nb, m.cs);
-        m.gemm.bf16(xn16, w_dn, lo, nb, LR, HCN);
-        gr_silu(lo, lo16, nb, m.cs);
-        m.gemm.bf16(lo16, w_up, gated, nb, HCN, LR);
-        gr_mix_r(Rm, grs, w_hn, gated, mixed, nullptr, nb, m.cs, mixed_h);
+        if (original_bf16) {
+            // hn is no longer needed after add_streams_broadcast. Reuse it for
+            // FP32 HC-normalized rows, without allocating a second workspace.
+            gr_norm(Rm, w_hn, EPS, hn, xn16, nb, m.cs);
+            m.gemm.bf16_f32(hn, w_dn, lo, nb, LR, HCN);
+            strata::kernels::native_gr_down_silu(lo, int(nb * LR), int(g.hc), m.cs);
+            m.gemm.bf16_f32(lo, w_up, gated, nb, HCN, LR);
+            strata::kernels::native_gr_pre_gated_multi(hn, gated, mixed, int(Nn), int(g.hc), int(nb), true, m.cs);
+        } else {
+            gr_norm_rs(Rm, w_hn, EPS, grs, xn16, nb, m.cs);
+            m.gemm.bf16(xn16, w_dn, lo, nb, LR, HCN);
+            gr_silu(lo, lo16, nb, m.cs);
+            m.gemm.bf16(lo16, w_up, gated, nb, HCN, LR);
+            gr_mix_r(Rm, grs, w_hn, gated, mixed, nullptr, nb, m.cs, mixed_h);
+        }
         // K and V into the drafter's cache, as the prompt path's QSA layers append theirs
         proj(mixed, mixed_h, w_k, Kc, nb, KV, Nn, 0);
         proj(mixed, mixed_h, w_v, Vc, nb, KV, Nn, 0);
@@ -2173,6 +2198,7 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
     Clock::time_point ple_t0 = t_start;
 
     for (int64_t c0 = 0; c0 < n; c0 += m.T) {
+        const auto chunk_start = Clock::now();
         if (should_stop && should_stop()) { err = "cancelled"; return false; }
         if (std::getenv("STRATA_TRACE")) { std::fprintf(stderr, "strata trace: prompt chunk %lld of %lld\n", (long long) c0, (long long) n); std::fflush(stderr); }
         const int64_t T = std::min(m.T, n - c0), p0 = pos0 + c0;
@@ -4232,6 +4258,14 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
             if (on_chunk && !on_chunk(m.R, T, p0, err)) return false;
             host_sync_ms += std::chrono::duration<double, std::milli>(toc2 - toc).count();
             host_chunk_ms += ms_since(toc2);
+            if (std::getenv("STRATA_PREFILL_TRACE")) {
+                const auto chunk_done = Clock::now();
+                std::fprintf(stderr,"strata prefill chunk: start=%lld rows=%lld main_and_wait_ms=%.3f callback_ms=%.3f total_ms=%.3f\n",
+                             (long long)p0,(long long)T,
+                             std::chrono::duration<double,std::milli>(toc2-chunk_start).count(),
+                             std::chrono::duration<double,std::milli>(chunk_done-toc2).count(),
+                             std::chrono::duration<double,std::milli>(chunk_done-chunk_start).count());
+            }
         }
     }
     // Do not drain the successor here. This is the overlap: an intermediate

@@ -1234,6 +1234,11 @@ if(STRATA_NATIVE_EXPERTS)
     endif()
     add_subdirectory(${strata_llamacpp_SOURCE_DIR}/ggml ${CMAKE_BINARY_DIR}/ggml EXCLUDE_FROM_ALL)
   endif()
+  if(STRATA_BUILD_TESTS OR STRATA_BUILD_CONVERSATION_TESTS)
+    add_executable(mtp_q8_test src/weights/mtp_q8_test.cpp)
+    target_link_libraries(mtp_q8_test PRIVATE strata_safetensors ggml-base)
+    add_test(NAME mtp_q8_stream COMMAND mtp_q8_test)
+  endif()
   # part of strata_kernels_cpu (the pool calls these and they call its CPU probe: one library, so GNU ld's
   # one-pass static linking has no cycle to resolve)
   target_sources(strata_kernels_cpu PRIVATE src/kernels/cpu/native_expert.cpp src/kernels/cpu/iq_avx512.cpp

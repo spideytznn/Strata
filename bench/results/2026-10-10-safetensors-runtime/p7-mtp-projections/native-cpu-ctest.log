@@ -1,0 +1,87 @@
+Start testing: Oct 10 04:04 中国标准时间
+----------------------------------------------------------
+1/5 Testing: safetensors_layout
+1/5 Test: safetensors_layout
+Command: "G:/Strata/Strata-Safetensors/build-safetensors/safetensors_layout_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-safetensors
+"safetensors_layout" start time: Oct 10 04:04 中国标准时间
+Output:
+----------------------------------------------------------
+PASS: byte roundtrip, independent FP64 decode, signed zero, all finite micro scales, invalid scales
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"safetensors_layout" end time: Oct 10 04:04 中国标准时间
+"safetensors_layout" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/5 Testing: safetensors_source
+2/5 Test: safetensors_source
+Command: "G:/Strata/Strata-Safetensors/build-safetensors/safetensors_source_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-safetensors
+"safetensors_source" start time: Oct 10 04:04 中国标准时间
+Output:
+----------------------------------------------------------
+PASS: sorted coalesced reads, family counters, bounds, ownership, sealed expert source and sample reuse
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"safetensors_source" end time: Oct 10 04:04 中国标准时间
+"safetensors_source" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/5 Testing: safetensors_segments
+3/5 Test: safetensors_segments
+Command: "G:/Strata/Strata-Safetensors/build-safetensors/safetensors_segment_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-safetensors
+"safetensors_segments" start time: Oct 10 04:04 中国标准时间
+Output:
+----------------------------------------------------------
+segmented direct I/O, cross-page, batch/worker and row-cache reuse passed
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"safetensors_segments" end time: Oct 10 04:04 中国标准时间
+"safetensors_segments" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/5 Testing: spec_visible_boundaries
+4/5 Test: spec_visible_boundaries
+Command: "G:/Strata/Strata-Safetensors/build-safetensors/spec_visible_test.exe"
+Directory: G:/Strata/Strata-Safetensors/build-safetensors
+"spec_visible_boundaries" start time: Oct 10 04:04 中国标准时间
+Output:
+----------------------------------------------------------
+PASS: 792 max_tokens/EOS acceptance boundaries
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"spec_visible_boundaries" end time: Oct 10 04:04 中国标准时间
+"spec_visible_boundaries" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/5 Testing: safetensors_reader
+5/5 Test: safetensors_reader
+Command: "G:/Strata/Strata/.venv/Scripts/python.exe" "G:/Strata/Strata-Safetensors/native_safetensors/../tools/test_safetensors_reader.py" "--exe" "G:/Strata/Strata-Safetensors/build-safetensors/strata-safetensors.exe"
+Directory: G:/Strata/Strata-Safetensors/build-safetensors
+"safetensors_reader" start time: Oct 10 04:04 中国标准时间
+Output:
+----------------------------------------------------------
+.........s...
+----------------------------------------------------------------------
+Ran 13 tests in 4.733s
+
+OK (skipped=1)
+<end of output>
+Test time =   4.85 sec
+----------------------------------------------------------
+Test Passed.
+"safetensors_reader" end time: Oct 10 04:04 中国标准时间
+"safetensors_reader" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 10 04:04 中国标准时间

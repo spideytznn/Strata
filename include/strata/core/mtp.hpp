@@ -158,6 +158,7 @@ public:
 private:
     bool load_safetensors(weights::SafetensorsSource&, std::string& err);
     bool native_fp8_ = false;
+    bool native_q8_projections_ = false;   ///< optional Q8 dense matrices; experts remain original FP8
     float* fp8_hidden_ = nullptr;
     bool record_forward(int T, int step_row0, cudaStream_t cs, std::string& err);
     /// The layer's front for T rows at step rows [row0, +T): the embedding, the fc projections, the attention

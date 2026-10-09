@@ -338,8 +338,8 @@ SSD reads during inference.
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`. That launcher selects
-`config/native/rtx5090-262k-mtp2.json`: 262,144 context capacity, 8,192-token
-prefill, native MTP2, INT8 KV, W4A8 expert prefill and dedicated prompt workspace, served
+`config/native/rtx5090-262k-mtp4.json`: 262,144 context capacity, 8,192-token
+prefill, four MTP draft tokens with Q8_0 projections, INT8 KV, W4A8 expert prefill and dedicated prompt workspace, served
 at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. Native server
 configs and the generator set `allowed_hosts: ["*"]` to accept any HTTP Host
 header. Changes to this setting take effect on the next start. The context
@@ -350,8 +350,64 @@ workspace beside the expert cache. FP32 decode activations and BF16x2 dense
 prefill remain enabled. This combination has not completed GPU acceptance or
 end-to-end timing. The user is testing the service interactively; no second
 engine is started alongside it. Restart the desktop launcher to load the staged
-`build-native-engine/strata-startup.exe`. Diagnostics append to
-`logs/native-262k-int8.log`; the launcher creates its directory.
+`build-native-engine/strata-prefill.exe`. Diagnostics append to
+`logs/native-262k-mtp4-q8.log`; the launcher creates its directory.
+
+### Optional Q8 MTP projections and chunk diagnostics
+
+At the user's request, the desktop profile selects `--spec 5 --mtp-max-t 5`
+(one verifier token plus four drafts) and
+`STRATA_MTP_NATIVE_PROJECTIONS=q8_0`. With this variable unset or `bf16`, native
+MTP keeps the original BF16 projection path. Invalid values are rejected at load.
+The config generator exposes `--mtp 4 --mtp-projections q8_0` and keeps BF16 as
+its default. `rtx5090-262k-mtp2.json` remains a separate BF16 reference profile.
+
+The adapter quantizes the same ten matrices as the existing Q8 MTP pack:
+`fc_embedding`, `fc_hidden`, attention Q/K/V/O, indexer `index_qk_proj` and the
+shared expert's gate/up/down projections. It streams BF16 rows directly from
+safetensors through ggml's Q8_0 reference quantizer at load, without writing a
+converted model. Norms remain FP32, HC mixers/router remain BF16, and all 512 MTP
+experts keep their original FP8 codes and block scales. The original main-model
+NVFP4 weights and output head are unchanged. Projection quantization is lossy;
+draft acceptance, output parity and end-to-end speed require separate GPU checks.
+
+The inherited `Prefill::draft_kv` batch path required Q8 front projections. The
+BF16 native profile therefore fell back to small token groups after each main
+prefill chunk. Q8 makes that batch path eligible on this single-GPU profile;
+runtime scratch/KV conditions can still cause fallback. The CUDA build includes
+the existing Q8 MMQ kernels. `STRATA_MTP_BATCH=0` retains the token-group path for
+comparison. Q8 loading alone does not establish that the batch path ran or that
+it improved speed.
+
+An additional opt-in path, `STRATA_MTP_BATCH_BF16=1`, now accepts the four original
+BF16 front projections directly. This is a code-interface extension, not a GPU
+format restriction. It reuses `Gemm::bf16_f32` (three BF16 components of each FP32
+activation, FP32 accumulated output), the existing batched norms, pinned HC
+postops and KV appends. HC down/up also retain FP32 intermediate activations.
+The existing scratch is reused; no persistent matrix copy or extra workspace is
+allocated. GEMM accumulation order differs from per-token execution, so this
+is not a byte-identity claim. The engine default remains the old BF16 fallback
+until GPU parity/acceptance and timing are measured. Generate a comparison
+profile with `--mtp 4 --mtp-batch-bf16`; the local
+`rtx5090-262k-mtp4-bf16.json` has the same desktop settings with BF16 projections
+and this batch opt-in. The desktop entry still selects the requested Q8 profile.
+
+On 2026-10-10, the user's RTX 5090 / 9950X3D / 96 GB service with INT8 KV and BF16
+MTP reported 24,332 fresh input tokens in 22,577 ms (1,077.7 tok/s), below the
+2,000-2,500 target. This is an interactive observation, not a controlled A/B.
+The new Q8/MTP4 combination has not been timed on GPU. Chunk tracing now reports
+main compute plus waits, MTP callback path/time and conversation-checkpoint time.
+The desktop profile also enables the existing `STRATA_PLE_TRACE` read/wait trace
+to distinguish ngram SSD waits from MTP and checkpoint pauses. Cumulative ngram
+blocked time includes decode and earlier requests and cannot be assigned to one
+prefill. No second engine was started during the user's active session.
+
+CPU tests cover row slices, tile boundaries, exact scale/code/tie rounding,
+zero blocks, canaries and rejection of nonfinite inputs/scales and invalid
+bindings. A read-only pass over all ten real matrices converted 138,936,320 BF16
+bytes to 73,809,920 Q8 bytes (62.1 MiB less), with no main-expert or ngram reads.
+The CUDA engine builds for SM120; GPU execution, cache restore and four-draft
+acceptance with this combined profile are pending. HIP/SYCL were not built.
 
 The native loader previously replaced every explicit `--kv` with FP16. It now
 honours `--kv int8` and keeps FP16 when unspecified. Native Q4/hybrid KV are
