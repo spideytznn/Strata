@@ -38,10 +38,10 @@ vision, cross-model drafts and MTP requantization are refused by this native pat
 The HF tokenizer and all added tokens are used directly. The supplied froggeric
 v22.5 template is retained in `config/native/froggeric-v22.5.jinja`.
 
-## Runtime evidence recorded so far
+## Runtime correctness evidence
 
-These are correctness checks on the RTX 5090 / Ryzen 9950X3D / 96 GB machine,
-not a completed throughput comparison. Raw summaries are under
+These are correctness checks on the RTX 5090 / Ryzen 9950X3D / 96 GB machine.
+Repeated throughput measurements are recorded separately below. Raw summaries are under
 `bench/results/2026-10-10-safetensors-runtime/`.
 
 - All 1,079 dense bindings, 4,947,698,560 values, were compared with the same
@@ -71,7 +71,7 @@ match bit-for-bit across draft depths, including the QSA spare row and block
 position; the deliberately interrupted request itself may end at different
 window boundaries and is excluded, but its resumed continuation must match.
 Raw logs and tokens are in `mtp-cache/`. CPU/GPU scheduling, adaptive swaps
-and repeated comparative timings are still being validated.
+and repeated comparative timings are recorded in the P5 runs below.
 
 `p5-reference/` records the next completed gate, using 4,499 hot GPU experts,
 16,384 context, FP16 KV, no MTP, FP32 decode activations and BF16x2/FP16 prefill.
@@ -90,15 +90,15 @@ forced tool arguments and tool-result continuation, plus explicit image and
 oversized-context rejection over real localhost HTTP. The earlier HTTP attempt
 incorrectly left Anthropic thinking enabled while expecting a short answer;
 the corrected test explicitly disables thinking. No engine change was needed.
-These results establish the reference path only. The FP4, mixed CPU/GPU,
-adaptive, MTP timing and longer-context quality matrix remains in progress.
+These results establish the reference path. The subsequent FP4, mixed CPU/GPU,
+adaptive, MTP timing and longer-context quality results follow below.
 
 `p5-pinned/` repeats the same eight requests with full `cudaHostAllocMapped`
 residency. All first-token logits and all 128-token continuations are bit-identical
 to `p5-reference/`; HTTP checks and executed 8192 prefill also pass. This changes
 allocation and data movement, not the expert representation or arithmetic. The
 same requests are in `p5-reference/requests.json`; binary hashes and raw GPU
-samples are included with each run. Repeated default selection remains pending.
+samples are included with each run. Default selection uses the repeated runs below.
 
 The manual `native-registration-probe` target reproduces the allocation order
 without any model files (it uses 63.282 GiB host memory and 20 GiB VRAM). On this
@@ -187,9 +187,106 @@ independently of the diagnostic environment variable or any stray subset file.
 These results still use fixed 4,499-slot caches; automatic-cache and repeated
 comparisons are recorded separately.
 
+## Repeated comparison on this machine
+
+`p5-three-rounds/` contains three fresh processes per backend, each with a
+128-token unmeasured warmup followed by the same eight 128-token requests.
+All 72 measured requests pass, with zero expert file reads and no CPU expert
+execution. Each backend uses 32,768 context, 8,192 prefill with borrowing,
+FP16 KV, automatic expert cache sizing, 2,048 MiB VRAM reserve, adaptive
+promotions every four rounds and MTP disabled. The comparison uses a 2 GiB,
+two-slot conversation cache; the separately tested operator profiles use 4 GiB
+and four slots. Request IDs, commands, raw logs, telemetry and min/median/max
+summaries are archived. No slow samples are removed.
+
+The table reports medians across the three processes. Decode rates exclude
+the first output token. A warm prompt reuses its prefix and benefits from prior
+expert placement. A cold prompt is a new prefix in an already loaded, warmed
+process, not an empty OS disk cache. Startup is excluded from these timings.
+
+| Measurement | Native safetensors | Fidelity NVFP4 | Existing Q4XL |
+| --- | ---: | ---: | ---: |
+| Short warm 0: total seconds / decode tok/s | 2.030 / 67.22 | 2.065 / 65.59 | 1.666 / 82.74 |
+| Short warm 1: total seconds / decode tok/s | 1.907 / 71.82 | 1.907 / 71.09 | 1.563 / 88.10 |
+| Short warm 2: total seconds / decode tok/s | 1.905 / 71.73 | 1.898 / 71.28 | 1.624 / 83.96 |
+| 8192 segment + header: prompt processing seconds | 5.056 | 3.777 | 2.753 |
+| Long cold: total seconds / decode tok/s | 7.563 / 50.80 | 6.553 / 46.43 | 5.147 / 53.73 |
+| Long warm: total seconds / decode tok/s | 2.072 / 67.66 | 2.072 / 66.58 | 1.736 / 80.71 |
+| Peak process working set GiB | 67.95 | 51.50 | 84.61 |
+| Whole-device peak used VRAM MiB | 31,330 | 31,135 | 31,027 |
+
+This is a deployment comparison, not isolation of one kernel. Q4XL uses
+different quantized weights and has more GPU expert slots because its dense
+weights occupy less VRAM. Native retains RAM copies of all experts, including
+GPU residents; legacy keeps the resident complement. Native enables FP32 GDN
+activations, while the inherited fidelity preset does not. Native ngram data
+resides on D: (BIWIN X570 PRO), legacy ngram data on G: (Fanxiang S790); both are
+NVMe drives. These differences are retained in the commands and hardware
+record. The slower native cold prefill remains an optimization opportunity;
+these measurements do not establish a single cause.
+
+One native short-cold sample takes 5.333 seconds instead of approximately 2.95
+seconds. Its ngram counters record an additional 2.481 seconds of blocked wait,
+with a reported p99 read latency of 80,763 microseconds. Expert source reads
+remain zero, and the warm replay returns to approximately 1.9 seconds. The
+sample remains in the ranges. This observation does not identify a hardware
+fault or measure physical expert SSD traffic.
+
+Recorded measured-request SM clock ranges are 2707-2790 MHz native,
+2692-2760 MHz fidelity and 2715-2790 MHz Q4XL; all report 13,801 MHz memory
+clock. GPU telemetry includes the desktop. Hardware is RTX 5090 with driver
+617.14, Ryzen 9950X3D and 96 GiB RAM. DIMM firmware reports 6600 MT/s; that is
+not a measured memory clock. See `hardware.json` and each `summary.json`.
+
+## Native MTP and selected operator defaults
+
+`p5-mtp2-three-rounds/` repeats the native comparison in three fresh processes
+with two draft tokens. All 24 continuations are exactly equal to the matching
+no-MTP continuations, and all expert source reads remain zero. The main model
+still verifies every draft token; FP32 decode activations and BF16x2/FP16
+prefill are unchanged. The draft consumes VRAM: automatic cache sizes are
+6,119 / 6,177 / 6,111 experts instead of the no-MTP 7,143 / 7,154 / 7,161.
+
+| Request | No MTP median total seconds | MTP2 median total seconds | MTP2 min-max seconds |
+| --- | ---: | ---: | ---: |
+| Short 0 cold | 3.014 | 2.468 | 2.385-2.500 |
+| Short 0 warm | 2.030 | 1.564 | 1.537-1.632 |
+| Short 1 cold | 2.949 | 2.317 | 2.310-2.332 |
+| Short 1 warm | 1.907 | 1.460 | 1.445-1.554 |
+| Short 2 cold | 3.428 | 2.370 | 2.325-2.613 |
+| Short 2 warm | 1.905 | 1.419 | 1.407-1.515 |
+| Long cold | 7.563 | 6.607 | 6.513-11.563 |
+| Long warm | 2.072 | 1.669 | 1.662-1.693 |
+
+MTP2 reduces total-time medians by 12.6-30.9% across these eight requests.
+Short warm decode medians are 88.57 / 95.65 / 98.90 tok/s; these exclude TTFT
+and are not end-to-end rates. One long cold run spends 9.556 seconds processing
+the prompt, versus 4.516 and 4.590 seconds in the other runs. Its ngram blocked
+counter increases by only 0.215 seconds; the full delay is not explained by
+that counter. The MTP runs include low-clock GPU samples (540 MHz SM and
+7001 MHz memory minimum); their causal relation to the outlier is unproven.
+The sample remains in the report. Startup takes 93.74-107.52 seconds, median
+99.41; peak process working set is 68.00 GiB and whole-device VRAM 31,326 MiB.
+
+`START-NATIVE.bat` and newly generated configs therefore select MTP2 for this
+machine. `--mtp 0` generates the no-MTP reference. This decision uses measured
+request latency, not MTP acceptance or FP4 kernel throughput alone. Both
+operator configs were also tested without benchmark overrides:
+`p5-operator-auto/` and `p5-operator-auto-mtp2/` pass actual 8192 prefill, all
+eight continuation comparisons and real HTTP acceptance, including native
+image rejection. Their conversation cache is 4 GiB with four slots.
+
+The completed scope is Windows single-GPU SM120 text inference from this
+original checkpoint, tested through 32K context. HIP and SYCL builds are not
+validated. Sparse MTP-indexer selection, vision and multi-GPU remain outside
+this implementation; unsupported native modes fail explicitly. The small
+quality suite establishes migration fidelity and cache/MTP consistency, not
+general model quality or equivalence to an unquantized BF16 model. Improving
+native cold prefill and explaining latency tails remain optimization work.
+
 ## Build the runtime
 
-On this machine, `START-NATIVE.bat` starts the independent quality configuration
+On this machine, `START-NATIVE.bat` starts the independent MTP2 quality configuration
 at `127.0.0.1:8097`. It uses this checkout's Python environment and engine;
 the original model and other deployments are unchanged. The server runs in the
 foreground and Ctrl+C stops it. The native backend currently accepts text only.
@@ -197,9 +294,10 @@ foreground and Ctrl+C stops it. The native backend currently accepts text only.
 `config/native/rtx5090-quality.json` selects 32,768 context, 8,192 prefill,
 FP16 KV, full mapped expert RAM, automatic VRAM cache sizing with 2,048 MiB
 reserve, the bundled initial expert profile, 96 promotions every four rounds,
-and a 4 GiB conversation cache. MTP stays off for the reference quality setup.
+and a 4 GiB conversation cache. MTP stays off in this reference config;
+`config/native/rtx5090-mtp2.json` is the startup profile with native MTP2 enabled.
 `--staging`, `--adapt-every 0`, `--balanced-experts`, `--pcie-frac 0|0.5|1` and
-`--mtp 1|2|4` on the generator expose the measured alternatives explicitly.
+`--mtp 0|1|2|4` on the generator expose the measured alternatives explicitly.
 CPU fractions apply only to cold experts. The smaller reference diagnostic
 config remains in `config/native/reference.json`.
 

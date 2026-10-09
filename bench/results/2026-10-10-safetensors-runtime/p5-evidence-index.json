@@ -1,0 +1,95 @@
+{
+  "scope": "Completed Windows SM120 single-GPU text runtime and P5 acceptance; not a general model-quality certification.",
+  "base_commit": "d167eb89301a02e0d6299f49d35494ba5096bc10",
+  "runtime_source_commit": "fda63a44",
+  "branch": "codex/safetensors-native",
+  "binary_sha256": "841835c525a2598e8d9f7d12f4bc85a264e04cb7ff5df0ab12c7de9780fa7a53",
+  "hardware_record": "hardware.json",
+  "startup": "START-NATIVE.bat; localhost 127.0.0.1:8097; config/native/rtx5090-mtp2.json",
+  "selected_settings": {
+    "context": 32768,
+    "prefill": 8192,
+    "kv": "fp16",
+    "decode_activations": "fp32",
+    "prefill_arithmetic": "BF16x2/FP16",
+    "mtp_draft_tokens": 2,
+    "expert_ram": "all 63.282 GiB CUDA mapped and pinned, including GPU residents",
+    "expert_cache": "auto; reserve 2048 MiB",
+    "adapt_every": 4,
+    "adapt_swaps": 96,
+    "conversation_cache_mib": 4096
+  },
+  "default_evidence": "p5-mtp2-three-rounds: all 24 exact continuations; median total times 12.6-30.9% lower than native no-MTP across eight requests. One long cold outlier retained.",
+  "cross_backend_evidence": "p5-three-rounds: nine fresh processes, 72 requests, MTP off; Q4XL is not a quality oracle. Different ngram SSDs and inherited precision presets are documented.",
+  "source_io": "All measured resident requests have zero expert file reads; native expert and MTP source access is sealed after loading. Counters are requested source bytes, not physical disk telemetry.",
+  "preserved_inputs": [
+    "original NVIDIA checkpoint",
+    "existing Q4XL/main Strata deployment",
+    "verified Strata-NVFP4-Fusion checkout"
+  ],
+  "limits": [
+    "native text only",
+    "Windows SM120 validated; HIP/SYCL not built",
+    "MTP uses dense/window draft attention; sparse indexer selection not implemented",
+    "32K context validated",
+    "small authored quality suite, not BF16 equivalence",
+    "native cold prefill and latency tails can improve"
+  ],
+  "archives": [
+    {
+      "path": "p5-adaptive-mtp",
+      "status": "pass",
+      "manifest_sha256": "65c908112076a24e597ca3ee2aaf26c017e397b789e88c397d2784bd21134446"
+    },
+    {
+      "path": "p5-fp4-numerical",
+      "status": "see results",
+      "manifest_sha256": "f06ec7bb9fca4fa5380a111631b4173e28ba9ba5febdcdd13b4542af945f1e6f"
+    },
+    {
+      "path": "p5-long-context",
+      "status": "completed",
+      "manifest_sha256": "4d319f75db47600bfd3e8f43090ff0d6ba2d47bfdcf0fff8d182546558329d9f"
+    },
+    {
+      "path": "p5-mtp2-three-rounds",
+      "status": "pass",
+      "manifest_sha256": "50b6e83a3f61ddba5c9fd737f677556ce90acec92ce55b6a3e6dfaa774116208"
+    },
+    {
+      "path": "p5-operator-auto",
+      "status": "pass",
+      "manifest_sha256": "40f818b1f6db919e697b412016b045e662859a919cd2433d9e54cd86657b27fe"
+    },
+    {
+      "path": "p5-operator-auto-mtp2",
+      "status": "pass",
+      "manifest_sha256": "f05b075e6108516d72aedba1bde67de12b01cc29d82281eed2e282ed8069f25d"
+    },
+    {
+      "path": "p5-pinned-combinations",
+      "status": "pass",
+      "manifest_sha256": "1a27f0c0e8cc6292ebe9e7df8a07e426931c2c8d462730854b34c305c12bee62"
+    },
+    {
+      "path": "p5-prefill",
+      "status": "pass",
+      "manifest_sha256": "232fb217cad5880e07f0eff899d79959b345658826bc7361c97aae5f72da6bae"
+    },
+    {
+      "path": "p5-staging-compute",
+      "status": "interrupted_between_cases",
+      "manifest_sha256": "fa2961c03df32e0d2240011a03bb26186a813cac2e1b394b334e14ef6f156bff"
+    },
+    {
+      "path": "p5-teacher",
+      "status": "completed",
+      "manifest_sha256": "1fcf104aeeb8bed509c7b210376d31b839c6a6b5cf0f3deca07d4bb2c84d7d75"
+    },
+    {
+      "path": "p5-three-rounds",
+      "status": "pass",
+      "manifest_sha256": "3ef203d6d5f25441ba079e71cbe59b2a4fef6756f10faaced56f4c1f3ea89c0f"
+    }
+  ]
+}

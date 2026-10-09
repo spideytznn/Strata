@@ -37,7 +37,13 @@ def main():
                 ('generated','ttft_s','prompt_ms','after_first_token_per_s','wall_s','reused','cpu_expert_entries')}
         samples = [json.loads(line) for folder in args.run.glob(case+'-*') if folder.is_dir()
                    for line in (folder/'telemetry.jsonl').read_text(encoding='utf8').splitlines()]
-        gpu = [s['gpu_csv'].split(',') for s in samples if s.get('gpu_csv') and '\n' not in s['gpu_csv']]
+        intervals = [(r['started_unix_s'],r['started_unix_s']+r['wall_s'])
+                     for rep in repeats for r in rep['requests']]
+        all_gpu = [s['gpu_csv'].split(',') for s in samples if s.get('gpu_csv') and '\n' not in s['gpu_csv']]
+        row['whole_process_peak_gpu_used_mib'] = max(float(g[3]) for g in all_gpu)
+        gpu = [s['gpu_csv'].split(',') for s in samples if s.get('gpu_csv') and '\n' not in s['gpu_csv']
+               and any(start <= s['unix_s'] <= end for start,end in intervals)]
+        row['gpu_sampling_note'] = 'Distributions below use measured request intervals; peak above includes startup.'
         row['gpu_samples'] = len(gpu)
         for key, index in [('used_mib',3),('sm_mhz',6),('memory_mhz',7),('watts',8),('celsius',9)]:
             values = []

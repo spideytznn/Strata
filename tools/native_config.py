@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--model',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
  p.add_argument('--context',type=int,default=32768);p.add_argument('--prefill',type=int,default=8192)
- p.add_argument('--mtp',type=int,choices=(0,1,2,4),default=0);p.add_argument('--expert-cache',type=int,default=0)
+ p.add_argument('--mtp',type=int,choices=(0,1,2,4),default=2);p.add_argument('--expert-cache',type=int,default=0)
  p.add_argument('--conversation-cache-mib',type=int,default=4096)
  p.add_argument('--adapt-every',type=int,default=4);p.add_argument('--adapt-swaps',type=int,default=96)
  p.add_argument('--pcie-frac',type=float,choices=(0,0.5,1),default=1,

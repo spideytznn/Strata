@@ -6,8 +6,7 @@
   "mtp_command": "python tools/native_runtime_acceptance.py --config config/native/reference.json --output build-safetensors/runtime-acceptance-p4c",
   "mtp_note": "Four independent sequential engines. 17 completed requests per variant; interruption itself excluded from main-state equality, completed continuation included. Raw logs include the zero expert/MTP source-read barriers.",
   "snapshot_fix": "Disk sessions omit an unloaded draft. QSA commit restores the moving spare row and last completed block position in the native opt-in path.",
-  "binary_sha256_current": "f80397b61f0553d2a734110c0200fce32194dcabd3215f4c11da4c07c1d29854",
-  "binary_note": "Current build adds prefill tracing, cache precision identity and optional host registration after the P4c run; its core forward and commit kernels are unchanged.",
+  "binary_note": "Historical P4 record: this build added prefill tracing, cache precision identity and optional host registration after P4c. For final runtime hash and P5 evidence see p5-evidence-index.json.",
   "checks": [
     "5 standalone CTests passed",
     "3 CUDA snapshot/validation/commit CTests passed",
@@ -17,5 +16,6 @@
   "not_built": [
     "HIP",
     "SYCL"
-  ]
+  ],
+  "binary_sha256_at_p4_record": "f80397b61f0553d2a734110c0200fce32194dcabd3215f4c11da4c07c1d29854"
 }

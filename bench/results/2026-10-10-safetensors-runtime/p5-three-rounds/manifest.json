@@ -1,0 +1,156 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\baseline-p5-three-rounds",
+  "status": "pass",
+  "files": [
+    {
+      "path": "fidelity-0/command.json",
+      "bytes": 2141,
+      "sha256": "65d85003a166e9612bc7d302889e873f16d02d2b42b9f17ae14d585c17bac08b"
+    },
+    {
+      "path": "fidelity-0/engine.log",
+      "bytes": 12479,
+      "sha256": "8b8cab0e207ee2cb2d6ea91a1c1492f01e098e30ad10fe9c7804c0456eac46ab"
+    },
+    {
+      "path": "fidelity-0/telemetry.jsonl",
+      "bytes": 11714,
+      "sha256": "45f5c644a7e1c837bb85fbe09e3d885b0691cd31e84ed80325ea7f191dfa4d33"
+    },
+    {
+      "path": "fidelity-1/command.json",
+      "bytes": 2141,
+      "sha256": "65d85003a166e9612bc7d302889e873f16d02d2b42b9f17ae14d585c17bac08b"
+    },
+    {
+      "path": "fidelity-1/engine.log",
+      "bytes": 12480,
+      "sha256": "aa8d489a7f2f6ee396ef83ffc8cbc04b591c33ad4be2cebbd0fb28b1d429e2f3"
+    },
+    {
+      "path": "fidelity-1/telemetry.jsonl",
+      "bytes": 11085,
+      "sha256": "bd7c1c48e390982437176469c785accb10da3c409a07ee31134014c75003fb12"
+    },
+    {
+      "path": "fidelity-2/command.json",
+      "bytes": 2141,
+      "sha256": "65d85003a166e9612bc7d302889e873f16d02d2b42b9f17ae14d585c17bac08b"
+    },
+    {
+      "path": "fidelity-2/engine.log",
+      "bytes": 12480,
+      "sha256": "9c5aa16b408f502d4132d212fd29388f4fc681771f7458d73611cb84603aebbf"
+    },
+    {
+      "path": "fidelity-2/telemetry.jsonl",
+      "bytes": 10961,
+      "sha256": "16f3573b8e944f19adad0f7bfc3f98f953856d054b5f54837dde5386afd7cec8"
+    },
+    {
+      "path": "native-0/command.json",
+      "bytes": 1278,
+      "sha256": "cbacc54a1b44343db2133b3bee45d36796aa234e7a6db820a807d3f5d04048c8"
+    },
+    {
+      "path": "native-0/engine.log",
+      "bytes": 16894,
+      "sha256": "59185e0b72bf40f529659ce498f9d28263e8c2411018c3630bf65dc7382277d1"
+    },
+    {
+      "path": "native-0/telemetry.jsonl",
+      "bytes": 21215,
+      "sha256": "bdc6b8869b607d6bfb8cbbd9a9a949a8dce3e9b768dba3e35abdef5beb8124b6"
+    },
+    {
+      "path": "native-1/command.json",
+      "bytes": 1278,
+      "sha256": "cbacc54a1b44343db2133b3bee45d36796aa234e7a6db820a807d3f5d04048c8"
+    },
+    {
+      "path": "native-1/engine.log",
+      "bytes": 17006,
+      "sha256": "d58da34336a8662f1099bd70dde298d529f1b8805dae2243c02d074e44724c12"
+    },
+    {
+      "path": "native-1/telemetry.jsonl",
+      "bytes": 21206,
+      "sha256": "7bf6c94051ae1d42dc900982742025b34242eb24448cb0e84d404c51d1df0250"
+    },
+    {
+      "path": "native-2/command.json",
+      "bytes": 1278,
+      "sha256": "cbacc54a1b44343db2133b3bee45d36796aa234e7a6db820a807d3f5d04048c8"
+    },
+    {
+      "path": "native-2/engine.log",
+      "bytes": 16905,
+      "sha256": "db0f6707c82173fa02681b070c2b4d2e38227e5cbd4112fa4ff4213b81475f36"
+    },
+    {
+      "path": "native-2/telemetry.jsonl",
+      "bytes": 22559,
+      "sha256": "2c7d7f9a19298816c0b90ab3fa6aacdb11b5a4a1a05e5905c89b0c2ca7dbc497"
+    },
+    {
+      "path": "q4xl-0/command.json",
+      "bytes": 1480,
+      "sha256": "0a56c3f98324b6f3e2eb579b87a87428bb4f4a5abedf1117f257bfff7795b4e5"
+    },
+    {
+      "path": "q4xl-0/engine.log",
+      "bytes": 11915,
+      "sha256": "beacdd8940f570bb40ee9269031c7812c97583abe5f1e51d5ccd827efb87f90e"
+    },
+    {
+      "path": "q4xl-0/telemetry.jsonl",
+      "bytes": 19545,
+      "sha256": "b95f88464ee00cab3330705c4f0994a3f487e7463c0d6013d3d90115a974dc01"
+    },
+    {
+      "path": "q4xl-1/command.json",
+      "bytes": 1480,
+      "sha256": "0a56c3f98324b6f3e2eb579b87a87428bb4f4a5abedf1117f257bfff7795b4e5"
+    },
+    {
+      "path": "q4xl-1/engine.log",
+      "bytes": 12026,
+      "sha256": "d60fc2eaf46fe28aba0f8762939d8dc34be88c4634d353436d0b131176a95a52"
+    },
+    {
+      "path": "q4xl-1/telemetry.jsonl",
+      "bytes": 20467,
+      "sha256": "dc642b3637a2262b187423a798d6f2bd87b8e80cc59155221a4e12bcdb19b1c4"
+    },
+    {
+      "path": "q4xl-2/command.json",
+      "bytes": 1480,
+      "sha256": "0a56c3f98324b6f3e2eb579b87a87428bb4f4a5abedf1117f257bfff7795b4e5"
+    },
+    {
+      "path": "q4xl-2/engine.log",
+      "bytes": 11915,
+      "sha256": "acd7eafe5f496ad116a024c0e8573803ba259491db0fd2938772cbe2e7d3e65e"
+    },
+    {
+      "path": "q4xl-2/telemetry.jsonl",
+      "bytes": 20162,
+      "sha256": "3769d63b71897ee75f60fb12b1a286c78471778a227a84536aa3af43ffdfa2c4"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 341493,
+      "sha256": "76fc3517f66879e386fac144126a379818b0b8ad340e5c620d4e52622d7efb82"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 27871,
+      "sha256": "8f82bc33635566a7000d6c3e5cdf761b8865cb92965905296011337fb31e8c3a"
+    }
+  ]
+}

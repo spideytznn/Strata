@@ -1,0 +1,39 @@
+[strata] a picture a tool returned was left out of the prompt: this server has no image encoder
+[strata] a picture a tool returned was left out of the prompt: this server has no image encoder
+[strata] a picture a tool returned was left out of the prompt: this image format needs Pillow
+[strata] a picture a tool returned was left out of the prompt: the image URL could not be read
+[strata] done: 8 tokens in 0 s (129055.5 tok/s) (length, cancel=False)
+[strata] done: 50 tokens in 0 s (228199.3 tok/s) (length, cancel=False)
+[strata] done: 50 tokens in 0 s (228946.7 tok/s) (length, cancel=False)
+[strata] done: 50 tokens in 0 s (236432.0 tok/s) (length, cancel=False)
+[strata] done: 50 tokens in 0 s (234580.8 tok/s) (length, cancel=False)
+[strata] done: 1500 tokens in 0 s (22461.1 tok/s) (length, cancel=False)
+[strata] done: 1500 tokens in 0 s (22561.8 tok/s) (length, cancel=False)
+[strata] 400 invalid request: prompt (246 tokens) + max tokens (4096) exceeds the context (4096); requests are never truncated. Send a smaller max_tokens (at most 3842 here), or add "fit_max_tokens": true to the model's strata-<model>.json to shorten it to the room left (#545)
+[strata] 400 invalid request: prompt (246 tokens) + max tokens (4096) exceeds the context (4096); requests are never truncated. Send a smaller max_tokens (at most 3842 here), or add "fit_max_tokens": true to the model's strata-<model>.json to shorten it to the room left (#545)
+[strata] done: 2011 tokens in 0 s (17221.9 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17243.7 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17107.9 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17387.9 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17273.9 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (16731.3 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17071.4 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17006.7 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17106.0 tok/s) (stop, cancel=False)
+[strata] done: 2011 tokens in 0 s (17361.1 tok/s) (stop, cancel=False)
+[strata] done: 1 tokens in 0 s (52428.8 tok/s) (length, cancel=False)
+[strata] the reply reached max tokens while still thinking, so it has no answer: a thinking budget (reasoning_budget_tokens, in the request or in strata-<model>.json for every request) leaves room to answer
+[strata] done: 1 tokens in 0 s (64527.8 tok/s) (length, cancel=False)
+[strata] the reply reached max tokens while still thinking, so it has no answer: a thinking budget (reasoning_budget_tokens, in the request or in strata-<model>.json for every request) leaves room to answer
+[strata] done: 5 tokens in 0 s (187245.7 tok/s) (length, cancel=False)
+[strata] the reply reached max tokens while still thinking, so it has no answer: a thinking budget (reasoning_budget_tokens, in the request or in strata-<model>.json for every request) leaves room to answer
+[strata] 400 invalid request: prompt (4088 tokens) leaves no room to answer in the context (4096); requests are never truncated
+[strata] done: 1 tokens in 0 s (59074.7 tok/s) (length, cancel=False)
+[strata] the reply reached max tokens while still thinking, so it has no answer: a thinking budget (reasoning_budget_tokens, in the request or in strata-<model>.json for every request) leaves room to answer
+[strata] done: 5 tokens in 0 s (187245.7 tok/s) (length, cancel=False)
+[strata] the reply reached max tokens while still thinking, so it has no answer: a thinking budget (reasoning_budget_tokens, in the request or in strata-<model>.json for every request) leaves room to answer
+[strata] 400 invalid request: prompt (4088 tokens) leaves no room to answer in the context (4096); requests are never truncated
+----------------------------------------------------------------------
+Ran 16 tests in 2.327s
+
+OK

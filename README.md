@@ -4,14 +4,19 @@ Experimental native safetensors weight backend for the NVIDIA Qwen3.8-Flash-Next
 checkpoint, starting at the verified Strata NVFP4 fidelity commit
 `d167eb89301a02e0d6299f49d35494ba5096bc10`. The native path now runs text inference directly from the original model
 directory, with resident NVFP4 experts, segmented ngram reads, native FP8 MTP
-and session caching. Full acceptance and tuning are in progress. See
+and session caching. The Windows SM120 text-inference acceptance suite and
+three-round deployment comparisons are complete. See
 [the implementation status and reproducible checks](docs/SAFETENSORS_NATIVE.md).
 
 For the configured RTX 5090 / 9950X3D / 96 GB Windows machine, run
 `START-NATIVE.bat` to start the text server at `127.0.0.1:8097` using the original
 NVIDIA safetensors directory. The quality config uses FP32 decode activations,
-BF16x2/FP16 prefill, full resident experts and adaptive GPU caching. FP4 and MTP
-remain explicit options. This startup does not modify the existing deployment.
+BF16x2/FP16 prefill, full resident experts, adaptive GPU caching and original
+MTP with two draft tokens verified by the main model. FP4 remains opt-in:
+measured decode did not improve end-to-end, and faster FP4 prefill changed
+outputs. The no-MTP reference is `config/native/rtx5090-quality.json`.
+This startup does not modify the existing deployment. Native vision and
+multi-GPU are unsupported; HIP and SYCL have not been built or validated.
 
 ## Inherited Strata NVFP4 baseline
 

@@ -1,0 +1,66 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\baseline-p5-mtp2-three-rounds",
+  "status": "pass",
+  "files": [
+    {
+      "path": "native-0/command.json",
+      "bytes": 1368,
+      "sha256": "f4e271a6ab861de8b0f27378a17667c00f29d915952f3c809a56549aeac136ce"
+    },
+    {
+      "path": "native-0/engine.log",
+      "bytes": 17271,
+      "sha256": "22ee4fb86802e8e282035af3d953c27e71d998b78d5bb1aafacd632ab166174a"
+    },
+    {
+      "path": "native-0/telemetry.jsonl",
+      "bytes": 23353,
+      "sha256": "406f0236e5bb05edbabf960c516f84b3dbeab20450525f32222d81368f6053da"
+    },
+    {
+      "path": "native-1/command.json",
+      "bytes": 1368,
+      "sha256": "f4e271a6ab861de8b0f27378a17667c00f29d915952f3c809a56549aeac136ce"
+    },
+    {
+      "path": "native-1/engine.log",
+      "bytes": 17270,
+      "sha256": "0f86ef1268d9ed60b12c7396de0b774ec194d3f73359d74ec5fc7eebec457e97"
+    },
+    {
+      "path": "native-1/telemetry.jsonl",
+      "bytes": 20818,
+      "sha256": "8e92dabbced13cb92d5c69816bd451cc46eea930d1ec39b1158bad8f2b50a602"
+    },
+    {
+      "path": "native-2/command.json",
+      "bytes": 1368,
+      "sha256": "f4e271a6ab861de8b0f27378a17667c00f29d915952f3c809a56549aeac136ce"
+    },
+    {
+      "path": "native-2/engine.log",
+      "bytes": 17279,
+      "sha256": "f0cabb3867ce4179d788cff0603b1441d3ea69e106da5670e9884d9d41fc0f67"
+    },
+    {
+      "path": "native-2/telemetry.jsonl",
+      "bytes": 20194,
+      "sha256": "712d8537feae8ada8b9daa9043c18ebeaae88d8202d733d497e6c2cfedb41307"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 115427,
+      "sha256": "62dbc0ecb6217a520dc9a3627d39016a224182e93d56beb1d5fdf96b26eb7cbc"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 9734,
+      "sha256": "f78b26562be498e4e0edb937217dd258876eadbf6fc1ea43e2aa742c521226cc"
+    }
+  ]
+}

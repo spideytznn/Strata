@@ -18,7 +18,7 @@ def main():
     result = json.loads((source / 'results.json').read_text(encoding='utf8'))
     if result.get('status') not in ('pass', 'completed', 'interrupted_between_cases', 'failed'):
         raise ValueError('run must have an explicit terminal status before archival')
-    names = {'results.json', 'requests.json', 'command.json', 'engine.log',
+    names = {'results.json', 'summary.json', 'requests.json', 'command.json', 'engine.log',
              'http.json', 'telemetry.jsonl', 'gpu.csv'}
     files = sorted(p for p in source.rglob('*') if p.is_file() and p.name in names)
     destination.mkdir(parents=True)

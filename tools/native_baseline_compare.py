@@ -45,6 +45,7 @@ def main():
     configs = {name: json.loads(path.read_text(encoding='utf8')) for name, path in
                [('native', a.native_config), ('fidelity', a.fidelity_config), ('q4xl', a.q4xl_config)]}
     requests = json.loads(a.requests.read_text(encoding='utf8'))
+    (a.output/'requests.json').write_bytes(a.requests.read_bytes())
     # One fresh process per round: a repeated prompt must not silently become
     # a warm measurement. Each process still tests cold/warm pairs in order.
     tok = SafetensorsTokenizer.from_directory(configs['native']['tokenizer'])
