@@ -1,0 +1,40 @@
+[nvfp4-tensor] SM120 native FP4 MMA enabled, 1 activation terms, checkpoint scales, FP32 accumulation; weights unchanged
+layer=0 expert=0 terms=1 quantX=0 GU=5.5696356e-08 quantH=0 down=4.9374602e-08 vsF32=13.815259%
+  uneven/permuted/strided rel=0
+layer=0 expert=0 terms=2 quantX=0 GU=6.2756802e-08 quantH=0 down=5.5737345e-08 vsF32=1.357798%
+  uneven/permuted/strided rel=0
+layer=0 expert=0 terms=3 quantX=0 GU=5.3009993e-07 quantH=0 down=1.4757864e-07 vsF32=0.115868%
+  uneven/permuted/strided rel=0
+BENCH tokens=1 groups=10 mode=F32 us=57.251
+BENCH tokens=1 groups=10 mode=FP4 us=32.762
+BENCH tokens=1 groups=10 mode=FP4x2 us=46.181
+BENCH tokens=1 groups=10 mode=FP4x3 us=47.405
+BENCH tokens=1 groups=10 mode=F32 us=58.572
+BENCH tokens=1 groups=10 mode=FP4 us=35.511
+BENCH tokens=1 groups=10 mode=FP4x2 us=43.027
+BENCH tokens=1 groups=10 mode=FP4x3 us=47.364
+BENCH tokens=2 groups=10 mode=F32 us=109.470
+BENCH tokens=2 groups=10 mode=FP4 us=32.762
+BENCH tokens=2 groups=10 mode=FP4x2 us=43.488
+BENCH tokens=2 groups=10 mode=FP4x3 us=53.242
+BENCH tokens=2 groups=20 mode=F32 us=114.509
+BENCH tokens=2 groups=20 mode=FP4 us=34.820
+BENCH tokens=2 groups=20 mode=FP4x2 us=47.092
+BENCH tokens=2 groups=20 mode=FP4x3 us=52.381
+BENCH tokens=4 groups=10 mode=F32 us=216.304
+BENCH tokens=4 groups=10 mode=FP4 us=32.772
+BENCH tokens=4 groups=10 mode=FP4x2 us=47.548
+BENCH tokens=4 groups=10 mode=FP4x3 us=50.620
+BENCH tokens=4 groups=40 mode=F32 us=242.032
+BENCH tokens=4 groups=40 mode=FP4 us=141.823
+BENCH tokens=4 groups=40 mode=FP4x2 us=162.113
+BENCH tokens=4 groups=40 mode=FP4x3 us=144.219
+BENCH tokens=8 groups=10 mode=F32 us=424.431
+BENCH tokens=8 groups=10 mode=FP4 us=32.782
+BENCH tokens=8 groups=10 mode=FP4x2 us=47.671
+BENCH tokens=8 groups=10 mode=FP4x3 us=49.248
+BENCH tokens=8 groups=80 mode=F32 us=465.243
+BENCH tokens=8 groups=80 mode=FP4 us=354.390
+BENCH tokens=8 groups=80 mode=FP4x2 us=369.996
+BENCH tokens=8 groups=80 mode=FP4x3 us=345.286
+PASS (compute-only, distinct checkpoint weights; excludes PCIe and routing)

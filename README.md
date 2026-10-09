@@ -7,6 +7,12 @@ directory, with resident NVFP4 experts, segmented ngram reads, native FP8 MTP
 and session caching. Full acceptance and tuning are in progress. See
 [the implementation status and reproducible checks](docs/SAFETENSORS_NATIVE.md).
 
+For the configured RTX 5090 / 9950X3D / 96 GB Windows machine, run
+`START-NATIVE.bat` to start the text server at `127.0.0.1:8097` using the original
+NVIDIA safetensors directory. The quality config uses FP32 decode activations,
+BF16x2/FP16 prefill, full resident experts and adaptive GPU caching. FP4 and MTP
+remain explicit options. This startup does not modify the existing deployment.
+
 ## Inherited Strata NVFP4 baseline
 
 The instructions below describe the inherited GGUF/pack engine. They are retained

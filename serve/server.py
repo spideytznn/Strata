@@ -3241,6 +3241,8 @@ class Service:
         images = images_of(messages)
         if images:
             if self.vision is None:
+                if (getattr(self.engine, 'info', None) or {}).get('native_adapter'):
+                    raise ValueError("the native safetensors backend currently supports text only; images are not supported")
                 raise ValueError("this server was started without the vision encoder (run setup again and choose "
                                  "'vision'), so it cannot read images")
             pad = self.tok.encode(IMAGE_PAD, parse_special=True)[0]

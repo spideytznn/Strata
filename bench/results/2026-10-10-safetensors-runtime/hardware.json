@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-10-10T02:13:23.8882880+08:00",
+  "observed_at": "2026-10-10T02:13:23.888288+08:00",
   "memory": [
     {
       "Capacity": 51539607552,
@@ -17,6 +17,22 @@
       "Name": "AMD Ryzen 9 9950X3D 16-Core Processor          ",
       "NumberOfCores": 16,
       "NumberOfLogicalProcessors": 32
+    }
+  ],
+  "storage": [
+    {
+      "drive": "D",
+      "disk_number": 0,
+      "model": "BIWIN X570 PRO 2TB",
+      "bus_type": "NVMe",
+      "bytes": 2048408248320
+    },
+    {
+      "drive": "G",
+      "disk_number": 1,
+      "model": "Fanxiang S790 2TB",
+      "bus_type": "NVMe",
+      "bytes": 2000398934016
     }
   ]
 }

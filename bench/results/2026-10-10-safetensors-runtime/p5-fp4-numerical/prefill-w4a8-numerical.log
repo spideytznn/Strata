@@ -1,0 +1,5 @@
+group: 508 rows over 20 experts (max 59 / 31 per expert)
+  gate/up, experts 0-15 (bounds from 0)      rel. error 0.5341%
+  gate/up, experts 16-19 (bounds from 16)    rel. error 0.5376%
+  down, experts 16-19 (relative bounds)      rel. error 0.5368%
+RESULT: ok

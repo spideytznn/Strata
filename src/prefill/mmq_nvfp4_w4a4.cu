@@ -6,6 +6,8 @@
 // FP4 activation quantizer see BLACKWELL_MMA_AVAILABLE together - they must agree on the activations' layout.
 // Their non-static symbols are renamed so they cannot fold with strata_mmq's plain-arch copies.
 #include "common.cuh"
+#include <cstdio>
+#include <cstdlib>
 
 #define mul_mat_q_switch_J strata_w4a4_mul_mat_q_switch_J
 #define mul_mat_q_case strata_w4a4_mul_mat_q_case
@@ -43,6 +45,13 @@ bool w4a4_available() {
     return ran && h == 1;
 }
 void run_nvfp4_w4a4(ggml_backend_cuda_context& ctx, const mmq_args& a, cudaStream_t s) {
+    static const bool traced = [] {
+        const char* trace = std::getenv("STRATA_PREFILL_TRACE");
+        if (trace && trace[0] == '1')
+            std::fprintf(stderr, "strata prefill kernel: SM120 FP4 MMA w4a4 dispatch\n");
+        return true;
+    }();
+    (void) traced;
     strata_w4a4_mul_mat_q_case<GGML_TYPE_NVFP4>(ctx, a, s);
 }
 void quantize_nvfp4_w4a4(const float* x, const int32_t* ids, void* xq, float* yscale, bool aligned, int64_t cols,

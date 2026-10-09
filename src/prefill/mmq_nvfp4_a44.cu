@@ -10,6 +10,8 @@
 // (src/prefill/mmq_vendor: llama.cpp's mmq.cuh with STRATA_MMQ_Y2). Two FP4 terms take exactly q8_1's bytes, so the
 // prompt path's activation buffers are unchanged. Built for 12xa only, as mmq_nvfp4_w4a4.cu.
 #include "common.cuh"
+#include <cstdio>
+#include <cstdlib>
 
 #include <cuda_fp4.h>
 
@@ -203,6 +205,13 @@ bool a44_available() {
 }
 void run_nvfp4_a44(ggml_backend_cuda_context& ctx, const mmq_args& a, cudaStream_t s, const void* const* w, int n,
                    const int32_t* y_rows) {
+    static const bool traced = [] {
+        const char* trace = std::getenv("STRATA_PREFILL_TRACE");
+        if (trace && trace[0] == '1')
+            std::fprintf(stderr, "strata prefill kernel: SM120 FP4 MMA w4a4x2 gate/up dispatch\n");
+        return true;
+    }();
+    (void) traced;
     strata_mmq_xptr xp{};   // w: each expert's weights where they lie (null: a + z x stride, as gathered)
     for (int i = 0; w != nullptr && i < n; ++i) xp.p[i] = (const char*) w[i];
     xp.yrows = y_rows;      // MMQ row -> activation row (null: the same row)

@@ -1,0 +1,61 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\matrix-p5-prefill",
+  "status": "pass",
+  "files": [
+    {
+      "path": "prefill-fp4/command.json",
+      "bytes": 1290,
+      "sha256": "a344a2c025007f684de719bfa35fb03a578471930994e135ee444843c3a4eaaa"
+    },
+    {
+      "path": "prefill-fp4/engine.log",
+      "bytes": 15260,
+      "sha256": "abd7f5b133f7a46118dbe17d4f4242aec77b1409b0df926f535a40fefe34a109"
+    },
+    {
+      "path": "prefill-fp4/telemetry.jsonl",
+      "bytes": 24028,
+      "sha256": "12c812b7168f44072d5ba6b7a12e1ba495ca52b63a25a6be6f8d9a7692f625d7"
+    },
+    {
+      "path": "prefill-fp4x2/command.json",
+      "bytes": 1294,
+      "sha256": "afd2ca06a6c0707d341b7342ce3b887dddb8fdbaa1632f4a08409fd416f710c7"
+    },
+    {
+      "path": "prefill-fp4x2/engine.log",
+      "bytes": 15268,
+      "sha256": "f2701321381500c323b81ba85c5539f10d2a07f3db5740b1c4c96c67dd76cdfd"
+    },
+    {
+      "path": "prefill-fp4x2/telemetry.jsonl",
+      "bytes": 24164,
+      "sha256": "aaaa7b9ebda6df866c5beeeb755e0f88d7bdb23d994e8291812a93029ffa2736"
+    },
+    {
+      "path": "prefill-int8/command.json",
+      "bytes": 1291,
+      "sha256": "7541526ca31c4d4d7428c5ca920692fc433cf2cbd19ef754afe7b8714264b235"
+    },
+    {
+      "path": "prefill-int8/engine.log",
+      "bytes": 15261,
+      "sha256": "22971b2d0ea2fc4c1f4793adc80cf18048b70da64068d6e69cda5bb29120da5d"
+    },
+    {
+      "path": "prefill-int8/telemetry.jsonl",
+      "bytes": 24631,
+      "sha256": "b61d9d63f1037242e86c9814d52c81676b2071c198125191820203f17e7bc61b"
+    },
+    {
+      "path": "requests.json",
+      "bytes": 213823,
+      "sha256": "7ca7d3e74c779f775e5c05e33abab602c2db507654cc801ccee32939ff258c9d"
+    },
+    {
+      "path": "results.json",
+      "bytes": 104035,
+      "sha256": "08c58fe2fee6895d1a41b53671e769901b0d939134e0dd500ff9d9330824e2de"
+    }
+  ]
+}

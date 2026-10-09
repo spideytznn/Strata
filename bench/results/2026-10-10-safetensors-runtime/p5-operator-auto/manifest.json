@@ -1,0 +1,31 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\operator-p5-auto",
+  "status": "pass",
+  "files": [
+    {
+      "path": "command.json",
+      "bytes": 1081,
+      "sha256": "6da1e55d75f29629424cd9dc00fb24b1272af2a45e2f7e7e8e584ee1f077033a"
+    },
+    {
+      "path": "engine.log",
+      "bytes": 25237,
+      "sha256": "80df93332eb74d11221ad76cdb606312fd41a1e54106e375987e732ec8d955a0"
+    },
+    {
+      "path": "http.json",
+      "bytes": 8186,
+      "sha256": "6a6d4d5098110f5b847e84fbcd64a8c39fe5ea13f6964b22bdac8782aec6acc4"
+    },
+    {
+      "path": "results.json",
+      "bytes": 35301,
+      "sha256": "5d5fcb5c21781923533f08d1b6fd5b81933795a97f05efaabe3f232ab2775ed6"
+    },
+    {
+      "path": "telemetry.jsonl",
+      "bytes": 22991,
+      "sha256": "f405ae0cd2f941bcd984f519f2530c7bef271aadf28204064b4bf9cea8d0f506"
+    }
+  ]
+}

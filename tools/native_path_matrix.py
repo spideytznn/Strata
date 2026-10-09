@@ -91,7 +91,7 @@ def main():
   k=opts.get('mtp',0);setting('--spec',max(2,k+1));setting('--mtp-max-t',max(1,k+1));setting('--spec-min-p',0)
   if k:args.extend(['--mtp','native'])
   env=child_env(cfg);env.update({k:str(v) for k,v in opts.items() if k.startswith('STRATA_')})
-  env.update({'STRATA_DUMP_FIRST_LOGITS':str((folder/'logits.f32').resolve()),'STRATA_MTP_FULL_HEAD':'1','STRATA_PREFILL_TRACE':'1'})
+  env.update({'STRATA_DUMP_FIRST_LOGITS':str((folder/'logits.f32').resolve()),'STRATA_PREFILL_TRACE':'1'})
   (folder/'command.json').write_text(json.dumps({'command':[cfg['exe'],*args],'env':{k:v for k,v in env.items() if k.startswith('STRATA_')}},indent=2),encoding='utf8')
   row={'requests':[]};result['cases'][case]=row;save();t=time.monotonic()
   telemetry=Telemetry(folder/'telemetry.jsonl')

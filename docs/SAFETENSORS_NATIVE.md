@@ -15,8 +15,9 @@ A 63.282 GiB owned expert arena is physically locked in system RAM, including
 copies of experts currently in VRAM. Failure to lock the whole arena aborts
 startup. The initial path uses a separate 337.5 MiB pinned staging arena.
 `STRATA_NATIVE_ALLOC_PINNED=1` instead allocates the whole arena with
-`cudaHostAllocMapped`, eliminating that host staging copy. It remains explicit
-while end-to-end default selection is in progress. Model expert and MTP source reads are sealed after loading;
+`cudaHostAllocMapped`, eliminating that host staging copy. The generated quality
+config now selects this measured path; a bare CLI keeps the initial reference
+defaults. Model expert and MTP source reads are sealed after loading;
 only the segmented ngram table remains demand-read during inference. Source
 counters measure requested bytes, not physical SSD activity; physical locking
 prevents the owned expert arena from being paged out.
@@ -155,7 +156,49 @@ experts on CPU gives KL 5.3595e-10, agreement 234/234 and NLL difference
 samples check numerical and integration behavior; they are not a broad model
 benchmark or a comparison with unquantized BF16 weights.
 
+`p5-prefill/` compares prefill arithmetic with full pinned residency and the
+same eight requests. For the actual 8192-token segment plus assistant header,
+prompt processing is 4,966.7 ms for BF16x2/FP16, 4,237.4 ms for W4A8,
+3,074.9 ms for two-term FP4 and 2,917.9 ms for single-term FP4. Relative first
+logit KL on that long request is respectively 0 / 0.0012513 / 0.0020589 /
+0.0020638. W4A8 preserves this 128-token continuation; both FP4 prefill choices
+change it. These are single cold/warm pairs, so faster candidates stay opt-in
+while the quality configuration retains BF16x2/FP16.
+
+`p5-fp4-numerical/` records rebuilt SM120 diagnostics on real checkpoint
+weights. For layer 0 expert 0, the one/two/three-term GPU results match the
+independent activation quantizer and FP64 product reference (gate/up relative
+error at most 5.31e-7 and down at most 1.48e-7); uneven groups and permuted
+destinations also pass. Error versus FP32 activations is a separate quantity:
+13.82% / 1.36% / 0.116% on these synthetic activations. Grouped prefill tests
+cover 508 rows across 20 experts, including partial groups, and all three
+candidate paths pass their numerical checks. Trace messages are emitted from
+the actual FP4 dispatch wrappers; SASS evidence is retained separately. These
+kernel diagnostics read the already-validated fidelity pack as an oracle;
+the inference runtime still loads only the original safetensors directory.
+
 ## Build the runtime
+
+On this machine, `START-NATIVE.bat` starts the independent quality configuration
+at `127.0.0.1:8097`. It uses this checkout's Python environment and engine;
+the original model and other deployments are unchanged. The server runs in the
+foreground and Ctrl+C stops it. The native backend currently accepts text only.
+
+`config/native/rtx5090-quality.json` selects 32,768 context, 8,192 prefill,
+FP16 KV, full mapped expert RAM, automatic VRAM cache sizing with 2,048 MiB
+reserve, the bundled initial expert profile, 96 promotions every four rounds,
+and a 4 GiB conversation cache. MTP stays off for the reference quality setup.
+`--staging`, `--adapt-every 0`, `--balanced-experts`, `--pcie-frac 0|0.5|1` and
+`--mtp 1|2|4` on the generator expose the measured alternatives explicitly.
+CPU fractions apply only to cold experts. The smaller reference diagnostic
+config remains in `config/native/reference.json`.
+
+`p5-operator-auto/` tests these quality settings without benchmark overrides:
+7,102 actual GPU slots, 1,670 temporarily borrowed for prefill, all eight
+128-token continuations identical to the reference, actual 8192 prefill,
+HTTP acceptance and zero expert source reads. Slot counts depend on other VRAM
+use at startup and are not hardcoded. This run's peak working set is
+73,460,129,792 bytes; startup is 90.48 seconds with in-memory repacking.
 
 ```powershell
 cd G:\Strata\Strata-Safetensors

@@ -1,0 +1,6 @@
+strata prefill kernel: SM120 FP4 MMA w4a4 dispatch
+group: 508 rows over 20 experts (max 59 / 31 per expert)
+  gate/up, experts 0-15 (bounds from 0)      rel. error 8.5960%
+  gate/up, experts 16-19 (bounds from 16)    rel. error 8.6026%
+  down, experts 16-19 (relative bounds)      rel. error 8.5801%
+RESULT: ok

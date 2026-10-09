@@ -1,0 +1,21 @@
+{
+  "note": "Real checkpoint layer 0 experts. FP64 product reference; activation quantization error is separate from kernel agreement. Compute-only timings exclude PCIe and routing.",
+  "source_pack": "G:\\Strata\\Strata-data\\packs\\nvidia-nvfp4-fidelity\\experts.bin",
+  "input_scales": "C:\\Users\\spideytznn\\Documents\\Codex\\2026-10-09\\d-qwen3-8-flash-next-nvfp4\\outputs\\nvfp4-layer-input-scales.bin",
+  "commands": [
+    "nvfp4_tensor_test experts.bin input-scales.bin 0 0",
+    "STRATA_PREFILL_TRACE=1 STRATA_PREFILL_NVFP4=w4a8|w4a4x2|w4a4 mmq_nvfp4_parity experts.bin --group"
+  ],
+  "files": {
+    "fp4-native-numerical.log": "d4707e2a62dee9d8de7c26292f19b162c2cc43374276638f21eddd9cc120b375",
+    "prefill-w4a8-numerical.log": "1b7aacd0ad500c5b1167d13a6e333ac0f579bd045d26a3015f19d03764cec57d",
+    "prefill-w4a4x2-numerical.log": "817ed723e2796c9bb0873d1625e7856d1785d6ad8a7b228be31c69ebeb82e3e0",
+    "prefill-w4a4-numerical.log": "562ba6394e62149b2dca2eb0dea76d4f41b440c76fc157122241e66c3c3ddd3a",
+    "build-native-full-head-trace.log": "d648c7a247bd010cd03bb13593d02555d99838381ee8740a96a12fae368bcc10"
+  },
+  "binaries": {
+    "strata.exe": "7b4cf89c0f765a87274338103118e0d6d33ba39d8dabc7331b7e57850188fc6c",
+    "nvfp4_tensor_test.exe": "31b6b9691267127106c72580e835054d527583baa36a5135efaff3e9d1b9e417",
+    "mmq_nvfp4_parity.exe": "baca44bce2b590f01418b993e0946a7c59da62926ec31c434b05e9a1d08cda75"
+  }
+}

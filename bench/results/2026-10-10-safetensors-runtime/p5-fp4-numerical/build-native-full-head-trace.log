@@ -1,0 +1,125 @@
+-- Strata: CUDA enabled, arch 120
+-- strata: pack/full/experts.bin absent - the expert arena load test is NOT registered
+-- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+-- CMAKE_SYSTEM_PROCESSOR: AMD64
+-- CMAKE_GENERATOR_PLATFORM: 
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: /arch:AVX512 GGML_AVX512
+-- ggml version: 0.24.0
+-- ggml commit:  unknown
+-- Configuring done (4.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: G:/Strata/Strata-Safetensors/build-native-engine
+[1/10] Building CXX object CMakeFiles\mmq_nvfp4_parity.dir\src\prefill\mmq_nvfp4_parity.cpp.obj
+[2/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\mtp.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(59): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(47): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(57): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/platform/memory.hpp(58): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(62): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(111): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(426): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(305): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(463): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(469): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(496): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(752): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(870): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(877): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(887): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(913): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(913): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(938): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(942): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(942): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(951): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(951): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(1179): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+[3/10] Linking CXX static library strata_engine.lib
+[4/10] Building CXX object CMakeFiles\nvfp4_tensor_test.dir\src\kernels\nvfp4_tensor_test.cpp.obj
+G:\Strata\Strata-Safetensors\src\kernels\nvfp4_tensor_test.cpp(21): warning C4018: “<”: 有符号/无符号不匹配
+[5/10] Linking CXX executable nvfp4_tensor_test.exe
+[6/10] Building CUDA object CMakeFiles\strata_mmq_w4a4.dir\src\prefill\mmq_nvfp4_w4a4.cu.obj
+G:/Strata/Strata/third_party/llama.cpp/ggml/src\ggml-impl.h(1): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin/../include\cuda.h(23283): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+G:/Strata/Strata/third_party/llama.cpp/ggml/src\ggml-impl.h(1): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin/../include\cuda.h(23283): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(636): warning #221-D: floating-point value does not fit in required floating-point type
+              return -((float)(1e+300));
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                  ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                                      ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(636): warning #221-D: floating-point value does not fit in required floating-point type
+              return -((float)(1e+300));
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                  ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                                      ^
+
+mmq_nvfp4_w4a4.cu
+tmpxft_0000aafc_00000000-7_mmq_nvfp4_w4a4.cudafe1.cpp
+[7/10] Building CUDA object CMakeFiles\strata_mmq_w4a4.dir\src\prefill\mmq_nvfp4_a44.cu.obj
+G:/Strata/Strata/third_party/llama.cpp/ggml/src\ggml-impl.h(1): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin/../include\cuda.h(23283): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+G:/Strata/Strata/third_party/llama.cpp/ggml/src\ggml-impl.h(1): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.0\bin/../include\cuda.h(23283): warning C4819: ���ļ����������ڵ�ǰ����ҳ(936)�б�ʾ���ַ����뽫���ļ�����Ϊ Unicode ��ʽ�Է�ֹ���ݶ�ʧ
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(636): warning #221-D: floating-point value does not fit in required floating-point type
+              return -((float)(1e+300));
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                  ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                                      ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(636): warning #221-D: floating-point value does not fit in required floating-point type
+              return -((float)(1e+300));
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                  ^
+
+G:/Strata/Strata/third_party/llama.cpp/ggml/src/ggml-cuda\common.cuh(638): warning #221-D: floating-point value does not fit in required floating-point type
+              return make_half2(-((float)(1e+300)), -((float)(1e+300)));
+                                                      ^
+
+mmq_nvfp4_a44.cu
+tmpxft_000093c4_00000000-7_mmq_nvfp4_a44.cudafe1.cpp
+[8/10] Linking CXX static library strata_mmq_w4a4.lib
+[9/10] Linking CXX executable mmq_nvfp4_parity.exe
+[10/10] Linking CXX executable strata.exe
