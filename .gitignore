@@ -36,6 +36,8 @@ td.log
 /run-*.sh
 /strata-*.json
 /strata-*.log
+/safetensors-local/
+*.safetensors
 /build-strata.bat
 /build-strata-cuda12.bat
 /build-cuda12/

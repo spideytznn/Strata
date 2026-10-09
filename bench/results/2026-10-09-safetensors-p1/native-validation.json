@@ -1,0 +1,247 @@
+{
+  "container_seconds": 1.8684056,
+  "elapsed_seconds": 2.0619651,
+  "expert_read_guard": true,
+  "families": {
+    "dense": {
+      "bytes": 9895397144,
+      "tensor_count": 1068
+    },
+    "expert": {
+      "bytes": 67948314624,
+      "tensor_count": 294912
+    },
+    "mtp": {
+      "bytes": 2698026496,
+      "tensor_count": 3101
+    },
+    "ngram": {
+      "bytes": 51200246018,
+      "tensor_count": 131
+    },
+    "vision": {
+      "bytes": 897862112,
+      "tensor_count": 333
+    }
+  },
+  "files": [
+    {
+      "data_offset": 1644024,
+      "file_bytes": 3115991696,
+      "header_bytes": 1644016,
+      "name": "model-00001-of-00010.safetensors",
+      "tensor_count": 12327
+    },
+    {
+      "data_offset": 5197456,
+      "file_bytes": 10005510304,
+      "header_bytes": 5197448,
+      "name": "model-00002-of-00010.safetensors",
+      "tensor_count": 38725
+    },
+    {
+      "data_offset": 5338416,
+      "file_bytes": 10005364728,
+      "header_bytes": 5338408,
+      "name": "model-00003-of-00010.safetensors",
+      "tensor_count": 39560
+    },
+    {
+      "data_offset": 5270608,
+      "file_bytes": 10006060112,
+      "header_bytes": 5270600,
+      "name": "model-00004-of-00010.safetensors",
+      "tensor_count": 38970
+    },
+    {
+      "data_offset": 5355360,
+      "file_bytes": 10005362392,
+      "header_bytes": 5355352,
+      "name": "model-00005-of-00010.safetensors",
+      "tensor_count": 39617
+    },
+    {
+      "data_offset": 5349016,
+      "file_bytes": 10005375328,
+      "header_bytes": 5349008,
+      "name": "model-00006-of-00010.safetensors",
+      "tensor_count": 39560
+    },
+    {
+      "data_offset": 5269440,
+      "file_bytes": 10005956544,
+      "header_bytes": 5269432,
+      "name": "model-00007-of-00010.safetensors",
+      "tensor_count": 38969
+    },
+    {
+      "data_offset": 5348888,
+      "file_bytes": 10005375200,
+      "header_bytes": 5348880,
+      "name": "model-00008-of-00010.safetensors",
+      "tensor_count": 39560
+    },
+    {
+      "data_offset": 1211088,
+      "file_bytes": 5679113808,
+      "header_bytes": 1211080,
+      "name": "model-00009-of-00010.safetensors",
+      "tensor_count": 9036
+    },
+    {
+      "data_offset": 2320,
+      "file_bytes": 128587536,
+      "header_bytes": 2312,
+      "name": "model-00010-of-00010.safetensors",
+      "tensor_count": 20
+    },
+    {
+      "data_offset": 416368,
+      "file_bytes": 53717551730,
+      "header_bytes": 416360,
+      "name": "model-fp8-mtp-ple.safetensors",
+      "tensor_count": 3201
+    }
+  ],
+  "io": {
+    "data_read_calls": 26,
+    "header_bytes": 40402984,
+    "metadata_bytes": 31329346,
+    "source_read_bytes": {
+      "dense": 0,
+      "expert": 16588944,
+      "mtp": 0,
+      "ngram": 1538,
+      "vision": 0
+    },
+    "staging_peak_bytes": 2457600
+  },
+  "mode": "verify-set",
+  "model": {
+    "expert_arena_committed_bytes": 0,
+    "expert_arena_planned_bytes": 67948118016,
+    "experts": 24576,
+    "full_attention_layers": 12,
+    "input_scales_planned_bytes": 294912,
+    "layers": 48,
+    "linear_layers": 36,
+    "ngram_first_absolute_offset": 416370,
+    "ngram_rows": 320001536,
+    "ngram_segments": 128,
+    "nvfp4_projections": 73728,
+    "text_forward_connected": false,
+    "type": "qwen4_exp",
+    "vision_forward_supported": false
+  },
+  "ngram_row_samples": [
+    {
+      "absolute_offset": 416370,
+      "row": 0,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_0.weight",
+      "sample_sha256": "fff3289c28f864f6047e5653ad2d55f21a004e1da6a52cc1cac7fd78340cc54c"
+    },
+    {
+      "absolute_offset": 417650,
+      "row": 8,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_0.weight",
+      "sample_sha256": "dcbc2a0f6e67b02a78f53608a00c42846d6c92aaa7536b3589913a8413e6377e"
+    },
+    {
+      "absolute_offset": 400418130,
+      "row": 2500011,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_0.weight",
+      "sample_sha256": "c1b462499e330ffc1970da65bee71efb7f48fb545e9c05cc7dcff193befb72fd"
+    },
+    {
+      "absolute_offset": 400418290,
+      "row": 2500012,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_1.weight",
+      "sample_sha256": "bd150b5df8a8854a31ca6a167a2df0e0d2d77249850d11a3c5bd948cccff5ac4"
+    },
+    {
+      "absolute_offset": 400418450,
+      "row": 2500013,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_1.weight",
+      "sample_sha256": "4d6c211175c15664af01eed67ae9627dc51d9f8c6df3bf5ba2dcce7c282e9fe7"
+    },
+    {
+      "absolute_offset": 4000435410,
+      "row": 25000119,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_9.weight",
+      "sample_sha256": "e64cb06332d875f7d1b2cf2cf1927b4a6091fe7b36c7aebc6741fd1870553ee7"
+    },
+    {
+      "absolute_offset": 4000435570,
+      "row": 25000120,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_10.weight",
+      "sample_sha256": "0d79d75f1c625c602d8203f89f798f7ff31b75c998ca5f5f3dce1b35d51ff53b"
+    },
+    {
+      "absolute_offset": 51200661970,
+      "row": 320001535,
+      "tensor": "model.language_model.layers.1.ple.ple_embedding.ngram_embedding.shard_127.weight",
+      "sample_sha256": "dee239cf4244a05edf95a657f010fb8d03eacbb20ea248ac2dda3a17865277b4"
+    }
+  ],
+  "ok": true,
+  "schema_version": 1,
+  "scope": "weight source validation; not full model inference",
+  "tensor_count": 299545,
+  "verification": [
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 0,
+      "layer": 0,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    },
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 7,
+      "layer": 0,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    },
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 100,
+      "layer": 12,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    },
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 300,
+      "layer": 24,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    },
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 5,
+      "layer": 40,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    },
+    {
+      "blob_bytes": 2764816,
+      "byte_exact": true,
+      "expert": 511,
+      "layer": 47,
+      "physical_ram_locked": false,
+      "roundtrip_bytes": 2764824,
+      "input_scales_bit_exact": true
+    }
+  ],
+  "report_note": "Raw row bytes and scale values omitted from tracked evidence; original diagnostic output remains in ignored build directory."
+}

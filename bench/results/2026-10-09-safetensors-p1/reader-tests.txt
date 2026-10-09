@@ -1,0 +1,18 @@
+test_64_bit_seek (__main__.Reader.test_64_bit_seek) ... ok
+test_duplicate_keys_and_bad_json (__main__.Reader.test_duplicate_keys_and_bad_json) ... ok
+test_header_limit_and_truncation (__main__.Reader.test_header_limit_and_truncation) ... ok
+test_index_mismatch (__main__.Reader.test_index_mismatch) ... ok
+test_malformed_descriptors (__main__.Reader.test_malformed_descriptors) ... ok
+test_nesting_limit (__main__.Reader.test_nesting_limit) ... ok
+test_overlap_hole_trailing (__main__.Reader.test_overlap_hole_trailing) ... ok
+test_path_traversal_absolute_and_ads (__main__.Reader.test_path_traversal_absolute_and_ads) ... ok
+test_read_range (__main__.Reader.test_read_range) ... ok
+test_symlink_escape (__main__.Reader.test_symlink_escape) ... skipped "symlink privilege unavailable: [WinError 1314] 客户端没有所需的特权。: 'C:\\\\Users\\\\SPIDEY~1\\\\AppData\\\\Local\\\\Temp\\\\tmphxeyloho\\\\outside.safetensors' -> 'C:\\\\Users\\\\SPIDEY~1\\\\AppData\\\\Local\\\\Temp\\\\safetensors-测试-0fivgytw\\\\权重.safetensors'"
+test_unicode_scalar_empty_and_unaligned (__main__.Reader.test_unicode_scalar_empty_and_unaligned) ... ok
+test_unindexed_file (__main__.Reader.test_unindexed_file) ... ok
+test_unsupported_model (__main__.Reader.test_unsupported_model) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 4.670s
+
+OK (skipped=1)

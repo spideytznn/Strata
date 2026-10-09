@@ -1,0 +1,180 @@
+{
+  "scope": "P1 metadata and six expert adapters; not end-to-end model quality or throughput",
+  "source": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
+  "source_headers": {
+    "model-00001-of-00010.safetensors": {
+      "bytes": 3115991696,
+      "mtime_ns": 1791529135212469600,
+      "header_sha256": "bdcddbabf8c2aa309d840ee4af90f3b60d5b49bf9ae8f7712f88c2f2d8c863e0",
+      "header_bytes": 1644016,
+      "tensor_count": 12327
+    },
+    "model-00002-of-00010.safetensors": {
+      "bytes": 10005510304,
+      "mtime_ns": 1791529538645575100,
+      "header_sha256": "75c38918482ee6acfd1287f84e3f4532ae963dfbbe2cebda54ffd6edaf4d7d9c",
+      "header_bytes": 5197448,
+      "tensor_count": 38725
+    },
+    "model-00003-of-00010.safetensors": {
+      "bytes": 10005364728,
+      "mtime_ns": 1791529469798753500,
+      "header_sha256": "fd0483bbc018b9b09680382dae95bf9b9b3f57b9ec9a38436da39ac8c241c3d7",
+      "header_bytes": 5338408,
+      "tensor_count": 39560
+    },
+    "model-00004-of-00010.safetensors": {
+      "bytes": 10006060112,
+      "mtime_ns": 1791529450686324700,
+      "header_sha256": "22f595e3539e7ac8e2980cb002e445ee2ff3531b74078ac4ad47f044c4e6d029",
+      "header_bytes": 5270600,
+      "tensor_count": 38970
+    },
+    "model-00005-of-00010.safetensors": {
+      "bytes": 10005362392,
+      "mtime_ns": 1791528695017293200,
+      "header_sha256": "9f78817c3ff29193824cbaaf819db8e9af79114822581a409e7f1caced78a3b1",
+      "header_bytes": 5355352,
+      "tensor_count": 39617
+    },
+    "model-00006-of-00010.safetensors": {
+      "bytes": 10005375328,
+      "mtime_ns": 1791528181711584900,
+      "header_sha256": "fd719711158c4584037fab89fabd8c55e516ba7d6d54e576a368a5d97c374b77",
+      "header_bytes": 5349008,
+      "tensor_count": 39560
+    },
+    "model-00007-of-00010.safetensors": {
+      "bytes": 10005956544,
+      "mtime_ns": 1791528101598625600,
+      "header_sha256": "59eb733b551d12a31ecbeb8e481736d8d3f5ad4a324e93b78b81b627c379ba84",
+      "header_bytes": 5269432,
+      "tensor_count": 38969
+    },
+    "model-00008-of-00010.safetensors": {
+      "bytes": 10005375200,
+      "mtime_ns": 1791528058432182100,
+      "header_sha256": "a7bb06b78d605d9fdd46d8973773e000cc6799df35728311a26f346cbd963244",
+      "header_bytes": 5348880,
+      "tensor_count": 39560
+    },
+    "model-00009-of-00010.safetensors": {
+      "bytes": 5679113808,
+      "mtime_ns": 1791527697574413300,
+      "header_sha256": "5d03166fec014160456ff85225ee60954440e6da8541669e05d449b94c2548c1",
+      "header_bytes": 1211080,
+      "tensor_count": 9036
+    },
+    "model-00010-of-00010.safetensors": {
+      "bytes": 128587536,
+      "mtime_ns": 1791527096965786500,
+      "header_sha256": "1ad354d063124c537cbffeaaaf71afd4fce6ea58ff5fdcd07f69ead605a7e744",
+      "header_bytes": 2312,
+      "tensor_count": 20
+    },
+    "model-fp8-mtp-ple.safetensors": {
+      "bytes": 53717551730,
+      "mtime_ns": 1791530494998103700,
+      "header_sha256": "96a397d5d78441c22f874379191121c6757dd1459d9967f37743865fe04f2bd0",
+      "header_bytes": 416360,
+      "tensor_count": 3201
+    }
+  },
+  "experts": [
+    {
+      "layer": 0,
+      "expert": 0,
+      "blob_sha256": "cef9cb74833d1c2354ab30c15e5d8ed088e9c4aceec38fd000e5a00336594800",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 6.61e-05 s_up 6.61e-05 s_down 5.99e-05 -> expert output rel. error 0.000023%\nRESULT: ok (worst 0.000023%)\n",
+      "existing_gpu_reference_stderr": ""
+    },
+    {
+      "layer": 0,
+      "expert": 7,
+      "blob_sha256": "37ecee7b084f9b4426550ae24745020d3ae292557122eb855249dd5d99ebd380",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 0.000117 s_up 0.000117 s_down 0.000161 -> expert output rel. error 0.000024%\nRESULT: ok (worst 0.000024%)\n",
+      "existing_gpu_reference_stderr": ""
+    },
+    {
+      "layer": 12,
+      "expert": 100,
+      "blob_sha256": "6a97a6287667b193938874e43a88eeedb9c5e8ef8e0f12056043808e79fc4d79",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 7.19e-05 s_up 7.19e-05 s_down 7.52e-05 -> expert output rel. error 0.000027%\nRESULT: ok (worst 0.000027%)\n",
+      "existing_gpu_reference_stderr": ""
+    },
+    {
+      "layer": 24,
+      "expert": 300,
+      "blob_sha256": "223d02f82caf33ec59988267ca7aa21919f23ccbb6e6972bda54679a57bd5d7b",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 2.28e-05 s_up 2.28e-05 s_down 2.23e-05 -> expert output rel. error 0.000027%\nRESULT: ok (worst 0.000027%)\n",
+      "existing_gpu_reference_stderr": ""
+    },
+    {
+      "layer": 40,
+      "expert": 5,
+      "blob_sha256": "fab41835457bd3585032aafca7f566bf6e04dd0e51adc3a60cd61998b6368d19",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 4.63e-05 s_up 4.63e-05 s_down 3.25e-05 -> expert output rel. error 0.000027%\nRESULT: ok (worst 0.000027%)\n",
+      "existing_gpu_reference_stderr": ""
+    },
+    {
+      "layer": 47,
+      "expert": 511,
+      "blob_sha256": "15fb1a0875f30077d46758cdd142badc6a75a14cbd9b5a2ff24ab807ccbaf8d2",
+      "legacy_pack_byte_exact": true,
+      "decoded_weight_max_abs_error": 0,
+      "fp64_swiglu_max_abs_error": 0.0,
+      "activation_rows": 3,
+      "existing_gpu_reference_stdout": "layer  0 expert   0: s_gate 7.74e-05 s_up 7.74e-05 s_down 3.4e-05 -> expert output rel. error 0.000026%\nRESULT: ok (worst 0.000026%)\n",
+      "existing_gpu_reference_stderr": ""
+    }
+  ],
+  "native_report": "native-validation.json",
+  "seconds": 3.707826700003352,
+  "ngram_boundary_rows_verified": 8,
+  "original_size_and_mtime_unchanged": true,
+  "full_source_hash_verified": false,
+  "gpu_test_executable": "G:\\Strata\\Strata-NVFP4-Fusion\\build-fidelity\\nvfp4_expert_gpu_parity.exe",
+  "build_toolchain": {
+    "compiler": "MSVC 19.44.35228.0",
+    "cuda_reference": "CUDA 13.0 / SM120",
+    "driver": "617.14",
+    "cpu": "Ryzen 9950X3D",
+    "gpu": "RTX 5090 32GB",
+    "installed_ram_gib": 96
+  },
+  "baseline_commit": "d167eb89301a02e0d6299f49d35494ba5096bc10",
+  "gpu_oracle_executable_sha256": "b213f02e9b841f39c2cb07459289252a2bcd2e5610b36b0f41d82292d2671d33",
+  "metadata_sha256": {
+    "config.json": "4156f806efe3b33a892f13634002b2fb2371eb520908a5a110e63eab1822dd49",
+    "hf_quant_config.json": "331ad11d57c8bc374554579977198084e0d4d0933d5b3558f125f6f670aba0e8",
+    "model.safetensors.index.json": "660414e8300728ba80062e6a3c81cb76a65e2ab136ac9e9ceb450ba0c51c3c0d",
+    "tokenizer.json": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "tokenizer_config.json": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27",
+    "chat_template.jinja": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041"
+  },
+  "requested_template": {
+    "path": "C:\\Users\\spideytznn\\Documents\\Codex\\2026-10-09\\d-qwen3-8-flash-next-nvfp4\\outputs\\froggeric-v22.5.jinja",
+    "sha256": "4e3057e958bc01efb8e24701ef37c809051644774c6040e37c777927d9bfe22e",
+    "forward_connected": false
+  }
+}

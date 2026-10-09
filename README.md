@@ -1,4 +1,16 @@
-# Strata NVFP4
+# Strata Safetensors
+
+Experimental native safetensors weight backend for the NVIDIA Qwen3.8-Flash-Next
+checkpoint, starting at the verified Strata NVFP4 fidelity commit
+`d167eb89301a02e0d6299f49d35494ba5096bc10`. The current milestone is a C++ metadata
+reader, weight-source interface and lossless expert adapter. Full text inference
+from a model directory is **not connected yet**. See
+[the implementation status and reproducible checks](docs/SAFETENSORS_NATIVE.md).
+
+## Inherited Strata NVFP4 baseline
+
+The instructions below describe the inherited GGUF/pack engine. They are retained
+as reference; they are not the new native safetensors startup path.
 
 **Qwen3.8-Flash-Next (125B hybrid MoE) in NVFP4 on one RTX 20, 30, 40 or 50 card (12 GB of VRAM or more; built
 and measured on an RTX 5090) + 64 GB of RAM or more, text and pictures.** A fork of
