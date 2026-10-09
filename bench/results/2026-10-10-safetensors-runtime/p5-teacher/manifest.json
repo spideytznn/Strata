@@ -1,0 +1,71 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\build-safetensors\\quality-p5-teacher",
+  "status": "completed",
+  "files": [
+    {
+      "path": "cpu100/command.json",
+      "bytes": 1284,
+      "sha256": "4b171cd1d906ea9d271134c440d88b09f3df8aa55974ebe3ebdb0fab9878c1b9"
+    },
+    {
+      "path": "cpu100/engine.log",
+      "bytes": 218144,
+      "sha256": "8e65add1dde24f4b8ea18c6ca30b21632677beb1006fabf737c3fc4618621daa"
+    },
+    {
+      "path": "cpu100/telemetry.jsonl",
+      "bytes": 17951,
+      "sha256": "6fadd6b191c6333ca2a51c3092776035b2f8cab160ba60eb5ac039bd7cfa76f9"
+    },
+    {
+      "path": "fidelity/command.json",
+      "bytes": 2280,
+      "sha256": "d82546292ae177a141ab6e334db94bf357b7b8bb6f196a3aa6350519968c154e"
+    },
+    {
+      "path": "fidelity/engine.log",
+      "bytes": 133456,
+      "sha256": "1bba1907d4a9b81ed5464a28451afd38f63c275364d4c2881f4499e377b8b53b"
+    },
+    {
+      "path": "fidelity/telemetry.jsonl",
+      "bytes": 7864,
+      "sha256": "79a2d2b63133792753ab4e0597e740b62720e422a81ab8deb79de47d10c57bea"
+    },
+    {
+      "path": "reference/command.json",
+      "bytes": 1287,
+      "sha256": "72fb6832101720925576802fe2cf1284915d509ef974c721958a6ee8c179059d"
+    },
+    {
+      "path": "reference/engine.log",
+      "bytes": 237730,
+      "sha256": "80e80d6f83b079c361b835ad9957b69eb9ee1e1f0767011ead46184565f3c8e1"
+    },
+    {
+      "path": "reference/telemetry.jsonl",
+      "bytes": 16587,
+      "sha256": "47cf8cd18c4f0fe8a1053de30a430996ba03b38f12983602a5e083c72cc6f8d9"
+    },
+    {
+      "path": "results.json",
+      "bytes": 1016467,
+      "sha256": "321e0c3718d96f2575dc97840a1d047ddb819066b4a15c0a6e0aa1dbfb28cd74"
+    },
+    {
+      "path": "tc3/command.json",
+      "bytes": 1281,
+      "sha256": "431793335d7216de2e935623f33bf6dbce2a4fcc91b66aacf3027121e88c41d4"
+    },
+    {
+      "path": "tc3/engine.log",
+      "bytes": 237732,
+      "sha256": "f3d4582ed07169d5198675d2509f5caaa7ef435758c31787ec3483cc682edec7"
+    },
+    {
+      "path": "tc3/telemetry.jsonl",
+      "bytes": 17338,
+      "sha256": "ed379b1243fdaee0832c2df4f7ee62eb36580908107f0b5d19ed0017bf76c37c"
+    }
+  ]
+}

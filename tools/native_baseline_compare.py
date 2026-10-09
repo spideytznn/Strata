@@ -1,7 +1,8 @@
 """Same-day, sequential native / fidelity GGUF / Q4XL session measurements.
 
 Production configs are read only. Only weight paths are inherited; every run
-gets the same context, FP16 KV, expert slots, prefill and request token IDs.
+gets the same context, FP16 KV, VRAM reserve, prefill and request token IDs.
+Auto cache sizing can produce different slot counts for different formats.
 Q4XL is a different quantization/checkpoint, not a numerical quality oracle.
 """
 import argparse
@@ -120,7 +121,7 @@ def main():
                             out.append(v)
                     r = {'name': name, 'input_tokens': len(ids), 'ids': out, 'text': tok.decode(out), 'started_unix_s':started_unix,
                          'ttft_s': first, 'wall_s': time.monotonic() - start, **engine.last}
-                    assert r['generated'] == len(out) and 0 < len(out) <= limit
+                    assert r['generated'] == len(out) == limit, 'fixed-length comparison ended early; inspect EOS separately'
                     r['after_first_token_per_s'] = (len(out) - 1) / (last - first) if len(out) > 1 else None
                     r['cpu_expert_entries'] = r['lookups'] - r['hits']
                     r['routed_expert_entries'] = r['lookups'] + r['offloaded']

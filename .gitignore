@@ -63,3 +63,6 @@ build-vision-cuda12.bat
 
 /.ccache/
 /.rocm-win/
+
+# Curated native-backend evidence includes the raw runtime diagnostics.
+!bench/results/2026-10-10-safetensors-runtime/**/engine.log

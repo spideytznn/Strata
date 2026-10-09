@@ -143,6 +143,18 @@ pinned experiments; the archive is marked `interrupted_between_cases`, not a
 completed adaptive result. Each evidence archive includes a file hash manifest.
 Hardware and firmware-reported memory settings are in `hardware.json`.
 
+`p5-teacher/` contains 234 teacher-forced positions (68 English, 82 Chinese,
+84 code), using 6,999 hot slots, 4,096 context and 256-token prefill. Each target
+is scored against the full 248,320 logits. The same-checkpoint fidelity backend
+uses fully pinned resident experts and performs no CPU Q8 fallback. Relative
+to native FP32 activations, its average KL is 2.5864e-6, top-1 agreement is
+234/234, and mean NLL difference is -0.00028689 nats/token. Three-term FP4 gives
+KL 0.00030822, agreement 233/234 and NLL difference -0.00002183; running all cold
+experts on CPU gives KL 5.3595e-10, agreement 234/234 and NLL difference
+-0.00000154. Native reference mean NLL is 1.18476296. These authored, small
+samples check numerical and integration behavior; they are not a broad model
+benchmark or a comparison with unquantized BF16 weights.
+
 ## Build the runtime
 
 ```powershell
