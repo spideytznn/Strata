@@ -43,14 +43,19 @@ The desktop `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops
 the server. Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 
 The profile keeps original BF16 projections and the full draft/target heads.
-MTP proposes up to four tokens, retains the first two guesses, and uses
-`--spec-min-p 0.7` for deeper drafts. This is independent of target sampling
+MTP proposes up to two draft tokens (`--spec 3 --mtp-max-t 3`) and uses
+`--spec-min-p 0.5` from the first guess. `--spec-min-drafts` is omitted, so
+no minimum draft count is forced. This is independent of target sampling
 `min_p`. Existing BF16 draft batching is enabled, with ordinary one-token
 commit retained. CPU75 cold-expert decode, canonical FP32 expert arithmetic,
 INT8/elastic KV and the existing GPU image encoder remain enabled. Official
 thinking defaults remain temperature 1, top_p 0.95, top_k 20, min_p 0,
 presence_penalty 0 and repetition_penalty 1; explicit requests/shared web
 settings override them. The encoder allows up to 1024 tokens per image.
+
+The allocation and performance measurements below describe the preceding
+four-draft / 0.7-gate / floor-two profile. The current two-draft / 0.5-gate
+setting was requested on 2026-10-11 and has no new throughput measurement.
 
 The workspace is allocated and written before expert-cache sizing, with a
 512 MiB temporary startup guard and explicit late-MTP-head budgeting. The

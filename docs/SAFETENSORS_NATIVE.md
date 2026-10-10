@@ -53,13 +53,18 @@ configured chunk. The explicit reserve is now 1024 MiB after paired testing;
 the accepted efficiency14 profile with reserve 3072 remains available through
 `START-NATIVE-262K-STABLE.bat`. Bare CLI and GGUF defaults remain unchanged.
 
-The final local profile keeps original BF16 projections and full heads, enables
-the existing BF16 MTP batch path, and proposes up to four drafts with
-`--spec-min-p 0.7 --spec-min-drafts 2`. The first two guesses are retained;
-confidence controls deeper guesses. The gate does not change target sampling
+The current local profile keeps original BF16 projections and full heads, enables
+the existing BF16 MTP batch path, and proposes up to two drafts with
+`--spec 3 --mtp-max-t 3 --spec-min-p 0.5`. `--spec-min-drafts` is omitted
+(default zero), so confidence can truncate the chain from the first guess.
+The gate does not change target sampling
 `min_p`. Ordinary one-token commit remains enabled (`STRATA_ONE_TOKEN_COMMIT=0`).
 An opt-in startup weight read uses the existing guard without a forward pass,
 weight changes or session mutation. Profile timings do not isolate its benefit.
+
+The measurements below cover the preceding four-draft / 0.7-gate / floor-two
+profile; the two-draft / 0.5-gate change requested on 2026-10-11 has not been
+benchmarked again.
 
 Three fresh starts per profile pass all 63 visual/text/cached requests. The two
 4096 profiles have exact complete outputs for all 21 corresponding requests.
@@ -455,8 +460,8 @@ SSD reads during inference.
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-fast.json` and
 `build-native-engine/strata-efficiency17.exe`. Settings are 262144 total context,
-4096 dedicated prefill, INT8 KV, original BF16 MTP up to four drafts, gate 0.7,
-floor two, BF16 draft batching, CPU75 cold experts, kernel copying, elastic KV,
+4096 dedicated prefill, INT8 KV, original BF16 MTP up to two drafts, gate 0.5,
+no forced draft floor, BF16 draft batching, CPU75 cold experts, kernel copying, elastic KV,
 canonical FP32 arithmetic and ordinary T1 commit. FP32 decode activations,
 BF16x2 dense prefill, W4A8 expert prefill and closed startup handles stay enabled.
 The GPU visual encoder loads before automatic expert sizing. An actual 4096-row
