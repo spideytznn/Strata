@@ -6624,6 +6624,7 @@ int strata_main(int argc, char** argv) {
         // confirms every emitted token against the real model regardless of where the draft came from.
         const bool use_mtp = !o.mtp.empty();
         strata::prefill::Prefill sp;
+        const int64_t configured_prefill_chunk = o.prefill_chunk;
         // the pool is idle while a prompt is read unless batch slots decode between its parts; with
         // STRATA_PREFILL_CPU_SHARE the staged-chunk limit before the chunk below sizes the loans (bytes_needed reads it)
         const bool share_pool = o.batch <= 0 && !o.no_pool;
@@ -6961,8 +6962,11 @@ int strata_main(int argc, char** argv) {
                 }
                 if (c > 0) {
                     std::fprintf(stderr, "strata serve: a %lld-token chunk's prompt buffers need %lld MiB on CUDA%d, "
-                                         "%lld MiB free: %lld-token chunks\n", (long long) o.prefill_chunk,
-                                 (long long) (need >> 20), dev, (long long) (fb >> 20), (long long) c);
+                                         "%lld MiB free: %lld-token chunks (+%lld MiB required headroom, "
+                                         "%lld MiB short including headroom)\n", (long long) o.prefill_chunk,
+                                 (long long) (need >> 20), dev, (long long) (fb >> 20), (long long) c,
+                                 (long long) (kHeadroom >> 20),
+                                 (long long) ((need + kHeadroom - fb + (1ll << 20) - 1) >> 20));
                     o.prefill_chunk = c;
                 }
             }
@@ -7005,6 +7009,10 @@ int strata_main(int argc, char** argv) {
                                      "context, or read prompts in smaller chunks (--prefill 512)\n");
             return 1;
         }
+        if (std::getenv("STRATA_PREFILL_TRACE"))
+            std::fprintf(stderr, "strata serve prefill selection: configured=%lld selected=%lld auto=%d reduced=%d\n",
+                         (long long) configured_prefill_chunk, (long long) o.prefill_chunk,
+                         (int) o.prefill_auto, (int) (o.prefill_chunk < configured_prefill_chunk));
         if (peer.valid() && o.peer_prefill_rows != 0) {
             const int64_t rows = o.peer_prefill_rows > 0 ? o.peer_prefill_rows : o.prefill_chunk * K / 2;
             if (!sp.set_peer(&peer, rows, err)) {
@@ -10634,6 +10642,11 @@ int strata_main(int argc, char** argv) {
             int64_t at = read_from;
             for (const int64_t to : cuts) {
                 if (to <= at) continue;
+                if (std::getenv("STRATA_PREFILL_TRACE"))
+                    std::fprintf(stderr, "strata serve prefill segment: start=%lld end=%lld root=%d turn=%d "
+                                         "message=%d pin=%d reread=%d\n",
+                                 (long long) at, (long long) to, (int) (to == root_at), (int) (to == turn_at),
+                                 (int) (to == message_at), (int) (to == pin_at), (int) (to == reread_to));
                 err.clear();
                 const bool win = windows_ok(at, to);
                 if (win && !refill(err)) {

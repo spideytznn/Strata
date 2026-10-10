@@ -45,6 +45,11 @@ Image preparation adds a median 145 ms. All 57 requests have zero expert file
 reads and exact own-cache/repeat outputs. Different effective chunks change
 sampled continuations, so these are not same-output decode speed comparisons.
 See [all samples, latency and limits](bench/results/2026-10-10-safetensors-runtime/p13-visual-performance/README.md).
+Those private visual runs all allocated 4096 rows. A subsequent real desktop
+startup with the same 3072 MiB reserve fell back to 3072 rows: a 26,328-token
+request took 12.89 s (2042.5 tok/s), followed by 11,905 generated tokens at
+69.9 tok/s. The reserve does not yet guarantee 4096 in every startup. See the
+[actual request and staged diagnostics](bench/results/2026-10-10-safetensors-runtime/p14-desktop-26k/README.md).
 The older figures below describe the text-only, greedy efficiency11 profile.
 
 The measured preceding `strata-efficiency11.exe` profile uses INT8 KV, W4A8 expert prefill,

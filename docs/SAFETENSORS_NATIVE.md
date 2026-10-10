@@ -51,6 +51,14 @@ have zero expert file reads and exact own-cache/repeat outputs. The
 [complete visual benchmark](../bench/results/2026-10-10-safetensors-runtime/p13-visual-performance/README.md)
 includes the prior visual reserve and pure-text control, all samples, TTFT,
 sampling output differences between chunk geometries and finite-test limits.
+All of those current-visual runs actually allocated 4096 rows. A later real
+desktop startup with the same 3072 MiB reserve fell back to 3072 rows and
+processed 26,328 prompt tokens in 12.89 s (2042.5 tok/s); 11,905 generated
+tokens ran at 69.9 tok/s. Thus the current reserve does not guarantee 4096
+under every desktop startup. The [real-request record and staged diagnostics](../bench/results/2026-10-10-safetensors-runtime/p14-desktop-26k/README.md)
+keep this result separate from the controlled benchmark. The 3584 MiB test
+profile and efficiency13 diagnostic build are staged, unmeasured candidates;
+the desktop launcher remains on efficiency12.
 Earlier efficiency11 measurements below remain text-only greedy results.
 The [private image smoke check](../bench/results/2026-10-10-safetensors-runtime/p11-native-vision/README.md)
 passes solid-color recognition, warm image reuse, A/B/A, return to text and
