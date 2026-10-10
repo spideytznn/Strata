@@ -42,6 +42,13 @@ context, 4,096-token dedicated prefill and `127.0.0.1:8880`**. Its config is
 The desktop `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops
 the server. Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 
+The desktop profile enables `fit_max_tokens: true`, as the preceding Q4XL
+deployment does: an oversized client output budget is shortened to the remaining
+262144-token context instead of causing a 400. The prompt is never truncated.
+This avoids an unnecessary server-side overflow when agents such as ZCode ask
+for a large output budget. It does not override the client's own compaction
+policy; ZCode's native-model context setting should also be 262144.
+
 The profile keeps original BF16 projections and the full draft/target heads.
 MTP proposes up to two draft tokens (`--spec 3 --mtp-max-t 3`) and uses
 `--spec-min-p 0.5` from the first guess. `--spec-min-drafts` is omitted, so

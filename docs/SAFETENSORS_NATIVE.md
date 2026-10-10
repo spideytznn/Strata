@@ -470,6 +470,12 @@ allocation and the temporary 512 MiB startup guard. Images remain enabled.
 
 The launcher serves `127.0.0.1:8880` in the foreground; Ctrl+C stops it. Wildcard
 Host accepts any HTTP Host header. Logs append to `logs/native-262k-fast.log`.
+The fast profile also enables `fit_max_tokens: true`, matching the older Q4XL
+deployment. The server clamps a client's oversized output cap to remaining
+context rather than refusing prompt plus output with 400; it never truncates
+the input. This is separate from ZCode's automatic compaction policy and
+requires restarting the server to take effect. ZCode's native-model context
+override was checked as 262144; its own output/safety reserve still applies.
 `START-NATIVE-262K-STABLE.bat` selects the preceding accepted
 `rtx5090-262k-mtp2.json` / efficiency14 with reserve 3072, two drafts and BF16
 draft batching off. The fully unloaded alternative is

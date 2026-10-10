@@ -52,6 +52,7 @@
   "tokenizer_format": "safetensors",
   "chat_template": "G:\\Strata\\Strata-Safetensors\\config\\native\\froggeric-v22.5.jinja",
   "model_name": "Qwen3.8-Flash-Next-NVFP4-Native",
+  "fit_max_tokens": true,
   "lib_dirs": [
     "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.0\\bin\\x64",
     "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.0\\bin"
