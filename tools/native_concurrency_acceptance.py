@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -135,6 +136,7 @@ def main():
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--context", type=int, default=8192)
     ap.add_argument("--vision", action="store_true")
+    ap.add_argument("--adaptive", action="store_true", help="retain adaptive settings and require real two-row batch promotions")
     ap.add_argument("--limit", type=int, default=64)
     ap.add_argument("--growth-tokens", type=int, default=0, help="also test long-slot KV growth beside a short admission")
     ap.add_argument("--capacity-tokens", type=int, default=0, help="exact token count for a near-capacity two-long-slot check")
@@ -151,8 +153,9 @@ def main():
     setting("--batch", 2)
     setting("--max-context", a.context)
     setting("--vram-reserve-mib", 1536)
-    setting("--adapt-every", 1000000)
-    setting("--adapt-swaps", 0)
+    if not a.adaptive:
+        setting("--adapt-every", 1000000)
+        setting("--adapt-swaps", 0)
     cfg["env"]["STRATA_NATIVE_PREFILL_FIRST"] = "1"
     tok = SafetensorsTokenizer.from_directory(cfg["tokenizer"])
     template = ChatTemplate(Path(cfg["chat_template"]))
@@ -247,6 +250,12 @@ def main():
             result["cases"].append({"name": "kv_growth_long_slot", "prompt_tokens": len(long_ids),
                                     "solo": long_ref, "batch": grown, "followup": next_batch})
             print(f"long-slot grow/reuse beside short admission: {len(long_ids)} tokens, identical", flush=True)
+        if a.adaptive:
+            log = eng.log_path.read_text(encoding="utf8")
+            promotions = re.findall(r"safetensors batch adaptive: round=\d+ promoted=(\d+) completed_total=\d+ active_rows=2", log)
+            result["batch_adaptive"] = {"two_row_rounds": len(promotions), "promoted": sum(map(int, promotions))}
+            save()
+            assert promotions and sum(map(int, promotions)) > 0, "no actual two-row batch promotions"
         result["passed"] = True
         save()
         print("cancel/resume, followup, caps: passed", flush=True)

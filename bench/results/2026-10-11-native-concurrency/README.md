@@ -12,6 +12,14 @@ outputs, protocol/HTTP results and startup information. Raw protocol runs also
 record the executable SHA256. Logs contain runtime memory and residency counters.
 The PNG is a synthetic red square used to check vision exclusion.
 
+Subsequent inspection found a missing adaptive tick in actual batch decode:
+the measured executable accumulates routing heat, but periodic exchange is
+scheduled only by solo generation. The recorded measurements remain observations
+of that executable; configured adaptation and cumulative promotions do not prove
+two-row batch promotions. A correction was compiled as `strata-concurrency3.exe`
+(`adaptive-fix-build.log`), with GPU acceptance pending resource availability;
+see [the staged correction](../../../docs/NATIVE_CONCURRENCY.md#adaptive-exchange-correction-staged-after-initial-acceptance).
+
 ## Functional results
 
 | Directory | Check | Result |

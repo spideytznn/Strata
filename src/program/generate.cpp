@@ -9171,6 +9171,7 @@ int strata_main(int argc, char** argv) {
         double bt_wait0 = 0, bt_pool0 = 0;
         int64_t bt_miss0 = 0, bt_hits0 = 0, bt_pcie0 = 0;
         int64_t bt_windows = 0, bt_rows = 0, bt_tokens = 0;
+        int64_t native_batch_adapt_windows = 0, native_batch_adapt_rounds = 0;
         Clock::time_point bt_start = Clock::now();
         int admit_slot = -1;               ///< the slot the request being read will continue in (BGEN)
         long long admit_max_new = 0;
@@ -9309,6 +9310,30 @@ int strata_main(int argc, char** argv) {
             drive.d.experts = 0;
             drive.d.failed = false;
             apply_pending(false);
+            if (safetensors && !drive.d.usage.empty() &&
+                native_batch_adapt_windows >= o.adapt_every &&
+                std::none_of(pf_parts.begin(), pf_parts.end(), [](const PfPart& p) { return !p.lent.empty(); })) {
+                // The batch loop collects every row's routing heat but never enters the solo
+                // loop's adaptive tick. Reuse its swap policy between completed windows.
+                // Finish copies before the next launch or a prompt admission can reuse slots.
+                // A borrowed prefill workspace retains its cache ownership until refill().
+                if (cudaDeviceSynchronize() != cudaSuccess || !adapt_tick(true)) {
+                    err = "native batch: adaptive tier could not reach an idle window boundary";
+                    return false;
+                }
+                apply_pending(true);
+                if (!adapt()) {
+                    err = "native batch: adaptive expert exchange failed";
+                    return false;
+                }
+                const size_t promoted = pending.size();
+                apply_pending(true);
+                native_batch_adapt_windows = 0;
+                ++native_batch_adapt_rounds;
+                std::fprintf(stderr, "safetensors batch adaptive: round=%lld promoted=%zu completed_total=%llu active_rows=%d\n",
+                             (long long) native_batch_adapt_rounds, promoted,
+                             (unsigned long long) native_completed_promotions, S);
+            }
             if (bt_windows == 0) {
                 bt_start = Clock::now();
                 bt_wait0 = ver.ms_wait; bt_pool0 = ver.ms_pool;
@@ -9362,6 +9387,7 @@ int strata_main(int argc, char** argv) {
             bt_run += msd(w0, w1);
             bt_commit += msd(w1, w2);
             ++bt_windows;
+            if (safetensors) ++native_batch_adapt_windows;
             for (int a = 0; a < A; ++a) bt_rows += keep[active[a]];
             for (int t = 0; t < A; ++t) {
                 const int b = active[t];

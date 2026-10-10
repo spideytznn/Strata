@@ -45,6 +45,33 @@ In-memory live-slot, checkpoint and parked-conversation reuse remain available.
 
 ## State, sampling and memory
 
+### Adaptive exchange correction staged after initial acceptance
+
+Inspection after the initial runs found that `strata-concurrency2.exe` accumulates
+routing heat in batch windows but does not periodically schedule new adaptive
+rounds there. Solo generation still exchanges experts. Initial logs' cumulative
+promotion counts therefore do not prove promotions during two-row decode.
+
+The correction is built separately as `strata-concurrency3.exe`; the desktop
+config still selects the previously tested executable until GPU acceptance.
+The native batch boundary now reuses the existing hot/cold swap policy every
+`--adapt-every` windows, with at most `--adapt-swaps` promotions per round (4 and
+96 in this profile). Heat includes routed entries from all active rows. Copies
+complete before the next window; exchanges are deferred while prefill borrows
+expert-cache slots. The dedicated workspace profile does not take that loan.
+The first correction uses a synchronized boundary; its speed is unmeasured.
+
+CUDA SM120 compilation passed. GPU parity, real two-row promotion and source-read
+acceptance remain pending because the user's existing service occupies the GPU.
+The acceptance harness's new `--adaptive` option retains configured adaptation
+and additionally requires nonzero promotions from logged `active_rows=2` rounds:
+
+```powershell
+.venv-native/Scripts/python.exe tools/native_concurrency_acceptance.py --config config/native/rtx5090-262k-parallel.json --exe build-native-engine/strata-concurrency3.exe --output bench/results/local-batch-adaptive --context 262144 --vision --limit 128 --adaptive
+```
+
+### Per-request state
+
 Each slot has its own GDN recurrence/conv history, PLE history and previous token
 pair, QSA KV/indexer and committed token list. The target verifier's batch commit
 now applies the same opt-in canonical QSA spare-row cleanup as its solo commit.

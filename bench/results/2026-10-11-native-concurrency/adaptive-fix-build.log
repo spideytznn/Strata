@@ -1,0 +1,267 @@
+-- Strata: CUDA enabled, arch 120
+-- strata: pack/full/experts.bin absent - the expert arena load test is NOT registered
+-- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+-- CMAKE_SYSTEM_PROCESSOR: AMD64
+-- CMAKE_GENERATOR_PLATFORM:
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: /arch:AVX512 GGML_AVX512
+-- ggml version: 0.24.0
+-- ggml commit:  unknown
+-- Configuring done (4.5s)
+-- Generating done (0.1s)
+-- Build files have been written to: G:/Strata/Strata-Safetensors/build-native-engine
+[1/2] Building CXX object CMakeFiles\strata.dir\src\program\generate.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/platform/memory.hpp(58): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/dma_batch.hpp(32): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(59): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/emulate.hpp(17): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(224): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(226): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(238): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(247): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(248): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1217): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1274): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1287): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1288): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1300): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1310): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1316): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1427): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2107): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2736): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2898): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2918): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2922): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3677): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3778): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3921): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4692): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5240): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5246): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5398): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5420): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5421): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5423): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5705): warning C4244: “=”: 从“const int64_t”转换到“int32_t”，可能丢失数据
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6189): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6210): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6346): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6348): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6394): warning C4456: “r”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6366): note: 参见“r”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6417): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6558): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6702): warning C4456: “sp”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5664): note: 参见“sp”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6923): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7533): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7560): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7567): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7570): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7573): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7839): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7878): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8121): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8130): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(9565): warning C4189: “w”: 局部变量已初始化但不引用
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(9764): warning C4456: “wo”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4426): note: 参见“wo”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(9899): warning C4456: “tok”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5744): note: 参见“tok”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(9960): warning C4456: “hdr”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5684): note: 参见“hdr”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10274): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10513): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10514): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10517): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10485): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10657): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10810): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10917): warning C4456: “sbuf”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3186): note: 参见“sbuf”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11694): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11904): warning C4456: “pool”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4597): note: 参见“pool”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11913): warning C4456: “pool”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4597): note: 参见“pool”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12663): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12698): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12821): warning C4456: “sbuf”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3186): note: 参见“sbuf”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(13222): warning C4456: “hdr”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5684): note: 参见“hdr”的声明
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1691): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1713): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(1880): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2034): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2036): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2053): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2055): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2088): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2123): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2151): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2243): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2328): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2429): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2694): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(2745): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3091): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3115): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3212): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3255): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3256): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3552): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3554): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3730): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3756): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(3762): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4195): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4203): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4217): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4283): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4494): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4513): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4531): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4532): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4542): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4558): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4627): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(4949): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5043): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5044): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5045): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5084): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5129): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5434): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5437): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5542): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5692): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(5716): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6050): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6682): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(6761): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7096): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7129): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7131): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7948): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7949): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8037): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8808): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8820): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8951): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(8955): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(9957): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10219): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10246): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10302): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10359): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10381): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10574): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10847): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10934): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(10943): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11542): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11663): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11668): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11798): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(11856): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12098): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12127): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12160): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12587): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12588): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12589): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12598): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12809): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12840): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12873): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12962): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12964): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(12972): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(13197): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(13217): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1461): warning C4244: “=”: 从“__int64”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1461): note: 模板实例化上下文(最早的实例化上下文)为
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7775): note: 查看对正在编译的函数 模板 实例化“void std::vector<int32_t,std::allocator<int>>::assign<std::_Vector_iterator<std::_Vector_val<std::_Simple_types<_Ty>>>,0>(_Iter,_Iter)”的引用
+        with
+        [
+            _Ty=int64_t,
+            _Iter=std::_Vector_iterator<std::_Vector_val<std::_Simple_types<int64_t>>>
+        ]
+G:\Strata\Strata-Safetensors\src\program\generate.cpp(7775): note: 请参阅 "strata_main::<lambda_84>::operator ()" 中对 "std::vector<int32_t,std::allocator<int>>::assign" 的第一个引用
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1491): note: 查看对正在编译的函数 模板 实例化“void std::vector<int32_t,std::allocator<int>>::_Assign_counted_range<__int64*>(_Iter,const unsigned __int64)”的引用
+        with
+        [
+            _Iter=__int64 *
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(4813): warning C4244: “=”: 从“__int64”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(4813): note: 模板实例化上下文(最早的实例化上下文)为
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1491): note: 查看对正在编译的函数 模板 实例化“void std::vector<int32_t,std::allocator<int>>::_Assign_counted_range<__int64*>(_Iter,const unsigned __int64)”的引用
+        with
+        [
+            _Iter=__int64 *
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1475): note: 查看对正在编译的函数 模板 实例化“_OutIt *std::_Copy_n_unchecked4<__int64*,unsigned __int64,int*>(_InIt,_SizeTy,_OutIt)”的引用
+        with
+        [
+            _OutIt=int *,
+            _InIt=__int64 *,
+            _SizeTy=unsigned __int64
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(462): warning C4244: “初始化”: 从“int64_t”转换到“_Ty”，可能丢失数据
+        with
+        [
+            _Ty=int
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(462): note: 模板实例化上下文(最早的实例化上下文)为
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\vector(1436): note: 查看对正在编译的函数 模板 实例化“int *std::_Uninitialized_copy_n<__int64*,std::allocator<int>>(_InIt,size_t,int *,_Alloc &)”的引用
+        with
+        [
+            _InIt=__int64 *,
+            _Alloc=std::allocator<int>
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xmemory(1938): note: 查看对正在编译的函数 模板 实例化“void std::_Uninitialized_backout_al<std::allocator<int>>::_Emplace_back<__int64&>(__int64 &)”的引用
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xmemory(1844): note: 查看对正在编译的函数 模板 实例化“void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int64_t&>(_Alloc &,_Objty *const ,int64_t &)”的引用
+        with
+        [
+            _Alloc=std::allocator<int>,
+            _Ty=int,
+            _Objty=int
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xmemory(730): note: 查看对正在编译的函数 模板 实例化“_Ty *std::construct_at<_Objty,int64_t&>(_Ty *const ,int64_t &) noexcept(<expr>)”的引用
+        with
+        [
+            _Ty=int,
+            _Objty=int
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(463): warning C4244: “初始化”: 从“int64_t”转换到“_Objty”，可能丢失数据
+        with
+        [
+            _Objty=int
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xutility(463): note: 模板实例化上下文(最早的实例化上下文)为
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xmemory(1844): note: 查看对正在编译的函数 模板 实例化“void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int64_t&>(_Alloc &,_Objty *const ,int64_t &)”的引用
+        with
+        [
+            _Alloc=std::allocator<int>,
+            _Ty=int,
+            _Objty=int
+        ]
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\xmemory(730): note: 查看对正在编译的函数 模板 实例化“_Ty *std::construct_at<_Objty,int64_t&>(_Ty *const ,int64_t &) noexcept”的引用
+        with
+        [
+            _Ty=int,
+            _Objty=int
+        ]
+[2/2] Linking CXX executable strata-concurrency3.exe
