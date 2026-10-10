@@ -8,6 +8,7 @@ def main():
  p.add_argument('--kv',choices=('fp16','int8'),default='fp16')
  p.add_argument('--prefill-mode',choices=('fp16','w4a8','w4a4x2','w4a4'),default='fp16')
  p.add_argument('--dedicated-prefill',action='store_true',help='reserve prompt workspace separately from the expert cache')
+ p.add_argument('--parallel',type=int,choices=range(1,9),default=1,help='opt-in concurrent text slots; validated desktop profile uses 2')
  p.add_argument('--exe',type=Path,help='engine executable, including a staged build')
  p.add_argument('--load-batch',type=int,default=1,help='startup expert batch size, 1..128; 1 keeps the reference loader')
  p.add_argument('--load-workers',type=int,default=1,help='startup byte-packing workers, 1..16')
@@ -31,6 +32,7 @@ def main():
  if a.mtp_batch_bf16 and (not a.mtp or a.mtp_projections!='bf16'):p.error('--mtp-batch-bf16 requires enabled BF16 MTP')
  if a.spec_min_p is not None and (not a.mtp or not 0<=a.spec_min_p<=1):p.error('--spec-min-p requires enabled MTP and a probability in 0..1')
  if not 0<=a.spec_min_drafts<=a.mtp:p.error('--spec-min-drafts must be between 0 and the MTP draft count')
+ if a.parallel>1 and a.spec_min_drafts:p.error('--spec-min-drafts is a serial MTP option; omit it with --parallel')
  model=a.model.resolve(strict=True);output=a.output.resolve()
  if output==model or model in output.parents:raise ValueError('output must be outside the original model directory')
  if output.exists():raise FileExistsError(output)
@@ -56,6 +58,7 @@ def main():
                 'STRATA_NATIVE_ALLOC_PINNED':'0' if a.staging else '1',
                 'STRATA_NATIVE_LOAD_BATCH':str(a.load_batch),'STRATA_NATIVE_LOAD_WORKERS':str(a.load_workers)}}
  if a.mtp_projections!='bf16':config['env']['STRATA_MTP_NATIVE_PROJECTIONS']=a.mtp_projections
+ if a.parallel>1:config['parallel']=a.parallel
  if a.mtp_batch_bf16:config['env']['STRATA_MTP_BATCH_BF16']='1'
  output.parent.mkdir(parents=True,exist_ok=True)
  with output.open('x',encoding='utf8') as f:json.dump(config,f,ensure_ascii=False,indent=2)

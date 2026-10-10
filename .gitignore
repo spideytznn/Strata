@@ -66,5 +66,6 @@ build-vision-cuda12.bat
 
 # Curated native-backend evidence includes the raw runtime diagnostics.
 !bench/results/2026-10-10-safetensors-runtime/**/*.log
+!bench/results/2026-10-11-native-concurrency/**/*.log
 !bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/build/
 !bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/build/**

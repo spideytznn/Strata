@@ -1,5 +1,9 @@
 # Several requests at once (batch slots)
 
+For the original NVIDIA safetensors backend, use the narrower validated profile
+and limits in [Native concurrency](NATIVE_CONCURRENCY.md). Its text slots also
+apply per-request penalties; images run exclusively and batched MTP is refused.
+
 By default Strata serves **one request at a time**: the others wait in the server's queue. With `"parallel": N`
 (the engine's `--batch N`, also spelled `--slots N`) the engine keeps up to N conversations open and decodes them
 **together**: every verify window then carries one token of each conversation, so the dense weights, the shared

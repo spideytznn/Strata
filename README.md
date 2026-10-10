@@ -159,6 +159,12 @@ The fully unloaded MTP alternative is
 [`rtx5090-262k-no-mtp.json`](config/native/rtx5090-262k-no-mtp.json).
 `START-NATIVE-262K-STABLE.bat` retains the earlier efficiency14 profile.
 
+`START-NATIVE-262K-PARALLEL.bat` selects an opt-in **two-request text batch**,
+with the same 262K context and dedicated 4096-row prefill. Images run exclusively;
+one request alone retains MTP, while concurrent slots use target-only decode.
+See [native concurrency](docs/NATIVE_CONCURRENCY.md) for tests, memory costs and
+latency/throughput measurements. The original desktop launcher is unchanged.
+
 ## Validation and limits
 
 - Weight-layout roundtrips, real-expert FP64 checks, full-logit comparisons,
@@ -168,9 +174,9 @@ The fully unloaded MTP alternative is
   session switching and disk-restore checks. These are finite regression tests.
 - The 262K fixture proves capacity and tested state reuse. It does not establish
   general long-context reasoning quality, retrieval accuracy or 262K throughput.
-- Native multi-GPU, continuous batching, pipeline parallelism and external
-  draft models are unsupported. Parked conversations do not imply simultaneous
-  generation.
+- Native text requests can decode together with `"parallel": 2`; admissions
+  share the prompt reader. Native multi-GPU, batched MTP, pipeline parallelism
+  and external draft models are unsupported. Images require exclusive generation.
 - Native CUDA SM120 is validated locally. Linux, HIP, SYCL and other hardware
   have not been validated for this backend. Inherited backend support is not
   evidence for the new native path.

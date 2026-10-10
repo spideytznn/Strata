@@ -2543,6 +2543,14 @@ bool Verifier::capture_commit_batch(const int* rows, int S, int hbase, std::stri
                                                   commitb_ + (size_t) rows[first] * CB + 2 + (u - first),
                                                   0, (const float*) wikn->data, EPS, ib, s, st.max_cells,
                                                   rope_scaling(), cs_);
+                    static const bool canonical = [] {
+                        const char* v = std::getenv("STRATA_SPEC_CANONICAL_STATE");
+                        return v && std::atoi(v) != 0;
+                    }();
+                    if (canonical)
+                        qsa_commit_spare(st.idx_pooled, st.idx_dead, st.idx_block_pos,
+                                         commitb_ + (size_t) rows[first] * CB,
+                                         (int) ID, (int) s.idx_block, (int) st.max_cells, cs_);
                 }
                 ++qsa_index;
             }
@@ -2877,10 +2885,12 @@ bool Verifier::sample_rows(int S, std::string& err) {
     bool any = false;
     for (int t = 0; t < S; ++t) {
         strata::kernels::SamplerParams sp = slot_sp_[(size_t) last_rows_[t]];
-        if (sp.greedy || sp.temperature <= 0.0f) continue;
+        const int32_t* history = batch_hist_[t];
+        const int history_len = history ? batch_hist_len_[t] : 0;
+        if ((sp.greedy || sp.temperature <= 0.0f) && history == nullptr) continue;
         sp.counter = (uint64_t) last_pos_b_[t];   // Philox(seed, position): the solo window's draw for this position
-        sp.penalty_last_n = 0;
-        strata::kernels::sample_tokens(head_logits_ + (size_t) t * (size_t) n_vocab_, 1, (int) n_vocab_, nullptr, 0, sp,
+        sp.penalty_last_n = history_len;
+        strata::kernels::sample_tokens(head_logits_ + (size_t) t * (size_t) n_vocab_, 1, (int) n_vocab_, history, history_len, sp,
                                        m_out_ + t, cs_);
         any = true;
     }

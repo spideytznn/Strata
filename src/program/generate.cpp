@@ -2129,7 +2129,7 @@ int strata_main(int argc, char** argv) {
         }
         if (!o.native_preset.empty() || !o.native_dense_gguf.empty() || !o.native_head_gguf.empty() || !o.embd_gguf.empty() ||
             !o.ple_gguf.empty() || !o.layer_split.empty() || o.no_ple || o.keep_canonical ||
-            o.pipeline_windows > 1 || o.batch > 0) {
+            o.pipeline_windows > 1) {
             std::fprintf(stderr,"--safetensors requires the native single-GPU path without GGUF weight overrides\n"); return 2;
         }
         o.stream_token = o.gr_native_mmvf = o.native_bf16 = o.native_bf16_extra = true;
@@ -2147,6 +2147,12 @@ int strata_main(int argc, char** argv) {
                 std::fprintf(stderr,"--safetensors MTP requires --mtp native without external Q4 overrides\n"); return 2;
             }
             o.mtp = o.safetensors;
+        }
+        const char* native_batch_mtp = std::getenv("STRATA_BATCH_MTP");
+        if (o.batch > 0 && (o.batch_mtp || (native_batch_mtp && native_batch_mtp[0] && native_batch_mtp[0] != '0'))) {
+            std::fprintf(stderr, "--safetensors: --batch-mtp is not validated; batch slots use target-only decode, "
+                                 "while a request alone keeps native MTP\n");
+            return 2;
         }
         o.mmap_experts = true; // reuse the resident ExpertSource and dispatch interface
         o.resident_cpu_experts = true; // fully resident at load; reuse the adaptive scheduler
@@ -4199,14 +4205,15 @@ int strata_main(int argc, char** argv) {
             const bool on = asked && !multi_gpu && o.kv_resident <= 0 &&
                             !o.expert_profile.empty() && (!o.resident_cpu_experts || native_grow) && o.expert_cache != 0 && !remote &&
                             strata::core::vmm_available() &&
-                            // the batch slots carve their own K/V and --vram-elastic's cache is not one VMM range
-                            o.batch == 0 && !o.vram_elastic && o.peer_device < 0;
+                            // Native batch sessions register in the same elastic pool registry. They grow
+                            // together; batch_step and trimming below protect every slot's live cells.
+                            (o.batch == 0 || native_grow) && !o.vram_elastic && o.peer_device < 0;
             if (safetensors && asked && !native_grow)
                 std::fprintf(stderr, "safetensors: elastic K/V disabled; full context allocated up front "
                                      "(STRATA_NATIVE_KV_GROW=1 opts into native VMM acceptance testing)\n");
             if (asked && !on && (o.kv_grow_given || (ev != nullptr && ev[0] != '\0')))
                 std::fprintf(stderr, "strata generate: --kv-grow is off (one GPU, a profile, the whole K/V in VRAM, "
-                                     "every expert in RAM, no --batch, --vram-elastic or --peer-device)\n");
+                                     "every expert in RAM, native slots only, no --vram-elastic or --peer-device)\n");
             const char* iv = std::getenv("STRATA_KV_GROW_INIT");
             strata::core::qsa_set_kv_elastic(on, iv != nullptr && std::atoll(iv) > 0 ? std::atoll(iv) : 16384);
             strata::core::ExpertCache::set_vmm(on);
@@ -4624,11 +4631,11 @@ int strata_main(int argc, char** argv) {
     constexpr int64_t kPrefillStartupGuard = 512ll << 20;
     if (prefill_first) {
         if (!safetensors || !o.serve || !auto_cache || pf_borrow || o.prefill_auto || o.prefill_chunk <= 0 ||
-            multi_gpu || o.batch > 0 || o.vram_elastic || o.peer_device >= 0 || o.pipeline_windows > 0 ||
+            multi_gpu || o.vram_elastic || o.peer_device >= 0 || o.pipeline_windows > 0 ||
             std::any_of(o.expert_cache_remote.begin(), o.expert_cache_remote.end(), [](int n) { return n > 0; })) {
             std::fprintf(stderr, "safetensors: STRATA_NATIVE_PREFILL_FIRST=1 needs native single-GPU --serve, "
                                  "--expert-cache auto, explicit --prefill and --no-prefill-borrow, "
-                                 "without batching, peer, remote caches, pipeline or --vram-elastic\n");
+                                 "without peer, remote caches, pipeline or --vram-elastic\n");
             return 2;
         }
         strata::prefill::gemm_prewarm_wait();
@@ -9146,6 +9153,7 @@ int strata_main(int argc, char** argv) {
             // fed).  Kept when the request ends (`cached`), so the next turn of that conversation continues from it
             // instead of reading its history again (see `slot_source` in the request path).
             std::vector<int32_t> ids;
+            strata::kernels::SamplerParams sampling;   ///< native batch penalty history belongs to this sequence
             bool cached = false;           ///< idle, and its sessions still hold `ids`
             bool cvec = true;              ///< the control vector setting `ids` were read with
             bool img = false;              ///< the conversation has pictures (never reused from the slot)
@@ -9288,6 +9296,13 @@ int strata_main(int argc, char** argv) {
             }
             if (batch_mtp && A > 0) next_slot = ((size_t) active[A - 1] + 1) % bs.size();
             if (S == 0) return true;
+            if (kvg.on) {
+                const int64_t upto = *std::max_element(pos, pos + S) + 256;
+                if (!kvg_ensure(upto, [&] { cudaDeviceSynchronize(); apply_pending(true); })) {
+                    err = "native batch: the K/V cannot grow to a slot's next position";
+                    return false;
+                }
+            }
             const bool was_busy = strata::core::progress().busy.load();
             strata::core::progress().busy.store(true);
             drive.d.layers = 0;
@@ -9300,6 +9315,30 @@ int strata_main(int argc, char** argv) {
                 bt_miss0 = drive.d.multi_misses; bt_hits0 = drive.d.cache_hits; bt_pcie0 = drive.d.pcie_experts;
             }
             const Clock::time_point w0 = Clock::now();
+            if (safetensors) {
+                // The solo prompt reader can overwrite d_hist between batch windows. Rebuild every active
+                // row from its own committed tokens and proposed input, including greedy penalties.
+                for (int a = 0; a < A; ++a) {
+                    const BSlot& sl = bs[(size_t) active[a]];
+                    const int width = std::min(sl.sampling.penalty_last_n, kPenaltyWindowCap);
+                    const int count = batch_mtp ? 2 : 1;
+                    const int first_row = first[a];
+                    if (width > 0) {
+                        strata::kernels::penalty_rows(sl.ids.data(), (int64_t) sl.ids.size(), tok + first_row,
+                                                      count, width, hist_stage.data());
+                        const strata::core::OnDevice on_h(hist_dev);
+                        if (cudaMemcpy(d_hist + (size_t) first_row * kPenaltyWindowCap, hist_stage.data(),
+                                       (size_t) count * width * sizeof(int32_t), cudaMemcpyHostToDevice) != cudaSuccess) {
+                            err = "native batch: penalty history upload failed";
+                            return false;
+                        }
+                    }
+                    for (int j = 0; j < count; ++j)
+                        ver.set_batch_history(first_row + j,
+                            width > 0 ? d_hist + (size_t) first_row * kPenaltyWindowCap + (size_t) j * width : nullptr,
+                            width);
+                }
+            }
             if (!ver.run_slot_rows(rows, S, tok, pos, win_pool_fn, win_pool_user, outb, err) || drive.d.failed) {
                 std::printf("ERR %s\n", drive.d.failed && drive.d.fail ? drive.d.fail : err.c_str());
                 return false;
@@ -9868,6 +9907,11 @@ int strata_main(int argc, char** argv) {
             const int64_t n = (int64_t) ids.size();
             req_imgs.clear();
             if (geni && !o.vision) { std::printf("ERR this engine was started without --vision\n"); continue; }
+            if (safetensors && geni && (batch_on() || (admit_slot >= 0 && admit_max_new > 1))) {
+                std::printf("ERR native vision needs exclusive generation (shared M-RoPE table)\n");
+                std::fflush(stdout);
+                continue;
+            }
             if (geni || !mrope_identity) {
                 // positions for every cell this request can reach; the identity again for a text request
                 std::string ve;
@@ -10202,7 +10246,14 @@ int strata_main(int argc, char** argv) {
                 kv_quiesce();
                 // STRATA_KV_GROW_HOLD=1 (opt-in): keep the K/V as long as the longest parked conversation; default: trim to this request alone, as 0.1.40
                 static const bool hold_on = [] { const char* v = std::getenv("STRATA_KV_GROW_HOLD"); return v != nullptr && std::atoi(v) != 0; }();
-                if (!kvg_trim(n + 256, hold_on ? conversations.longest_tokens() + 256 : 0)) {
+                int64_t hold_cells = hold_on ? conversations.longest_tokens() + 256 : 0;
+                // Elastic native pools share a mapping size. A short admission must not unmap a longer
+                // active, yielded or cached slot's K/V; its next turn copies those cells back to ss.
+                if (safetensors)
+                    for (const BSlot& slot : bs)
+                        if (slot.active || slot.cached || slot.partial)
+                            hold_cells = std::max<int64_t>(hold_cells, (int64_t) slot.ids.size() + 256);
+                if (!kvg_trim(n + 256, hold_cells)) {
                     std::printf("ERR the K/V could not give its VRAM back to the expert cache\n");
                     std::fflush(stdout);
                     return 1;
@@ -11895,6 +11946,7 @@ int strata_main(int argc, char** argv) {
                     sl.max_new = admit_max_new;
                     sl.t0 = Clock::now();
                     sl.ids = live;
+                    sl.sampling = req_sp;
                     if (batch_mtp) {
                         if (!slot_mtp[(size_t) admit_slot]->draft_first(1, ver.final_R_all(), sl.x,
                                                                         sl.p - 1, sl.draft.data(), err)) {

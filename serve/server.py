@@ -4,7 +4,7 @@
     python -m serve.server --engine strata --config strata.json --port 8080   (the real engine, resident)
 
 Endpoints: POST /v1/chat/completions (OpenAI, stream and non-stream), POST /v1/messages (Anthropic, stream and
-non-stream), GET /v1/models, GET /models, GET /props, GET /slots, GET /health, GET /mcp. One sequence at a time behind a FIFO (plan: one resident sequence).
+non-stream), GET /v1/models, GET /models, GET /props, GET /slots, GET /health, GET /mcp. One sequence behind a FIFO by default; opt-in parallel batch slots.
 Tools from MCP servers (serve/mcp.py, `"mcp_servers"` in the config or --mcp-config) are offered only to requests that
 ask for them with `"strata_mcp": true` - the web app does; other clients see exactly the API they always saw.
 Images (optional, when the config has a "vision" entry): OpenAI image_url parts and Anthropic image blocks (base64
@@ -739,6 +739,10 @@ class StrataEngine:
             self.wait_lens: list[list[int]] = []        # ... their prompt lengths (a long read gives way to short ones)
             self.ctl_epoch = 0                          # how often the control lines were taken
             self.ctl = threading.Lock()                 # one admission or solo request on the control lines at a time
+            self.vision_cv = threading.Condition()
+            self.vision_readers = 0
+            self.vision_writer = False
+            self.vision_waiting = 0
         self.gen = self.__dict__.get("gen", 0) + 1      # which engine process this is (a request notes its own)
         self._ctl_erred = False                         # #1059: the control lines ended on an ERR
         self._yielded = None                            # (slot, tokens read): the last request on them gave way
@@ -1468,6 +1472,54 @@ class StrataEngine:
                          "tok_s": round(r["generated"] / max(1e-6, now - ft), 1) if ft else None})
         return view
 
+    def _native_batch_gate(self, cancel, image):
+        """Native text requests share the batch engine; images exclusively own its mutable M-RoPE table.
+
+        Writer preference prevents an image request starving behind arriving text. Waits emit heartbeats,
+        and cancellation never enters the engine. The caller releases its permit after draining generation.
+        """
+        with self.vision_cv:
+            if image:
+                self.vision_waiting += 1
+        acquired, granted = False, False
+        try:
+            while not cancel.is_set():
+                with self.vision_cv:
+                    allowed = (not self.vision_writer and
+                               (self.vision_readers == 0 if image else self.vision_waiting == 0))
+                    if allowed:
+                        if image:
+                            self.vision_writer = True
+                            acquired = True
+                        else:
+                            self.vision_readers += 1
+                        if not image:
+                            return True
+                        break
+                    self.vision_cv.wait(timeout=0.25)
+                yield None
+            else:
+                return False
+            # A cancelled text generator can still be draining its BSTOP in the background.
+            # Hold the exclusive permit until those engine slots are idle too.
+            while not cancel.is_set():
+                with self.slot_cv:
+                    if not any(self.slot_busy) or not self.alive():
+                        break
+                    self.slot_cv.wait(timeout=0.25)
+                yield None
+            if cancel.is_set():
+                return False
+            granted = True
+            return True
+        finally:
+            if image:
+                with self.vision_cv:
+                    self.vision_waiting -= 1
+                    if acquired and not granted:
+                        self.vision_writer = False
+                    self.vision_cv.notify_all()
+
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
         """Yields token ids, and None as a heartbeat every 10 s while the engine is quiet (reading a long prompt):
         the HTTP layer turns it into an SSE comment, which keeps clients' watchdogs calm and notices a client that
@@ -1475,7 +1527,23 @@ class StrataEngine:
         if not self.alive():
             raise EngineDied("the engine is unavailable; this request was not sent")
         if getattr(self, "batch", 0):
-            yield from self.generate_batched(ids, max_new, sampling, cancel, embeddings)
+            if self.info.get("weight_source") == "safetensors":
+                entered = yield from self._native_batch_gate(cancel, bool(embeddings))
+                if not entered:
+                    return
+                try:
+                    yield from self.generate_batched(ids, max_new, sampling, cancel, embeddings)
+                finally:
+                    if embeddings:
+                        with self.vision_cv:
+                            self.vision_writer = False
+                            self.vision_cv.notify_all()
+                    else:
+                        with self.vision_cv:
+                            self.vision_readers -= 1
+                            self.vision_cv.notify_all()
+            else:
+                yield from self.generate_batched(ids, max_new, sampling, cancel, embeddings)
             return
         self.progress, self.progress_ms, self.reused = None, 0, 0
         self.prefill_tok_s_mean = None

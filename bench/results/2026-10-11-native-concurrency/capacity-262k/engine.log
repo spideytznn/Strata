@@ -1,0 +1,876 @@
+strata generate: native pack:  experts (largest blob 2.76 MB), token embedding BF16 in mapped host memory (1212 MiB, 1.8 s)
+strata generate: 7016 MiB of weights loaded from  in 10.8 s (1 canonical tensors skipped: served natively)
+strata generate: GPU 0: NVIDIA GeForce RTX 5090, compute capability 12.0
+strata generate: the SSD is kept awake while rows are read: one page of the table after 100 ms without a read, until 60 s after the last request (STRATA_SSD_KEEPALIVE=0 turns it off)
+strata generate: profile G:\Strata\Strata-Safetensors\data\expert-profile.bin: 24576 ranked pairs, built for 24576 slots
+strata generate: --batch: 2 slot sessions on CUDA0 (0.56 GiB each); 20.92 GiB free
+strata generate: --batch 2: the slot sessions take 1.12 GiB of VRAM on CUDA0 that the expert cache would otherwise hold
+safetensors MTP: 29 dense tensors, 512 original FP8 experts; 2573.1 MiB, no requantization
+strata mtp: original safetensors draft, 2620 MiB total VRAM, startup 2.19 s
+strata generate: native BF16 head, 1271398400 bytes, in 1.4 s
+safetensors: allocating 63.282 GiB expert RAM (CUDA pinned); startup batch=64 workers=4
+safetensors: expert RAM allocated and locked in 5.48 s
+safetensors: resident experts 1/48 layers (elapsed 6.04 s, read 0.46 s, pack 0.07 s)
+safetensors: resident experts 2/48 layers (elapsed 6.58 s, read 0.92 s, pack 0.15 s)
+safetensors: resident experts 3/48 layers (elapsed 7.08 s, read 1.35 s, pack 0.23 s)
+safetensors: resident experts 4/48 layers (elapsed 7.61 s, read 1.79 s, pack 0.30 s)
+safetensors: resident experts 5/48 layers (elapsed 8.15 s, read 2.25 s, pack 0.38 s)
+safetensors: resident experts 6/48 layers (elapsed 8.67 s, read 2.71 s, pack 0.45 s)
+safetensors: resident experts 7/48 layers (elapsed 9.17 s, read 3.14 s, pack 0.52 s)
+safetensors: resident experts 8/48 layers (elapsed 9.83 s, read 3.72 s, pack 0.59 s)
+safetensors: resident experts 9/48 layers (elapsed 10.30 s, read 4.12 s, pack 0.67 s)
+safetensors: resident experts 10/48 layers (elapsed 11.89 s, read 5.63 s, pack 0.74 s)
+safetensors: resident experts 11/48 layers (elapsed 12.35 s, read 6.02 s, pack 0.81 s)
+safetensors: resident experts 12/48 layers (elapsed 12.83 s, read 6.42 s, pack 0.88 s)
+safetensors: resident experts 13/48 layers (elapsed 13.36 s, read 6.88 s, pack 0.96 s)
+safetensors: resident experts 14/48 layers (elapsed 13.84 s, read 7.28 s, pack 1.03 s)
+safetensors: resident experts 15/48 layers (elapsed 14.29 s, read 7.66 s, pack 1.10 s)
+safetensors: resident experts 16/48 layers (elapsed 14.79 s, read 8.09 s, pack 1.18 s)
+safetensors: resident experts 17/48 layers (elapsed 15.28 s, read 8.50 s, pack 1.25 s)
+safetensors: resident experts 18/48 layers (elapsed 15.81 s, read 8.97 s, pack 1.32 s)
+safetensors: resident experts 19/48 layers (elapsed 16.42 s, read 9.50 s, pack 1.39 s)
+safetensors: resident experts 20/48 layers (elapsed 16.93 s, read 9.94 s, pack 1.46 s)
+safetensors: resident experts 21/48 layers (elapsed 17.61 s, read 10.54 s, pack 1.54 s)
+safetensors: resident experts 22/48 layers (elapsed 18.52 s, read 11.38 s, pack 1.61 s)
+safetensors: resident experts 23/48 layers (elapsed 19.53 s, read 12.31 s, pack 1.69 s)
+safetensors: resident experts 24/48 layers (elapsed 20.04 s, read 12.75 s, pack 1.76 s)
+safetensors: resident experts 25/48 layers (elapsed 20.56 s, read 13.20 s, pack 1.83 s)
+safetensors: resident experts 26/48 layers (elapsed 21.09 s, read 13.66 s, pack 1.90 s)
+safetensors: resident experts 27/48 layers (elapsed 21.65 s, read 14.14 s, pack 1.97 s)
+safetensors: resident experts 28/48 layers (elapsed 22.12 s, read 14.54 s, pack 2.05 s)
+safetensors: resident experts 29/48 layers (elapsed 22.65 s, read 14.99 s, pack 2.12 s)
+safetensors: resident experts 30/48 layers (elapsed 23.23 s, read 15.50 s, pack 2.20 s)
+safetensors: resident experts 31/48 layers (elapsed 23.77 s, read 15.96 s, pack 2.27 s)
+safetensors: resident experts 32/48 layers (elapsed 24.31 s, read 16.42 s, pack 2.34 s)
+safetensors: resident experts 33/48 layers (elapsed 24.83 s, read 16.87 s, pack 2.42 s)
+safetensors: resident experts 34/48 layers (elapsed 25.31 s, read 17.27 s, pack 2.49 s)
+safetensors: resident experts 35/48 layers (elapsed 25.86 s, read 17.75 s, pack 2.57 s)
+safetensors: resident experts 36/48 layers (elapsed 26.42 s, read 18.24 s, pack 2.64 s)
+safetensors: resident experts 37/48 layers (elapsed 26.96 s, read 18.71 s, pack 2.71 s)
+safetensors: resident experts 38/48 layers (elapsed 27.50 s, read 19.17 s, pack 2.78 s)
+safetensors: resident experts 39/48 layers (elapsed 28.02 s, read 19.62 s, pack 2.86 s)
+safetensors: resident experts 40/48 layers (elapsed 28.54 s, read 20.07 s, pack 2.93 s)
+safetensors: resident experts 41/48 layers (elapsed 28.98 s, read 20.43 s, pack 3.00 s)
+safetensors: resident experts 42/48 layers (elapsed 29.60 s, read 20.97 s, pack 3.08 s)
+safetensors: resident experts 43/48 layers (elapsed 30.07 s, read 21.37 s, pack 3.15 s)
+safetensors: resident experts 44/48 layers (elapsed 30.55 s, read 21.78 s, pack 3.23 s)
+safetensors: resident experts 45/48 layers (elapsed 31.04 s, read 22.19 s, pack 3.30 s)
+safetensors: resident experts 46/48 layers (elapsed 31.62 s, read 22.69 s, pack 3.37 s)
+safetensors: resident experts 47/48 layers (elapsed 32.16 s, read 23.16 s, pack 3.45 s)
+safetensors: resident experts 48/48 layers (elapsed 32.67 s, read 23.60 s, pack 3.52 s)
+safetensors: 63.282 GiB physically page-locked and GPU-mapped via cudaHostAlloc, 0.0 MiB GPU staging
+safetensors: startup weight handles closed; all resident payload reads sealed
+safetensors: expert startup complete: 32.67 s, batch=64 workers=4 scratch_peak_mib=168.75 read_s=23.60 pack_s=3.52 source_read_calls=29980
+safetensors: all expert weights in locked RAM; expert source reads sealed
+strata generate: CPU pool tasks/phase: 40 (capped by rows), participating threads: 16
+strata generate: 15 pool workers on logical processors 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30, the host thread on 0 (draining too) (--host-core first)
+strata prefill allocation: requested=4096 effective=4096 capacity=4096 workspace_bytes=2906123008 free_vram_bytes=14720958464
+safetensors: prefill-first: 4096 rows allocated and touched before expert cache sizing; 512 MiB startup headroom held; experts use the remaining budget
+strata generate: expert cache auto: 13.71 GiB free, 1536 MiB reserved (+2 MiB for the draft head) -> 4716 slots
+strata generate: only 0 MiB free once the slots are written (reserve 1536 MiB); shrinking the expert cache
+safetensors: written-cache budget also keeps 3 MiB for the late MTP head
+strata generate: only 0 MiB free once the slots are written (reserve 1536 MiB); shrinking the expert cache
+safetensors: written-cache budget also keeps 3 MiB for the late MTP head
+strata generate: only 1063 MiB free once the slots are written (reserve 1536 MiB); shrinking the expert cache
+safetensors: written-cache budget also keeps 3 MiB for the late MTP head
+strata generate: expert cache 3294 slots, 8.48 GiB of VRAM; policy is
+strata generate: native NVFP4 CPU/GPU FP32 canonical arithmetic enabled
+                 (32-lane reduction and double exp rounded to float).
+                 PROFILE, ranked by routing frequency, no eviction.
+strata generate: the profile fill asks for 0 pairs ahead (STRATA_FILL_AHEAD)
+strata generate: pre-filled 3294 of 3294 slots from the profile in 0.2 s (39740 MB/s); slot 0 verified
+strata generate: R4 hit path ON - resident experts are computed on the GPU
+strata generate: 15 expert-pool workers + the host thread
+strata generate: session is up (engine 0.1.41)
+strata generate: token graph hit path: 3294 resident experts, decided on the device
+strata generate: resident RAM mode: 63.28 GiB of experts in RAM (page-locked), 3294 in the GPU cache; adaptive swaps off
+strata serve: the prompt path allocates its own buffers (dedicated workspace: --no-prefill-borrow)
+strata serve prefill selection: configured=4096 selected=4096 auto=0 reduced=0
+strata generate: elastic K/V: 16384 of 262144 cells in VRAM (0.72 of 9.54 GiB); the expert cache (3294 slots) gives the K/V room below slot 3294 as the context grows
+strata hc: CUDA0: the hyper-connection read runs as staged (the norm per token and stream, the down projection's activations staged ahead by cp.async); checked bit for bit against the plain read on this card (STRATA_HC_SPLIT=1 or 0 for the earlier ones)
+strata verify: window up to 3 tokens, 355.1 MiB of device buffers
+strata verify: batch windows of up to 2 sequences (layers [0, 48))
+strata serve: STRATA_ADAPT_FETCH is off (the adaptive tier is off)
+safetensors: startup MTP weight warm: 2573.1 MiB read on device in 3.6 ms; original weights, KV and sampling state unchanged
+safetensors: startup immutable weight warm completed in 33.3 ms using the 512 MiB guard; no forward pass or expert source read
+safetensors: prefill-first ready: configured=4096 allocated=4096; startup headroom released; 1753 MiB free
+strata serve: 1753 MiB of VRAM free with everything loaded
+safetensors: engine ready after 70.48 s from main entry
+strata serve prefill segment: start=0 end=22 root=0 turn=1 message=0 pin=0 reread=0
+strata verify: capturing the 3-token window (1738 MiB of VRAM free)
+strata: the hyper-connection read v4 (programmatic dependent launch)
+strata verify: captured the 3-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (1734 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata verify: capturing the 2-token window (1728 MiB of VRAM free)
+strata verify: captured the 2-token window (upload no error, sync no error)
+strata serve: prompt 29 tokens = 0 reused + 29 read in 1264 ms (23.0 tok/s), 32 generated in 1645 ms (19.4 tok/s), drafts accepted 18 of 24, 1 checkpoints
+strata serve: decode expert cache hit rate: 43.7% (7133 hits / 16327 lookups); 1913 more read by the GPU over PCIe or from another GPU (10.5% of all 18240 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 1088 rows, 6.6% row-cache hits, 1016 SSD reads (4.4 MB), read p50 147 us p99 385 us, blocked 0.013 ms total (submit 0.695 ms), cache 1016/1048576 rows, SSD kept awake by 22 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 7133 hits this request; since the start RAM 18779 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 60 tokens in 56.2 ms; parked=1 bytes=237053168 evictions=0 snapshot_bytes=237053168 reused_kv_bytes=0
+strata serve prefill segment: start=0 end=19 root=0 turn=1 message=0 pin=0 reread=0
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 26 tokens = 0 reused + 26 read in 1120 ms (23.2 tok/s), 32 generated in 1131 ms (28.3 tok/s), drafts accepted 20 of 22, 1 checkpoints
+strata serve: decode expert cache hit rate: 27.8% (3972 hits / 14291 lookups); 2029 more read by the GPU over PCIe or from another GPU (12.4% of all 16320 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 2032 rows, 16.5% row-cache hits, 1696 SSD reads (7.3 MB), read p50 147 us p99 535 us, blocked 0.024 ms total (submit 1.187 ms), cache 1696/1048576 rows, SSD kept awake by 33 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 3972 hits this request; since the start RAM 33824 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 57 tokens in 51.2 ms; parked=1 bytes=237047000 evictions=0 snapshot_bytes=237047000 reused_kv_bytes=0
+strata serve: conversation cache: restored 22 tokens (checkpoint) in 45.0 ms; parked=1 bytes=237973328
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 29 tokens (copied in 61.4 ms)
+strata serve: prompt 29 tokens = 22 reused + 7 read in 200 ms (35.0 tok/s), 1 generated in 21 ms (47.9 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 45.5% (194 hits / 426 lookups); 54 more read by the GPU over PCIe or from another GPU (11.2% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 2144 rows, 20.9% row-cache hits, 1696 SSD reads (7.3 MB), read p50 147 us p99 535 us, blocked 0.025 ms total (submit 1.187 ms), cache 1696/1048576 rows, SSD kept awake by 36 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 194 hits this request; since the start RAM 35595 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 29 tokens in 48.0 ms; parked=1 bytes=237053044 evictions=0 snapshot_bytes=237053044 reused_kv_bytes=305280
+strata serve: conversation cache: restored 19 tokens (checkpoint) in 24.1 ms; parked=1 bytes=237973228
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 26 tokens (copied in 63.3 ms)
+strata serve: prompt 26 tokens = 19 reused + 7 read in 185 ms (37.8 tok/s), 1 generated in 30 ms (33.3 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 38.3% (159 hits / 415 lookups); 65 more read by the GPU over PCIe or from another GPU (13.5% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 2256 rows, 24.8% row-cache hits, 1696 SSD reads (7.3 MB), read p50 147 us p99 535 us, blocked 0.026 ms total (submit 1.187 ms), cache 1696/1048576 rows, SSD kept awake by 38 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 159 hits this request; since the start RAM 37461 blobs, files 0 blobs 0.0 MB read
+strata verify: captured the batch window over slots 0,1
+strata batch: 31 windows, avg 2.00 rows, 44.79 ms/window = run 43.42 (CUDA0 GPU-reach wait 16.87 + CPU experts 24.40) + commit 1.32 + emit 0.05; per layer-window: CPU experts 10.38, VRAM hits 6.34, PCIe 2.95; 44.7 rows/s over 1388 ms of wall time (admissions included)
+strata serve: conversation cache: parked 26 tokens in 44.6 ms; parked=2 bytes=474099920 evictions=0 snapshot_bytes=237046876 reused_kv_bytes=244224
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 38.0 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 29 tokens = 22 reused + 7 read in 176 ms (39.7 tok/s), 32 generated in 865 ms (37.0 tok/s), drafts accepted 12 of 29, 1 checkpoints
+strata serve: decode expert cache hit rate: 40.8% (8512 hits / 20885 lookups); 2635 more read by the GPU over PCIe or from another GPU (11.2% of all 23520 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4224 rows, 42.6% row-cache hits, 2424 SSD reads (10.4 MB), read p50 142 us p99 528 us, blocked 0.040 ms total (submit 1.784 ms), cache 2424/1048576 rows, SSD kept awake by 53 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 8512 hits this request; since the start RAM 70305 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 60 tokens in 45.8 ms; parked=2 bytes=474100044 evictions=0 snapshot_bytes=237053168 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 36.8 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 26 tokens = 19 reused + 7 read in 191 ms (36.7 tok/s), 32 generated in 628 ms (50.9 tok/s), drafts accepted 19 of 24, 1 checkpoints
+strata serve: decode expert cache hit rate: 29.0% (4533 hits / 15610 lookups); 2150 more read by the GPU over PCIe or from another GPU (12.1% of all 17760 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4912 rows, 49.5% row-cache hits, 2480 SSD reads (10.6 MB), read p50 143 us p99 527 us, blocked 0.056 ms total (submit 1.837 ms), cache 2480/1048576 rows, SSD kept awake by 60 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 4533 hits this request; since the start RAM 80766 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 57 tokens in 45.6 ms; parked=2 bytes=474100168 evictions=0 snapshot_bytes=237047000 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 36.8 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 29 tokens (copied in 74.3 ms)
+strata serve: prompt 29 tokens = 22 reused + 7 read in 193 ms (36.3 tok/s), 1 generated in 22 ms (45.1 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 45.5% (194 hits / 426 lookups); 54 more read by the GPU over PCIe or from another GPU (11.2% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 5024 rows, 50.6% row-cache hits, 2480 SSD reads (10.6 MB), read p50 143 us p99 527 us, blocked 0.057 ms total (submit 1.837 ms), cache 2480/1048576 rows, SSD kept awake by 62 reads (slowest 0.7 ms)
+strata serve: expert tiers: GPU 194 hits this request; since the start RAM 82537 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 29 tokens in 46.2 ms; parked=2 bytes=473666508 evictions=0 snapshot_bytes=236619508 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 36.8 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 26 tokens (copied in 78.4 ms)
+strata serve: prompt 26 tokens = 19 reused + 7 read in 200 ms (35.0 tok/s), 1 generated in 22 ms (46.4 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 38.3% (159 hits / 415 lookups); 65 more read by the GPU over PCIe or from another GPU (13.5% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 5136 rows, 51.7% row-cache hits, 2480 SSD reads (10.6 MB), read p50 143 us p99 527 us, blocked 0.057 ms total (submit 1.837 ms), cache 2480/1048576 rows, SSD kept awake by 65 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 159 hits this request; since the start RAM 84403 blobs, files 0 blobs 0.0 MB read
+strata batch: 31 windows, avg 2.00 rows, 46.81 ms/window = run 46.12 (CUDA0 GPU-reach wait 17.91 + CPU experts 26.57) + commit 0.64 + emit 0.05; per layer-window: CPU experts 10.55, VRAM hits 6.16, PCIe 3.01; 42.7 rows/s over 1451 ms of wall time (admissions included)
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 26 tokens in 38.1 ms; parked=2 bytes=473177936 evictions=0 snapshot_bytes=236558428 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 37.6 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 29 tokens = 22 reused + 7 read in 184 ms (38.1 tok/s), 32 generated in 589 ms (54.4 tok/s), drafts accepted 19 of 20, 1 checkpoints
+strata serve: decode expert cache hit rate: 39.9% (5611 hits / 14070 lookups); 1770 more read by the GPU over PCIe or from another GPU (11.2% of all 15840 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 6800 rows, 58.5% row-cache hits, 2824 SSD reads (12.1 MB), read p50 143 us p99 526 us, blocked 0.068 ms total (submit 2.120 ms), cache 2824/1048576 rows, SSD kept awake by 81 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 5611 hits this request; since the start RAM 113756 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 60 tokens in 36.0 ms; parked=2 bytes=473611596 evictions=0 snapshot_bytes=237053168 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 46.2 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 26 tokens = 19 reused + 7 read in 194 ms (36.2 tok/s), 32 generated in 612 ms (52.3 tok/s), drafts accepted 20 of 22, 1 checkpoints
+strata serve: decode expert cache hit rate: 28.9% (4128 hits / 14290 lookups); 2030 more read by the GPU over PCIe or from another GPU (12.4% of all 16320 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 7440 rows, 61.5% row-cache hits, 2864 SSD reads (12.2 MB), read p50 143 us p99 524 us, blocked 0.073 ms total (submit 2.164 ms), cache 2864/1048576 rows, SSD kept awake by 89 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 4128 hits this request; since the start RAM 123653 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 57 tokens in 39.3 ms; parked=2 bytes=474100168 evictions=0 snapshot_bytes=237047000 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 39.8 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 29 tokens (copied in 69.1 ms)
+strata serve: prompt 29 tokens = 22 reused + 7 read in 190 ms (36.8 tok/s), 1 generated in 22 ms (46.1 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 45.5% (194 hits / 426 lookups); 54 more read by the GPU over PCIe or from another GPU (11.2% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 7552 rows, 62.1% row-cache hits, 2864 SSD reads (12.2 MB), read p50 143 us p99 524 us, blocked 0.074 ms total (submit 2.164 ms), cache 2864/1048576 rows, SSD kept awake by 91 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 194 hits this request; since the start RAM 125424 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 29 tokens in 45.9 ms; parked=2 bytes=473666508 evictions=0 snapshot_bytes=236619508 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 38.6 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 26 tokens (copied in 101.5 ms)
+strata serve: prompt 26 tokens = 19 reused + 7 read in 203 ms (34.4 tok/s), 1 generated in 23 ms (43.3 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 38.3% (159 hits / 415 lookups); 65 more read by the GPU over PCIe or from another GPU (13.5% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 7664 rows, 62.6% row-cache hits, 2864 SSD reads (12.2 MB), read p50 143 us p99 524 us, blocked 0.075 ms total (submit 2.164 ms), cache 2864/1048576 rows, SSD kept awake by 94 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 159 hits this request; since the start RAM 127290 blobs, files 0 blobs 0.0 MB read
+strata batch: 31 windows, avg 2.00 rows, 45.18 ms/window = run 44.48 (CUDA0 GPU-reach wait 17.44 + CPU experts 24.95) + commit 0.65 + emit 0.05; per layer-window: CPU experts 10.72, VRAM hits 5.92, PCIe 3.07; 44.3 rows/s over 1401 ms of wall time (admissions included)
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 26 tokens in 41.8 ms; parked=2 bytes=473177936 evictions=0 snapshot_bytes=236558428 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 37.7 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 29 tokens = 22 reused + 7 read in 177 ms (39.5 tok/s), 32 generated in 570 ms (56.1 tok/s), drafts accepted 19 of 23, 1 checkpoints
+strata serve: decode expert cache hit rate: 44.2% (6864 hits / 15537 lookups); 1743 more read by the GPU over PCIe or from another GPU (10.1% of all 17280 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 9344 rows, 69.0% row-cache hits, 2896 SSD reads (12.4 MB), read p50 144 us p99 539 us, blocked 0.082 ms total (submit 2.201 ms), cache 2896/1048576 rows, SSD kept awake by 113 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 6864 hits this request; since the start RAM 156873 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 60 tokens in 40.8 ms; parked=2 bytes=473611596 evictions=0 snapshot_bytes=237053168 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 53.3 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 26 tokens = 19 reused + 7 read in 203 ms (34.5 tok/s), 32 generated in 612 ms (52.3 tok/s), drafts accepted 20 of 22, 1 checkpoints
+strata serve: decode expert cache hit rate: 27.8% (3972 hits / 14291 lookups); 2029 more read by the GPU over PCIe or from another GPU (12.4% of all 16320 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 9984 rows, 71.0% row-cache hits, 2896 SSD reads (12.4 MB), read p50 144 us p99 539 us, blocked 0.087 ms total (submit 2.201 ms), cache 2896/1048576 rows, SSD kept awake by 120 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 3972 hits this request; since the start RAM 166816 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 57 tokens in 45.0 ms; parked=2 bytes=474100168 evictions=0 snapshot_bytes=237047000 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 41.1 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 29 tokens (copied in 66.3 ms)
+strata serve: prompt 29 tokens = 22 reused + 7 read in 193 ms (36.3 tok/s), 1 generated in 29 ms (34.6 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 45.5% (194 hits / 426 lookups); 54 more read by the GPU over PCIe or from another GPU (11.2% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 10096 rows, 71.3% row-cache hits, 2896 SSD reads (12.4 MB), read p50 144 us p99 539 us, blocked 0.088 ms total (submit 2.201 ms), cache 2896/1048576 rows, SSD kept awake by 123 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 194 hits this request; since the start RAM 168587 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 29 tokens in 45.1 ms; parked=2 bytes=473666508 evictions=0 snapshot_bytes=236619508 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 37.0 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 26 tokens (copied in 67.2 ms)
+strata serve: prompt 26 tokens = 19 reused + 7 read in 199 ms (35.2 tok/s), 1 generated in 22 ms (45.4 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 38.3% (159 hits / 415 lookups); 65 more read by the GPU over PCIe or from another GPU (13.5% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 10208 rows, 71.6% row-cache hits, 2896 SSD reads (12.4 MB), read p50 144 us p99 539 us, blocked 0.089 ms total (submit 2.201 ms), cache 2896/1048576 rows, SSD kept awake by 125 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 159 hits this request; since the start RAM 170453 blobs, files 0 blobs 0.0 MB read
+strata verify: captured the batch window over slots 1
+strata batch: 31 windows, avg 1.42 rows, 35.54 ms/window = run 34.97 (CUDA0 GPU-reach wait 14.70 + CPU experts 18.35) + commit 0.53 + emit 0.05; per layer-window: CPU experts 7.74, VRAM hits 4.19, PCIe 2.09; 39.9 rows/s over 1102 ms of wall time (admissions included)
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 26 tokens in 43.3 ms; parked=2 bytes=473177936 evictions=0 snapshot_bytes=236558428 reused_kv_bytes=0
+strata batch: slot 0 gave back 42 tokens of this conversation (all it holds) in 59.9 ms
+strata serve: prompt 43 tokens = 42 reused + 1 read in 116 ms (8.6 tok/s), 18 generated in 331 ms (54.3 tok/s), drafts accepted 10 of 12, 0 checkpoints
+strata serve: decode expert cache hit rate: 42.3% (3639 hits / 8599 lookups); 1001 more read by the GPU over PCIe or from another GPU (10.4% of all 9600 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 11264 rows, 74.2% row-cache hits, 2904 SSD reads (12.4 MB), read p50 143 us p99 539 us, blocked 0.094 ms total (submit 2.213 ms), cache 2904/1048576 rows, SSD kept awake by 139 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 3639 hits this request; since the start RAM 189450 blobs, files 0 blobs 0.0 MB read
+strata serve prefill segment: start=60 end=67 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 68 tokens = 60 reused + 8 read in 122 ms (65.6 tok/s), 1 generated in 19 ms (51.7 tok/s), drafts accepted 0 of 0, 0 checkpoints
+strata serve: decode expert cache hit rate: 50.9% (220 hits / 432 lookups); 48 more read by the GPU over PCIe or from another GPU (10.0% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 11392 rows, 73.5% row-cache hits, 3016 SSD reads (12.9 MB), read p50 145 us p99 539 us, blocked 0.096 ms total (submit 2.288 ms), cache 3016/1048576 rows, SSD kept awake by 139 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 220 hits this request; since the start RAM 191335 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 68 tokens in 22.6 ms; parked=3 bytes=592289800 evictions=0 snapshot_bytes=119111864 reused_kv_bytes=0
+strata batch: slot 1 gave back 57 tokens of this conversation (all it holds) in 38.2 ms
+strata serve prefill segment: start=57 end=64 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 65 tokens = 57 reused + 8 read in 187 ms (42.8 tok/s), 1 generated in 20 ms (49.2 tok/s), drafts accepted 0 of 0, 0 checkpoints
+strata serve: decode expert cache hit rate: 52.1% (224 hits / 430 lookups); 50 more read by the GPU over PCIe or from another GPU (10.4% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 11520 rows, 73.6% row-cache hits, 3040 SSD reads (13.0 MB), read p50 146 us p99 539 us, blocked 0.098 ms total (submit 2.304 ms), cache 3040/1048576 rows, SSD kept awake by 140 reads (slowest 122.4 ms)
+strata serve: expert tiers: GPU 224 hits this request; since the start RAM 193412 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 65 tokens in 29.1 ms; parked=4 bytes=711395508 evictions=0 snapshot_bytes=119105708 reused_kv_bytes=0
+strata batch: slot 0 gave back 42 tokens of this conversation (all it holds) in 89.6 ms
+strata serve prefill segment: start=42 end=67 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 68 tokens = 42 reused + 26 read in 502 ms (51.8 tok/s), 1 generated in 20 ms (49.7 tok/s), drafts accepted 0 of 0, 0 checkpoints
+strata serve: decode expert cache hit rate: 50.9% (220 hits / 432 lookups); 48 more read by the GPU over PCIe or from another GPU (10.0% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 11936 rows, 74.5% row-cache hits, 3040 SSD reads (13.0 MB), read p50 146 us p99 539 us, blocked 0.102 ms total (submit 2.304 ms), cache 3040/1048576 rows, SSD kept awake by 144 reads (slowest 122.5 ms)
+strata serve: expert tiers: GPU 220 hits this request; since the start RAM 199152 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 68 tokens in 23.9 ms; parked=4 bytes=593887864 evictions=1 snapshot_bytes=119111864 reused_kv_bytes=0
+strata batch: slot 1 gave back 57 tokens of this conversation (all it holds) in 47.4 ms
+strata serve prefill segment: start=57 end=64 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 65 tokens = 57 reused + 8 read in 204 ms (39.2 tok/s), 1 generated in 28 ms (35.2 tok/s), drafts accepted 0 of 0, 0 checkpoints
+strata serve: decode expert cache hit rate: 52.1% (224 hits / 430 lookups); 50 more read by the GPU over PCIe or from another GPU (10.4% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 12064 rows, 74.8% row-cache hits, 3040 SSD reads (13.0 MB), read p50 146 us p99 539 us, blocked 0.104 ms total (submit 2.304 ms), cache 3040/1048576 rows, SSD kept awake by 146 reads (slowest 122.5 ms)
+strata serve: expert tiers: GPU 224 hits this request; since the start RAM 201229 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 65 tokens in 22.2 ms; parked=4 bytes=476435144 evictions=2 snapshot_bytes=119105708 reused_kv_bytes=0
+strata batch: slot 0 gave back 22 tokens of this conversation (its turn checkpoint) in 32.0 ms
+strata serve prefill segment: start=22 end=28 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 29 tokens = 22 reused + 7 read in 162 ms (43.3 tok/s), 1 generated in 30 ms (33.1 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 45.5% (194 hits / 426 lookups); 54 more read by the GPU over PCIe or from another GPU (11.2% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 12176 rows, 75.0% row-cache hits, 3040 SSD reads (13.0 MB), read p50 146 us p99 539 us, blocked 0.105 ms total (submit 2.304 ms), cache 3040/1048576 rows, SSD kept awake by 146 reads (slowest 122.5 ms)
+strata serve: expert tiers: GPU 194 hits this request; since the start RAM 203000 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 29 tokens in 45.9 ms; parked=4 bytes=593942788 evictions=3 snapshot_bytes=236619508 reused_kv_bytes=0
+strata batch: slot 1 gave back 19 tokens of this conversation (its turn checkpoint) in 47.2 ms
+strata serve prefill segment: start=19 end=25 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 26 tokens (copied in 67.0 ms)
+strata serve: prompt 26 tokens = 19 reused + 7 read in 198 ms (35.3 tok/s), 1 generated in 36 ms (27.9 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 38.3% (159 hits / 415 lookups); 65 more read by the GPU over PCIe or from another GPU (13.5% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 12288 rows, 75.3% row-cache hits, 3040 SSD reads (13.0 MB), read p50 146 us p99 539 us, blocked 0.106 ms total (submit 2.304 ms), cache 3040/1048576 rows, SSD kept awake by 150 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 159 hits this request; since the start RAM 204866 blobs, files 0 blobs 0.0 MB read
+strata batch: 1 windows, avg 1.00 rows, 32.12 ms/window = run 31.72 (CUDA0 GPU-reach wait 16.00 + CPU experts 14.86) + commit 0.34 + emit 0.06; per layer-window: CPU experts 5.04, VRAM hits 3.81, PCIe 1.15; 31.1 rows/s over 32 ms of wall time (admissions included)
+strata serve: conversation cache: parked 26 tokens in 45.8 ms; parked=4 bytes=711395508 evictions=4 snapshot_bytes=236558428 reused_kv_bytes=0
+strata serve prefill segment: start=0 end=15 root=0 turn=1 message=0 pin=0 reread=0
+strata serve prefill segment: start=15 end=21 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 22 tokens = 0 reused + 22 read in 532 ms (41.3 tok/s), 2 generated in 92 ms (21.7 tok/s), drafts accepted 0 of 2, 1 checkpoints
+strata serve: decode expert cache hit rate: 21.3% (341 hits / 1600 lookups); 320 more read by the GPU over PCIe or from another GPU (16.7% of all 1920 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 12704 rows, 74.4% row-cache hits, 3248 SSD reads (13.9 MB), read p50 148 us p99 3301 us, blocked 103.322 ms total (submit 2.458 ms), cache 3248/1048576 rows, SSD kept awake by 153 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 341 hits this request; since the start RAM 212039 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 23 tokens in 51.6 ms; parked=4 bytes=828780988 evictions=5 snapshot_bytes=236497344 reused_kv_bytes=0
+strata serve prefill segment: start=0 end=15 root=0 turn=1 message=0 pin=0 reread=0
+strata serve prefill segment: start=15 end=21 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 22 tokens = 0 reused + 22 read in 444 ms (49.5 tok/s), 2 generated in 101 ms (19.9 tok/s), drafts accepted 0 of 2, 1 checkpoints
+strata serve: decode expert cache hit rate: 20.8% (335 hits / 1610 lookups); 310 more read by the GPU over PCIe or from another GPU (16.1% of all 1920 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 13104 rows, 74.6% row-cache hits, 3328 SSD reads (14.2 MB), read p50 149 us p99 3137 us, blocked 105.498 ms total (submit 2.520 ms), cache 3328/1048576 rows, SSD kept awake by 157 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 335 hits this request; since the start RAM 218855 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 23 tokens in 51.3 ms; parked=4 bytes=828780988 evictions=5 snapshot_bytes=236497344 reused_kv_bytes=0
+strata serve: conversation cache: restored 15 tokens (checkpoint) in 23.6 ms; parked=4 bytes=829151668
+strata serve prefill segment: start=15 end=21 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 22 tokens (copied in 57.8 ms)
+strata serve: prompt 22 tokens = 15 reused + 7 read in 186 ms (37.6 tok/s), 1 generated in 32 ms (31.1 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 32.0% (131 hits / 409 lookups); 71 more read by the GPU over PCIe or from another GPU (14.8% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 13216 rows, 74.8% row-cache hits, 3328 SSD reads (14.2 MB), read p50 149 us p99 3137 us, blocked 105.499 ms total (submit 2.520 ms), cache 3328/1048576 rows, SSD kept awake by 160 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 131 hits this request; since the start RAM 220757 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 22 tokens in 33.6 ms; parked=4 bytes=828780984 evictions=5 snapshot_bytes=236497340 reused_kv_bytes=183168
+strata serve: conversation cache: restored 15 tokens (checkpoint) in 29.4 ms; parked=4 bytes=829151664
+strata serve prefill segment: start=15 end=21 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 1 takes 22 tokens (copied in 60.3 ms)
+strata serve: prompt 22 tokens = 15 reused + 7 read in 181 ms (38.7 tok/s), 1 generated in 22 ms (45.3 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: decode expert cache hit rate: 33.3% (137 hits / 411 lookups); 69 more read by the GPU over PCIe or from another GPU (14.4% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 13328 rows, 75.0% row-cache hits, 3328 SSD reads (14.2 MB), read p50 149 us p99 3137 us, blocked 105.500 ms total (submit 2.520 ms), cache 3328/1048576 rows, SSD kept awake by 162 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 137 hits this request; since the start RAM 222648 blobs, files 0 blobs 0.0 MB read
+strata batch: 1 windows, avg 2.00 rows, 40.34 ms/window = run 39.63 (CUDA0 GPU-reach wait 16.88 + CPU experts 21.58) + commit 0.64 + emit 0.07; per layer-window: CPU experts 7.56, VRAM hits 3.98, PCIe 2.06; 49.6 rows/s over 40 ms of wall time (admissions included)
+strata: K/V grown to 262144 cells (9.54 GiB); the expert cache gave 3166 slots for it, 0 hotter experts moved to colder ones' slots (128 of 3294 slots hold experts) - and new VRAM, the cache being at its floor
+strata serve: conversation cache: parked 22 tokens in 37.0 ms; parked=4 bytes=946172616 evictions=6 snapshot_bytes=236497340 reused_kv_bytes=183168
+strata serve prefill segment: start=0 end=260993 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=65488 pages=175 total_ms=7.056 call_lock_ms=0.000 lookup_ms=0.364 plan_ms=1.583 group_wait_ms=2.711 cache_insert_ms=0.174 callback_ms=2.194 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=8.725 raw_resize_ms=1.604 host_available_mib=11223
+strata ple: chunk 0: read started 9.7 ms into the run, layer 1 reached at 356.4, waited 0.0 ms
+strata prefill callback: start=0 rows=4096 draft_path=token draft_ms=9.563 checkpoint_ms=0.002 total_ms=9.606
+strata prefill chunk: start=0 rows=4096 main_and_wait_ms=1801.130 callback_ms=9.639 total_ms=1810.768
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=0
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.202 call_lock_ms=0.000 lookup_ms=0.893 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.308 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.253 raw_resize_ms=0.006 host_available_mib=11102
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.2, waited 0.0 ms
+strata prefill callback: start=4096 rows=4096 draft_path=token draft_ms=0.179 checkpoint_ms=0.002 total_ms=0.206
+strata prefill chunk: start=4096 rows=4096 main_and_wait_ms=1508.370 callback_ms=0.220 total_ms=1508.590
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=4096
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.682 call_lock_ms=0.000 lookup_ms=0.680 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=3.000 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.735 raw_resize_ms=0.004 host_available_mib=11105
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.6, waited 0.0 ms
+strata prefill callback: start=8192 rows=4096 draft_path=token draft_ms=0.124 checkpoint_ms=0.002 total_ms=0.150
+strata prefill chunk: start=8192 rows=4096 main_and_wait_ms=1512.036 callback_ms=0.163 total_ms=1512.199
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=8192
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.229 call_lock_ms=0.000 lookup_ms=0.654 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.574 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.279 raw_resize_ms=0.003 host_available_mib=11097
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.6, waited 0.0 ms
+strata prefill callback: start=12288 rows=4096 draft_path=token draft_ms=0.106 checkpoint_ms=29.611 total_ms=29.742
+strata prefill chunk: start=12288 rows=4096 main_and_wait_ms=1510.280 callback_ms=29.760 total_ms=1540.039
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=12288
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.188 call_lock_ms=0.000 lookup_ms=0.643 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.543 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.236 raw_resize_ms=0.004 host_available_mib=10999
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 16.3, waited 0.0 ms
+strata prefill callback: start=16384 rows=4096 draft_path=token draft_ms=0.104 checkpoint_ms=0.002 total_ms=0.138
+strata prefill chunk: start=16384 rows=4096 main_and_wait_ms=1516.025 callback_ms=0.151 total_ms=1516.176
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=16384
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.478 call_lock_ms=0.000 lookup_ms=0.834 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.643 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.527 raw_resize_ms=0.005 host_available_mib=11001
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 15.9, waited 0.0 ms
+strata prefill callback: start=20480 rows=4096 draft_path=token draft_ms=0.120 checkpoint_ms=0.002 total_ms=0.149
+strata prefill chunk: start=20480 rows=4096 main_and_wait_ms=1511.416 callback_ms=0.162 total_ms=1511.578
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=20480
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.543 call_lock_ms=0.000 lookup_ms=0.949 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.593 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.594 raw_resize_ms=0.005 host_available_mib=11003
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.6, waited 0.0 ms
+strata prefill callback: start=24576 rows=4096 draft_path=token draft_ms=0.170 checkpoint_ms=0.002 total_ms=0.198
+strata prefill chunk: start=24576 rows=4096 main_and_wait_ms=1504.199 callback_ms=0.241 total_ms=1504.440
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=24576
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.300 call_lock_ms=0.000 lookup_ms=1.090 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.208 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.363 raw_resize_ms=0.005 host_available_mib=11002
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata prefill callback: start=28672 rows=4096 draft_path=token draft_ms=0.120 checkpoint_ms=28.426 total_ms=28.573
+strata prefill chunk: start=28672 rows=4096 main_and_wait_ms=1517.651 callback_ms=28.590 total_ms=1546.241
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=28672
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.074 call_lock_ms=0.000 lookup_ms=0.750 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.322 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.123 raw_resize_ms=0.004 host_available_mib=10892
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 16.3, waited 0.0 ms
+strata prefill callback: start=32768 rows=4096 draft_path=token draft_ms=0.141 checkpoint_ms=0.002 total_ms=0.169
+strata prefill chunk: start=32768 rows=4096 main_and_wait_ms=1515.945 callback_ms=0.182 total_ms=1516.127
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=32768
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.224 call_lock_ms=0.000 lookup_ms=0.653 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.568 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.270 raw_resize_ms=0.003 host_available_mib=10889
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.3, waited 0.0 ms
+strata prefill callback: start=36864 rows=4096 draft_path=token draft_ms=0.114 checkpoint_ms=0.002 total_ms=0.235
+strata prefill chunk: start=36864 rows=4096 main_and_wait_ms=1512.014 callback_ms=0.249 total_ms=1512.263
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=36864
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.027 call_lock_ms=0.000 lookup_ms=0.766 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.259 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.074 raw_resize_ms=0.004 host_available_mib=10882
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 27.2, waited 0.0 ms
+strata prefill callback: start=40960 rows=4096 draft_path=token draft_ms=0.111 checkpoint_ms=0.002 total_ms=0.142
+strata prefill chunk: start=40960 rows=4096 main_and_wait_ms=1532.245 callback_ms=0.155 total_ms=1532.400
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=40960
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.856 call_lock_ms=0.000 lookup_ms=0.578 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.276 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.912 raw_resize_ms=0.002 host_available_mib=10870
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.4, waited 0.0 ms
+strata prefill callback: start=45056 rows=4096 draft_path=token draft_ms=0.101 checkpoint_ms=35.259 total_ms=35.394
+strata prefill chunk: start=45056 rows=4096 main_and_wait_ms=1508.785 callback_ms=35.411 total_ms=1544.196
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=45056
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.469 call_lock_ms=0.000 lookup_ms=0.905 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.562 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.526 raw_resize_ms=0.005 host_available_mib=10784
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 22.3, waited 0.0 ms
+strata prefill callback: start=49152 rows=4096 draft_path=token draft_ms=0.130 checkpoint_ms=0.002 total_ms=0.163
+strata prefill chunk: start=49152 rows=4096 main_and_wait_ms=1517.524 callback_ms=0.176 total_ms=1517.700
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=49152
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.257 call_lock_ms=0.000 lookup_ms=0.663 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.592 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.304 raw_resize_ms=0.003 host_available_mib=10770
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 15.7, waited 0.0 ms
+strata prefill callback: start=53248 rows=4096 draft_path=token draft_ms=0.204 checkpoint_ms=0.002 total_ms=0.234
+strata prefill chunk: start=53248 rows=4096 main_and_wait_ms=1528.074 callback_ms=0.253 total_ms=1528.327
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=53248
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.206 call_lock_ms=0.000 lookup_ms=0.639 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.566 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.255 raw_resize_ms=0.005 host_available_mib=10774
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.1, waited 0.0 ms
+strata prefill callback: start=57344 rows=4096 draft_path=token draft_ms=0.105 checkpoint_ms=0.002 total_ms=0.169
+strata prefill chunk: start=57344 rows=4096 main_and_wait_ms=1553.825 callback_ms=0.182 total_ms=1554.007
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=57344
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.315 call_lock_ms=0.000 lookup_ms=0.806 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.507 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.373 raw_resize_ms=0.005 host_available_mib=10771
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 15.7, waited 0.0 ms
+strata prefill callback: start=61440 rows=4096 draft_path=token draft_ms=0.122 checkpoint_ms=65.258 total_ms=65.406
+strata prefill chunk: start=61440 rows=4096 main_and_wait_ms=1522.830 callback_ms=65.423 total_ms=1588.252
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=61440
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.376 call_lock_ms=0.000 lookup_ms=0.674 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.700 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.425 raw_resize_ms=0.004 host_available_mib=10677
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 15.7, waited 0.0 ms
+strata prefill callback: start=65536 rows=4096 draft_path=token draft_ms=0.128 checkpoint_ms=0.002 total_ms=0.156
+strata prefill chunk: start=65536 rows=4096 main_and_wait_ms=1555.175 callback_ms=0.169 total_ms=1555.343
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=65536
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.190 call_lock_ms=0.000 lookup_ms=0.653 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.535 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.241 raw_resize_ms=0.003 host_available_mib=10658
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.5, waited 0.0 ms
+strata prefill callback: start=69632 rows=4096 draft_path=token draft_ms=0.124 checkpoint_ms=0.002 total_ms=0.151
+strata prefill chunk: start=69632 rows=4096 main_and_wait_ms=1540.334 callback_ms=0.170 total_ms=1540.505
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=69632
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.595 call_lock_ms=0.000 lookup_ms=1.095 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.498 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.652 raw_resize_ms=0.004 host_available_mib=10646
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata prefill callback: start=73728 rows=4096 draft_path=token draft_ms=0.167 checkpoint_ms=0.002 total_ms=0.195
+strata prefill chunk: start=73728 rows=4096 main_and_wait_ms=1545.724 callback_ms=0.208 total_ms=1545.932
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=73728
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.202 call_lock_ms=0.000 lookup_ms=0.643 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.557 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.252 raw_resize_ms=0.004 host_available_mib=10653
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.2, waited 0.0 ms
+strata prefill callback: start=77824 rows=4096 draft_path=token draft_ms=0.119 checkpoint_ms=57.996 total_ms=58.142
+strata prefill chunk: start=77824 rows=4096 main_and_wait_ms=1544.877 callback_ms=58.160 total_ms=1603.037
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=77824
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.942 call_lock_ms=0.000 lookup_ms=0.657 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.284 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.988 raw_resize_ms=0.004 host_available_mib=10567
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 23.7, waited 0.0 ms
+strata prefill callback: start=81920 rows=4096 draft_path=token draft_ms=0.178 checkpoint_ms=0.002 total_ms=0.206
+strata prefill chunk: start=81920 rows=4096 main_and_wait_ms=1556.338 callback_ms=0.220 total_ms=1556.557
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=81920
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.134 call_lock_ms=0.000 lookup_ms=0.829 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.303 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.184 raw_resize_ms=0.005 host_available_mib=10553
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.2, waited 0.0 ms
+strata prefill callback: start=86016 rows=4096 draft_path=token draft_ms=0.129 checkpoint_ms=0.002 total_ms=0.158
+strata prefill chunk: start=86016 rows=4096 main_and_wait_ms=1553.009 callback_ms=0.172 total_ms=1553.181
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=86016
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.481 call_lock_ms=0.000 lookup_ms=0.763 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.716 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.523 raw_resize_ms=0.004 host_available_mib=10547
+strata ple: chunk 0: read started 0.2 ms into the run, layer 1 reached at 17.0, waited 0.0 ms
+strata prefill callback: start=90112 rows=4096 draft_path=token draft_ms=0.135 checkpoint_ms=0.002 total_ms=0.163
+strata prefill chunk: start=90112 rows=4096 main_and_wait_ms=1569.959 callback_ms=0.177 total_ms=1570.135
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=90112
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.471 call_lock_ms=0.000 lookup_ms=0.755 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.715 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.511 raw_resize_ms=0.004 host_available_mib=10552
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 15.7, waited 0.0 ms
+strata prefill callback: start=94208 rows=4096 draft_path=token draft_ms=0.122 checkpoint_ms=69.205 total_ms=69.359
+strata prefill chunk: start=94208 rows=4096 main_and_wait_ms=1518.604 callback_ms=69.376 total_ms=1587.981
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=94208
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.236 call_lock_ms=0.000 lookup_ms=0.619 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.615 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.284 raw_resize_ms=0.005 host_available_mib=10441
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 26.1, waited 0.0 ms
+strata prefill callback: start=98304 rows=4096 draft_path=token draft_ms=0.159 checkpoint_ms=0.002 total_ms=0.199
+strata prefill chunk: start=98304 rows=4096 main_and_wait_ms=1552.959 callback_ms=0.221 total_ms=1553.180
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=98304
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.480 call_lock_ms=0.000 lookup_ms=0.686 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.792 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.515 raw_resize_ms=0.003 host_available_mib=10389
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.9, waited 0.0 ms
+strata prefill callback: start=102400 rows=4096 draft_path=token draft_ms=0.173 checkpoint_ms=0.002 total_ms=0.205
+strata prefill chunk: start=102400 rows=4096 main_and_wait_ms=1567.634 callback_ms=0.220 total_ms=1567.854
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=102400
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.362 call_lock_ms=0.000 lookup_ms=0.792 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.568 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.413 raw_resize_ms=0.005 host_available_mib=10397
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.0, waited 0.0 ms
+strata prefill callback: start=106496 rows=4096 draft_path=token draft_ms=0.124 checkpoint_ms=0.002 total_ms=0.154
+strata prefill chunk: start=106496 rows=4096 main_and_wait_ms=1573.349 callback_ms=0.168 total_ms=1573.517
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=106496
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.506 call_lock_ms=0.000 lookup_ms=0.985 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.520 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.551 raw_resize_ms=0.004 host_available_mib=10401
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.7, waited 0.0 ms
+strata prefill callback: start=110592 rows=4096 draft_path=token draft_ms=0.131 checkpoint_ms=54.199 total_ms=54.355
+strata prefill chunk: start=110592 rows=4096 main_and_wait_ms=1573.078 callback_ms=54.373 total_ms=1627.451
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=110592
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.425 call_lock_ms=0.000 lookup_ms=0.654 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.769 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.478 raw_resize_ms=0.004 host_available_mib=10411
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.5, waited 0.0 ms
+strata prefill callback: start=114688 rows=4096 draft_path=token draft_ms=0.125 checkpoint_ms=0.002 total_ms=0.153
+strata prefill chunk: start=114688 rows=4096 main_and_wait_ms=1537.958 callback_ms=0.167 total_ms=1538.125
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=114688
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.741 call_lock_ms=0.000 lookup_ms=0.563 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.176 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.791 raw_resize_ms=0.003 host_available_mib=10400
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.6, waited 0.0 ms
+strata prefill callback: start=118784 rows=4096 draft_path=token draft_ms=0.128 checkpoint_ms=0.002 total_ms=0.157
+strata prefill chunk: start=118784 rows=4096 main_and_wait_ms=1585.748 callback_ms=0.173 total_ms=1585.922
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=118784
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.378 call_lock_ms=0.000 lookup_ms=0.828 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.547 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.432 raw_resize_ms=0.004 host_available_mib=10403
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.2, waited 0.0 ms
+strata prefill callback: start=122880 rows=4096 draft_path=token draft_ms=0.123 checkpoint_ms=0.002 total_ms=0.152
+strata prefill chunk: start=122880 rows=4096 main_and_wait_ms=1562.665 callback_ms=0.166 total_ms=1562.831
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=122880
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.945 call_lock_ms=0.000 lookup_ms=0.585 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.358 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.992 raw_resize_ms=0.003 host_available_mib=10414
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 24.8, waited 0.0 ms
+strata prefill callback: start=126976 rows=4096 draft_path=token draft_ms=0.107 checkpoint_ms=25.229 total_ms=25.411
+strata prefill chunk: start=126976 rows=4096 main_and_wait_ms=1582.930 callback_ms=25.428 total_ms=1608.359
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=126976
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.443 call_lock_ms=0.000 lookup_ms=0.631 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.810 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.495 raw_resize_ms=0.004 host_available_mib=10423
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.8, waited 0.0 ms
+strata prefill callback: start=131072 rows=4096 draft_path=token draft_ms=0.127 checkpoint_ms=0.002 total_ms=0.156
+strata prefill chunk: start=131072 rows=4096 main_and_wait_ms=1560.642 callback_ms=0.169 total_ms=1560.811
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=131072
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.434 call_lock_ms=0.000 lookup_ms=0.771 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.661 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.474 raw_resize_ms=0.005 host_available_mib=10379
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.0, waited 0.0 ms
+strata prefill callback: start=135168 rows=4096 draft_path=token draft_ms=0.114 checkpoint_ms=0.002 total_ms=0.153
+strata prefill chunk: start=135168 rows=4096 main_and_wait_ms=1585.609 callback_ms=0.259 total_ms=1585.868
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=135168
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.838 call_lock_ms=0.000 lookup_ms=0.588 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.249 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.886 raw_resize_ms=0.003 host_available_mib=10364
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.4, waited 0.0 ms
+strata prefill callback: start=139264 rows=4096 draft_path=token draft_ms=0.122 checkpoint_ms=0.002 total_ms=0.151
+strata prefill chunk: start=139264 rows=4096 main_and_wait_ms=1586.168 callback_ms=0.166 total_ms=1586.334
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=139264
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.204 call_lock_ms=0.000 lookup_ms=0.669 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.533 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.254 raw_resize_ms=0.004 host_available_mib=10372
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 15.7, waited 0.0 ms
+strata prefill callback: start=143360 rows=4096 draft_path=token draft_ms=0.117 checkpoint_ms=49.682 total_ms=49.826
+strata prefill chunk: start=143360 rows=4096 main_and_wait_ms=1591.075 callback_ms=49.842 total_ms=1640.917
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=143360
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.495 call_lock_ms=0.000 lookup_ms=0.911 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.582 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.544 raw_resize_ms=0.005 host_available_mib=10378
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.7, waited 0.0 ms
+strata prefill callback: start=147456 rows=4096 draft_path=token draft_ms=0.166 checkpoint_ms=0.002 total_ms=0.201
+strata prefill chunk: start=147456 rows=4096 main_and_wait_ms=1569.429 callback_ms=0.219 total_ms=1569.648
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=147456
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.188 call_lock_ms=0.000 lookup_ms=0.651 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.535 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.237 raw_resize_ms=0.004 host_available_mib=10355
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.0, waited 0.0 ms
+strata prefill callback: start=151552 rows=4096 draft_path=token draft_ms=0.121 checkpoint_ms=0.002 total_ms=0.150
+strata prefill chunk: start=151552 rows=4096 main_and_wait_ms=1595.418 callback_ms=0.163 total_ms=1595.581
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=151552
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.110 call_lock_ms=0.000 lookup_ms=0.579 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.530 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.163 raw_resize_ms=0.003 host_available_mib=10379
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.3, waited 0.0 ms
+strata prefill callback: start=155648 rows=4096 draft_path=token draft_ms=0.132 checkpoint_ms=0.002 total_ms=0.164
+strata prefill chunk: start=155648 rows=4096 main_and_wait_ms=1667.667 callback_ms=0.183 total_ms=1667.851
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=155648
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.516 call_lock_ms=0.000 lookup_ms=0.834 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.680 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.572 raw_resize_ms=0.004 host_available_mib=10408
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 22.0, waited 0.0 ms
+strata prefill callback: start=159744 rows=4096 draft_path=token draft_ms=0.128 checkpoint_ms=35.213 total_ms=35.372
+strata prefill chunk: start=159744 rows=4096 main_and_wait_ms=1779.342 callback_ms=35.394 total_ms=1814.736
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=159744
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.380 call_lock_ms=0.000 lookup_ms=0.831 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.548 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.411 raw_resize_ms=0.003 host_available_mib=10370
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.0, waited 0.0 ms
+strata prefill callback: start=163840 rows=4096 draft_path=token draft_ms=0.138 checkpoint_ms=0.002 total_ms=0.168
+strata prefill chunk: start=163840 rows=4096 main_and_wait_ms=2035.224 callback_ms=0.183 total_ms=2035.407
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=163840
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.417 call_lock_ms=0.000 lookup_ms=0.845 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.570 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.466 raw_resize_ms=0.004 host_available_mib=10367
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 19.2, waited 0.0 ms
+strata prefill callback: start=167936 rows=4096 draft_path=token draft_ms=0.183 checkpoint_ms=0.002 total_ms=0.221
+strata prefill chunk: start=167936 rows=4096 main_and_wait_ms=1593.785 callback_ms=0.278 total_ms=1594.063
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=167936
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.925 call_lock_ms=0.000 lookup_ms=0.674 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.249 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.978 raw_resize_ms=0.004 host_available_mib=10314
+strata ple: chunk 0: read started 0.2 ms into the run, layer 1 reached at 27.4, waited 0.0 ms
+strata prefill callback: start=172032 rows=4096 draft_path=token draft_ms=0.246 checkpoint_ms=0.002 total_ms=0.274
+strata prefill chunk: start=172032 rows=4096 main_and_wait_ms=1691.363 callback_ms=0.288 total_ms=1691.651
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=172032
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.430 call_lock_ms=0.000 lookup_ms=0.865 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.564 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.477 raw_resize_ms=0.003 host_available_mib=10345
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.9, waited 0.1 ms
+strata prefill callback: start=176128 rows=4096 draft_path=token draft_ms=0.111 checkpoint_ms=44.532 total_ms=44.671
+strata prefill chunk: start=176128 rows=4096 main_and_wait_ms=1643.624 callback_ms=44.691 total_ms=1688.315
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=176128
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.415 call_lock_ms=0.000 lookup_ms=0.820 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.593 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.461 raw_resize_ms=0.003 host_available_mib=10378
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.8, waited 0.0 ms
+strata prefill callback: start=180224 rows=4096 draft_path=token draft_ms=0.130 checkpoint_ms=0.002 total_ms=0.159
+strata prefill chunk: start=180224 rows=4096 main_and_wait_ms=1641.637 callback_ms=0.175 total_ms=1641.812
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=180224
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.330 call_lock_ms=0.000 lookup_ms=0.823 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.505 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.374 raw_resize_ms=0.003 host_available_mib=10369
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.3, waited 0.0 ms
+strata prefill callback: start=184320 rows=4096 draft_path=token draft_ms=0.123 checkpoint_ms=0.002 total_ms=0.151
+strata prefill chunk: start=184320 rows=4096 main_and_wait_ms=1669.892 callback_ms=0.165 total_ms=1670.058
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=184320
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.528 call_lock_ms=0.000 lookup_ms=0.838 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.688 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.577 raw_resize_ms=0.003 host_available_mib=10384
+strata ple: chunk 0: read started 0.0 ms into the run, layer 1 reached at 22.2, waited 0.0 ms
+strata prefill callback: start=188416 rows=4096 draft_path=token draft_ms=0.254 checkpoint_ms=0.002 total_ms=0.295
+strata prefill chunk: start=188416 rows=4096 main_and_wait_ms=1707.157 callback_ms=0.309 total_ms=1707.466
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=188416
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.380 call_lock_ms=0.000 lookup_ms=0.933 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.445 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.434 raw_resize_ms=0.005 host_available_mib=10384
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.7, waited 0.0 ms
+strata prefill callback: start=192512 rows=4096 draft_path=token draft_ms=0.162 checkpoint_ms=26.306 total_ms=26.502
+strata prefill chunk: start=192512 rows=4096 main_and_wait_ms=1734.897 callback_ms=26.519 total_ms=1761.416
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=192512
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.184 call_lock_ms=0.000 lookup_ms=0.741 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.441 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.230 raw_resize_ms=0.003 host_available_mib=10418
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 27.5, waited 0.0 ms
+strata prefill callback: start=196608 rows=4096 draft_path=token draft_ms=0.130 checkpoint_ms=0.002 total_ms=0.158
+strata prefill chunk: start=196608 rows=4096 main_and_wait_ms=1706.094 callback_ms=0.172 total_ms=1706.265
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=196608
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.475 call_lock_ms=0.000 lookup_ms=0.844 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.629 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.523 raw_resize_ms=0.003 host_available_mib=10431
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 26.2, waited 0.0 ms
+strata prefill callback: start=200704 rows=4096 draft_path=token draft_ms=0.130 checkpoint_ms=0.002 total_ms=0.169
+strata prefill chunk: start=200704 rows=4096 main_and_wait_ms=1756.469 callback_ms=0.183 total_ms=1756.653
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=200704
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.415 call_lock_ms=0.000 lookup_ms=0.834 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.580 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.462 raw_resize_ms=0.003 host_available_mib=10427
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.3, waited 0.0 ms
+strata prefill callback: start=204800 rows=4096 draft_path=token draft_ms=0.135 checkpoint_ms=0.002 total_ms=0.165
+strata prefill chunk: start=204800 rows=4096 main_and_wait_ms=1724.267 callback_ms=0.180 total_ms=1724.448
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=204800
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.368 call_lock_ms=0.000 lookup_ms=0.857 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.510 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.426 raw_resize_ms=0.003 host_available_mib=10442
+strata ple: chunk 0: read started 0.2 ms into the run, layer 1 reached at 25.9, waited 0.0 ms
+strata prefill callback: start=208896 rows=4096 draft_path=token draft_ms=0.164 checkpoint_ms=36.367 total_ms=36.593
+strata prefill chunk: start=208896 rows=4096 main_and_wait_ms=1660.887 callback_ms=36.611 total_ms=1697.498
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=208896
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.492 call_lock_ms=0.000 lookup_ms=0.836 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.654 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.533 raw_resize_ms=0.003 host_available_mib=10484
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 25.5, waited 0.0 ms
+strata prefill callback: start=212992 rows=4096 draft_path=token draft_ms=0.126 checkpoint_ms=0.002 total_ms=0.160
+strata prefill chunk: start=212992 rows=4096 main_and_wait_ms=1717.143 callback_ms=0.177 total_ms=1717.320
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=212992
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.846 call_lock_ms=0.000 lookup_ms=0.603 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.242 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.894 raw_resize_ms=0.004 host_available_mib=10504
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.2, waited 0.0 ms
+strata prefill callback: start=217088 rows=4096 draft_path=token draft_ms=0.208 checkpoint_ms=0.002 total_ms=0.273
+strata prefill chunk: start=217088 rows=4096 main_and_wait_ms=1741.132 callback_ms=0.287 total_ms=1741.420
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=217088
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.107 call_lock_ms=0.000 lookup_ms=0.806 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.298 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.152 raw_resize_ms=0.003 host_available_mib=10501
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 21.3, waited 0.0 ms
+strata prefill callback: start=221184 rows=4096 draft_path=token draft_ms=0.136 checkpoint_ms=0.002 total_ms=0.170
+strata prefill chunk: start=221184 rows=4096 main_and_wait_ms=1914.363 callback_ms=0.184 total_ms=1914.548
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=221184
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.755 call_lock_ms=0.000 lookup_ms=0.590 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.163 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.803 raw_resize_ms=0.004 host_available_mib=10449
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 19.4, waited 0.0 ms
+strata prefill callback: start=225280 rows=4096 draft_path=token draft_ms=32.864 checkpoint_ms=28.933 total_ms=61.846
+strata prefill chunk: start=225280 rows=4096 main_and_wait_ms=1499.099 callback_ms=61.869 total_ms=1560.967
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=225280
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.380 call_lock_ms=0.000 lookup_ms=0.857 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.521 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.430 raw_resize_ms=0.003 host_available_mib=10553
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata prefill callback: start=229376 rows=4096 draft_path=token draft_ms=168.898 checkpoint_ms=0.002 total_ms=168.951
+strata prefill chunk: start=229376 rows=4096 main_and_wait_ms=1689.942 callback_ms=168.966 total_ms=1858.908
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=229376
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.374 call_lock_ms=0.000 lookup_ms=0.885 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.487 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.441 raw_resize_ms=0.003 host_available_mib=10506
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 22.8, waited 0.0 ms
+strata prefill callback: start=233472 rows=4096 draft_path=token draft_ms=149.913 checkpoint_ms=0.002 total_ms=149.966
+strata prefill chunk: start=233472 rows=4096 main_and_wait_ms=1674.630 callback_ms=149.981 total_ms=1824.611
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=233472
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.413 call_lock_ms=0.000 lookup_ms=0.835 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.577 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.456 raw_resize_ms=0.003 host_available_mib=10492
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.8, waited 0.0 ms
+strata prefill callback: start=237568 rows=4096 draft_path=token draft_ms=154.514 checkpoint_ms=0.002 total_ms=154.565
+strata prefill chunk: start=237568 rows=4096 main_and_wait_ms=1660.123 callback_ms=154.616 total_ms=1814.739
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=237568
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.386 call_lock_ms=0.000 lookup_ms=0.825 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.559 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.440 raw_resize_ms=0.003 host_available_mib=10522
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata prefill callback: start=241664 rows=4096 draft_path=token draft_ms=139.850 checkpoint_ms=33.743 total_ms=173.622
+strata prefill chunk: start=241664 rows=4096 main_and_wait_ms=1680.241 callback_ms=173.646 total_ms=1853.886
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=241664
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.451 call_lock_ms=0.000 lookup_ms=0.818 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.631 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.505 raw_resize_ms=0.004 host_available_mib=10528
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 21.6, waited 0.0 ms
+strata prefill callback: start=245760 rows=4096 draft_path=token draft_ms=162.921 checkpoint_ms=0.002 total_ms=162.971
+strata prefill chunk: start=245760 rows=4096 main_and_wait_ms=1781.241 callback_ms=162.985 total_ms=1944.226
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=245760
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.249 call_lock_ms=0.000 lookup_ms=0.645 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.603 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.303 raw_resize_ms=0.004 host_available_mib=10523
+strata ple: chunk 0: read started 0.2 ms into the run, layer 1 reached at 29.3, waited 0.0 ms
+strata prefill callback: start=249856 rows=4096 draft_path=token draft_ms=121.295 checkpoint_ms=0.002 total_ms=121.333
+strata prefill chunk: start=249856 rows=4096 main_and_wait_ms=2078.741 callback_ms=121.348 total_ms=2200.089
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=249856
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.075 call_lock_ms=0.000 lookup_ms=0.716 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.357 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.118 raw_resize_ms=0.004 host_available_mib=10696
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.3, waited 0.0 ms
+strata prefill callback: start=253952 rows=4096 draft_path=token draft_ms=111.823 checkpoint_ms=0.002 total_ms=111.873
+strata prefill chunk: start=253952 rows=4096 main_and_wait_ms=1543.982 callback_ms=111.889 total_ms=1655.871
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=253952
+strata ple batch phases: rows=47120 misses=112 pages=115 total_ms=3.006 call_lock_ms=0.000 lookup_ms=0.630 plan_ms=0.010 group_wait_ms=0.446 cache_insert_ms=0.026 callback_ms=1.862 reader_drain_ms=0.000
+strata ple gather phases: tokens=2945 rows=47120 total_ms=3.049 raw_resize_ms=0.003 host_available_mib=10834
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 17.7, waited 0.0 ms
+strata prefill callback: start=258048 rows=2945 draft_path=token draft_ms=92.627 checkpoint_ms=0.002 total_ms=92.666
+strata prefill chunk: start=258048 rows=2945 main_and_wait_ms=1414.855 callback_ms=92.681 total_ms=1507.536
+strata prefill executed: tokens=2945 max_chunk=2945 capacity=4096 start=258048
+strata serve prefill segment: start=260993 end=260999 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 261000 tokens = 0 reused + 261000 read in 105948 ms (2463.5 tok/s), 8 generated in 184 ms (43.4 tok/s), drafts accepted 4 of 6, 6 checkpoints
+strata serve: decode expert cache hit rate: 6.1% (243 hits / 3996 lookups); 804 more read by the GPU over PCIe or from another GPU (16.8% of all 4800 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4189504 rows, 98.4% row-cache hits, 3754 SSD reads (16.0 MB), read p50 152 us p99 2057 us, blocked 112.974 ms total (submit 2.633 ms), cache 3744/1048576 rows, SSD kept awake by 1125 reads (slowest 290.6 ms)
+strata serve: expert tiers: GPU 243 hits this request; since the start RAM 1793244 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: skip parking (snapshot 4593 MiB exceeds available budget)
+strata serve prefill segment: start=245760 end=261000 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.407 call_lock_ms=0.000 lookup_ms=0.813 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.593 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.450 raw_resize_ms=0.006 host_available_mib=11044
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.8, waited 0.0 ms
+strata prefill callback: start=245760 rows=4096 draft_path=token draft_ms=129.919 checkpoint_ms=0.002 total_ms=129.967
+strata prefill chunk: start=245760 rows=4096 main_and_wait_ms=1493.956 callback_ms=129.985 total_ms=1623.941
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=245760
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.702 call_lock_ms=0.000 lookup_ms=0.589 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.112 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.748 raw_resize_ms=0.005 host_available_mib=10985
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 20.1, waited 0.0 ms
+strata prefill callback: start=249856 rows=4096 draft_path=token draft_ms=131.137 checkpoint_ms=0.002 total_ms=131.191
+strata prefill chunk: start=249856 rows=4096 main_and_wait_ms=1587.685 callback_ms=131.207 total_ms=1718.892
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=249856
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.515 call_lock_ms=0.000 lookup_ms=0.865 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.649 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.561 raw_resize_ms=0.003 host_available_mib=11038
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 20.5, waited 0.0 ms
+strata prefill callback: start=253952 rows=4096 draft_path=token draft_ms=130.247 checkpoint_ms=0.002 total_ms=130.284
+strata prefill chunk: start=253952 rows=4096 main_and_wait_ms=1856.531 callback_ms=130.301 total_ms=1986.832
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=253952
+strata ple batch phases: rows=47232 misses=128 pages=133 total_ms=10.642 call_lock_ms=0.000 lookup_ms=0.541 plan_ms=0.011 group_wait_ms=8.402 cache_insert_ms=0.028 callback_ms=1.634 reader_drain_ms=0.000
+strata ple gather phases: tokens=2952 rows=47232 total_ms=10.668 raw_resize_ms=0.006 host_available_mib=10802
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 14.3, waited 0.0 ms
+strata prefill callback: start=258048 rows=2952 draft_path=token draft_ms=80.083 checkpoint_ms=0.002 total_ms=80.132
+strata prefill chunk: start=258048 rows=2952 main_and_wait_ms=1440.734 callback_ms=80.148 total_ms=1520.881
+strata prefill executed: tokens=2952 max_chunk=2952 capacity=4096 start=258048
+strata serve prefill segment: start=261000 end=261006 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 261007 tokens = 245760 reused + 15247 read in 6973 ms (2186.5 tok/s), 8 generated in 174 ms (45.9 tok/s), drafts accepted 4 of 5, 6 checkpoints
+strata serve: decode expert cache hit rate: 2.0% (72 hits / 3523 lookups); 797 more read by the GPU over PCIe or from another GPU (18.4% of all 4320 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4433600 rows, 98.4% row-cache hits, 4023 SSD reads (17.1 MB), read p50 153 us p99 8285 us, blocked 123.064 ms total (submit 2.767 ms), cache 4008/1048576 rows, SSD kept awake by 1183 reads (slowest 639.1 ms)
+strata serve: expert tiers: GPU 72 hits this request; since the start RAM 1896363 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: skip parking (snapshot 4593 MiB exceeds available budget)
+strata serve prefill segment: start=245760 end=260993 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.125 call_lock_ms=0.000 lookup_ms=0.585 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.538 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.169 raw_resize_ms=0.004 host_available_mib=10837
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 20.3, waited 0.0 ms
+strata prefill callback: start=245760 rows=4096 draft_path=token draft_ms=161.254 checkpoint_ms=0.003 total_ms=161.304
+strata prefill chunk: start=245760 rows=4096 main_and_wait_ms=1693.946 callback_ms=161.321 total_ms=1855.267
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=245760
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.740 call_lock_ms=0.001 lookup_ms=0.571 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.167 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=2.785 raw_resize_ms=0.004 host_available_mib=10444
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 19.0, waited 0.0 ms
+strata prefill callback: start=249856 rows=4096 draft_path=token draft_ms=142.837 checkpoint_ms=0.002 total_ms=142.870
+strata prefill chunk: start=249856 rows=4096 main_and_wait_ms=1748.562 callback_ms=142.885 total_ms=1891.447
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=249856
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=2.991 call_lock_ms=0.000 lookup_ms=0.757 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.232 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.040 raw_resize_ms=0.003 host_available_mib=10427
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata prefill callback: start=253952 rows=4096 draft_path=token draft_ms=154.621 checkpoint_ms=0.002 total_ms=154.660
+strata prefill chunk: start=253952 rows=4096 main_and_wait_ms=1696.667 callback_ms=154.677 total_ms=1851.343
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=253952
+strata ple batch phases: rows=47120 misses=0 pages=0 total_ms=2.537 call_lock_ms=0.000 lookup_ms=0.610 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=1.926 reader_drain_ms=0.000
+strata ple gather phases: tokens=2945 rows=47120 total_ms=2.581 raw_resize_ms=0.003 host_available_mib=10415
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 12.8, waited 0.0 ms
+strata prefill callback: start=258048 rows=2945 draft_path=token draft_ms=113.014 checkpoint_ms=0.002 total_ms=113.071
+strata prefill chunk: start=258048 rows=2945 main_and_wait_ms=1488.561 callback_ms=113.108 total_ms=1601.668
+strata prefill executed: tokens=2945 max_chunk=2945 capacity=4096 start=258048
+strata serve prefill segment: start=260993 end=260999 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: slot 0 takes 261000 tokens (copied in 1192.8 ms)
+strata serve: prompt 261000 tokens = 245760 reused + 15240 read in 7361 ms (2070.3 tok/s), 1 generated in 46 ms (21.6 tok/s), drafts accepted 0 of 0, 6 checkpoints
+strata serve: decode expert cache hit rate: 3.9% (15 hits / 385 lookups); 95 more read by the GPU over PCIe or from another GPU (19.8% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4677440 rows, 98.5% row-cache hits, 4023 SSD reads (17.1 MB), read p50 153 us p99 8285 us, blocked 123.064 ms total (submit 2.767 ms), cache 4008/1048576 rows, SSD kept awake by 1261 reads (slowest 639.1 ms)
+strata serve: expert tiers: GPU 15 hits this request; since the start RAM 1996571 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: skip parking (snapshot 4592 MiB exceeds available budget)
+strata serve prefill segment: start=245760 end=261000 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.660 call_lock_ms=0.000 lookup_ms=0.836 plan_ms=0.002 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.822 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.711 raw_resize_ms=0.007 host_available_mib=10561
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 27.8, waited 0.0 ms
+strata prefill callback: start=245760 rows=4096 draft_path=token draft_ms=145.562 checkpoint_ms=0.002 total_ms=145.600
+strata prefill chunk: start=245760 rows=4096 main_and_wait_ms=1687.768 callback_ms=145.618 total_ms=1833.386
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=245760
+strata verify: captured the batch window over slots 0
+strata batch: 7 windows, avg 1.00 rows, 39.28 ms/window = run 38.52 (CUDA0 GPU-reach wait 14.72 + CPU experts 21.73) + commit 0.70 + emit 0.06; per layer-window: CPU experts 7.54, VRAM hits 0.51, PCIe 1.95; 25.5 rows/s over 275 ms of wall time (admissions included)
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.489 call_lock_ms=0.000 lookup_ms=0.809 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.679 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.526 raw_resize_ms=0.005 host_available_mib=10847
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 22.9, waited 0.0 ms
+strata prefill callback: start=249856 rows=4096 draft_path=token draft_ms=150.115 checkpoint_ms=0.002 total_ms=150.170
+strata prefill chunk: start=249856 rows=4096 main_and_wait_ms=1691.927 callback_ms=150.187 total_ms=1842.114
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=249856
+strata ple batch phases: rows=65536 misses=0 pages=0 total_ms=3.443 call_lock_ms=0.000 lookup_ms=0.842 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=2.600 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=3.471 raw_resize_ms=0.003 host_available_mib=10870
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 24.1, waited 0.0 ms
+strata prefill callback: start=253952 rows=4096 draft_path=token draft_ms=149.466 checkpoint_ms=0.002 total_ms=149.518
+strata prefill chunk: start=253952 rows=4096 main_and_wait_ms=1691.213 callback_ms=149.535 total_ms=1840.747
+strata prefill executed: tokens=4096 max_chunk=4096 capacity=4096 start=253952
+strata ple batch phases: rows=47232 misses=0 pages=0 total_ms=2.578 call_lock_ms=0.000 lookup_ms=0.651 plan_ms=0.001 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=1.926 reader_drain_ms=0.000
+strata ple gather phases: tokens=2952 rows=47232 total_ms=2.604 raw_resize_ms=0.003 host_available_mib=10887
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 18.3, waited 0.0 ms
+strata prefill callback: start=258048 rows=2952 draft_path=token draft_ms=112.653 checkpoint_ms=0.002 total_ms=112.689
+strata prefill chunk: start=258048 rows=2952 main_and_wait_ms=1502.224 callback_ms=112.726 total_ms=1614.949
+strata prefill executed: tokens=2952 max_chunk=2952 capacity=4096 start=258048
+strata serve prefill segment: start=261000 end=261006 root=0 turn=0 message=0 pin=0 reread=0
+strata batch: the prompt was read in 2 parts, the slots decoding 275 ms between them
+strata batch: slot 1 takes 261007 tokens (copied in 939.5 ms)
+strata serve: prompt 261007 tokens = 245760 reused + 15247 read in 7581 ms (2011.1 tok/s), 1 generated in 27 ms (36.9 tok/s), drafts accepted 0 of 0, 6 checkpoints
+strata serve: decode expert cache hit rate: 3.1% (12 hits / 385 lookups); 95 more read by the GPU over PCIe or from another GPU (19.8% of all 480 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=0 promoted_payload_bytes=0 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 4921504 rows, 98.6% row-cache hits, 4023 SSD reads (17.1 MB), read p50 153 us p99 8285 us, blocked 123.066 ms total (submit 2.767 ms), cache 4008/1048576 rows, SSD kept awake by 1340 reads (slowest 639.1 ms)
+strata serve: expert tiers: GPU 12 hits this request; since the start RAM 2099972 blobs, files 0 blobs 0.0 MB read
+strata batch: 7 windows, avg 1.00 rows, 35.53 ms/window = run 34.70 (CUDA0 GPU-reach wait 14.64 + CPU experts 18.45) + commit 0.74 + emit 0.09; per layer-window: CPU experts 7.83, VRAM hits 0.17, PCIe 2.00; 28.1 rows/s over 249 ms of wall time (admissions included)
+safetensors: post-residency expert source bytes=0
+safetensors: post-residency MTP source bytes=0

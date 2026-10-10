@@ -1,0 +1,164 @@
+[strata] "parallel" must be a whole number of requests (2..8), not '4': ignored
+[strata] "parallel" must be a whole number of requests (2..8), not True: ignored
+[strata] "parallel": 12 - the engine runs at most 8 requests together; it will use 8
+[strata] done: 8 tokens in 0 s (29.3 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 0 s (29.2 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 1 s (29.6 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 1 s (29.4 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 1 s (29.4 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 1 s (29.6 tok/s) (length, cancel=False)
+[strata] answering: 5 of max 8 tokens, 28.1 tok/s, 1 s
+[strata] answering: 4 of max 8 tokens, 34.7 tok/s, 1 s
+[strata] done: 8 tokens in 1 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 1 s so far
+[strata] done: 8 tokens in 1 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 1 s so far
+[strata] done: 8 tokens in 1 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 1 s so far
+[strata] done: 8 tokens in 1 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 1 s so far
+[strata] done: 8 tokens in 2 s (29.2 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 2 s so far
+[strata] done: 8 tokens in 2 s (29.1 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 2 s so far
+[strata] done: 8 tokens in 2 s (29.1 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 2 s so far
+[strata] done: 8 tokens in 2 s (29.2 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 2 s so far
+[strata] done: 8 tokens in 2 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 2 s so far
+[strata] done: 8 tokens in 2 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 2 s so far
+[strata] done: 8 tokens in 3 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.2 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 3 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 3 s so far
+[strata] done: 8 tokens in 4 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 4 s (29.7 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 4 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 4 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 4 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 4 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 4 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 5 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 5 s so far
+[strata] done: 8 tokens in 6 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.3 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 6 s (29.8 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 6 s so far
+[strata] done: 8 tokens in 7 s (29.7 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.7 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 7 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 7 s so far
+[strata] done: 8 tokens in 8 s (29.8 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 45 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.7 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.6 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.5 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.4 tok/s) (length, cancel=False)
+[strata] reading the prompt: 32 of 46 tokens, 8 s so far
+[strata] done: 8 tokens in 8 s (29.3 tok/s) (length, cancel=False)
+[strata] done: 8 tokens in 8 s (33.1 tok/s) (length, cancel=False)
+[strata] done: 10 tokens in 1 s (33.4 tok/s) (stop, cancel=False)
+[strata] thinking: 29 of max 200 tokens, 31.1 tok/s, 1 s
+[strata] done: 55 tokens in 2 s (37.0 tok/s) (stop, cancel=False)
+[strata] the engine stopped unexpectedly (exit code 1). The engine exited (code 1) after it reported: verify batch: layer 34 never rang (graph finished) - please report it at github.com/sergqwer/strata-nvfp4/issues with the log. The next request starts the engine again.
+[strata] the engine stopped unexpectedly (exit code 1). The engine exited (code 1) after it reported: verify batch: layer 34 never rang (graph finished) - please report it at github.com/sergqwer/strata-nvfp4/issues with the log. The next request starts the engine again.
+[strata] done: 1 tokens in 0 s (16.4 tok/s) (error, cancel=False)
+[strata] done: 4 tokens in 0 s (24.3 tok/s) (error, cancel=False)
+[strata] done: 10 tokens in 0 s (25.1 tok/s) (stop, cancel=False)
+[strata] reading the prompt: 2,464 of 3,037 tokens, 1 s so far
+[strata] done: 10 tokens in 1 s (34.0 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (23.4 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (25.2 tok/s) (stop, cancel=False)
+[strata] reading the prompt: 2,496 of 3,037 tokens, 1 s so far
+[strata] done: 10 tokens in 1 s (33.8 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (33.7 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 1 s (34.2 tok/s) (stop, cancel=False)
+[strata] answering: 31 of max 64 tokens, 31.2 tok/s, 1 s
+[strata] done: 55 tokens in 2 s (31.6 tok/s) (stop, cancel=False)
+[strata] parallel requests: 4 asked, the engine runs 2 (its log says why)
+[strata] parallel requests: 4 asked, the engine runs one at a time (its log says why)
+[strata] done: 10 tokens in 0 s (49.1 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (33.0 tok/s) (stop, cancel=False)
+[strata] answering: 41 of max 200 tokens, 41.1 tok/s, 1 s
+[strata] done: 55 tokens in 1 s (42.2 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (33.7 tok/s) (stop, cancel=False)
+[strata] answering: 32 of max 200 tokens, 32.1 tok/s, 1 s
+[strata] done: 55 tokens in 2 s (32.0 tok/s) (stop, cancel=False)
+[strata] answering: 1 of max 64 tokens, 31.8 tok/s, 1 s
+[strata] reading the prompt: 32 of 3,037 tokens, 2 s so far
+[strata] answering: 3 of max 64 tokens, 2.8 tok/s, 2 s
+[strata] done: 10 tokens in 2 s (7.4 tok/s) (stop, cancel=False)
+[strata] answering: 2 of max 64 tokens, 39.5 tok/s, 3 s
+[strata] done: 10 tokens in 3 s (33.0 tok/s) (stop, cancel=False)
+[strata] done: 9 tokens in 0 s (49.4 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 0 s (49.3 tok/s) (stop, cancel=False)
+[strata] reading the prompt: 1,280 of 3,037 tokens, 1 s so far
+[strata] reading the prompt: 32 of 3,037 tokens, 1 s so far
+[strata] done: 10 tokens in 2 s (25.1 tok/s) (stop, cancel=False)
+[strata] reading the prompt: 32 of 43 tokens, 2 s so far
+[strata] answering: 2 of max 64 tokens, 27.5 tok/s, 2 s
+[strata] done: 10 tokens in 2 s (33.9 tok/s) (stop, cancel=False)
+[strata] done: 10 tokens in 3 s (30.6 tok/s) (stop, cancel=False)
+.................................
+----------------------------------------------------------------------
+Ran 33 tests in 37.161s
+
+OK

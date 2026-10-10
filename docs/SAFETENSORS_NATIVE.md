@@ -33,8 +33,10 @@ The original GGUF/pack path retains its defaults.
 experts. The draft reuses Strata's attention, rollback, sampling and verification;
 the main model verifies every proposed token. Draft attention currently follows
 Strata's dense/window path; the saved MTP indexer weights are validated and kept
-but are not used for sparse draft selection. Multi-GPU, request batching, pipeline >1,
-cross-model drafts and external Q4 draft overrides are refused by this native path.
+but are not used for sparse draft selection. Opt-in native request batching is
+validated with two text slots; see [native concurrency](NATIVE_CONCURRENCY.md).
+Multi-GPU, pipeline >1, cross-model drafts and external Q4 draft overrides are
+refused by this native path.
 The desktop profile enables the inherited `--vision` / GENI embedding path with
 the installed external BF16 image encoder, including image rotary positions
 and image-aware conversation reuse. Main-model weights remain safetensors;

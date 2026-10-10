@@ -181,12 +181,18 @@ public:
     /// -1 = an error (err).  Serves every layer that has rung so far.
     int batch_poll(PoolMultiFn pool, void* user, std::string& err);
     bool batch_busy() const { return b_running_; }
-    /// A slot's sampling (temperature / top_p / top_k / min_p / seed; penalties are not applied in batch windows):
+    /// A slot's sampling (temperature / top_p / top_k / min_p / seed; penalties need set_batch_history below):
     /// its row is drawn again on the last stage with Philox(seed, position), as a solo window draws it.  Greedy by
     /// default.  Set on the first stage, it reaches the last.
     void set_slot_sampling(int slot, const strata::kernels::SamplerParams& sp) {
         if (slot >= 0 && slot < (int) slot_sp_.size()) slot_sp_[(size_t) slot] = sp;
         if (next_) next_->set_slot_sampling(slot, sp);
+    }
+    /// Optional penalty tail for row t of the next batch window. Caller owns the device buffer until the
+    /// window finishes; null preserves the inherited batch sampler. Native admissions set every active row.
+    void set_batch_history(int row, const int32_t* history, int length) {
+        if (row >= 0 && row < 8) { batch_hist_[row] = history; batch_hist_len_[row] = length; }
+        if (next_) next_->set_batch_history(row, history, length);
     }
     const int32_t* batch_out() const { return b_out_; }
     bool last_stage() const { return g_ != nullptr && le_ == g_->n_layers; }
@@ -322,6 +328,8 @@ private:
     std::chrono::steady_clock::time_point b_last_;
     int32_t b_out_[8] = {};
     std::vector<strata::kernels::SamplerParams> slot_sp_;
+    const int32_t* batch_hist_[8] = {};
+    int batch_hist_len_[8] = {};
     bool sample_rows(int S, std::string& err);   ///< the sampled slots' rows of the last batch window
     int32_t* h_commitb_ = nullptr; int32_t* m_commitb_ = nullptr;   // per slot [1, 0, pos, -1 ..], stride 2 + max_t
     int32_t* commitb_ = nullptr;

@@ -1,0 +1,5 @@
+Exploratory run exited with AssertionError: long slots did not overlap.
+The token-parity assertion immediately before the overlap assertion passed.
+Both 64-token answers completed, but slot 0 finished between chunks of slot 1 prefill.
+See engine.log: single-row batch windows, 2275 ms decode between four prompt parts.
+This is not a successful full-length overlapping decode acceptance run.
