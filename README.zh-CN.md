@@ -108,7 +108,7 @@ OpenAI 客户端地址为 **http://127.0.0.1:8880/v1**。
 `START-NATIVE-262K-STABLE.bat` 保留较早的 efficiency14 配置。
 
 `START-NATIVE-262K-PARALLEL.bat` 选择可选的**两路文本并发**，仍为 262K 上下文、
-4096 行专用 prefill。图片请求独占引擎；单请求保留 MTP，多请求批处理直接由主模型解码。
+4096 行专用 prefill。图片请求独占引擎；并发配置完全不加载 MTP，所有请求直接由主模型解码。
 内存开销、验收及首字/吞吐测量见[原生并发说明](docs/NATIVE_CONCURRENCY.md)。原桌面入口不变。
 
 ## 验收与边界

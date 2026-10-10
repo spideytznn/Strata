@@ -21,13 +21,20 @@ server setting; its default is still one request. The measured desktop profile
 contains additional arithmetic, memory and scheduling settings, so a generic
 config is not a reproduction of its measurements.
 
-One request alone uses the existing MTP path: `--spec 3 --spec-min-p 0.5`
-(at most two proposals). When another text request arrives, the server drains
-that solo generation and resumes it in an independent batch slot. Slots verify
-one target token each per window, without MTP proposals. The request left alone
-returns to solo MTP. `--batch-mtp` is explicitly refused for native weights until
-its combined state, sampling and performance are validated. No target weights or
-projections are requantized by concurrency.
+The desktop parallel profile leaves MTP entirely disabled: no `--mtp`, no draft
+weights loaded, `--spec 2` and `--suffix-draft 0`. Every request, including one
+running alone, uses target-only decode. Removing MTP also removes its draft
+weight/state allocation; the earlier acceptance profile reported 2620 MiB for
+that allocation. Actual reclaimed VRAM and resulting cache sizing have not been
+remeasured with this setting.
+
+When another text request arrives, the server drains the solo generation and
+resumes it in an independent batch slot. Slots verify one target token each per
+window. A custom config can still load native MTP for solo requests, as in the
+initial acceptance runs below; concurrent slots remain target-only.
+`--batch-mtp` is explicitly refused for native weights until its combined state,
+sampling and performance are validated. No target weights or projections are
+requantized by concurrency.
 
 More than two requests wait for a free slot. Admissions share one prompt reader;
 active slots receive decode windows between prompt chunks. This is batch decode
@@ -73,7 +80,8 @@ gets its exclusive permit. This does not establish parallel image generation.
 ## Validation on this PC
 
 RTX 5090 32 GB, Ryzen 9950X3D, 96 GB RAM, native Windows CUDA SM120,
-2026-10-11. Raw data and commands are in
+2026-10-11. These initial runs loaded MTP for solo requests, before it was
+disabled in the desktop parallel profile. Raw data and commands are in
 [`bench/results/2026-10-11-native-concurrency`](../bench/results/2026-10-11-native-concurrency/README.md).
 
 - Raw protocol checks compare solo and two-slot outputs exactly for English and
@@ -103,7 +111,8 @@ other GPUs, multi-GPU and more than two native slots have not been validated.
 
 ## Latency and throughput screen
 
-The same executable was run serially and with two slots, using 262K INT8 KV,
+Before disabling MTP in the desktop parallel profile, the same executable was
+run serially and with two slots, using 262K INT8 KV,
 4096 dedicated prefill, vision loaded, native MTP for solo requests, 1536 MiB
 reserve, greedy sampling and adaptive expert exchange. Three rounds per client
 count followed reference warmups. Each client requested 96 tokens. Values below

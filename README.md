@@ -161,7 +161,7 @@ The fully unloaded MTP alternative is
 
 `START-NATIVE-262K-PARALLEL.bat` selects an opt-in **two-request text batch**,
 with the same 262K context and dedicated 4096-row prefill. Images run exclusively;
-one request alone retains MTP, while concurrent slots use target-only decode.
+this profile leaves MTP weights unloaded and uses target-only decode for all requests.
 See [native concurrency](docs/NATIVE_CONCURRENCY.md) for tests, memory costs and
 latency/throughput measurements. The original desktop launcher is unchanged.
 
