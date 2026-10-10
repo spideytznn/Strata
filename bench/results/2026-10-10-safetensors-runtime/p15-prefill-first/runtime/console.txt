@@ -1,0 +1,415 @@
+START r1 vision3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4998 experts, 12.87 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r1 vision3072 doc8k-cold: fresh=8052 reused=0 pp=2744.1 decode=89.6 prep=0.008s ttft=2.963s
+DONE r1 vision3072 doc8k-warm: fresh=5 reused=8047 pp=36.3 decode=104.6 prep=0.001s ttft=0.165s
+DONE r1 vision3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=104.5 decode=85.5 prep=0.001s ttft=0.363s
+DONE r1 vision3072 doc24k-cold: fresh=24057 reused=0 pp=3107.6 decode=114.2 prep=0.031s ttft=7.791s
+DONE r1 vision3072 doc24k-warm: fresh=5 reused=24052 pp=23.1 decode=120.7 prep=0.003s ttft=0.240s
+DONE r1 vision3072 image8k-cold: fresh=8087 reused=0 pp=2838.9 decode=100.6 prep=0.496s ttft=3.378s
+DONE r1 vision3072 image8k-warm: fresh=5 reused=8082 pp=38.1 decode=105.9 prep=0.007s ttft=0.173s
+START r1 vision3584
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4804 experts, 12.37 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r1 vision3584 doc8k-cold: fresh=8052 reused=0 pp=2675.3 decode=88.5 prep=0.008s ttft=3.039s
+DONE r1 vision3584 doc8k-warm: fresh=5 reused=8047 pp=34.1 decode=103.8 prep=0.001s ttft=0.165s
+DONE r1 vision3584 doc8k-followup-continuation: fresh=36 reused=8179 pp=99.9 decode=83.8 prep=0.002s ttft=0.380s
+DONE r1 vision3584 doc24k-cold: fresh=24057 reused=0 pp=3062.8 decode=113.9 prep=0.030s ttft=7.904s
+DONE r1 vision3584 doc24k-warm: fresh=5 reused=24052 pp=20.2 decode=115.1 prep=0.003s ttft=0.272s
+DONE r1 vision3584 image8k-cold: fresh=8087 reused=0 pp=2818.0 decode=99.6 prep=0.143s ttft=3.046s
+DONE r1 vision3584 image8k-warm: fresh=5 reused=8082 pp=41.7 decode=103.5 prep=0.006s ttft=0.170s
+START r1 vision-priority3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4055 experts, 10.44 GiB of VRAM) ...
+DONE r1 vision-priority3072 doc8k-cold: fresh=8052 reused=0 pp=2668.0 decode=81.9 prep=0.008s ttft=3.047s
+DONE r1 vision-priority3072 doc8k-warm: fresh=5 reused=8047 pp=32.9 decode=95.8 prep=0.001s ttft=0.172s
+DONE r1 vision-priority3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=95.4 decode=78.9 prep=0.001s ttft=0.397s
+DONE r1 vision-priority3072 doc24k-cold: fresh=24057 reused=0 pp=2979.2 decode=103.2 prep=0.030s ttft=8.125s
+DONE r1 vision-priority3072 doc24k-warm: fresh=5 reused=24052 pp=19.8 decode=111.3 prep=0.003s ttft=0.279s
+DONE r1 vision-priority3072 image8k-cold: fresh=8087 reused=0 pp=2776.7 decode=92.6 prep=0.151s ttft=3.098s
+DONE r1 vision-priority3072 image8k-warm: fresh=5 reused=8082 pp=37.1 decode=96.7 prep=0.006s ttft=0.175s
+START r2 vision-priority3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4055 experts, 10.44 GiB of VRAM) ...
+DONE r2 vision-priority3072 doc8k-cold: fresh=8052 reused=0 pp=2661.5 decode=81.9 prep=0.008s ttft=3.055s
+DONE r2 vision-priority3072 doc8k-warm: fresh=5 reused=8047 pp=35.6 decode=96.1 prep=0.001s ttft=0.166s
+DONE r2 vision-priority3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=92.0 decode=78.5 prep=0.001s ttft=0.411s
+DONE r2 vision-priority3072 doc24k-cold: fresh=24057 reused=0 pp=2991.5 decode=104.8 prep=0.029s ttft=8.091s
+DONE r2 vision-priority3072 doc24k-warm: fresh=5 reused=24052 pp=21.8 decode=109.1 prep=0.003s ttft=0.254s
+DONE r2 vision-priority3072 image8k-cold: fresh=8087 reused=0 pp=2739.7 decode=92.6 prep=0.153s ttft=3.140s
+DONE r2 vision-priority3072 image8k-warm: fresh=5 reused=8082 pp=38.3 decode=96.8 prep=0.006s ttft=0.183s
+START r2 vision3584
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4804 experts, 12.37 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r2 vision3584 doc8k-cold: fresh=8052 reused=0 pp=2733.0 decode=88.5 prep=0.008s ttft=2.975s
+DONE r2 vision3584 doc8k-warm: fresh=5 reused=8047 pp=34.3 decode=103.6 prep=0.001s ttft=0.168s
+DONE r2 vision3584 doc8k-followup-continuation: fresh=36 reused=8179 pp=101.4 decode=84.4 prep=0.001s ttft=0.374s
+DONE r2 vision3584 doc24k-cold: fresh=24057 reused=0 pp=3068.4 decode=112.9 prep=0.029s ttft=7.889s
+DONE r2 vision3584 doc24k-warm: fresh=5 reused=24052 pp=21.7 decode=119.3 prep=0.003s ttft=0.253s
+DONE r2 vision3584 image8k-cold: fresh=8087 reused=0 pp=2856.3 decode=99.8 prep=0.149s ttft=3.014s
+DONE r2 vision3584 image8k-warm: fresh=5 reused=8082 pp=39.4 decode=103.4 prep=0.006s ttft=0.166s
+START r2 vision3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4998 experts, 12.87 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r2 vision3072 doc8k-cold: fresh=8052 reused=0 pp=2736.7 decode=89.6 prep=0.008s ttft=2.971s
+DONE r2 vision3072 doc8k-warm: fresh=5 reused=8047 pp=34.2 decode=104.0 prep=0.001s ttft=0.164s
+DONE r2 vision3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=102.9 decode=85.5 prep=0.001s ttft=0.368s
+DONE r2 vision3072 doc24k-cold: fresh=24057 reused=0 pp=3095.1 decode=108.0 prep=0.029s ttft=7.821s
+DONE r2 vision3072 doc24k-warm: fresh=5 reused=24052 pp=22.2 decode=120.9 prep=0.003s ttft=0.248s
+DONE r2 vision3072 image8k-cold: fresh=8087 reused=0 pp=2840.8 decode=100.6 prep=0.150s ttft=3.029s
+DONE r2 vision3072 image8k-warm: fresh=5 reused=8082 pp=39.7 decode=106.0 prep=0.006s ttft=0.170s
+START r3 vision3584
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4804 experts, 12.37 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r3 vision3584 doc8k-cold: fresh=8052 reused=0 pp=2735.4 decode=88.6 prep=0.008s ttft=2.972s
+DONE r3 vision3584 doc8k-warm: fresh=5 reused=8047 pp=34.5 decode=103.2 prep=0.001s ttft=0.170s
+DONE r3 vision3584 doc8k-followup-continuation: fresh=36 reused=8179 pp=101.0 decode=84.6 prep=0.001s ttft=0.376s
+DONE r3 vision3584 doc24k-cold: fresh=24057 reused=0 pp=3071.2 decode=113.5 prep=0.028s ttft=7.881s
+DONE r3 vision3584 doc24k-warm: fresh=5 reused=24052 pp=21.2 decode=119.1 prep=0.003s ttft=0.258s
+DONE r3 vision3584 image8k-cold: fresh=8087 reused=0 pp=2824.3 decode=99.5 prep=0.149s ttft=3.047s
+DONE r3 vision3584 image8k-warm: fresh=5 reused=8082 pp=40.4 decode=104.8 prep=0.007s ttft=0.167s
+START r3 vision-priority3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+DONE r3 vision-priority3072 doc8k-cold: fresh=8052 reused=0 pp=2639.1 decode=82.4 prep=0.008s ttft=3.082s
+DONE r3 vision-priority3072 doc8k-warm: fresh=5 reused=8047 pp=33.8 decode=97.4 prep=0.001s ttft=0.173s
+DONE r3 vision-priority3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=93.8 decode=79.1 prep=0.001s ttft=0.403s
+DONE r3 vision-priority3072 doc24k-cold: fresh=24057 reused=0 pp=2975.5 decode=105.5 prep=0.028s ttft=8.136s
+DONE r3 vision-priority3072 doc24k-warm: fresh=5 reused=24052 pp=20.9 decode=111.5 prep=0.003s ttft=0.264s
+DONE r3 vision-priority3072 image8k-cold: fresh=8087 reused=0 pp=2761.4 decode=91.4 prep=0.141s ttft=3.105s
+DONE r3 vision-priority3072 image8k-warm: fresh=5 reused=8082 pp=36.4 decode=96.2 prep=0.006s ttft=0.180s
+START r3 vision3072
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4998 experts, 12.87 GiB of VRAM) ...
+[strata] almost ready ...
+DONE r3 vision3072 doc8k-cold: fresh=8052 reused=0 pp=2756.5 decode=88.4 prep=0.008s ttft=2.949s
+DONE r3 vision3072 doc8k-warm: fresh=5 reused=8047 pp=33.3 decode=102.6 prep=0.001s ttft=0.168s
+DONE r3 vision3072 doc8k-followup-continuation: fresh=36 reused=8179 pp=102.9 decode=79.7 prep=0.001s ttft=0.368s
+DONE r3 vision3072 doc24k-cold: fresh=24057 reused=0 pp=3081.7 decode=115.5 prep=0.029s ttft=7.856s
+DONE r3 vision3072 doc24k-warm: fresh=5 reused=24052 pp=22.9 decode=120.8 prep=0.003s ttft=0.242s
+DONE r3 vision3072 image8k-cold: fresh=8087 reused=0 pp=2833.8 decode=101.1 prep=0.150s ttft=3.037s
+DONE r3 vision3072 image8k-warm: fresh=5 reused=8082 pp=40.9 decode=106.1 prep=0.006s ttft=0.162s
+{
+  "vision3072": {
+    "doc8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2744.095695736632,
+      "decode_tok_s": 89.55432729308053,
+      "prepare_s": 0.00784380000186502,
+      "ttft_s": 2.9627054000011412,
+      "fresh_tokens": 8052,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 34.22313483915127,
+      "decode_tok_s": 103.98895117393776,
+      "prepare_s": 0.0006728999978804495,
+      "ttft_s": 0.16491580000001704,
+      "fresh_tokens": 5,
+      "reused": 8047,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-followup-continuation": {
+      "samples": 3,
+      "prefill_tok_s": 102.88653901114604,
+      "decode_tok_s": 85.51005411183111,
+      "prepare_s": 0.0010451999987708405,
+      "ttft_s": 0.3676811999976053,
+      "fresh_tokens": 36,
+      "reused": 8179,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 3095.1431328401413,
+      "decode_tok_s": 114.21433032925849,
+      "prepare_s": 0.028894700000819284,
+      "ttft_s": 7.8207623999987845,
+      "fresh_tokens": 24057,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 22.872827081427264,
+      "decode_tok_s": 120.83451335787785,
+      "prepare_s": 0.0030445000011241063,
+      "ttft_s": 0.24220970000169473,
+      "fresh_tokens": 5,
+      "reused": 24052,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2838.9384258934215,
+      "decode_tok_s": 100.6447554646957,
+      "prepare_s": 0.1503664000047138,
+      "ttft_s": 3.036954200004402,
+      "fresh_tokens": 8087,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 39.65107057890563,
+      "decode_tok_s": 105.96903717195131,
+      "prepare_s": 0.006116299999121111,
+      "ttft_s": 0.1698486999994202,
+      "fresh_tokens": 5,
+      "reused": 8082,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    }
+  },
+  "vision3584": {
+    "doc8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2733.0120154775645,
+      "decode_tok_s": 88.53842429273016,
+      "prepare_s": 0.008043900001212023,
+      "ttft_s": 2.9747435999997833,
+      "fresh_tokens": 8052,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 34.34065934065934,
+      "decode_tok_s": 103.64372469635627,
+      "prepare_s": 0.0006666000008408446,
+      "ttft_s": 0.16827120000016293,
+      "fresh_tokens": 5,
+      "reused": 8047,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-followup-continuation": {
+      "samples": 3,
+      "prefill_tok_s": 101.03845074375526,
+      "decode_tok_s": 84.39374958792114,
+      "prepare_s": 0.0010677000027499162,
+      "ttft_s": 0.37602530000003753,
+      "fresh_tokens": 36,
+      "reused": 8179,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 3068.4166220249485,
+      "decode_tok_s": 113.46511834057266,
+      "prepare_s": 0.029035199997451855,
+      "ttft_s": 7.888797999999952,
+      "fresh_tokens": 24057,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 21.240441801189466,
+      "decode_tok_s": 119.13626209977662,
+      "prepare_s": 0.0030231000018829945,
+      "ttft_s": 0.25801000000501517,
+      "fresh_tokens": 5,
+      "reused": 24052,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2824.2648599566946,
+      "decode_tok_s": 99.59539371304076,
+      "prepare_s": 0.14936589999706484,
+      "ttft_s": 3.045591499998409,
+      "fresh_tokens": 8087,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 40.35512510088781,
+      "decode_tok_s": 103.50125333548961,
+      "prepare_s": 0.006115600001066923,
+      "ttft_s": 0.16654290000587935,
+      "fresh_tokens": 5,
+      "reused": 8082,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    }
+  },
+  "vision-priority3072": {
+    "doc8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2661.466252396377,
+      "decode_tok_s": 81.92524321556579,
+      "prepare_s": 0.008152200000040466,
+      "ttft_s": 3.0548161000006075,
+      "fresh_tokens": 8052,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 33.78378378378378,
+      "decode_tok_s": 96.11774423668994,
+      "prepare_s": 0.0006605000016861595,
+      "ttft_s": 0.17152469999928144,
+      "fresh_tokens": 5,
+      "reused": 8047,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc8k-followup-continuation": {
+      "samples": 3,
+      "prefill_tok_s": 93.7744204219849,
+      "decode_tok_s": 78.9051904820614,
+      "prepare_s": 0.0010657000020728447,
+      "ttft_s": 0.40334530000109226,
+      "fresh_tokens": 36,
+      "reused": 8179,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2979.231940952829,
+      "decode_tok_s": 104.84069129330821,
+      "prepare_s": 0.02866820000053849,
+      "ttft_s": 8.125242199999775,
+      "fresh_tokens": 24057,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "doc24k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 20.911752404851526,
+      "decode_tok_s": 111.32370847103844,
+      "prepare_s": 0.0031018000008771196,
+      "ttft_s": 0.2635582000002614,
+      "fresh_tokens": 5,
+      "reused": 24052,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-cold": {
+      "samples": 3,
+      "prefill_tok_s": 2761.387693778597,
+      "decode_tok_s": 92.61269083279069,
+      "prepare_s": 0.15080090000265045,
+      "ttft_s": 3.105185499996878,
+      "fresh_tokens": 8087,
+      "reused": 0,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    },
+    "image8k-warm": {
+      "samples": 3,
+      "prefill_tok_s": 37.0919881305638,
+      "decode_tok_s": 96.72787727650571,
+      "prepare_s": 0.00628570000117179,
+      "ttft_s": 0.18015540000487817,
+      "fresh_tokens": 5,
+      "reused": 8082,
+      "generated_counts": [
+        128,
+        128,
+        128
+      ]
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "status": "pass",
+  "base_commit": "f72d339df5c2f247ea73ab85f7eba442002d0867",
+  "hardware": "RTX 5090 32 GB / Ryzen 9950X3D / 96 GB / Windows / CUDA 13",
+  "executable": "build-native-engine/strata-efficiency17.exe",
+  "exe_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+  "source_sha256": {
+    "CMakeLists.txt": "320430c5fdd60374797022e51334caf78960a322af81028d8f2e4b1f3e09f1eb",
+    "include/strata/core/mtp.hpp": "3a891541866f2e55a6ef582358c426c2e6f72ec68b4b573228747e46e3e7531b",
+    "include/strata/core/native_draft_vocab.hpp": "0fe7fdb62189bf899c84268f77a2c191c2fe90ad595207d3976374bab19c0c6f",
+    "src/core/mtp.cpp": "719fae4e496b90e6719f6b0f1a9998f0c228ca5a5aac57e6298d47a1fecfa9d3",
+    "src/program/generate.cpp": "3319384425137431bf321f051bc6cce0a68cb6e1a20b8f2162495ad0235170bf",
+    "src/program/native_draft_vocab_test.cpp": "e0eb3e960a97bc8181242349806b01d8fd5a1b14900d62cabb11b7177b34d36e"
+  },
+  "cpu_test": "native_draft_vocab_test PASS",
+  "backends_built": [
+    "CUDA SM120 MSVC Release"
+  ],
+  "backends_unavailable": [
+    "HIP",
+    "SYCL"
+  ],
+  "command": "tools/build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency17 -Targets @('strata','native_draft_vocab_test')"
+}

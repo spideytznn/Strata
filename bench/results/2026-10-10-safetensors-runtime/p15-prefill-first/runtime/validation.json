@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "implementation_commit": "f72d339df5c2f247ea73ab85f7eba442002d0867",
+  "hardware": "RTX 5090 32 GB / Ryzen 9950X3D / 96 GB / Windows / CUDA 13",
+  "command": ".venv-native/Scripts/python.exe tools/native_visual_performance.py --config config/native/rtx5090-262k-mtp2.json --prefill-first --output logs/p15-prefill-first-validated --rounds 3 --new 128",
+  "checks": {
+    "total_requests": 63,
+    "all_output_caps_met": true,
+    "all_expert_file_reads_zero": true,
+    "warm_output_exact": true,
+    "repeat_outputs_exact_within_profile": true,
+    "allocation_priority_output_exact_at_4096": true,
+    "cross_chunk_output_exact": true
+  },
+  "runtime_results_sha256": "13ece0b5a8c5821a5bec4b0da60ecbc87090d570100e05088af4886080e27efa",
+  "limitations": [
+    "128 generated tokens per request, not full-answer quality",
+    "No long-context growth/disk restore in this finite suite",
+    "HIP and SYCL not built"
+  ],
+  "historical_build_checks": "../validation.json"
+}

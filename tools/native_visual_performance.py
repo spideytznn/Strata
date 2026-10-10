@@ -43,14 +43,42 @@ def main():
     p.add_argument('--new', type=int, default=128)
     p.add_argument('--prefill-first', action='store_true',
                    help='Compare reserve-only 3072/3584 against preallocated 4096 with a 3072 reserve.')
+    p.add_argument('--capacities', nargs='+', type=int,
+                   help='Screen explicit preallocated prompt capacities; preserves other config settings.')
+    p.add_argument('--reserve-mib', type=int, help='Explicit test override for capacity screening only.')
+    p.add_argument('--draft-batch-bf16', action='store_true', help='Test the existing opt-in BF16 draft KV batch path.')
+    p.add_argument('--profile-configs', type=Path, nargs='+', help='Compare complete desktop configs with round order rotated.')
     a = p.parse_args()
     assert a.rounds > 0 and a.new > 0
     a.output = a.output.resolve()
     a.output.mkdir(parents=True, exist_ok=False)
     base = json.loads(a.config.read_text(encoding='utf-8-sig'))
-    assert base['args'][base['args'].index('--prefill')+1] == '4096'
+    if not a.capacities and not a.profile_configs:
+        assert base['args'][base['args'].index('--prefill')+1] == '4096'
+    assert not a.draft_batch_bf16 or a.capacities, 'Use --capacities for the BF16 draft batch screen'
     assert '--vision' in base['args'] and base['vision']['gpu']
-    if a.prefill_first:
+    assert not (a.prefill_first and a.capacities)
+    assert not a.profile_configs or not (a.prefill_first or a.capacities or a.draft_batch_bf16 or a.reserve_mib is not None)
+    assert a.reserve_mib is None or a.capacities, '--reserve-mib is for --capacities only'
+    if a.profile_configs:
+        profiles = {path.stem:json.loads(path.read_text(encoding='utf-8-sig')) for path in a.profile_configs}
+        assert len(profiles) == len(a.profile_configs), 'Config filenames must have unique stems'
+        for cfg in profiles.values():
+            assert cfg['tokenizer'] == base['tokenizer'] and cfg['chat_template'] == base['chat_template']
+            assert cfg.get('vision') == base['vision'] and '--vision' in cfg['args']
+    elif a.capacities:
+        assert all(c > 0 and c % 256 == 0 for c in a.capacities)
+        assert len(set(a.capacities)) == len(a.capacities)
+        profiles = {f'capacity{c}':copy.deepcopy(base) for c in a.capacities}
+        for c,cfg in zip(a.capacities,profiles.values()):
+            cfg['args'][cfg['args'].index('--prefill')+1] = str(c)
+            cfg.setdefault('env',{})['STRATA_NATIVE_PREFILL_FIRST'] = '1'
+            if a.draft_batch_bf16:
+                cfg['env']['STRATA_MTP_BATCH_BF16'] = '1'
+            if a.reserve_mib is not None:
+                assert a.reserve_mib >= 0
+                cfg['args'][cfg['args'].index('--vram-reserve-mib')+1] = str(a.reserve_mib)
+    elif a.prefill_first:
         profiles = {name:copy.deepcopy(base) for name in ['vision3072','vision3584','vision-priority3072']}
         for name,cfg in profiles.items():
             cfg['args'][cfg['args'].index('--vram-reserve-mib')+1] = '3584' if name=='vision3584' else '3072'
@@ -82,8 +110,8 @@ def main():
     (a.output/'fixtures.json').write_text(json.dumps(fixture_info,ensure_ascii=False,indent=2),encoding='utf-8')
     result = {'status':'running','rounds':a.rounds,'new':a.new,'seed':9950,'platform':platform.platform(),
               'source_config_sha256':hashlib.sha256(a.config.read_bytes()).hexdigest(),
-              'profiles':profiles,'runs':[], 'profile_mode':'prefill-first' if a.prefill_first else 'visual-reserves',
-              'note':'Same binary, 4096 cap, official thinking sampling and fixed seed. Encoder loaded first. Cold/warm, image preparation and startup distinguished; no HTTP or state hashing.'}
+              'profiles':profiles,'runs':[], 'profile_mode':'profile-pair' if a.profile_configs else 'capacity-screen' if a.capacities else 'prefill-first' if a.prefill_first else 'visual-reserves',
+              'note':'Binary SHA256 recorded per run (complete profiles may select different builds). Official thinking sampling and fixed seed. Encoder loaded first. Cold/warm, image preparation and startup distinguished; no HTTP or state hashing.'}
     def save():
         (a.output/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     save()

@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "default_config_byte_identical_to_f72d339": true,
+  "default_config_sha256": "06e5c4468421504c74da2008c48a6e3b8e1019811e786fa4986e2e103af6abc8",
+  "explicit_mtp6_gate_floor_6144": "pass",
+  "invalid_argument_cases": 4,
+  "final_generator_sha256": "b7a15cdbbb62c742166329ff2c32908ac8a42693512fa5df509b4740aa6ce744",
+  "final_default_recheck": "byte-identical"
+}

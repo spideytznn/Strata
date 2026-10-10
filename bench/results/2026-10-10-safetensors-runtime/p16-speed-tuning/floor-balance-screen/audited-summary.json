@@ -1,0 +1,558 @@
+{
+  "status": "pass",
+  "requests": 108,
+  "external_reference": {
+    "path": "logs\\p16-mtp-screen\\results.json",
+    "sha256": "2edbb1a6efbea22cbc1abcea8aef74d1b46e5175010fec365836f38c34874a21",
+    "all_outputs_exact": true
+  },
+  "generated_tokens": 27648,
+  "reference": {
+    "window": 3,
+    "gate": 0,
+    "pcie_frac": 0.0
+  },
+  "summary": [
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.7,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 95.86877960791168,
+      "warm_decode_aggregate_tok_s": 99.88554780980127,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 99.99905529043966,
+          "accepted": 332,
+          "offered": 524
+        },
+        "chinese": {
+          "decode_median_tok_s": 94.27051529065454,
+          "accepted": 348,
+          "offered": 540
+        },
+        "code": {
+          "decode_median_tok_s": 94.60458253865869,
+          "accepted": 324,
+          "offered": 568
+        }
+      },
+      "decode_ratio_to_reference": 1.0587695591658919,
+      "warm_decode_ratio_to_reference": 1.0543127666215795
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 99.73961208044105,
+      "warm_decode_aggregate_tok_s": 99.84269575278532,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 102.25308262059363,
+          "accepted": 332,
+          "offered": 524
+        },
+        "chinese": {
+          "decode_median_tok_s": 102.55683562223064,
+          "accepted": 348,
+          "offered": 540
+        },
+        "code": {
+          "decode_median_tok_s": 94.80795130557962,
+          "accepted": 324,
+          "offered": 568
+        }
+      },
+      "decode_ratio_to_reference": 1.1015188213063554,
+      "warm_decode_ratio_to_reference": 1.0538604542322643
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 97.10947576056445,
+      "warm_decode_aggregate_tok_s": 97.16968002328024,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 96.1730269102506,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 100.36086982588535,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 94.98563362992486,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 1.0724717396252181,
+      "warm_decode_ratio_to_reference": 1.0256462163290612
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.7,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 93.3369793090876,
+      "warm_decode_aggregate_tok_s": 96.96724830181056,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 94.94123414544734,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 91.50414694463615,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 94.50092917042775,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 1.0308084951235075,
+      "warm_decode_ratio_to_reference": 1.0235095073356733
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 96.143012731438,
+      "warm_decode_aggregate_tok_s": 95.29718327335898,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 97.24848882239486,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 100.10328952788453,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 91.57662749781122,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 1.0617981747849927,
+      "warm_decode_ratio_to_reference": 1.0058816230301526
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.7,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 90.4764148720607,
+      "warm_decode_aggregate_tok_s": 94.8733786287832,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 98.47048379469636,
+          "accepted": 348,
+          "offered": 578
+        },
+        "chinese": {
+          "decode_median_tok_s": 89.40756414211185,
+          "accepted": 370,
+          "offered": 600
+        },
+        "code": {
+          "decode_median_tok_s": 86.09699783639655,
+          "accepted": 338,
+          "offered": 660
+        }
+      },
+      "decode_ratio_to_reference": 0.9992165779181001,
+      "warm_decode_ratio_to_reference": 1.001408276714021
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.0,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 90.54735166681404,
+      "warm_decode_aggregate_tok_s": 94.73995855126813,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 89.94446622255742,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 98.53188693731204,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 84.98962424557405,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 1.0,
+      "warm_decode_ratio_to_reference": 1.0
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 94.59817331912718,
+      "warm_decode_aggregate_tok_s": 93.88638280705615,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 98.7552460796624,
+          "accepted": 348,
+          "offered": 578
+        },
+        "chinese": {
+          "decode_median_tok_s": 99.09924408308117,
+          "accepted": 370,
+          "offered": 600
+        },
+        "code": {
+          "decode_median_tok_s": 87.00208145462153,
+          "accepted": 338,
+          "offered": 660
+        }
+      },
+      "decode_ratio_to_reference": 1.0447370527988373,
+      "warm_decode_ratio_to_reference": 0.9909903301915625
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 90.82630651513179,
+      "warm_decode_aggregate_tok_s": 90.98448051178771,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 89.49490655828872,
+          "accepted": 336,
+          "offered": 696
+        },
+        "chinese": {
+          "decode_median_tok_s": 97.90423799055137,
+          "accepted": 354,
+          "offered": 624
+        },
+        "code": {
+          "decode_median_tok_s": 85.897272676729,
+          "accepted": 332,
+          "offered": 712
+        }
+      },
+      "decode_ratio_to_reference": 1.003080762089478,
+      "warm_decode_ratio_to_reference": 0.9603601469020259
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.0,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 83.93763695879078,
+      "warm_decode_aggregate_tok_s": 90.25525313778027,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 82.89611231090325,
+          "accepted": 336,
+          "offered": 696
+        },
+        "chinese": {
+          "decode_median_tok_s": 95.81772004731357,
+          "accepted": 354,
+          "offered": 624
+        },
+        "code": {
+          "decode_median_tok_s": 76.91219662667704,
+          "accepted": 332,
+          "offered": 712
+        }
+      },
+      "decode_ratio_to_reference": 0.9270026722333642,
+      "warm_decode_ratio_to_reference": 0.9526630000470079
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.7,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 87.34369402412187,
+      "warm_decode_aggregate_tok_s": 87.51638083300097,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 90.01250559690769,
+          "accepted": 332,
+          "offered": 524
+        },
+        "chinese": {
+          "decode_median_tok_s": 89.50892469650555,
+          "accepted": 348,
+          "offered": 540
+        },
+        "code": {
+          "decode_median_tok_s": 82.8836346892229,
+          "accepted": 324,
+          "offered": 568
+        }
+      },
+      "decode_ratio_to_reference": 0.9646189801941351,
+      "warm_decode_ratio_to_reference": 0.9237536322716654
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.0,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 85.9387238994696,
+      "warm_decode_aggregate_tok_s": 85.95699911580691,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 84.94569519904479,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 88.45893631508093,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 84.52511052236663,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 0.949102566971779,
+      "warm_decode_ratio_to_reference": 0.9072940333754911
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.7,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 85.74251567201254,
+      "warm_decode_aggregate_tok_s": 85.16772941502634,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 85.79733142444358,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 87.6659050564848,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 83.86490786389894,
+          "accepted": 288,
+          "offered": 444
+        }
+      },
+      "decode_ratio_to_reference": 0.9469356540378808,
+      "warm_decode_ratio_to_reference": 0.8989631272525646
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.7,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 83.53319302367316,
+      "warm_decode_aggregate_tok_s": 83.51366340078947,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 85.03868124695563,
+          "accepted": 348,
+          "offered": 578
+        },
+        "chinese": {
+          "decode_median_tok_s": 88.32918941442227,
+          "accepted": 370,
+          "offered": 600
+        },
+        "code": {
+          "decode_median_tok_s": 77.92737658098736,
+          "accepted": 338,
+          "offered": 660
+        }
+      },
+      "decode_ratio_to_reference": 0.922536015531953,
+      "warm_decode_ratio_to_reference": 0.881504115875208
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.0,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 78.79832553558238,
+      "warm_decode_aggregate_tok_s": 78.18863007004398,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 77.53711875957663,
+          "accepted": 336,
+          "offered": 696
+        },
+        "chinese": {
+          "decode_median_tok_s": 84.67628701838142,
+          "accepted": 354,
+          "offered": 624
+        },
+        "code": {
+          "decode_median_tok_s": 74.8348215515847,
+          "accepted": 332,
+          "offered": 712
+        }
+      },
+      "decode_ratio_to_reference": 0.8702443979315441,
+      "warm_decode_ratio_to_reference": 0.8252972796872455
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 77.82258881705611,
+      "warm_decode_aggregate_tok_s": 77.881777894961,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 74.81486534094525,
+          "accepted": 354,
+          "offered": 936
+        },
+        "chinese": {
+          "decode_median_tok_s": 87.59176829017377,
+          "accepted": 378,
+          "offered": 792
+        },
+        "code": {
+          "decode_median_tok_s": 72.6416650048213,
+          "accepted": 352,
+          "offered": 948
+        }
+      },
+      "decode_ratio_to_reference": 0.8594684149727418,
+      "warm_decode_ratio_to_reference": 0.8220583910517082
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.0,
+      "pcie_frac": 0.0,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 71.64680364764325,
+      "warm_decode_aggregate_tok_s": 76.8245838668374,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 69.09715381851225,
+          "accepted": 354,
+          "offered": 936
+        },
+        "chinese": {
+          "decode_median_tok_s": 85.70205453304857,
+          "accepted": 378,
+          "offered": 792
+        },
+        "code": {
+          "decode_median_tok_s": 64.68385218972386,
+          "accepted": 352,
+          "offered": 948
+        }
+      },
+      "decode_ratio_to_reference": 0.7912633812999976,
+      "warm_decode_ratio_to_reference": 0.8108994878361077
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.0,
+      "pcie_frac": 0.5,
+      "samples": 6,
+      "all_outputs_exact": true,
+      "exact_outputs": 6,
+      "decode_aggregate_tok_s": 67.75294875301051,
+      "warm_decode_aggregate_tok_s": 67.68547406271482,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 65.24465418624393,
+          "accepted": 354,
+          "offered": 936
+        },
+        "chinese": {
+          "decode_median_tok_s": 76.28140672071285,
+          "accepted": 378,
+          "offered": 792
+        },
+        "code": {
+          "decode_median_tok_s": 63.12260977097196,
+          "accepted": 352,
+          "offered": 948
+        }
+      },
+      "decode_ratio_to_reference": 0.7482598607888632,
+      "warm_decode_ratio_to_reference": 0.7144342798723846
+    }
+  ],
+  "limitation": "Finite capped-output screen; eligibility requires exact reference tokens. Long outputs, stop boundaries, main-state parity and long-context restore need separate acceptance."
+}

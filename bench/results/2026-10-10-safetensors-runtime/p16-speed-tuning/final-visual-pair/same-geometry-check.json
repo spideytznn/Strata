@@ -1,0 +1,7 @@
+{
+  "status": "pass",
+  "rounds": 3,
+  "requests_per_profile": 21,
+  "all_4k_baseline_candidate_output_ids_equal": true,
+  "source": "results.json"
+}

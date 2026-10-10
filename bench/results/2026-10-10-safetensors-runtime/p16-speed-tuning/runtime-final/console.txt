@@ -1,0 +1,101 @@
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] still starting (61 s) - please wait ...
+[strata] filling the GPU's expert cache (4798 experts, 12.36 GiB of VRAM) ...
+k0 english: 48 tokens, reused=0, drafts=0/0
+k0 chinese: 48 tokens, reused=0, drafts=0/0
+k0 code: 48 tokens, reused=0, drafts=0/0
+k0 math: 4 tokens, reused=0, drafts=0/0
+k0 eos: 2 tokens, reused=0, drafts=0/0
+k0 sampled: 32 tokens, reused=16, drafts=0/0
+k0 official-english: 103 tokens, reused=16, drafts=0/0
+k0 official-chinese: 512 tokens, reused=0, drafts=0/0
+k0 official-code: 512 tokens, reused=25, drafts=0/0
+k0 limit1: 1 tokens, reused=16, drafts=0/0
+k0 limit2: 2 tokens, reused=16, drafts=0/0
+k0 limit3: 3 tokens, reused=16, drafts=0/0
+k0 limit7: 7 tokens, reused=16, drafts=0/0
+k0 limit9: 9 tokens, reused=16, drafts=0/0
+k0 A: 1 tokens, reused=0, drafts=0/0
+k0 B: 1 tokens, reused=0, drafts=0/0
+k0 A+: 8 tokens, reused=28, drafts=0/0
+k0 B-again: 1 tokens, reused=20, drafts=0/0
+k0 A+-restored: 8 tokens, reused=43, drafts=0/0
+k0 after-cancel: 16 tokens, reused=25, drafts=0/0
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] still starting (61 s) - please wait ...
+[strata] filling the GPU's expert cache (4827 experts, 12.43 GiB of VRAM) ...
+k2 english: 48 tokens, reused=0, drafts=27/40
+k2 chinese: 48 tokens, reused=0, drafts=27/40
+k2 code: 48 tokens, reused=0, drafts=30/34
+k2 math: 4 tokens, reused=0, drafts=1/4
+k2 eos: 2 tokens, reused=0, drafts=0/2
+k2 sampled: 32 tokens, reused=16, drafts=15/32
+k2 official-english: 103 tokens, reused=16, drafts=56/92
+k2 official-chinese: 512 tokens, reused=0, drafts=311/400
+k2 official-code: 512 tokens, reused=25, drafts=311/400
+k2 limit1: 1 tokens, reused=16, drafts=0/0
+k2 limit2: 2 tokens, reused=16, drafts=0/2
+k2 limit3: 3 tokens, reused=16, drafts=1/2
+k2 limit7: 7 tokens, reused=16, drafts=4/4
+k2 limit9: 9 tokens, reused=16, drafts=4/8
+k2 A: 1 tokens, reused=0, drafts=0/0
+k2 B: 1 tokens, reused=0, drafts=0/0
+k2 A+: 8 tokens, reused=28, drafts=4/6
+k2 B-again: 1 tokens, reused=20, drafts=0/0
+k2 A+-restored: 8 tokens, reused=43, drafts=4/6
+k2 after-cancel: 16 tokens, reused=25, drafts=9/12
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] filling the GPU's expert cache (4824 experts, 12.42 GiB of VRAM) ...
+[strata] almost ready ...
+k4 english: 48 tokens, reused=0, drafts=30/53
+k4 chinese: 48 tokens, reused=0, drafts=30/52
+k4 code: 48 tokens, reused=0, drafts=36/39
+k4 math: 4 tokens, reused=0, drafts=1/8
+k4 eos: 2 tokens, reused=0, drafts=0/4
+k4 sampled: 32 tokens, reused=16, drafts=19/37
+k4 official-english: 103 tokens, reused=16, drafts=65/116
+k4 official-chinese: 512 tokens, reused=0, drafts=357/509
+k4 official-code: 512 tokens, reused=25, drafts=364/497
+k4 limit1: 1 tokens, reused=16, drafts=0/0
+k4 limit2: 2 tokens, reused=16, drafts=0/2
+k4 limit3: 3 tokens, reused=16, drafts=1/2
+k4 limit7: 7 tokens, reused=16, drafts=4/6
+k4 limit9: 9 tokens, reused=16, drafts=6/6
+k4 A: 1 tokens, reused=0, drafts=0/0
+k4 B: 1 tokens, reused=0, drafts=0/0
+k4 A+: 8 tokens, reused=28, drafts=5/8
+k4 B-again: 1 tokens, reused=20, drafts=0/0
+k4 A+-restored: 8 tokens, reused=43, drafts=5/8
+k4 after-cancel: 16 tokens, reused=36, drafts=11/14
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] still starting (61 s) - please wait ...
+[strata] filling the GPU's expert cache (4828 experts, 12.43 GiB of VRAM) ...
+k6 english: 48 tokens, reused=0, drafts=31/57
+k6 chinese: 48 tokens, reused=0, drafts=30/61
+k6 code: 48 tokens, reused=0, drafts=38/46
+k6 math: 4 tokens, reused=0, drafts=1/10
+k6 eos: 2 tokens, reused=0, drafts=0/4
+k6 sampled: 32 tokens, reused=16, drafts=20/37
+k6 official-english: 103 tokens, reused=16, drafts=67/141
+k6 official-chinese: 512 tokens, reused=0, drafts=377/585
+k6 official-code: 512 tokens, reused=25, drafts=388/558
+k6 limit1: 1 tokens, reused=16, drafts=0/0
+k6 limit2: 2 tokens, reused=16, drafts=0/2
+k6 limit3: 3 tokens, reused=16, drafts=1/2
+k6 limit7: 7 tokens, reused=16, drafts=4/8
+k6 limit9: 9 tokens, reused=16, drafts=6/8
+k6 A: 1 tokens, reused=0, drafts=0/0
+k6 B: 1 tokens, reused=0, drafts=0/0
+k6 A+: 8 tokens, reused=28, drafts=6/6
+k6 B-again: 1 tokens, reused=20, drafts=0/0
+k6 A+-restored: 8 tokens, reused=43, drafts=6/6
+k6 after-cancel: 16 tokens, reused=36, drafts=12/14
+PASS: native MTP, greedy/seeded sampling, output caps, EOS, A/B/A, disk restore, cancel/resume, zero expert file reads

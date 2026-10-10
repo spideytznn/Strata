@@ -1,0 +1,198 @@
+START r1 capacity4096
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+[strata] still starting (61 s) - please wait ...
+[strata] filling the GPU's expert cache (4830 experts, 12.44 GiB of VRAM) ...
+DONE r1 capacity4096 doc8k-cold: fresh=8052 reused=0 pp=2475.9 decode=89.0 prep=0.007s ttft=3.280s
+DONE r1 capacity4096 doc8k-warm: fresh=5 reused=8047 pp=37.1 decode=103.7 prep=0.001s ttft=0.161s
+DONE r1 capacity4096 doc8k-followup-continuation: fresh=36 reused=8179 pp=98.5 decode=84.8 prep=0.001s ttft=0.384s
+DONE r1 capacity4096 doc24k-cold: fresh=24057 reused=0 pp=3324.6 decode=113.0 prep=0.030s ttft=7.285s
+DONE r1 capacity4096 doc24k-warm: fresh=5 reused=24052 pp=22.7 decode=116.4 prep=0.004s ttft=0.243s
+DONE r1 capacity4096 image8k-cold: fresh=8087 reused=0 pp=3057.4 decode=91.2 prep=0.149s ttft=2.827s
+DONE r1 capacity4096 image8k-warm: fresh=5 reused=8082 pp=40.6 decode=105.1 prep=0.006s ttft=0.162s
+START r1 capacity8192
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (41 s) - please wait ...
+DONE r1 capacity8192 doc8k-cold: fresh=8052 reused=0 pp=3183.4 decode=66.3 prep=0.008s ttft=2.588s
+DONE r1 capacity8192 doc8k-warm: fresh=5 reused=8047 pp=35.0 decode=95.8 prep=0.001s ttft=0.167s
+DONE r1 capacity8192 doc8k-followup-continuation: fresh=36 reused=8179 pp=81.6 decode=88.4 prep=0.001s ttft=0.462s
+DONE r1 capacity8192 doc24k-cold: fresh=24057 reused=0 pp=4335.6 decode=98.6 prep=0.030s ttft=5.599s
+DONE r1 capacity8192 doc24k-warm: fresh=5 reused=24052 pp=23.1 decode=104.2 prep=0.003s ttft=0.241s
+DONE r1 capacity8192 image8k-cold: fresh=8087 reused=0 pp=3770.2 decode=91.6 prep=0.141s ttft=2.321s
+DONE r1 capacity8192 image8k-warm: fresh=5 reused=8082 pp=38.3 decode=94.3 prep=0.006s ttft=0.171s
+{
+  "capacity4096": {
+    "doc8k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 2475.9386242735463,
+      "decode_tok_s": 88.96920831306039,
+      "prepare_s": 0.007440800000040326,
+      "ttft_s": 3.280207600000722,
+      "fresh_tokens": 8052,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc8k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 37.064492216456635,
+      "decode_tok_s": 103.66051182377713,
+      "prepare_s": 0.0006910999945830554,
+      "ttft_s": 0.1606924000006984,
+      "fresh_tokens": 5,
+      "reused": 8047,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc8k-followup-continuation": {
+      "samples": 1,
+      "prefill_tok_s": 98.49521203830369,
+      "decode_tok_s": 84.81876615201114,
+      "prepare_s": 0.0011379999996279366,
+      "ttft_s": 0.3837652000001981,
+      "fresh_tokens": 36,
+      "reused": 8179,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc24k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 3324.626865671642,
+      "decode_tok_s": 113.00432594685265,
+      "prepare_s": 0.02959329999430338,
+      "ttft_s": 7.285277599999972,
+      "fresh_tokens": 24057,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc24k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 22.747952684258415,
+      "decode_tok_s": 116.43773310288366,
+      "prepare_s": 0.003530100002535619,
+      "ttft_s": 0.24337950000335695,
+      "fresh_tokens": 5,
+      "reused": 24052,
+      "generated_counts": [
+        128
+      ]
+    },
+    "image8k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 3057.3513288722543,
+      "decode_tok_s": 91.15510611024071,
+      "prepare_s": 0.14853860000584973,
+      "ttft_s": 2.8270801000035135,
+      "fresh_tokens": 8087,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "image8k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 40.61738424045492,
+      "decode_tok_s": 105.0816845907561,
+      "prepare_s": 0.006182299999636598,
+      "ttft_s": 0.1624362000002293,
+      "fresh_tokens": 5,
+      "reused": 8082,
+      "generated_counts": [
+        128
+      ]
+    }
+  },
+  "capacity8192": {
+    "doc8k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 3183.36364355183,
+      "decode_tok_s": 66.32811690330604,
+      "prepare_s": 0.008324999995238613,
+      "ttft_s": 2.588176099998236,
+      "fresh_tokens": 8052,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc8k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 34.96503496503497,
+      "decode_tok_s": 95.82990192408475,
+      "prepare_s": 0.000647900000330992,
+      "ttft_s": 0.16692789999797242,
+      "fresh_tokens": 5,
+      "reused": 8047,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc8k-followup-continuation": {
+      "samples": 1,
+      "prefill_tok_s": 81.61414645205168,
+      "decode_tok_s": 88.38558210191962,
+      "prepare_s": 0.0011481000037747435,
+      "ttft_s": 0.46163869999872986,
+      "fresh_tokens": 36,
+      "reused": 8179,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc24k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 4335.610142916359,
+      "decode_tok_s": 98.5525100092393,
+      "prepare_s": 0.029554400003689807,
+      "ttft_s": 5.599241400006576,
+      "fresh_tokens": 24057,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "doc24k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 23.05209774089442,
+      "decode_tok_s": 104.2430165322909,
+      "prepare_s": 0.0029794000001857057,
+      "ttft_s": 0.24090450000221608,
+      "fresh_tokens": 5,
+      "reused": 24052,
+      "generated_counts": [
+        128
+      ]
+    },
+    "image8k-cold": {
+      "samples": 1,
+      "prefill_tok_s": 3770.16317016317,
+      "decode_tok_s": 91.57902268011733,
+      "prepare_s": 0.14066730000195093,
+      "ttft_s": 2.3205189000000246,
+      "fresh_tokens": 8087,
+      "reused": 0,
+      "generated_counts": [
+        128
+      ]
+    },
+    "image8k-warm": {
+      "samples": 1,
+      "prefill_tok_s": 38.34355828220859,
+      "decode_tok_s": 94.34657625119776,
+      "prepare_s": 0.005978600005619228,
+      "ttft_s": 0.17077000000426779,
+      "fresh_tokens": 5,
+      "reused": 8082,
+      "generated_counts": [
+        128
+      ]
+    }
+  }
+}

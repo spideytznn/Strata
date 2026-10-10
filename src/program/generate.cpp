@@ -582,6 +582,7 @@ struct Options {
     /// Plan v0.3 P6: a draft enters the verify window only while every draft before it (and itself) has at least
     /// this probability under the draft layer; 0 = always --spec-1 drafts.
     double spec_min_p = 0.0;
+    int spec_min_drafts = 0;
     /// Stop when the model emits an end-of-turn token (<|endoftext|> 248044, <|im_end|> 248046, or --eos-ids).
     bool stop_eos = false;
     std::vector<int64_t> eos_ids = {248044, 248046};
@@ -783,6 +784,7 @@ void usage() {
                  "                       writes 4; --suffix-draft lets it grow by 2, up to 8, where a repeat is likely)\n"
                  "  --spec-min-p P       how sure the draft layer must be to extend a verify window by another guess\n"
                  "                       (setup writes 0.5; --calibrate measures it on this PC, see docs/DETAILS.md)\n"
+                 "  --spec-min-drafts N  opt-in: keep the first N MTP guesses before confidence gating (serial only)\n"
                  "  --lookup-chain K     opt-in: after the MTP's drafts, add up to K prompt-lookup drafts that continue\n"
                  "                       them (the window grows to at most 8; default 0 = off)\n"
                  "  --lookup-chain-min M  the shortest context match --lookup-chain extends on (default 3)\n"
@@ -790,6 +792,7 @@ void usage() {
                  "                       (default) or one per stream (llama.cpp's MTP graph)\n"
                  "  --mtp-q4 all|proj|head  opt-in: the draft layer's projections and/or draft head as 4-bit copies\n"
                  "  --mtp-draft-vocab FILE  opt-in: the draft head's token subset (default <mtp>/draft_vocab.bin)\n"
+                 "                       native safetensors defaults to the full head; this explicit file selects a subset\n"
                  "  --control-vector-scaled FILE:SCALE[,...]  a control vector GGUF on the residual stream (llama.cpp's\n"
                  "                       format; --control-vector FILE = scale 1).  --serve: requests switch it (cvec=0|1)\n"
                  "  --control-vector-layer-range A B  the layers it follows (inclusive; default 1 .. the last)\n"
@@ -1916,6 +1919,7 @@ int strata_main(int argc, char** argv) {
         }
         else if (a == "--adapt-async") o.adapt_async = std::atoi(next("--adapt-async")) != 0 ? 1 : 0;
         else if (a == "--spec-min-p") o.spec_min_p = std::atof(next("--spec-min-p"));
+        else if (a == "--spec-min-drafts") o.spec_min_drafts = std::atoi(next("--spec-min-drafts"));
         else if (a == "--stop-eos") o.stop_eos = true;
         else if (a == "--spec-split") o.spec_split = true;
         else if (a == "--layer-split") o.layer_split = next("--layer-split");
@@ -2093,6 +2097,11 @@ int strata_main(int argc, char** argv) {
             cudaSetDevice(0);               // mapping lands on the register itself, whose sliced-pin fallback
         }                                   // (#243 / STRATA_ARENA_PIN_GIB) can already take over.
     }
+    if (o.spec_min_drafts < 0 || o.spec_min_drafts > 7 ||
+        (o.spec_min_drafts > 0 && (o.mtp.empty() || o.batch > 0 || o.pipeline_windows > 0))) {
+        std::fprintf(stderr, "strata generate: --spec-min-drafts needs 0..7 and a serial MTP configuration\n");
+        return 2;
+    }
     if (!o.safetensors.empty()) {
         auto native_default = [](const char* key,const char* value) {
             if (std::getenv(key)) return;
@@ -2134,8 +2143,8 @@ int strata_main(int argc, char** argv) {
         o.gr_fp32_activations = true;
         o.pack.clear();
         if (!o.mtp.empty()) {
-            if (o.mtp != "native" || !o.mtp_q4.empty() || !o.mtp_draft_vocab.empty()) {
-                std::fprintf(stderr,"--safetensors MTP requires --mtp native without external Q4 or draft-vocabulary overrides\n"); return 2;
+            if (o.mtp != "native" || !o.mtp_q4.empty()) {
+                std::fprintf(stderr,"--safetensors MTP requires --mtp native without external Q4 overrides\n"); return 2;
             }
             o.mtp = o.safetensors;
         }
@@ -4376,6 +4385,7 @@ int strata_main(int argc, char** argv) {
         mtp.set_hnorm_per_stream(o.mtp_hnorm_stream);   // --mtp-hnorm stream (opt-in), before any capture
         mtp.set_q4(o.mtp_q4 == "all" || o.mtp_q4 == "proj", o.mtp_q4 == "all" || o.mtp_q4 == "head");   // before load
         if (!o.mtp_draft_vocab.empty()) mtp.set_draft_vocab(o.mtp_draft_vocab);
+        mtp.set_min_drafts(o.spec_min_drafts);
         // the draft layer is the canonical model's MTP head (512 experts) even when the target is pruned,
         // so it always sees the canonical geometry; `static` because MtpDrafter keeps a reference
         // with a layer split across GPUs the drafter reads the last stage's residual: it lives on that device
@@ -4932,6 +4942,10 @@ int strata_main(int argc, char** argv) {
         int fake_fails = std::getenv("STRATA_TEST_CACHE_FAIL") ? std::atoi(std::getenv("STRATA_TEST_CACHE_FAIL")) : 0;
         int failed = 0;
         int zero_reads = 0;
+        // Native prefill-first also promises space for the head still allocated by bind().
+        // Rechecking only the operator reserve after touching slots loses that budget under WDDM.
+        const int64_t late_mtp_bind = prefill_first && !o.mtp.empty() && native_head.loaded()
+            ? (int64_t) mtp.bind_bytes(native_head.row_bytes(), n_vocab) : 0;
         for (int attempt = 0;; ++attempt) {
             bool ok = false;
             if (fake_fails > 0) {
@@ -4973,7 +4987,7 @@ int strata_main(int argc, char** argv) {
             cudaDeviceSynchronize();
             size_t free_b = 0, total_b = 0;
             free_b = strata::core::device_free_bytes(); (void) total_b;
-            const int64_t want = ((int64_t) o.vram_reserve_mib << 20) + pipe_first;
+            const int64_t want = ((int64_t) o.vram_reserve_mib << 20) + pipe_first + late_mtp_bind;
             if ((int64_t) free_b >= want - (64ll << 20)) break;
             // short by (want - free); a figure of 0 only says "at least": the first two such reads give back 1 GiB
             // each (under WDDM the free figure read before the allocation runs ~0.7 GiB high), later ones a quarter
@@ -4983,6 +4997,9 @@ int strata_main(int argc, char** argv) {
             const int64_t keep_bytes = xcache.bytes() - give;
             std::fprintf(stderr, "strata generate: only %lld MiB free once the slots are written (reserve %d MiB); "
                                  "shrinking the expert cache\n", (long long) (free_b >> 20), o.vram_reserve_mib);
+            if (late_mtp_bind > 0)
+                std::fprintf(stderr, "safetensors: written-cache budget also keeps %lld MiB for the late MTP head\n",
+                             (long long) ((late_mtp_bind + (1 << 20) - 1) >> 20));
             xcache.close();
             if (!shrink_to(keep_bytes)) break;
         }
@@ -8790,6 +8807,42 @@ int strata_main(int argc, char** argv) {
         {
             // what is left once everything is allocated: under WDDM a GPU filled to the brim does not fail, it pages -
             // and a page-in while the verify graph spins on a host flag stalls the request for good
+            // Opt-in: a temporary cache allocation may have displaced immutable model weights under WDDM.
+            // Read them back with the existing startup guard as disposable scratch, after cache sizing settles.
+            // No forward pass, weight write, session mutation or extra device allocation is involved.
+            const char* warm_env = std::getenv("STRATA_NATIVE_WARM_WEIGHTS");
+            if (prefill_first && warm_env != nullptr && std::strcmp(warm_env, "1") == 0) {
+                const auto warm_start = Clock::now();
+                auto read_weights = [&](const void* source, uint64_t bytes) {
+                    for (uint64_t off = 0; off < bytes;) {
+                        const size_t count = (size_t) std::min<uint64_t>(kPrefillStartupGuard, bytes - off);
+                        const cudaError_t status = cudaMemcpyAsync(prefill_startup_guard.get(),
+                            static_cast<const uint8_t*>(source) + off, count, cudaMemcpyDeviceToDevice, main_stream);
+                        if (status != cudaSuccess) {
+                            err = std::string("startup weight read: ") + cudaGetErrorString(status);
+                            return false;
+                        }
+                        off += count;
+                    }
+                    return true;
+                };
+                auto finish_reads = [&]() {
+                    const cudaError_t status = cudaStreamSynchronize(main_stream);
+                    if (status == cudaSuccess) return true;
+                    err = std::string("finishing startup weight reads: ") + cudaGetErrorString(status);
+                    return false;
+                };
+                if (!read_weights(arena, pool_bytes) ||
+                    (native_head.loaded() && !read_weights(native_head.weights(), native_head.weight_bytes())) ||
+                    !finish_reads() ||
+                    (!o.mtp.empty() && !mtp.warm_native_weights(prefill_startup_guard.get(), (size_t) kPrefillStartupGuard, err))) {
+                    std::fprintf(stderr, "safetensors: cannot warm original GPU weights before READY: %s\n", err.c_str());
+                    return 1;
+                }
+                std::fprintf(stderr, "safetensors: startup immutable weight warm completed in %.1f ms using the "
+                                     "512 MiB guard; no forward pass or expert source read\n",
+                             std::chrono::duration<double, std::milli>(Clock::now() - warm_start).count());
+            }
             if (prefill_first) prefill_startup_guard.reset();
             size_t free_b = 0, total_b = 0;
             cudaMemGetInfo(&free_b, &total_b);
@@ -11451,7 +11504,7 @@ int strata_main(int argc, char** argv) {
                 int T = use_mtp ? S_mtp : 1;   // no --mtp: one token a round unless a lookup draft fires
                 if (use_mtp && req_spec_min_p > 0.0) {
                     T = 1;
-                    while (T < S_mtp && dprob[(size_t) T - 1] >= (float) req_spec_min_p) ++T;
+                    while (T < S_mtp && (T <= o.spec_min_drafts || dprob[(size_t) T - 1] >= (float) req_spec_min_p)) ++T;
                 }
                 if (first_window) T = 1;
                 // a repeat of earlier context (prompt lookup) where the MTP's own first guess agrees: the policy takes it
@@ -12717,7 +12770,7 @@ int strata_main(int argc, char** argv) {
             int T = S_mtp;
             if (use_mtp && o.spec_min_p > 0.0) {
                 T = 1;
-                while (T < S_mtp && dprob[(size_t) T - 1] >= (float) o.spec_min_p) ++T;
+                while (T < S_mtp && (T <= o.spec_min_drafts || dprob[(size_t) T - 1] >= (float) o.spec_min_p)) ++T;
             }
             if (spec_stats) dprob_used = dprob;
             if (first_window) T = 1;

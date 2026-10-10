@@ -1,0 +1,96 @@
+{
+  "status": "pass",
+  "base_commit": "f72d339df5c2f247ea73ab85f7eba442002d0867",
+  "hardware": "RTX 5090 32 GB / Ryzen 9950X3D / 96 GB / Windows / CUDA 13",
+  "compiled_source": {
+    "CMakeLists.txt": "320430c5fdd60374797022e51334caf78960a322af81028d8f2e4b1f3e09f1eb",
+    "include/strata/core/mtp.hpp": "3a891541866f2e55a6ef582358c426c2e6f72ec68b4b573228747e46e3e7531b",
+    "include/strata/core/native_draft_vocab.hpp": "0fe7fdb62189bf899c84268f77a2c191c2fe90ad595207d3976374bab19c0c6f",
+    "src/core/mtp.cpp": "719fae4e496b90e6719f6b0f1a9998f0c228ca5a5aac57e6298d47a1fecfa9d3",
+    "src/program/generate.cpp": "3319384425137431bf321f051bc6cce0a68cb6e1a20b8f2162495ad0235170bf",
+    "src/program/native_draft_vocab_test.cpp": "e0eb3e960a97bc8181242349806b01d8fd5a1b14900d62cabb11b7177b34d36e"
+  },
+  "tool_sha256": {
+    "tools/native_archive_evidence.py": "f024786fdadce6a04f8870ccdbc8ffd2af7bb9dcfa13992869ee9dbfe430f4e2",
+    "tools/native_baseline_compare.py": "98d3fc0fe3b03100b6e69b776d1c367594f9f20b46805c9f77df6daaac87977f",
+    "tools/native_cli_bench.py": "6ef4905f536895184662ae85c7a44b887ca267ffb08e37f8311ccc4af92243f5",
+    "tools/native_config.py": "b7a15cdbbb62c742166329ff2c32908ac8a42693512fa5df509b4740aa6ce744",
+    "tools/native_config_pair.py": "28d2f84bda9a07dbde817bd387ef01f091e5b4a3f9fa1a86d900a6b82864e9a4",
+    "tools/native_container_parity.py": "83ad488beb164ffc660964a9cfa80290d07c484540c470004cfd26caeea4a28e",
+    "tools/native_draft_vocab.py": "969823797be1bead617864583e52854515e6d4aff8623fc7bc5503b8ee17811f",
+    "tools/native_expert_provider_parity.py": "1d461c10ec1876f8096cfa5ea2ea2e0ea19bffaafe68f1e77b9c7e391a63b2af",
+    "tools/native_http_acceptance.py": "2fcbb7c801ba81411e610130c83a55fcdefa23d587fb9a5f465773fbabf0518c",
+    "tools/native_operator_acceptance.py": "543be0493644314b4269845c4d48f63d6030b1627fd08e6303a1efdfac6347db",
+    "tools/native_operator_bench.py": "cd6a0e948f2d63fc3beee00375e0035279e57ca303b1a80d8d803aacfa171db9",
+    "tools/native_operator_state_check.py": "a44d2eaeeb4d33195999e06cb9a0122152a935147503fe33dd046a39eae1d9c1",
+    "tools/native_operator_summary.py": "49f5c751f8cd083853fa3ccb9895a29c0951f6d4d732758d9b9cee4cc92d2d64",
+    "tools/native_path_matrix.py": "a0a9c6db02fafc33bb2fccf2a7d80149cae7c7618ddc0bb36baa23ab2b6d0127",
+    "tools/native_performance_pair_summary.py": "7806499fcd4fb0639a86f9bdff4d3eb3a9a189892d8e9e375f917938b9ce7c21",
+    "tools/native_prefill_quality.py": "3b7b30062156843855d73d8611394af95239d8b97e31554d90177ca8bc1ff14b",
+    "tools/native_quality_suite.py": "fd021307f0a02ebdf0104121aa5402250ae1d48114b3bc5d4b5fc18ab027179a",
+    "tools/native_runtime_acceptance.py": "ac1c59c5077a76343acfdd5214f64237b413bf1d6f893e27ee909c2562efc183",
+    "tools/native_speculation_bench.py": "5411a5186d63a6fb066a79e28a08e5e160b2347b189d6d2231503487c8b4657d",
+    "tools/native_speculation_summary.py": "29b4575328d1bf7249537d839fa27086f791ffd4a59605389702fb7ba0b64b26",
+    "tools/native_summarize_baseline.py": "b0b14c2217ae6173af624b38c530cf5fb83b21dcfc000732e8efc4ece188fc9b",
+    "tools/native_telemetry.py": "fe181e501c02c4348faccb1413ca8fad5d550b54da86e3e5b3dc86f66c79dc41",
+    "tools/native_vision_smoke.py": "c407d88098413feb5683f3647b0999109ea3be80f731e3c83d3e3f2c3681a4dc",
+    "tools/native_visual_performance.py": "f250e9a80f95680ab88f86106e0ca783280aa3865e29154c839c57e00cb3441d",
+    "tools/native_visual_performance_summary.py": "66a41c38bd1a10c7ba3600c97df16fc94c0a024bcd28ec30624d33794fcb49ac",
+    "tools/native_visual_screen_summary.py": "efc82d87210bb9b3d6ee6d3eb2c3810c18084d8d3330b6f8bb9e083a36d9efac"
+  },
+  "desktop_config": "config/native/rtx5090-262k-fast.json",
+  "desktop_config_sha256": "037d23248da698282b59660d73f235dd4b670849cf926137d40390fb58876a8a",
+  "binary_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+  "stable_binary_sha256": "794241315ca5fdd54c8b90c9a4fdca61bf1e465f41d7bbaf7475d5f03a6ce6d0",
+  "stable_config_preserved": true,
+  "desktop_wrapper_preserved": true,
+  "selected_profile": {
+    "prefill": 4096,
+    "context": 262144,
+    "kv": "int8",
+    "maximum_mtp_drafts": 4,
+    "spec_min_p": 0.7,
+    "spec_min_drafts": 2,
+    "draft_head": "full original BF16",
+    "mtp_projections": "original BF16",
+    "reserve_mib": 1024
+  },
+  "acceptance": {
+    "visual_repeated_requests": 63,
+    "same_geometry_corresponding_outputs_exact": 21,
+    "runtime_completed_requests": 80,
+    "runtime_cancelled_requests": 4,
+    "capacity_completed_requests": 8,
+    "capacity_mapped_cells": 262144,
+    "resident_content_audits": 19,
+    "expert_and_mtp_source_reads": 0
+  },
+  "measurement": {
+    "prefill_24k_median_before_after": [
+      2968.09455658096,
+      3331.0256019717253
+    ],
+    "prefill_image_median_before_after": [
+      2741.35593220339,
+      3088.9992360580595
+    ],
+    "prefill_first_8k_median_before_after": [
+      2688.121786739667,
+      2558.220810166799
+    ],
+    "long_warm_aggregate_decode_before_after": [
+      91.93434714493276,
+      100.81783215406226
+    ]
+  },
+  "limits": [
+    "First 8K cold text prefill regresses 4.8%; no universal speedup",
+    "2048-token long-answer decode is a single-engine screen, not repeated estimate",
+    "finite inputs and seeds; no BF16 oracle or general accuracy claim",
+    "262K capacity fixture is repeated document, not throughput/retrieval quality",
+    "full 262K multiple-checkpoint RAM parking can exceed 4096 MiB budget",
+    "HIP and SYCL toolchains unavailable; CUDA SM120 validated"
+  ],
+  "large_test_snapshot_payloads": "SHA-256 and sizes retained; six files removed after acceptance",
+  "http_server_started": false
+}

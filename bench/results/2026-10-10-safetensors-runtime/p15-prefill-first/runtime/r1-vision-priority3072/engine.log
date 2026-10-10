@@ -1,0 +1,211 @@
+[strata] 2026-10-10 21:50:00 engine started: G:\Strata\Strata-Safetensors\build-native-engine\strata-efficiency14.exe --serve --model D:\迅雷下载\Qwen3.8-flash-next-nvfp4 --max-context 262144 --prefill 4096 --expert-cache auto --vram-reserve-mib 3072 --spec 3 --suffix-draft 0 --pcie-frac 0.25 --pcie-mode kernel --kv int8 --no-prefill-borrow --adapt-every 4 --adapt-swaps 96 --conversation-cache-mib 4096 --conversation-cache-slots 4 --prompt-cache 6 --stats --check-logits --expert-profile G:\Strata\Strata-Safetensors\data\expert-profile.bin --mtp native --mtp-max-t 3 --spec-min-p 0 --pool-tasks 40 --vision
+strata generate: native pack:  experts (largest blob 2.76 MB), token embedding BF16 in mapped host memory (1212 MiB, 1.7 s)
+strata generate: 7016 MiB of weights loaded from  in 9.9 s (1 canonical tensors skipped: served natively)
+strata generate: GPU 0: NVIDIA GeForce RTX 5090, compute capability 12.0
+strata generate: the SSD is kept awake while rows are read: one page of the table after 100 ms without a read, until 60 s after the last request (STRATA_SSD_KEEPALIVE=0 turns it off)
+strata generate: profile G:\Strata\Strata-Safetensors\data\expert-profile.bin: 24576 ranked pairs, built for 24576 slots
+safetensors MTP: 29 dense tensors, 512 original FP8 experts; 2573.1 MiB, no requantization
+strata mtp: original safetensors draft, 2620 MiB total VRAM, startup 2.41 s
+strata generate: native BF16 head, 1271398400 bytes, in 1.4 s
+safetensors: allocating 63.282 GiB expert RAM (CUDA pinned); startup batch=64 workers=4
+safetensors: expert RAM allocated and locked in 5.11 s
+safetensors: resident experts 1/48 layers (elapsed 5.76 s, read 0.55 s, pack 0.07 s)
+safetensors: resident experts 2/48 layers (elapsed 6.22 s, read 0.95 s, pack 0.14 s)
+safetensors: resident experts 3/48 layers (elapsed 6.69 s, read 1.34 s, pack 0.20 s)
+safetensors: resident experts 4/48 layers (elapsed 7.17 s, read 1.76 s, pack 0.27 s)
+safetensors: resident experts 5/48 layers (elapsed 7.60 s, read 2.13 s, pack 0.33 s)
+safetensors: resident experts 6/48 layers (elapsed 8.06 s, read 2.52 s, pack 0.40 s)
+safetensors: resident experts 7/48 layers (elapsed 8.53 s, read 2.92 s, pack 0.46 s)
+safetensors: resident experts 8/48 layers (elapsed 8.99 s, read 3.32 s, pack 0.53 s)
+safetensors: resident experts 9/48 layers (elapsed 9.41 s, read 3.67 s, pack 0.59 s)
+safetensors: resident experts 10/48 layers (elapsed 9.87 s, read 4.06 s, pack 0.66 s)
+safetensors: resident experts 11/48 layers (elapsed 10.38 s, read 4.52 s, pack 0.72 s)
+safetensors: resident experts 12/48 layers (elapsed 10.90 s, read 4.96 s, pack 0.78 s)
+safetensors: resident experts 13/48 layers (elapsed 11.37 s, read 5.37 s, pack 0.85 s)
+safetensors: resident experts 14/48 layers (elapsed 11.81 s, read 5.75 s, pack 0.91 s)
+safetensors: resident experts 15/48 layers (elapsed 12.24 s, read 6.11 s, pack 0.98 s)
+safetensors: resident experts 16/48 layers (elapsed 12.69 s, read 6.50 s, pack 1.04 s)
+safetensors: resident experts 17/48 layers (elapsed 13.14 s, read 6.88 s, pack 1.10 s)
+safetensors: resident experts 18/48 layers (elapsed 13.60 s, read 7.28 s, pack 1.17 s)
+safetensors: resident experts 19/48 layers (elapsed 14.04 s, read 7.65 s, pack 1.23 s)
+safetensors: resident experts 20/48 layers (elapsed 14.50 s, read 8.05 s, pack 1.30 s)
+safetensors: resident experts 21/48 layers (elapsed 14.96 s, read 8.45 s, pack 1.36 s)
+safetensors: resident experts 22/48 layers (elapsed 15.41 s, read 8.83 s, pack 1.42 s)
+safetensors: resident experts 23/48 layers (elapsed 15.90 s, read 9.25 s, pack 1.49 s)
+safetensors: resident experts 24/48 layers (elapsed 16.40 s, read 9.68 s, pack 1.55 s)
+safetensors: resident experts 25/48 layers (elapsed 16.91 s, read 10.13 s, pack 1.62 s)
+safetensors: resident experts 26/48 layers (elapsed 17.36 s, read 10.52 s, pack 1.68 s)
+safetensors: resident experts 27/48 layers (elapsed 17.80 s, read 10.89 s, pack 1.75 s)
+safetensors: resident experts 28/48 layers (elapsed 18.23 s, read 11.26 s, pack 1.81 s)
+safetensors: resident experts 29/48 layers (elapsed 18.70 s, read 11.67 s, pack 1.87 s)
+safetensors: resident experts 30/48 layers (elapsed 19.16 s, read 12.05 s, pack 1.94 s)
+safetensors: resident experts 31/48 layers (elapsed 19.59 s, read 12.42 s, pack 2.00 s)
+safetensors: resident experts 32/48 layers (elapsed 20.04 s, read 12.81 s, pack 2.07 s)
+safetensors: resident experts 33/48 layers (elapsed 20.50 s, read 13.20 s, pack 2.13 s)
+safetensors: resident experts 34/48 layers (elapsed 20.95 s, read 13.58 s, pack 2.20 s)
+safetensors: resident experts 35/48 layers (elapsed 21.40 s, read 13.97 s, pack 2.26 s)
+safetensors: resident experts 36/48 layers (elapsed 21.88 s, read 14.38 s, pack 2.32 s)
+safetensors: resident experts 37/48 layers (elapsed 22.36 s, read 14.80 s, pack 2.39 s)
+safetensors: resident experts 38/48 layers (elapsed 22.94 s, read 15.32 s, pack 2.45 s)
+safetensors: resident experts 39/48 layers (elapsed 23.40 s, read 15.71 s, pack 2.52 s)
+safetensors: resident experts 40/48 layers (elapsed 24.02 s, read 16.27 s, pack 2.58 s)
+safetensors: resident experts 41/48 layers (elapsed 24.54 s, read 16.72 s, pack 2.65 s)
+safetensors: resident experts 42/48 layers (elapsed 25.00 s, read 17.11 s, pack 2.71 s)
+safetensors: resident experts 43/48 layers (elapsed 25.45 s, read 17.49 s, pack 2.78 s)
+safetensors: resident experts 44/48 layers (elapsed 25.89 s, read 17.87 s, pack 2.84 s)
+safetensors: resident experts 45/48 layers (elapsed 26.36 s, read 18.27 s, pack 2.91 s)
+safetensors: resident experts 46/48 layers (elapsed 26.81 s, read 18.66 s, pack 2.97 s)
+safetensors: resident experts 47/48 layers (elapsed 27.23 s, read 19.01 s, pack 3.04 s)
+safetensors: resident experts 48/48 layers (elapsed 27.68 s, read 19.40 s, pack 3.10 s)
+safetensors: 63.282 GiB physically page-locked and GPU-mapped via cudaHostAlloc, 0.0 MiB GPU staging
+safetensors: startup weight handles closed; all resident payload reads sealed
+safetensors: expert startup complete: 27.68 s, batch=64 workers=4 scratch_peak_mib=168.75 read_s=19.40 pack_s=3.10 source_read_calls=29980
+safetensors: all expert weights in locked RAM; expert source reads sealed
+strata generate: CPU pool tasks/phase: 40 (capped by rows), participating threads: 16
+strata generate: 15 pool workers on logical processors 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30, the host thread on 0 (draining too) (--host-core first)
+strata prefill allocation: requested=4096 effective=4096 capacity=4096 workspace_bytes=2906123008 free_vram_bytes=16428040192
+safetensors: prefill-first: 4096 rows allocated and touched before expert cache sizing; 512 MiB startup headroom held; experts use the remaining budget
+strata generate: expert cache auto: 15.30 GiB free, 3072 MiB reserved (+2 MiB for the draft head) -> 4751 slots
+strata generate: only 1304 MiB free once the slots are written (reserve 3072 MiB); shrinking the expert cache
+strata generate: expert cache 4055 slots, 10.44 GiB of VRAM; policy is
+strata generate: native NVFP4 CPU/GPU FP32 canonical arithmetic enabled
+                 (32-lane reduction and double exp rounded to float).
+                 PROFILE, ranked by routing frequency, no eviction.
+strata generate: the profile fill asks for 0 pairs ahead (STRATA_FILL_AHEAD)
+strata generate: pre-filled 4055 of 4055 slots from the profile in 0.3 s (39576 MB/s); slot 0 verified
+strata generate: R4 hit path ON - resident experts are computed on the GPU
+strata generate: 15 expert-pool workers + the host thread
+strata generate: session is up (engine 0.1.41)
+strata generate: token graph hit path: 4055 resident experts, decided on the device
+strata generate: resident RAM mode: 63.28 GiB of experts in RAM (page-locked), 4055 in the GPU cache; adaptive swaps exchange them with the GPU cache (no file reads)
+strata serve: the prompt path allocates its own buffers (dedicated workspace: --no-prefill-borrow)
+strata serve prefill selection: configured=4096 selected=4096 auto=0 reduced=0
+strata generate: elastic K/V: 16384 of 262144 cells in VRAM (0.25 of 3.35 GiB); the expert cache (4055 slots) gives the K/V room below slot 4055 as the context grows
+strata hc: CUDA0: the hyper-connection read runs as staged (the norm per token and stream, the down projection's activations staged ahead by cp.async); checked bit for bit against the plain read on this card (STRATA_HC_SPLIT=1 or 0 for the earlier ones)
+strata verify: window up to 3 tokens, 355.1 MiB of device buffers
+strata serve: STRATA_ADAPT_FETCH is off (the resident RAM mode)
+strata serve: the adaptive tier's evictions reach the device's table before the next window (STRATA_ADAPT_EVICT_SYNC=0: when its copies land)
+safetensors: prefill-first ready: configured=4096 allocated=4096; startup headroom released; 3286 MiB free
+strata serve: 3286 MiB of VRAM free with everything loaded
+safetensors: engine ready after 54.78 s from main entry
+strata serve prefill segment: start=0 end=8047 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=65536 pages=42338 total_ms=114.804 call_lock_ms=0.000 lookup_ms=1.177 plan_ms=3.495 group_wait_ms=102.697 cache_insert_ms=4.669 callback_ms=2.425 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=117.233 raw_resize_ms=2.283 host_available_mib=16188
+strata ple: chunk 0: read started 0.5 ms into the run, layer 1 reached at 264.6, waited 0.0 ms
+strata ple batch phases: rows=63216 misses=48973 pages=43549 total_ms=127.793 call_lock_ms=0.000 lookup_ms=1.407 plan_ms=2.112 group_wait_ms=118.225 cache_insert_ms=3.456 callback_ms=2.384 reader_drain_ms=0.000
+strata ple gather phases: tokens=3951 rows=63216 total_ms=127.826 raw_resize_ms=0.003 host_available_mib=16065
+strata: the hyper-connection read v4 (programmatic dependent launch)
+strata prefill callback: start=0 rows=4096 draft_path=token draft_ms=124.178 checkpoint_ms=0.002 total_ms=124.227
+strata prefill chunk: start=0 rows=4096 main_and_wait_ms=1451.553 callback_ms=124.415 total_ms=1575.968
+strata ple: chunk 4096: read started 264.8 ms into the run, layer 1 reached at 1612.4, waited 0.0 ms
+strata prefill callback: start=4096 rows=3951 draft_path=token draft_ms=115.905 checkpoint_ms=0.002 total_ms=115.960
+strata prefill chunk: start=4096 rows=3951 main_and_wait_ms=1206.857 callback_ms=115.975 total_ms=1322.831
+strata prefill executed: tokens=8047 max_chunk=4096 capacity=4096 start=0
+strata serve prefill segment: start=8047 end=8051 root=0 turn=0 message=0 pin=0 reread=0
+strata verify: capturing the 3-token window (3214 MiB of VRAM free)
+strata verify: captured the 3-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (3210 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata serve: prompt 8052 tokens = 0 reused + 8052 read in 3018 ms (2668.0 tok/s), 128 generated in 1562 ms (81.9 tok/s), drafts accepted 75 of 104, 1 checkpoints
+strata serve: decode expert cache hit rate: 67.0% (47148 hits / 70403 lookups); 4957 more read by the GPU over PCIe or from another GPU (6.6% of all 75360 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=1152 promoted_payload_bytes=3185068032 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 131328 rows, 11.4% row-cache hits, 87727 SSD reads (359.6 MB), read p50 238 us p99 9179 us, blocked 240.977 ms total (submit 1.463 ms), cache 84709/1048576 rows, SSD kept awake by 29 reads (slowest 6.2 ms)
+strata serve: expert tiers: GPU 47148 hits this request; since the start RAM 70632 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 8179 tokens in 96.8 ms; parked=1 bytes=361055280 evictions=0 snapshot_bytes=361055280 reused_kv_bytes=0
+strata serve prefill segment: start=8047 end=8051 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 8052 tokens = 8047 reused + 5 read in 152 ms (32.9 tok/s), 128 generated in 1336 ms (95.8 tok/s), drafts accepted 75 of 104, 1 checkpoints
+strata serve: decode expert cache hit rate: 80.3% (58090 hits / 72384 lookups); 2976 more read by the GPU over PCIe or from another GPU (3.9% of all 75360 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=2457 promoted_payload_bytes=6793152912 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 133904 rows, 13.1% row-cache hits, 87727 SSD reads (359.6 MB), read p50 238 us p99 9179 us, blocked 240.991 ms total (submit 1.463 ms), cache 84709/1048576 rows, SSD kept awake by 43 reads (slowest 6.2 ms)
+strata serve: expert tiers: GPU 58090 hits this request; since the start RAM 88032 blobs, files 0 blobs 0.0 MB read
+strata serve prefill segment: start=8179 end=8210 root=0 turn=1 message=0 pin=0 reread=0
+strata serve prefill segment: start=8210 end=8214 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 8215 tokens = 8179 reused + 36 read in 377 ms (95.4 tok/s), 128 generated in 1622 ms (78.9 tok/s), drafts accepted 65 of 124, 2 checkpoints
+strata serve: decode expert cache hit rate: 76.5% (65465 hits / 85621 lookups); 4139 more read by the GPU over PCIe or from another GPU (4.6% of all 89760 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=3879 promoted_payload_bytes=10724721264 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 137456 rows, 13.7% row-cache hits, 90062 SSD reads (369.5 MB), read p50 236 us p99 9179 us, blocked 243.136 ms total (submit 3.356 ms), cache 87044/1048576 rows, SSD kept awake by 44 reads (slowest 6.2 ms)
+strata serve: expert tiers: GPU 65465 hits this request; since the start RAM 116085 blobs, files 0 blobs 0.0 MB read
+strata: K/V grown to 24576 cells (0.36 GiB); the expert cache gave 40 slots for it, 0 hotter experts moved to colder ones' slots (4015 of 4055 slots hold experts)
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=0
+strata serve: conversation cache: parked 8342 tokens in 86.6 ms; parked=1 bytes=481655428 evictions=0 snapshot_bytes=481655428 reused_kv_bytes=0
+strata serve prefill segment: start=0 end=24052 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=40 pages=40 total_ms=4.402 call_lock_ms=0.000 lookup_ms=1.950 plan_ms=0.005 group_wait_ms=0.299 cache_insert_ms=0.006 callback_ms=2.117 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=4.438 raw_resize_ms=0.004 host_available_mib=15550
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 16.1, waited 0.0 ms
+strata ple batch phases: rows=65536 misses=2064 pages=2079 total_ms=6.043 call_lock_ms=0.000 lookup_ms=2.610 plan_ms=0.100 group_wait_ms=1.052 cache_insert_ms=0.182 callback_ms=2.070 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=6.064 raw_resize_ms=0.005 host_available_mib=15549
+strata prefill callback: start=0 rows=4096 draft_path=token draft_ms=120.635 checkpoint_ms=0.002 total_ms=120.682
+strata prefill chunk: start=0 rows=4096 main_and_wait_ms=1198.059 callback_ms=120.697 total_ms=1318.756
+strata ple: chunk 4096: read started 16.3 ms into the run, layer 1 reached at 1334.6, waited 0.0 ms
+strata ple batch phases: rows=65536 misses=42524 pages=38325 total_ms=43.933 call_lock_ms=0.000 lookup_ms=1.823 plan_ms=1.744 group_wait_ms=35.923 cache_insert_ms=2.134 callback_ms=2.191 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=43.965 raw_resize_ms=0.004 host_available_mib=15531
+strata prefill callback: start=4096 rows=4096 draft_path=token draft_ms=112.692 checkpoint_ms=0.002 total_ms=112.742
+strata prefill chunk: start=4096 rows=4096 main_and_wait_ms=1201.339 callback_ms=112.758 total_ms=1314.097
+strata ple: chunk 8192: read started 1334.6 ms into the run, layer 1 reached at 2648.9, waited 0.0 ms
+strata ple batch phases: rows=65536 misses=45328 pages=42626 total_ms=97.307 call_lock_ms=0.000 lookup_ms=1.678 plan_ms=1.830 group_wait_ms=89.220 cache_insert_ms=2.235 callback_ms=2.219 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=97.339 raw_resize_ms=0.004 host_available_mib=15523
+strata prefill callback: start=8192 rows=4096 draft_path=token draft_ms=112.630 checkpoint_ms=0.002 total_ms=112.680
+strata prefill chunk: start=8192 rows=4096 main_and_wait_ms=1197.284 callback_ms=112.695 total_ms=1309.979
+strata ple: chunk 12288: read started 2649.0 ms into the run, layer 1 reached at 3958.8, waited 0.0 ms
+strata ple batch phases: rows=65536 misses=47121 pages=43615 total_ms=45.788 call_lock_ms=0.000 lookup_ms=2.114 plan_ms=1.963 group_wait_ms=37.262 cache_insert_ms=1.989 callback_ms=2.332 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=45.820 raw_resize_ms=0.005 host_available_mib=15529
+strata prefill callback: start=12288 rows=4096 draft_path=token draft_ms=110.171 checkpoint_ms=18.507 total_ms=128.706
+strata prefill chunk: start=12288 rows=4096 main_and_wait_ms=1197.645 callback_ms=128.723 total_ms=1326.368
+strata ple: chunk 16384: read started 3959.0 ms into the run, layer 1 reached at 5285.2, waited 0.0 ms
+strata ple batch phases: rows=57152 misses=38662 pages=36519 total_ms=38.275 call_lock_ms=0.000 lookup_ms=1.645 plan_ms=1.665 group_wait_ms=31.236 cache_insert_ms=1.729 callback_ms=1.885 reader_drain_ms=0.000
+strata ple gather phases: tokens=3572 rows=57152 total_ms=38.302 raw_resize_ms=0.004 host_available_mib=15395
+strata prefill callback: start=16384 rows=4096 draft_path=token draft_ms=109.903 checkpoint_ms=0.002 total_ms=109.953
+strata prefill chunk: start=16384 rows=4096 main_and_wait_ms=1198.949 callback_ms=115.927 total_ms=1314.877
+strata ple: chunk 20480: read started 5285.3 ms into the run, layer 1 reached at 6598.8, waited 0.0 ms
+strata prefill callback: start=20480 rows=3572 draft_path=token draft_ms=96.115 checkpoint_ms=0.002 total_ms=96.165
+strata prefill chunk: start=20480 rows=3572 main_and_wait_ms=1198.108 callback_ms=96.179 total_ms=1294.287
+strata prefill executed: tokens=24052 max_chunk=4096 capacity=4096 start=0
+strata serve prefill segment: start=24052 end=24056 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 24057 tokens = 0 reused + 24057 read in 8075 ms (2979.2 tok/s), 128 generated in 1240 ms (103.2 tok/s), drafts accepted 81 of 92, 2 checkpoints
+strata serve: decode expert cache hit rate: 77.4% (49311 hits / 63687 lookups); 3033 more read by the GPU over PCIe or from another GPU (4.5% of all 66720 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=4985 promoted_payload_bytes=13782607760 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 524576 rows, 43.7% row-cache hits, 254274 SSD reads (1042.3 MB), read p50 220 us p99 420 us, blocked 462.993 ms total (submit 4.264 ms), cache 245384/1048576 rows, SSD kept awake by 116 reads (slowest 64.7 ms)
+strata serve: expert tiers: GPU 49311 hits this request; since the start RAM 256422 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 24184 tokens in 189.3 ms; parked=2 bytes=1205258844 evictions=0 snapshot_bytes=723603416 reused_kv_bytes=0
+strata serve prefill segment: start=24052 end=24056 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 24057 tokens = 24052 reused + 5 read in 252 ms (19.8 tok/s), 128 generated in 1150 ms (111.3 tok/s), drafts accepted 81 of 92, 2 checkpoints
+strata serve: decode expert cache hit rate: 81.5% (52390 hits / 64285 lookups); 2435 more read by the GPU over PCIe or from another GPU (3.6% of all 66720 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=5878 promoted_payload_bytes=16251588448 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 526864 rows, 43.9% row-cache hits, 254274 SSD reads (1042.3 MB), read p50 220 us p99 420 us, blocked 463.006 ms total (submit 4.264 ms), cache 245384/1048576 rows, SSD kept awake by 129 reads (slowest 64.7 ms)
+strata serve: expert tiers: GPU 52390 hits this request; since the start RAM 270845 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: dropped 1 superseded copy of this conversation; parked=1
+strata serve: conversation cache: parked 24184 tokens in 109.0 ms; parked=2 bytes=1205258844 evictions=0 snapshot_bytes=723603416 reused_kv_bytes=0
+strata serve prefill segment: start=0 end=8082 root=0 turn=1 message=0 pin=0 reread=0
+strata ple batch phases: rows=65536 misses=16612 pages=273 total_ms=6.755 call_lock_ms=0.000 lookup_ms=1.533 plan_ms=0.206 group_wait_ms=2.363 cache_insert_ms=0.100 callback_ms=2.528 reader_drain_ms=0.000
+strata ple gather phases: tokens=4096 rows=65536 total_ms=6.791 raw_resize_ms=0.004 host_available_mib=14813
+strata ple: chunk 0: read started 67.7 ms into the run, layer 1 reached at 83.6, waited 0.0 ms
+strata ple batch phases: rows=63776 misses=43 pages=42 total_ms=5.528 call_lock_ms=0.000 lookup_ms=2.801 plan_ms=0.004 group_wait_ms=0.205 cache_insert_ms=0.004 callback_ms=2.493 reader_drain_ms=0.000
+strata ple gather phases: tokens=3986 rows=63776 total_ms=5.563 raw_resize_ms=0.007 host_available_mib=14809
+strata prefill callback: start=0 rows=4096 draft_path=token draft_ms=111.055 checkpoint_ms=0.002 total_ms=111.103
+strata prefill chunk: start=0 rows=4096 main_and_wait_ms=1269.219 callback_ms=111.118 total_ms=1380.338
+strata ple: chunk 4096: read started 83.7 ms into the run, layer 1 reached at 1395.8, waited 0.0 ms
+strata prefill callback: start=4096 rows=3986 draft_path=token draft_ms=106.497 checkpoint_ms=0.002 total_ms=106.545
+strata prefill chunk: start=4096 rows=3986 main_and_wait_ms=1198.834 callback_ms=106.558 total_ms=1305.392
+strata prefill executed: tokens=8082 max_chunk=4096 capacity=4096 start=0
+strata serve prefill segment: start=8082 end=8086 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 8087 tokens = 0 reused + 8087 read in 2913 ms (2776.6 tok/s), 128 generated in 1382 ms (92.6 tok/s), drafts accepted 78 of 98, 1 checkpoints
+strata serve: decode expert cache hit rate: 72.7% (48740 hits / 67058 lookups); 3982 more read by the GPU over PCIe or from another GPU (5.6% of all 71040 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=6912 promoted_payload_bytes=19110408192 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 658608 rows, 52.4% row-cache hits, 255708 SSD reads (1048.4 MB), read p50 219 us p99 426 us, blocked 474.179 ms total (submit 5.265 ms), cache 246774/1048576 rows, SSD kept awake by 157 reads (slowest 64.7 ms)
+strata serve: expert tiers: GPU 48740 hits this request; since the start RAM 332979 blobs, files 0 blobs 0.0 MB read
+strata serve: conversation cache: parked 8214 tokens in 75.7 ms; parked=3 bytes=1566863940 evictions=0 snapshot_bytes=361605096 reused_kv_bytes=0
+strata serve prefill segment: start=8082 end=8086 root=0 turn=0 message=0 pin=0 reread=0
+strata serve: prompt 8087 tokens = 8082 reused + 5 read in 135 ms (37.1 tok/s), 128 generated in 1323 ms (96.7 tok/s), drafts accepted 78 of 98, 1 checkpoints
+strata serve: decode expert cache hit rate: 75.7% (51078 hits / 67489 lookups); 3551 more read by the GPU over PCIe or from another GPU (5.0% of all 71040 routed)
+strata serve: resident RAM: 63.28 GiB of experts in RAM, 0 exchanged with the VRAM tier, 0 blob reads from the file
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=8041 promoted_payload_bytes=22231885456 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 661040 rows, 52.6% row-cache hits, 255708 SSD reads (1048.4 MB), read p50 219 us p99 426 us, blocked 474.210 ms total (submit 5.265 ms), cache 246774/1048576 rows, SSD kept awake by 170 reads (slowest 64.7 ms)
+strata serve: expert tiers: GPU 51078 hits this request; since the start RAM 352256 blobs, files 0 blobs 0.0 MB read
+safetensors: post-residency expert source bytes=0
+safetensors: post-residency MTP source bytes=0

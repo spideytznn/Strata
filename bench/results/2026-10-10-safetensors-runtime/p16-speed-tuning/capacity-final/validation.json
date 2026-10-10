@@ -1,0 +1,25 @@
+{
+  "status": "pass",
+  "command": ".venv-native/Scripts/python.exe tools/native_config_pair.py --configs config/native/rtx5090-262k-fast.json --fixture logs/efficiency/capacity-262k-fixture.json --cases capacity-262000 --long-restore --desktop-vision --verify-snapshots --expected-text ZEBRA-262000 --output logs/p16-capacity-final",
+  "input_tokens": 262000,
+  "actual_mapped_kv_cells": 262144,
+  "completed_requests": 8,
+  "resident_content_table_alias_audits": 19,
+  "all_resident_expert_errors_zero": true,
+  "all_self_main_states_exact": true,
+  "long_cold_warm_disk_output_ids_equal": true,
+  "long_expected_text": "ZEBRA-262000",
+  "warm_and_disk_reused_tokens": 261993,
+  "expert_and_mtp_source_reads_zero": true,
+  "diagnostic_env": {
+    "STRATA_STATE_HASH": "1",
+    "STRATA_SNAPSHOT_VERIFY": "1",
+    "STRATA_KVG_CHECK": "2"
+  },
+  "cache_limit": "Initial full 262K RAM snapshot with all checkpoints is 4607 MiB and exceeds the 4096 MiB parking budget. Parking is skipped; same live prefix reuse still succeeds. SAVE retains one checkpoint (4237575124 bytes); restore after short conversations succeeds.",
+  "limitations": [
+    "repeated-document capacity/cache test, not throughput or long-distance retrieval quality",
+    "state hashing, snapshot verification and expert read-back are diagnostic overhead",
+    "large session payloads excluded from Git"
+  ]
+}

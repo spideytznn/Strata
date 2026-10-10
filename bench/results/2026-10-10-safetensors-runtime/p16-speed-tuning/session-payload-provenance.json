@@ -1,0 +1,38 @@
+[
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-runtime-final\\k0\\session.bin",
+    "bytes": 237044184,
+    "sha256": "7e99727cf32f39fc4b0e5fe33a0e486363853cf0ecd1190e738847f78782a5a4",
+    "status": "removed after successful validation; no payload committed"
+  },
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-runtime-final\\k2\\session.bin",
+    "bytes": 237044184,
+    "sha256": "51d4cb9a912c2d66edb294c82cc0bbec19349b02a4380b3c8c5cd29954e471ce",
+    "status": "removed after successful validation; no payload committed"
+  },
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-runtime-final\\k4\\session.bin",
+    "bytes": 237044184,
+    "sha256": "8624d8c63825e99a6590120aa619bb7433b5194650a60dd156b6c3e2d7d4a223",
+    "status": "removed after successful validation; no payload committed"
+  },
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-runtime-final\\k6\\session.bin",
+    "bytes": 237044184,
+    "sha256": "540c1e51577cd16aa94f642887f30afdd2a12abd6845a53f5826308e7af96570",
+    "status": "removed after successful validation; no payload committed"
+  },
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-capacity-final\\0\\long-session.bin",
+    "bytes": 4237575124,
+    "sha256": "18b7284118be56566fe11f26825667e1991150cb1716f38642a8583e8b2279fe",
+    "status": "removed after successful validation; no payload committed"
+  },
+  {
+    "path": "G:\\Strata\\Strata-Safetensors\\logs\\p16-capacity-final\\0\\session.bin",
+    "bytes": 237044184,
+    "sha256": "50f3e15c309aa084b80b7387e5aadf6592da0610ac0b1fd93e7b9a91853e36e6",
+    "status": "removed after successful validation; no payload committed"
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "status": "pass",
+  "requests": 6,
+  "generated_tokens": 12288,
+  "reference": {
+    "path": "logs\\p16-long-operator\\results.json",
+    "sha256": "c4e1c7d489c5b08412df6cbbebf556099c7a1cd37be3fd3e9e12d11bfec51a17",
+    "exe_sha256": "794241315ca5fdd54c8b90c9a4fdca61bf1e465f41d7bbaf7475d5f03a6ce6d0",
+    "config_sha256": "74ada91578988964e24b1a60daa7d75cfd226b911a159825ca49c85e304a632e"
+  },
+  "reference_warm_aggregate_tok_s": 91.93434714493276,
+  "profiles": [
+    {
+      "config": "logs\\p16-speed-configs\\candidate-full6144-mtp4-adapt2.json",
+      "exe_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+      "expert_slots": 4521,
+      "vram_free_mib": 1233,
+      "prefill": 6144,
+      "warm_aggregate_tok_s": 101.81473496517519,
+      "ratio_to_reference": 1.1074722138904862,
+      "all_aggregate_tok_s": 97.95777802933313,
+      "warm_by_case": {
+        "english-0-warm": 98.01387891840153,
+        "chinese-0-warm": 108.06361401027871,
+        "code-0-warm": 99.9116991330904
+      },
+      "all_outputs_exact": true
+    }
+  ],
+  "limitation": "Finite matched-output runs; startup excluded. A single fresh engine per profile is a screen, not a repeated estimate."
+}

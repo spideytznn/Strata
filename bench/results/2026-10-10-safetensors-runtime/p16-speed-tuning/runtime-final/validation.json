@@ -1,0 +1,28 @@
+{
+  "status": "pass",
+  "command": ".venv-native/Scripts/python.exe tools/native_runtime_acceptance.py --config config/native/rtx5090-262k-fast.json --operator-cache --variants 0,2,4,6 --spec-min-p 0.7 --official-new 512 --output logs/p16-runtime-final",
+  "config_sha256": "037d23248da698282b59660d73f235dd4b670849cf926137d40390fb58876a8a",
+  "completed_requests": 80,
+  "completed_generated_ids": 5464,
+  "cancelled_requests": 4,
+  "checks": [
+    "all corresponding output IDs exact against zero drafts",
+    "all completed main-model states exact against zero drafts",
+    "explicit state fingerprint count",
+    "own snapshot continuation and main state exact",
+    "cancel visible prefix and resumed continuation exact",
+    "EOS terminates before cap",
+    "caps 1/2/3/7/9",
+    "official thinking sampling up to 512 tokens English/Chinese/code",
+    "vision loaded before automatic cache sizing",
+    "original physically locked expert arena",
+    "actual 4096 capacity",
+    "expert and MTP source reads zero"
+  ],
+  "limitations": [
+    "finite prompts and fixed sampling seeds",
+    "diagnostic state hashing, not performance timing",
+    "zero drafts retains MTP weights; fully unloaded reference is earlier P10 evidence",
+    "Session payloads hashed and removed after passing; see ../session-payload-provenance.json"
+  ]
+}

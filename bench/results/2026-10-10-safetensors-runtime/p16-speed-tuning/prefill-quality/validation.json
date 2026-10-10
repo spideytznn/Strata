@@ -1,0 +1,40 @@
+{
+  "status": "pass",
+  "positions_per_geometry": 234,
+  "full_vocabulary_logits_per_position": 248320,
+  "reference": "4096 prefill, same NVFP4 model; not a BF16 oracle",
+  "input_token_range": [
+    24602,
+    24689
+  ],
+  "candidate_summary": {
+    "positions": 234,
+    "mean_nll": 1.1762755761539894,
+    "mean_nll_delta": -0.003225234850523284,
+    "mean_kl": 0.0013614318564705923,
+    "top1_agreement": 0.9914529914529915
+  },
+  "by_category": {
+    "english": {
+      "positions": 68,
+      "mean_nll_delta": -0.010789187594912195,
+      "top1_matches": 66
+    },
+    "chinese": {
+      "positions": 82,
+      "mean_nll_delta": 0.0034132726636250353,
+      "top1_matches": 82
+    },
+    "code": {
+      "positions": 84,
+      "mean_nll_delta": -0.0035824828212575204,
+      "top1_matches": 84
+    }
+  },
+  "limitations": [
+    "Finite repeated-document teacher continuations, not broad task accuracy",
+    "Main logits differ slightly across prompt chunk geometry",
+    "Raw float dumps remain local; all per-position hashes and metrics archived",
+    "Not a performance measurement"
+  ]
+}

@@ -1,0 +1,188 @@
+START round=1 window=3
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4211 experts, 10.84 GiB of VRAM) ...
+DONE r1 t3 p0.0 gpu0.25 english-first: 88.45 tok/s, accepted=145/220, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 english-repeat: 97.95 tok/s, accepted=145/220, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 english-first: 98.89 tok/s, accepted=142/196, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 english-repeat: 99.24 tok/s, accepted=142/196, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 english-first: 98.02 tok/s, accepted=132/160, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 english-repeat: 98.23 tok/s, accepted=132/160, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 chinese-first: 89.92 tok/s, accepted=150/193, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 chinese-repeat: 103.16 tok/s, accepted=150/193, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 chinese-first: 103.11 tok/s, accepted=148/174, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 chinese-repeat: 101.96 tok/s, accepted=148/174, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 chinese-first: 100.34 tok/s, accepted=152/206, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 chinese-repeat: 99.46 tok/s, accepted=152/206, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 code-first: 85.12 tok/s, accepted=132/159, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 code-repeat: 97.32 tok/s, accepted=132/159, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 code-first: 95.84 tok/s, accepted=144/222, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 code-repeat: 96.79 tok/s, accepted=144/222, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 code-first: 97.70 tok/s, accepted=141/197, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 code-repeat: 98.11 tok/s, accepted=141/197, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 doc24k-first: 84.73 tok/s, accepted=144/222, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 doc24k-repeat: 86.68 tok/s, accepted=144/222, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 doc24k-first: 93.96 tok/s, accepted=137/188, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 doc24k-repeat: 93.92 tok/s, accepted=137/188, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 doc24k-first: 95.24 tok/s, accepted=131/157, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 doc24k-repeat: 95.38 tok/s, accepted=131/157, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 image8k-first: 87.99 tok/s, accepted=146/190, first_seen_exact=True
+DONE r1 t3 p0.5 gpu0.25 image8k-repeat: 92.31 tok/s, accepted=146/190, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 image8k-first: 89.37 tok/s, accepted=136/161, first_seen_exact=True
+DONE r1 t3 p0.7 gpu0.25 image8k-repeat: 90.47 tok/s, accepted=136/161, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 image8k-first: 90.33 tok/s, accepted=148/214, first_seen_exact=True
+DONE r1 t3 p0.0 gpu0.25 image8k-repeat: 90.39 tok/s, accepted=148/214, first_seen_exact=True
+START round=1 window=5
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4208 experts, 10.84 GiB of VRAM) ...
+DONE r1 t5 p0.0 gpu0.25 english-first: 78.04 tok/s, accepted=168/348, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 english-repeat: 86.38 tok/s, accepted=168/348, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 english-first: 95.69 tok/s, accepted=166/275, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 english-repeat: 97.82 tok/s, accepted=166/275, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 english-first: 104.34 tok/s, accepted=154/199, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 english-repeat: 104.29 tok/s, accepted=154/199, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 chinese-first: 86.51 tok/s, accepted=174/281, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 chinese-repeat: 102.68 tok/s, accepted=174/281, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 chinese-first: 104.73 tok/s, accepted=169/233, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 chinese-repeat: 103.52 tok/s, accepted=169/233, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 chinese-first: 97.43 tok/s, accepted=177/312, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 chinese-repeat: 97.58 tok/s, accepted=177/312, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 code-first: 83.47 tok/s, accepted=150/212, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 code-repeat: 97.42 tok/s, accepted=150/212, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 code-first: 85.89 tok/s, accepted=166/356, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 code-repeat: 86.53 tok/s, accepted=166/356, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 code-first: 93.11 tok/s, accepted=161/290, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 code-repeat: 92.86 tok/s, accepted=161/290, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 doc24k-first: 79.82 tok/s, accepted=168/348, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 doc24k-repeat: 89.37 tok/s, accepted=168/348, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 doc24k-first: 98.29 tok/s, accepted=160/246, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 doc24k-repeat: 98.19 tok/s, accepted=160/246, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 doc24k-first: 100.82 tok/s, accepted=151/190, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 doc24k-repeat: 100.89 tok/s, accepted=151/190, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 image8k-first: 85.47 tok/s, accepted=168/272, first_seen_exact=True
+DONE r1 t5 p0.5 gpu0.25 image8k-repeat: 91.25 tok/s, accepted=168/272, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 image8k-first: 94.16 tok/s, accepted=157/214, first_seen_exact=True
+DONE r1 t5 p0.7 gpu0.25 image8k-repeat: 92.71 tok/s, accepted=157/214, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 image8k-first: 85.10 tok/s, accepted=172/332, first_seen_exact=True
+DONE r1 t5 p0.0 gpu0.25 image8k-repeat: 85.99 tok/s, accepted=172/332, first_seen_exact=True
+START round=1 window=7
+[strata] starting the engine: reading the model's weights ...
+[strata] still starting (20 s) - please wait ...
+[strata] still starting (40 s) - please wait ...
+[strata] filling the GPU's expert cache (4206 experts, 10.83 GiB of VRAM) ...
+DONE r1 t7 p0.0 gpu0.25 english-first: 64.71 tok/s, accepted=177/468, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 english-repeat: 73.80 tok/s, accepted=177/468, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 english-first: 86.15 tok/s, accepted=174/338, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 english-repeat: 89.90 tok/s, accepted=174/338, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 english-first: 101.43 tok/s, accepted=165/215, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 english-repeat: 102.58 tok/s, accepted=165/215, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 chinese-first: 81.32 tok/s, accepted=185/334, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 chinese-repeat: 96.80 tok/s, accepted=185/334, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 chinese-first: 103.47 tok/s, accepted=180/265, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 chinese-repeat: 103.86 tok/s, accepted=180/265, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 chinese-first: 86.78 tok/s, accepted=189/396, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 chinese-repeat: 86.93 tok/s, accepted=189/396, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 code-first: 76.59 tok/s, accepted=157/252, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 code-repeat: 90.84 tok/s, accepted=157/252, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 code-first: 70.91 tok/s, accepted=176/474, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 code-repeat: 71.24 tok/s, accepted=176/474, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 code-first: 80.22 tok/s, accepted=170/379, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 code-repeat: 80.79 tok/s, accepted=170/379, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 doc24k-first: 65.10 tok/s, accepted=176/474, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 doc24k-repeat: 73.02 tok/s, accepted=176/474, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 doc24k-first: 91.09 tok/s, accepted=166/296, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 doc24k-repeat: 90.32 tok/s, accepted=166/296, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 doc24k-first: 100.86 tok/s, accepted=157/208, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 doc24k-repeat: 96.14 tok/s, accepted=157/208, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 image8k-first: 77.84 tok/s, accepted=175/334, first_seen_exact=True
+DONE r1 t7 p0.5 gpu0.25 image8k-repeat: 82.72 tok/s, accepted=175/334, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 image8k-first: 92.51 tok/s, accepted=164/227, first_seen_exact=True
+DONE r1 t7 p0.7 gpu0.25 image8k-repeat: 94.17 tok/s, accepted=164/227, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 image8k-first: 71.13 tok/s, accepted=179/456, first_seen_exact=True
+DONE r1 t7 p0.0 gpu0.25 image8k-repeat: 72.24 tok/s, accepted=179/456, first_seen_exact=True
+[
+  {
+    "window": 3,
+    "gate": 0.0,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 93.11149120851084,
+    "decode_aggregate_tok_s": 92.78757806298681,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 3,
+    "gate": 0.5,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 95.82888164580287,
+    "decode_aggregate_tok_s": 95.31078389396676,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 3,
+    "gate": 0.7,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 96.34989260902407,
+    "decode_aggregate_tok_s": 95.11354179051243,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 5,
+    "gate": 0.0,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 86.18703218947884,
+    "decode_aggregate_tok_s": 86.80467253276368,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 5,
+    "gate": 0.5,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 94.39902037829015,
+    "decode_aggregate_tok_s": 93.89843563739065,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 5,
+    "gate": 0.7,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 100.85094239733652,
+    "decode_aggregate_tok_s": 98.17080185604172,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 7,
+    "gate": 0.0,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 71.74432955591107,
+    "decode_aggregate_tok_s": 72.92595451813321,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 7,
+    "gate": 0.5,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 84.4328017729253,
+    "decode_aggregate_tok_s": 85.33162670079932,
+    "all_outputs_exact": true
+  },
+  {
+    "window": 7,
+    "gate": 0.7,
+    "pcie_frac": 0.25,
+    "samples": 10,
+    "decode_median_tok_s": 98.499320984717,
+    "decode_aggregate_tok_s": 95.5010072371857,
+    "all_outputs_exact": true
+  }
+]

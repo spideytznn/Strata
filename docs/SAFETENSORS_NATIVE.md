@@ -33,8 +33,8 @@ The original GGUF/pack path retains its defaults.
 experts. The draft reuses Strata's attention, rollback, sampling and verification;
 the main model verifies every proposed token. Draft attention currently follows
 Strata's dense/window path; the saved MTP indexer weights are validated and kept
-but are not used for sparse draft selection. Multi-GPU, batching, pipeline >1,
-cross-model drafts and MTP requantization are refused by this native path.
+but are not used for sparse draft selection. Multi-GPU, request batching, pipeline >1,
+cross-model drafts and external Q4 draft overrides are refused by this native path.
 The desktop profile enables the inherited `--vision` / GENI embedding path with
 the installed external BF16 image encoder, including image rotary positions
 and image-aware conversation reuse. Main-model weights remain safetensors;
@@ -43,35 +43,49 @@ metadata GGUF, without converting the main model. It uses the GPU and caps
 each image at 1024 tokens. Default sampling is the official thinking preset
 (temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0,
 repetition_penalty 1). Explicit requests and shared web settings override it.
-The desktop binary is now `strata-efficiency14.exe` with the user's requested
-prefill-first allocation mode. It physically allocates and writes the 4096-row
-workspace before expert-cache sizing, binds the residency table after filling
-the cache, and reuses the allocation. An additional 512 MiB startup guard is
-held until the verifier, MTP and other late startup allocations finish. The
-mode refuses startup rather than reducing the batch when its requirements
-cannot be met. It is opt-in through `STRATA_NATIVE_PREFILL_FIRST=1`; the bare
-CLI and other profiles retain the previous allocation path. CUDA SM120 build
-and configuration checks pass; GPU inference and throughput validation are
-pending while the user's existing service is active. See the
-[allocation change and acceptance procedure](../bench/results/2026-10-10-safetensors-runtime/p15-prefill-first/README.md).
-After the user authorized benchmarking, three fresh runs per profile measured
-the preceding efficiency12 visual preset
-at median **2727 tok/s (~8K text), 3109 (~24K text), and 2851 (~8K including
-1024 image tokens)**, with 145 ms median image preparation. All 57 requests
-have zero expert file reads and exact own-cache/repeat outputs. The
-[complete visual benchmark](../bench/results/2026-10-10-safetensors-runtime/p13-visual-performance/README.md)
-includes the prior visual reserve and pure-text control, all samples, TTFT,
-sampling output differences between chunk geometries and finite-test limits.
-All of those current-visual runs actually allocated 4096 rows. A later real
-desktop startup with the same 3072 MiB reserve fell back to 3072 rows and
-processed 26,328 prompt tokens in 12.89 s (2042.5 tok/s); 11,905 generated
-tokens ran at 69.9 tok/s. Thus the current reserve does not guarantee 4096
-under every desktop startup. The [real-request record and staged diagnostics](../bench/results/2026-10-10-safetensors-runtime/p14-desktop-26k/README.md)
-keep this result separate from the controlled benchmark. The 3584 MiB test
-profile and efficiency13 diagnostic build were staged, unmeasured candidates.
-The new allocation mode supersedes that reserve-only proposal; the running
-efficiency12 process keeps its original settings until the user restarts it.
+The desktop selects `strata-efficiency17.exe` and
+`config/native/rtx5090-262k-fast.json`. It retains the prefill-first allocation
+mode introduced in efficiency14: the 4096-row workspace is physically allocated
+and written before sizing the expert cache, and a temporary 512 MiB guard stays
+until late startup allocations finish. The residency recheck also budgets the
+late MTP head. Insufficient capacity refuses startup instead of shrinking the
+configured chunk. The explicit reserve is now 1024 MiB after paired testing;
+the accepted efficiency14 profile with reserve 3072 remains available through
+`START-NATIVE-262K-STABLE.bat`. Bare CLI and GGUF defaults remain unchanged.
+
+The final local profile keeps original BF16 projections and full heads, enables
+the existing BF16 MTP batch path, and proposes up to four drafts with
+`--spec-min-p 0.7 --spec-min-drafts 2`. The first two guesses are retained;
+confidence controls deeper guesses. The gate does not change target sampling
+`min_p`. Ordinary one-token commit remains enabled (`STRATA_ONE_TOKEN_COMMIT=0`).
+An opt-in startup weight read uses the existing guard without a forward pass,
+weight changes or session mutation. Profile timings do not isolate its benefit.
+
+Three fresh starts per profile pass all 63 visual/text/cached requests. The two
+4096 profiles have exact complete outputs for all 21 corresponding requests.
+Median prefill changes from 2968 to 3331 tok/s at about 24K text (+12.2%) and
+2741 to 3089 with an image (+12.7%). First-request about-8K text changes from
+2688 to 2558 (-4.8%); its total wall median increases from 4.57 to 4.82 s.
+Image total wall falls from 4.51 to 3.94 s. The 2048-token English/Chinese/code
+screen gives warm aggregate decode 91.93 to 100.82 tok/s (+9.7%), with exact
+outputs, but uses only one fresh engine per profile. All samples are retained.
+The selected profile actually allocates 4096 rows and leaves 1228/1228/1229 MiB
+free with vision loaded. The 6144 experiment gives 4173 tok/s at 24K, but has
+less consistent image/short-request benefit and small geometry logit changes.
+
+The final binary passes 80 completed requests plus four cancellations across
+zero/two/four/six drafts, including exact corresponding outputs/main states,
+caps/EOS, official seeded sampling, A/B/A, disk restore and cancel/resume.
+It also passes 262000 input tokens, actual 262144-cell mapping, warm/long disk
+restoration and resident-expert/restored-draft-KV read-back. Expert and MTP
+source reads remain zero. These finite checks are not a broad quality suite;
+the repeated-document capacity fixture is not throughput or retrieval evidence.
+See [P16 measurements and acceptance](../bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/README.md).
+The preceding prefill-first allocation change separately passed 63 requests;
+its conservative reserve cost decode speed. See
+[P15](../bench/results/2026-10-10-safetensors-runtime/p15-prefill-first/README.md).
 Earlier efficiency11 measurements below remain text-only greedy results.
+
 The [private image smoke check](../bench/results/2026-10-10-safetensors-runtime/p11-native-vision/README.md)
 passes solid-color recognition, warm image reuse, A/B/A, return to text and
 a capped request with official thinking sampling. This is not a visual quality
@@ -439,42 +453,34 @@ SSD reads during inference.
 ## Build the runtime
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
-`START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-mtp2.json` and
-`build-native-engine/strata-efficiency14.exe`. Settings are 262144 total context,
-4096 dedicated prefill, INT8 KV, original BF16 MTP2, CPU75 cold decode experts,
-kernel copying, elastic KV, canonical FP32 arithmetic and ordinary T1 commit.
-FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
-startup handles remain enabled. It serves `127.0.0.1:8880` in the foreground;
-Ctrl+C stops it. Wildcard Host accepts any HTTP Host header. The prefill cap
-was changed from 8192 to 4096 at the user's request. Actual chunks can be smaller; prior evidence used 8192.
-The desktop VRAM reserve is 3072 MiB. A recorded visual startup with the
-previous 2048 MiB reserve reduced configured 4096 to effective 3072 prompt rows
-and reported 22 MiB free after loading. The larger reserve keeps more space
-out of the expert cache; it does not unload experts from RAM or disable images.
-The subsequent three-round visual benchmark above measures this allocation
-correction; it does not establish a throughput improvement for every request. The [startup allocation check](../bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
-confirms 4096 rows with the visual encoder loaded and 746 MiB free. A subsequent
-desktop startup still reduced the batch; efficiency14 therefore allocates the
-workspace first and holds a separate 512 MiB startup guard, instead of relying
-only on this estimate. This new mode is built but not yet inference-tested.
-Restarting loads the new profile; tests do not start the public server. Logs append to
-`logs/native-262k-int8.log`, whose directory the launcher creates.
+`START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-fast.json` and
+`build-native-engine/strata-efficiency17.exe`. Settings are 262144 total context,
+4096 dedicated prefill, INT8 KV, original BF16 MTP up to four drafts, gate 0.7,
+floor two, BF16 draft batching, CPU75 cold experts, kernel copying, elastic KV,
+canonical FP32 arithmetic and ordinary T1 commit. FP32 decode activations,
+BF16x2 dense prefill, W4A8 expert prefill and closed startup handles stay enabled.
+The GPU visual encoder loads before automatic expert sizing. An actual 4096-row
+workspace is required; the 1024 MiB additional reserve is separate from that
+allocation and the temporary 512 MiB startup guard. Images remain enabled.
 
-Build this exact binary with:
+The launcher serves `127.0.0.1:8880` in the foreground; Ctrl+C stops it. Wildcard
+Host accepts any HTTP Host header. Logs append to `logs/native-262k-fast.log`.
+`START-NATIVE-262K-STABLE.bat` selects the preceding accepted
+`rtx5090-262k-mtp2.json` / efficiency14 with reserve 3072, two drafts and BF16
+draft batching off. The fully unloaded alternative is
+`rtx5090-262k-no-mtp.json`. Tests use private engines, leaving HTTP startup to
+the user. The original checkpoint and main deployment remain separate.
+
+Build the selected binary with:
 
 ```powershell
-.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency14 -Targets @('strata')
+.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency17 -Targets @('strata','native_draft_vocab_test')
 ```
 
-The preceding text-only efficiency11 acceptance evidence includes near-capacity
-262000-token input and
-full 262144-cell KV mapping, warm reuse, A/B/A, disk restore, sampled/greedy
-stability and three alternating final-binary speed pairs. The original main
-model and deployment remain separate. MTP4/Q8 were rolled back at the user's
-request; the desktop keeps original BF16 projections and BF16 MTP batching off.
-The fully unloaded MTP alternative is `rtx5090-262k-no-mtp.json`; CPU25/50 full
-combined throughput is unmeasured. CUDA SM120 builds and runs successfully;
-HIP/SYCL have not been built or validated on this machine.
+CUDA SM120 Release builds and runtime acceptance pass on this machine. HIP and
+SYCL toolchains are unavailable and were not built. The full evidence and the
+first-request 8K tradeoff are in
+[P16](../bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/README.md).
 
 ### Optional Q8 MTP projections and chunk diagnostics
 
@@ -483,7 +489,8 @@ The optional `rtx5090-262k-mtp4.json` comparison profile selects `--spec 5 --mtp
 `STRATA_MTP_NATIVE_PROJECTIONS=q8_0`. With this variable unset or `bf16`, native
 MTP keeps the original BF16 projection path. Invalid values are rejected at load.
 The config generator exposes `--mtp 4 --mtp-projections q8_0` and keeps BF16 as
-its default. `rtx5090-262k-mtp2.json` is again the desktop profile.
+its default. This older Q8 comparison profile is not the desktop default;
+the current fast profile retains original BF16 projections.
 
 The adapter quantizes the same ten matrices as the existing Q8 MTP pack:
 `fc_embedding`, `fc_hidden`, attention Q/K/V/O, indexer `index_qk_proj` and the

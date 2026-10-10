@@ -1,0 +1,34 @@
+{
+  "status": "pass",
+  "reference_4096_bitwise_equal_to_prior_quality_run": true,
+  "positions_per_geometry": 234,
+  "candidate_summary": {
+    "positions": 234,
+    "mean_nll": 1.1761891310041837,
+    "mean_nll_delta": -0.003311680000328998,
+    "mean_kl": 0.0010780564125130068,
+    "top1_agreement": 0.9914529914529915
+  },
+  "by_category": {
+    "english": {
+      "positions": 68,
+      "mean_nll_delta": -0.014477702573545729,
+      "top1_matches": 67
+    },
+    "chinese": {
+      "positions": 82,
+      "mean_nll_delta": 0.004755875143003057,
+      "top1_matches": 81
+    },
+    "code": {
+      "positions": 84,
+      "mean_nll_delta": -0.0021479893666921748,
+      "top1_matches": 84
+    }
+  },
+  "limitations": [
+    "Finite repeated-document teacher continuations, not broad task accuracy",
+    "Not a BF16 oracle",
+    "Not a performance measurement"
+  ]
+}

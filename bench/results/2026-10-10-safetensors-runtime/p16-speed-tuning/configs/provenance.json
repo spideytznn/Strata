@@ -1,0 +1,6 @@
+{
+  "expert_profile": "G:\\Strata\\Strata-Safetensors\\data\\expert-profile.bin",
+  "expert_profile_sha256": "8f59b4aa8873209dff11c11e37bcda9529a1335b724a1afeea37bf6388975baf",
+  "baseline_commit": "f72d339df5c2f247ea73ab85f7eba442002d0867",
+  "note": "Unmeasured private test configs; desktop unchanged."
+}

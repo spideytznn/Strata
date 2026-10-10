@@ -1,0 +1,378 @@
+{
+  "status": "pass",
+  "requests": 90,
+  "external_reference": {
+    "path": "logs\\p16-mtp-screen\\results.json",
+    "sha256": "2edbb1a6efbea22cbc1abcea8aef74d1b46e5175010fec365836f38c34874a21",
+    "all_outputs_exact": true
+  },
+  "generated_tokens": 23040,
+  "reference": {
+    "window": 3,
+    "gate": 0,
+    "pcie_frac": 0.25
+  },
+  "summary": [
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 98.17080185604172,
+      "warm_decode_aggregate_tok_s": 99.57679860592482,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 104.31736026557478,
+          "accepted": 308,
+          "offered": 398
+        },
+        "chinese": {
+          "decode_median_tok_s": 104.125727930793,
+          "accepted": 338,
+          "offered": 466
+        },
+        "code": {
+          "decode_median_tok_s": 90.44726325346747,
+          "accepted": 300,
+          "offered": 424
+        },
+        "doc24k": {
+          "decode_median_tok_s": 100.85094239733652,
+          "accepted": 302,
+          "offered": 380
+        },
+        "image8k": {
+          "decode_median_tok_s": 93.4328929897082,
+          "accepted": 314,
+          "offered": 428
+        }
+      },
+      "decode_ratio_to_reference": 1.0580166430187523,
+      "warm_decode_ratio_to_reference": 1.059388225043565
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 95.5010072371857,
+      "warm_decode_aggregate_tok_s": 97.26443768996961,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 102.00538824868956,
+          "accepted": 330,
+          "offered": 430
+        },
+        "chinese": {
+          "decode_median_tok_s": 103.6629781280418,
+          "accepted": 360,
+          "offered": 530
+        },
+        "code": {
+          "decode_median_tok_s": 83.71536310701443,
+          "accepted": 314,
+          "offered": 504
+        },
+        "doc24k": {
+          "decode_median_tok_s": 98.499320984717,
+          "accepted": 314,
+          "offered": 416
+        },
+        "image8k": {
+          "decode_median_tok_s": 93.33932194575343,
+          "accepted": 328,
+          "offered": 454
+        }
+      },
+      "decode_ratio_to_reference": 1.029243452958293,
+      "warm_decode_ratio_to_reference": 1.0347872340425532
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.5,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 95.31078389396676,
+      "warm_decode_aggregate_tok_s": 97.19427464975891,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 99.0619303813223,
+          "accepted": 284,
+          "offered": 392
+        },
+        "chinese": {
+          "decode_median_tok_s": 96.5413112175869,
+          "accepted": 300,
+          "offered": 386
+        },
+        "code": {
+          "decode_median_tok_s": 97.90465497298709,
+          "accepted": 282,
+          "offered": 394
+        },
+        "doc24k": {
+          "decode_median_tok_s": 93.9397856927003,
+          "accepted": 274,
+          "offered": 376
+        },
+        "image8k": {
+          "decode_median_tok_s": 90.15123862152987,
+          "accepted": 292,
+          "offered": 380
+        }
+      },
+      "decode_ratio_to_reference": 1.0271933580297474,
+      "warm_decode_ratio_to_reference": 1.0340407760355368
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.7,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 95.11354179051243,
+      "warm_decode_aggregate_tok_s": 96.52291288053027,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 98.12575985186027,
+          "accepted": 264,
+          "offered": 320
+        },
+        "chinese": {
+          "decode_median_tok_s": 102.53450993463882,
+          "accepted": 296,
+          "offered": 348
+        },
+        "code": {
+          "decode_median_tok_s": 91.21978199990949,
+          "accepted": 264,
+          "offered": 318
+        },
+        "doc24k": {
+          "decode_median_tok_s": 95.3126110224272,
+          "accepted": 262,
+          "offered": 314
+        },
+        "image8k": {
+          "decode_median_tok_s": 89.92257206982643,
+          "accepted": 272,
+          "offered": 322
+        }
+      },
+      "decode_ratio_to_reference": 1.0250676197836168,
+      "warm_decode_ratio_to_reference": 1.026898221112879
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.5,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 93.89843563739065,
+      "warm_decode_aggregate_tok_s": 96.38699378002681,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 96.75419934035168,
+          "accepted": 332,
+          "offered": 550
+        },
+        "chinese": {
+          "decode_median_tok_s": 94.59809862622413,
+          "accepted": 348,
+          "offered": 562
+        },
+        "code": {
+          "decode_median_tok_s": 92.98287895818424,
+          "accepted": 322,
+          "offered": 580
+        },
+        "doc24k": {
+          "decode_median_tok_s": 98.2405237094365,
+          "accepted": 320,
+          "offered": 492
+        },
+        "image8k": {
+          "decode_median_tok_s": 88.35828183336452,
+          "accepted": 336,
+          "offered": 544
+        }
+      },
+      "decode_ratio_to_reference": 1.0119720505437673,
+      "warm_decode_ratio_to_reference": 1.0254521905450384
+    },
+    {
+      "window": 3,
+      "draft_tokens": 2,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 92.78757806298681,
+      "warm_decode_aggregate_tok_s": 93.99462468240097,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 93.19979614289583,
+          "accepted": 290,
+          "offered": 440
+        },
+        "chinese": {
+          "decode_median_tok_s": 99.90241521468013,
+          "accepted": 304,
+          "offered": 412
+        },
+        "code": {
+          "decode_median_tok_s": 96.31356287113148,
+          "accepted": 288,
+          "offered": 444
+        },
+        "doc24k": {
+          "decode_median_tok_s": 85.70721596458819,
+          "accepted": 288,
+          "offered": 444
+        },
+        "image8k": {
+          "decode_median_tok_s": 90.36038982474975,
+          "accepted": 296,
+          "offered": 428
+        }
+      },
+      "decode_ratio_to_reference": 1.0,
+      "warm_decode_ratio_to_reference": 1.0
+    },
+    {
+      "window": 5,
+      "draft_tokens": 4,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 86.80467253276368,
+      "warm_decode_aggregate_tok_s": 88.9679715302491,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 82.2106137295537,
+          "accepted": 336,
+          "offered": 696
+        },
+        "chinese": {
+          "decode_median_tok_s": 97.50343968527145,
+          "accepted": 354,
+          "offered": 624
+        },
+        "code": {
+          "decode_median_tok_s": 86.20663867491874,
+          "accepted": 332,
+          "offered": 712
+        },
+        "doc24k": {
+          "decode_median_tok_s": 84.59264970178873,
+          "accepted": 336,
+          "offered": 696
+        },
+        "image8k": {
+          "decode_median_tok_s": 85.54663763966857,
+          "accepted": 344,
+          "offered": 664
+        }
+      },
+      "decode_ratio_to_reference": 0.9355204041842565,
+      "warm_decode_ratio_to_reference": 0.9465219083629893
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.5,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 85.33162670079932,
+      "warm_decode_aggregate_tok_s": 87.72891764447856,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 88.02615004128637,
+          "accepted": 348,
+          "offered": 676
+        },
+        "chinese": {
+          "decode_median_tok_s": 89.05683802647542,
+          "accepted": 370,
+          "offered": 668
+        },
+        "code": {
+          "decode_median_tok_s": 80.50286857762885,
+          "accepted": 340,
+          "offered": 758
+        },
+        "doc24k": {
+          "decode_median_tok_s": 90.70458750888497,
+          "accepted": 332,
+          "offered": 592
+        },
+        "image8k": {
+          "decode_median_tok_s": 80.27833456975564,
+          "accepted": 350,
+          "offered": 668
+        }
+      },
+      "decode_ratio_to_reference": 0.9196449404345247,
+      "warm_decode_ratio_to_reference": 0.9333397302335783
+    },
+    {
+      "window": 7,
+      "draft_tokens": 6,
+      "gate": 0.0,
+      "pcie_frac": 0.25,
+      "samples": 10,
+      "all_outputs_exact": true,
+      "exact_outputs": 10,
+      "decode_aggregate_tok_s": 72.92595451813321,
+      "warm_decode_aggregate_tok_s": 75.04646431481993,
+      "by_case": {
+        "english": {
+          "decode_median_tok_s": 69.25514050215328,
+          "accepted": 354,
+          "offered": 936
+        },
+        "chinese": {
+          "decode_median_tok_s": 86.85185716993047,
+          "accepted": 378,
+          "offered": 792
+        },
+        "code": {
+          "decode_median_tok_s": 71.07891549161246,
+          "accepted": 352,
+          "offered": 948
+        },
+        "doc24k": {
+          "decode_median_tok_s": 69.06040746123773,
+          "accepted": 352,
+          "offered": 948
+        },
+        "image8k": {
+          "decode_median_tok_s": 71.68890084992694,
+          "accepted": 358,
+          "offered": 912
+        }
+      },
+      "decode_ratio_to_reference": 0.7859452314686889,
+      "warm_decode_ratio_to_reference": 0.7984122982393398
+    }
+  ],
+  "limitation": "Finite capped-output screen; eligibility requires exact reference tokens. Long outputs, stop boundaries, main-state parity and long-context restore need separate acceptance."
+}

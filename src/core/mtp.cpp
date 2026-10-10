@@ -5,6 +5,7 @@
 #include "strata/core/on_device.hpp"
 
 #include "strata/core/native_head.hpp"
+#include "strata/core/native_draft_vocab.hpp"
 #include "strata/core/peer_experts.hpp"
 #include "strata/platform/memory.hpp"
 #include "strata/kernels/bf16_gemv.hpp"
@@ -104,7 +105,7 @@ strata::kernels::QsaShapes shapes_of(const ModelGeometry& g) {
 #define STRATA_FILE_TELL64(f) ftello(f)
 #endif
 
-bool read_file(const std::string& path, std::vector<uint8_t>& out) {
+bool read_file(const std::string& path, std::vector<uint8_t>& out, uint64_t max_bytes = ~uint64_t{0}) {
     // Loader fix (0.1.15+loaderfix.2): `ifstream::read` reaches the disk as 4095-byte reads on MSVC - the same
     // split `load_experts_ranges` had - so the drafter's 111 MiB dense blob paid 4 KiB per operation on a cold
     // start.  `fread` passes a request bigger than the stream buffer straight to `ReadFile()`.
@@ -117,7 +118,7 @@ bool read_file(const std::string& path, std::vector<uint8_t>& out) {
     } closer{f};
     if (STRATA_FILE_SEEK64(f, 0, SEEK_END) != 0) return false;
     const long long n = (long long) STRATA_FILE_TELL64(f);
-    if (n < 0 || STRATA_FILE_SEEK64(f, 0, SEEK_SET) != 0) return false;
+    if (n < 0 || (uint64_t) n > max_bytes || STRATA_FILE_SEEK64(f, 0, SEEK_SET) != 0) return false;
 #if !defined(_WIN32)
     strata::platform::advise_willneed(fileno(f), 0, (uint64_t) n);
 #endif
@@ -496,7 +497,7 @@ void MtpDrafter::record_top2(int j) {
 
 uint64_t MtpDrafter::bind_bytes(uint64_t head_row_bytes, int64_t n_vocab) const {
     uint64_t bytes = head_logits_ ? 0 : (uint64_t) max_t_ * (uint64_t) n_vocab * sizeof(float);
-    if (dhead_ == nullptr && owns_draft_head_ && !native_fp8_ && !full_head_env()) {
+    if (dhead_ == nullptr && owns_draft_head_ && (!native_fp8_ || !dvocab_path_.empty()) && !full_head_env()) {
         if (FILE* f = std::fopen(vocab_file().c_str(), "rb")) {
             std::fseek(f, 0, SEEK_END);
             const long size = std::ftell(f);
@@ -624,6 +625,11 @@ bool MtpDrafter::bind(const WeightTable& wt, const NativeHead* head, const float
     if (!wo) { err = "mtp: output.weight is missing"; return false; }
     n_vocab_ = wo->ne1;
     if (head == nullptr || !head->loaded()) { err = "mtp: the draft layer needs the native head (--native)"; return false; }
+    const bool native_subset = native_fp8_ && !dvocab_path_.empty();
+    if (native_subset && full_head_env()) {
+        err = "mtp: explicit native draft vocabulary conflicts with STRATA_MTP_FULL_HEAD=1";
+        return false;
+    }
     if (head_logits_ == nullptr &&
         cudaMalloc((void**) &head_logits_, (size_t) max_t_ * (size_t) n_vocab_ * sizeof(float)) != cudaSuccess) {
         err = "mtp: the draft logits do not fit";
@@ -642,12 +648,21 @@ bool MtpDrafter::bind(const WeightTable& wt, const NativeHead* head, const float
         owns_draft_head_ = false;
     }
     // the draft head's token subset, when tools/draft_vocab.py wrote one
-    // Original safetensors always uses the checkpoint's complete output head.
-    // Do not let an unrelated draft_vocab.bin in that directory change it.
-    if (dhead_ == nullptr && shared == nullptr && !native_fp8_ && !full_head_env()) {
+    // Native safetensors keeps the complete checkpoint head unless the operator explicitly selects a subset.
+    // An unrelated draft_vocab.bin beside the checkpoint must never silently change the native default.
+    if (dhead_ == nullptr && shared == nullptr && (!native_fp8_ || native_subset) && !full_head_env()) {
         std::vector<uint8_t> raw;
-        if (read_file(vocab_file(), raw) && raw.size() >= 4 && raw.size() % 4 == 0) {
+        const bool read = read_file(vocab_file(), raw, native_subset ? (uint64_t) n_vocab_ * 4 : ~uint64_t{0});
+        if (native_subset && (!read || raw.size() < 4 || raw.size() % 4 != 0)) {
+            err = "mtp: native draft vocabulary must be a readable nonempty int32 token-ID list, at most the full vocabulary";
+            return false;
+        }
+        if (read && raw.size() >= 4 && raw.size() % 4 == 0) {
             n_dvocab_ = (int64_t) (raw.size() / 4);
+            if (native_subset) {
+                std::vector<int32_t> ids;
+                if (!decode_native_draft_vocab(raw, n_vocab_, ids, err)) return false;
+            }
             const int64_t row_bytes = (int64_t) head->row_bytes();   // a vocabulary row of the native head
             if (cudaMalloc((void**) &dvocab_, raw.size()) != cudaSuccess ||
                 cudaMalloc((void**) &dhead_, (size_t) (n_dvocab_ * row_bytes)) != cudaSuccess) {
@@ -655,14 +670,29 @@ bool MtpDrafter::bind(const WeightTable& wt, const NativeHead* head, const float
                 draft_head_hint(n_dvocab_, row_bytes);
                 return false;
             }
-            cudaMemcpy(dvocab_, raw.data(), raw.size(), cudaMemcpyHostToDevice);
+            const cudaError_t vocab_copy = cudaMemcpy(dvocab_, raw.data(), raw.size(), cudaMemcpyHostToDevice);
+            if (native_subset && vocab_copy != cudaSuccess) {
+                err = std::string("mtp: native draft vocabulary upload: ") + cudaGetErrorString(vocab_copy);
+                return false;
+            }
             dvocab_host_.resize((size_t) n_dvocab_);
             std::memcpy(dvocab_host_.data(), raw.data(), raw.size());
             strata::kernels::gather_rows((const uint8_t*) head->weights(), row_bytes, dvocab_, n_dvocab_, dhead_, nullptr);
-            cudaDeviceSynchronize();
+            if (native_subset) {
+                const cudaError_t gather_launch = cudaGetLastError();
+                const cudaError_t gather_sync = cudaDeviceSynchronize();
+                if (gather_launch != cudaSuccess || gather_sync != cudaSuccess) {
+                    err = std::string("mtp: native BF16 draft head gather: ") +
+                          cudaGetErrorString(gather_launch != cudaSuccess ? gather_launch : gather_sync);
+                    return false;
+                }
+            } else cudaDeviceSynchronize();
             vram_ += (uint64_t) (n_dvocab_ * row_bytes) + raw.size();
             std::fprintf(stderr, "strata mtp: draft head over %lld tokens (%.1f MiB)\n", (long long) n_dvocab_,
                          (double) (n_dvocab_ * row_bytes) / 1048576.0);
+            if (native_subset)
+                std::fprintf(stderr, "safetensors: explicit draft head subset: %s; unchanged BF16 rows, "
+                                     "main verification uses all %lld tokens\n", vocab_file().c_str(), (long long) n_vocab_);
             dhead_type_ = head->type();
             if (q4_head_ && !make_q4_head(err)) return false;
             if (dhead_type_ == 14 && strata::kernels::native_q6_k_packed_enabled())   // STRATA_Q6_PACKED=1
@@ -1374,7 +1404,7 @@ bool MtpDrafter::draft(int T, const int32_t* tokens, int64_t p, int a, int32_t* 
         float pj = ((volatile float*) h_prob_)[0];
         if (probs) probs[0] = pj;
         n = 1;
-        for (int j = 1; j < max_steps && pj >= min_p; ++j) {
+        for (int j = 1; j < max_steps && (j < min_drafts_ || pj >= min_p); ++j) {
             if (cudaGraphLaunch(cp ? step_exec_c_[j] : step_exec_[j], cs_) != cudaSuccess) {
                 err = std::string("mtp draft step: ") + cudaGetErrorString(cudaGetLastError());
                 return false;
@@ -1407,6 +1437,41 @@ bool MtpDrafter::stage_source_R(int T, std::string& err) {
         err = "mtp: staging the window's residual rows failed";
         return false;
     }
+    return true;
+}
+
+bool MtpDrafter::warm_native_weights(void* scratch, size_t scratch_bytes, std::string& err) const {
+    const OnDevice on_device(device_);
+    if (!native_fp8_ || dense_ == nullptr || experts_ == nullptr || scratch == nullptr || scratch_bytes == 0) {
+        err = "mtp: warming needs loaded native weights and disposable device scratch";
+        return false;
+    }
+    const auto start = Clock::now();
+    uint64_t dense_bytes = 0;
+    for (const auto& tensor : tensors_) dense_bytes = std::max(dense_bytes, tensor.off + tensor.bytes);
+    const uint64_t expert_bytes = 512ull * strata::kernels::kMtpFp8Expert;
+    auto read = [&](const uint8_t* source, uint64_t bytes) {
+        for (uint64_t off = 0; off < bytes;) {
+            const size_t count = (size_t) std::min<uint64_t>(scratch_bytes, bytes - off);
+            const cudaError_t result = cudaMemcpyAsync(scratch, source + off, count, cudaMemcpyDeviceToDevice, cs_);
+            if (result != cudaSuccess) {
+                err = std::string("mtp: reading resident weights into startup scratch: ") + cudaGetErrorString(result);
+                return false;
+            }
+            off += count;
+        }
+        return true;
+    };
+    const uint64_t head_bytes = dhead_ != nullptr ? (uint64_t) n_dvocab_ * head_->row_bytes() : 0;
+    if (!read(dense_, dense_bytes) || !read(experts_, expert_bytes) || (head_bytes && !read(dhead_, head_bytes))) return false;
+    const cudaError_t result = cudaStreamSynchronize(cs_);
+    if (result != cudaSuccess) {
+        err = std::string("mtp: finishing startup weight reads: ") + cudaGetErrorString(result);
+        return false;
+    }
+    std::fprintf(stderr, "safetensors: startup MTP weight warm: %.1f MiB read on device in %.1f ms; "
+                         "original weights, KV and sampling state unchanged\n",
+                 double(dense_bytes + expert_bytes + head_bytes) / 1048576.0, ms_since(start));
     return true;
 }
 

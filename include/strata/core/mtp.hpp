@@ -50,6 +50,8 @@ public:
     void set_prompt_len(int64_t n) { prompt_len_ = n; }
     /// At most this many drafts per round (below max_t - 1): a window longer than the MTP's comes from elsewhere.
     void set_max_drafts(int k) { max_drafts_ = k; }
+    /// Optional draft floor: confidence gating applies only after these first guesses.
+    void set_min_drafts(int k) { min_drafts_ = k; }
     /// --mtp-hnorm stream (opt-in; before the first draft or prefill): pre_fc_norm_hidden normalizes each
     /// hyper-connection stream on its own, as llama.cpp's qwen4exp MTP graph does, instead of one RMS over all four.
     void set_hnorm_per_stream(bool on) { hnorm_stream_ = on; }
@@ -60,12 +62,17 @@ public:
     void set_q4(bool proj, bool head) { q4_ = proj; q4_head_ = head; }
     /// --mtp-draft-vocab FILE (opt-in; before bind): the draft head's token subset from FILE instead of
     /// rt/draft_vocab.bin (e.g. data/draft_vocab_en.bin, 40K tokens)
+    /// Native safetensors keeps the full head unless this explicit file is supplied.
     void set_draft_vocab(const std::string& path) { dvocab_path_ = path; }
     /// STRATA_MTP_TOP2=1 (diagnostic): draft j's runner-up token in the last draft() (-1 = unknown)
     static bool top2_env();
     int32_t top2(int j) const { return j >= 0 && j < (int) top2_.size() ? top2_[(size_t) j] : -1; }
     int max_t() const { return max_t_; }
     uint64_t vram_bytes() const { return vram_; }
+    /// Native startup only: read immutable dense/FP8 weights into a disposable device scratch buffer.
+    /// Finishes on the drafter's stream; does not run a forward pass or touch its KV/sampling state.
+    /// A caller warming other buffers into the same scratch must finish those copies first.
+    bool warm_native_weights(void* scratch, size_t scratch_bytes, std::string& err) const;
     /// The draft layer's K/V state (read-only: --serve's STRATA_STATE_HASH check hashes it)
     const QsaState& kv_state() const { return st_; }
     /// KV streaming: refill the ring of the drafter's window from its host copy for a sequence that continues at
@@ -198,6 +205,7 @@ private:
     int max_t_ = 0;
     int device_ = -1;   ///< the device `load` ran on: the public calls switch to it (layer split)
     int max_drafts_ = 1 << 30;
+    int min_drafts_ = 0;
     bool hnorm_stream_ = false;
     bool q4_ = false, q4_head_ = false;
     uint8_t* dense4_ = nullptr;              ///< --mtp-q4: Q4_0 copies of the Q8_0 tensors

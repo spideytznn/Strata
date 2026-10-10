@@ -1,0 +1,74 @@
+{
+  "status": "pass",
+  "requests": 24,
+  "generated_tokens": 49152,
+  "reference": null,
+  "reference_warm_aggregate_tok_s": 91.93434714493276,
+  "profiles": [
+    {
+      "config": "logs\\p16-speed-configs\\desktop-before.json",
+      "exe_sha256": "794241315ca5fdd54c8b90c9a4fdca61bf1e465f41d7bbaf7475d5f03a6ce6d0",
+      "expert_slots": 4041,
+      "vram_free_mib": 3287,
+      "prefill": 4096,
+      "warm_aggregate_tok_s": 91.93434714493276,
+      "ratio_to_reference": 1.0,
+      "all_aggregate_tok_s": 91.57567848947826,
+      "warm_by_case": {
+        "english-0-warm": 89.05896677683076,
+        "chinese-0-warm": 97.14033648122411,
+        "code-0-warm": 90.01643854883655
+      },
+      "all_outputs_exact": true
+    },
+    {
+      "config": "logs\\p16-speed-configs\\candidate-full4k.json",
+      "exe_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+      "expert_slots": 4813,
+      "vram_free_mib": 1139,
+      "prefill": 4096,
+      "warm_aggregate_tok_s": 100.81783215406226,
+      "ratio_to_reference": 1.0966285755543013,
+      "all_aggregate_tok_s": 99.71039518196255,
+      "warm_by_case": {
+        "english-0-warm": 95.04803452916879,
+        "chinese-0-warm": 107.32290149141103,
+        "code-0-warm": 100.82709728239465
+      },
+      "all_outputs_exact": true
+    },
+    {
+      "config": "logs\\p16-speed-configs\\candidate-full8k.json",
+      "exe_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+      "expert_slots": 4221,
+      "vram_free_mib": 1233,
+      "prefill": 8192,
+      "warm_aggregate_tok_s": 94.71220992073403,
+      "ratio_to_reference": 1.0302157230901092,
+      "all_aggregate_tok_s": 94.42364156515178,
+      "warm_by_case": {
+        "english-0-warm": 90.51813677608695,
+        "chinese-0-warm": 100.1986359677877,
+        "code-0-warm": 93.92125839811057
+      },
+      "all_outputs_exact": true
+    },
+    {
+      "config": "logs\\p16-speed-configs\\candidate-subset8k.json",
+      "exe_sha256": "73aaf99e46aa832934e9d13f1bb28c52ac197e4bc81704caa1cb105b83d0661b",
+      "expert_slots": 3990,
+      "vram_free_mib": 1231,
+      "prefill": 8192,
+      "warm_aggregate_tok_s": 96.62397954289183,
+      "ratio_to_reference": 1.0510106673250854,
+      "all_aggregate_tok_s": 96.76291510881103,
+      "warm_by_case": {
+        "english-0-warm": 91.46899745869827,
+        "chinese-0-warm": 103.45419828047807,
+        "code-0-warm": 95.69914581035867
+      },
+      "all_outputs_exact": true
+    }
+  ],
+  "limitation": "Finite matched-output runs; startup excluded. A single fresh engine per profile is a screen, not a repeated estimate."
+}

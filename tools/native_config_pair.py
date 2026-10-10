@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / 'tools')]
-from serve.server import StrataEngine, child_env
+from serve.server import StrataEngine, Vision, child_env, vision_env
 from conversation_cache_parity import state_hashes
 from native_telemetry import Telemetry
 from safetensors_tokenizer import SafetensorsTokenizer
@@ -34,12 +34,16 @@ def main():
                    help='own warm/restore state must match; report is for legacy mixed-provider arithmetic')
     p.add_argument('--long-restore', action='store_true',
                    help='save the last long session, then restore it after the short A/B/A sequence')
+    p.add_argument('--desktop-vision', action='store_true', help='Load the configured GPU encoder before cache sizing.')
+    p.add_argument('--verify-snapshots', action='store_true', help='Verify restored KV and resident expert bytes (diagnostic timing).')
+    p.add_argument('--expected-text', help='Require this decoded text in each long fixture answer.')
     p.add_argument('--output', type=Path, required=True)
     a = p.parse_args()
     a.output.mkdir(parents=True, exist_ok=False)
-    fixtures = {name: ids for name, ids, _ in json.loads(a.fixture.read_text())}
+    fixtures = {name: ids for name, ids, _ in json.loads(a.fixture.read_text(encoding='utf-8'))}
     results = {'runs': [], 'state_comparison': a.state_comparison,
                'self_state_comparison': a.self_state_comparison,
+               'expected_text': a.expected_text,
                'note': 'Private stdin engines only; state hashing adds overhead.'}
     reference = None
     if a.reference:
@@ -64,13 +68,20 @@ def main():
         log = folder / 'engine.log'
         env = child_env(cfg)
         env['STRATA_STATE_HASH'] = '1'
+        if a.verify_snapshots:
+            env['STRATA_SNAPSHOT_VERIFY'] = '1'
+            env['STRATA_KVG_CHECK'] = '2'
         row = {'config_path': str(path), 'config': cfg, 'requests': [],
+               'diagnostic_env':{key:env[key] for key in ('STRATA_STATE_HASH','STRATA_SNAPSHOT_VERIFY','STRATA_KVG_CHECK') if key in env},
                'exe_sha256': hashlib.sha256(Path(cfg['exe']).read_bytes()).hexdigest()}
         results['runs'].append(row)
         save()
         tel = Telemetry(folder / 'telemetry.jsonl')
-        engine = None
+        engine = vision = None
+        vision_log = (folder / 'vision.log').open('w', encoding='utf-8')
         try:
+            if a.desktop_vision and cfg.get('vision'):
+                vision = Vision(cfg['vision'], log=vision_log, env=vision_env(cfg,env))
             engine = StrataEngine(cfg['exe'], cfg['args'], cwd=cfg['cwd'], log=str(log.resolve()), env=env)
             tel.pid = engine.proc.pid
             row['info'] = dict(engine.info)
@@ -79,7 +90,7 @@ def main():
             def generate(name, ids, limit):
                 start = time.monotonic()
                 out = [v for v in engine.generate(ids, limit, {'temperature': 0}, threading.Event()) if v is not None]
-                record = {'name': name, 'ids': out, 'wall_s': time.monotonic()-start, **engine.last}
+                record = {'name': name, 'ids': out, 'text':tok.decode(out), 'wall_s': time.monotonic()-start, **engine.last}
                 row['requests'].append(record)
                 save()
                 assert 0 < len(out) <= limit and record['generated'] == len(out), name
@@ -95,6 +106,8 @@ def main():
                 initial = generate(case+'-initial', ids, 128)
                 warm = generate(case+'-warm', ids, 128)
                 assert warm == initial, f'{case}: prefix reuse changed output'
+                if a.expected_text:
+                    assert a.expected_text in tok.decode(initial), f'{case}: expected answer absent'
                 chunk = int(cfg['args'][cfg['args'].index('--prefill')+1])
                 # Prompt checkpoints follow chunk boundaries; the small tail
                 # after the last full chunk is legitimately read again.
@@ -131,6 +144,9 @@ def main():
             row['telemetry'] = tel.close()
             if engine:
                 engine.close()
+            if vision:
+                vision.shutdown()
+            vision_log.close()
             save()
         text = log.read_text(encoding='utf8')
         row['states'] = state_hashes(text)
@@ -151,9 +167,22 @@ def main():
                 assert row['committed_state_equal'], 'committed state differs'
         assert 'post-residency expert source bytes=0' in text
         assert 'post-residency MTP source bytes=0' in text
+        if a.verify_snapshots:
+            audits=re.findall(r'strata kvg audit \[[^\]]+\] #\d+:[^\n]*',text)
+            assert audits,'missing resident expert audits'
+            for line in audits:
+                counts=re.search(r'(\d+) out of range, (\d+) in the K/V.s slots, (\d+) duplicate, (\d+) d_res mismatches; content (\d+) bad of \d+ \((\d+) without a RAM blob\)',line)
+                assert counts and all(int(value)==0 for value in counts.groups()), 'resident expert audit errors'
+                resident=re.search(r'(\d+) resident;',line)
+                checked=re.search(r'bad of (\d+)',line)
+                assert resident and checked and int(resident[1])==int(checked[1])>0,'incomplete resident expert read-back'
+            assert not re.search(r'[1-9]\d* aliased chunks',text),'resident expert alias errors'
+            row['resident_audits']=audits
+            assert 'SNAPSHOT_VERIFY draft=' in text,'missing restored draft KV verification'
         chunks = re.findall(r'strata prefill executed: tokens=(\d+) max_chunk=(\d+) capacity=(\d+)', text)
-        assert any(int(total) >= 8192 and int(maximum) == int(capacity) == 8192
-                   for total, maximum, capacity in chunks), '8192 prefill was not executed'
+        requested_chunk = int(cfg['args'][cfg['args'].index('--prefill')+1])
+        assert any(int(total) >= requested_chunk and int(maximum) == int(capacity) == requested_chunk
+                   for total, maximum, capacity in chunks), 'configured full prefill chunk was not executed'
         row['status'] = 'pass'
         save()
     results['status'] = 'pass'

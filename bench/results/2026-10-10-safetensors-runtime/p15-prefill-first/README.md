@@ -1,9 +1,9 @@
 # Allocate the prompt workspace before the expert cache
 
-Requested after the real desktop fallback in P14. This record describes an
-implemented allocation policy and build checks, **not a measured speedup**.
-The user's efficiency12 engine and visual sidecar remain running; no model
-was loaded alongside them and no HTTP request was sent to their server.
+Requested after the real desktop fallback in P14. The initial implementation
+commit `f72d339d` recorded build checks while the user's service was running.
+After the user released resources, private GPU acceptance completed below.
+No HTTP request was sent to the user's server.
 
 ## Allocation order
 
@@ -42,7 +42,7 @@ thinking sampling, wildcard Host headers and loopback port 8880. The desktop
 shortcut still points at `START-NATIVE-262K.bat`. The active process keeps the
 configuration it loaded before this change.
 
-## Checks completed
+## Initial build checks
 
 - Release CUDA SM120 / MSVC engine builds successfully. HIP and SYCL toolchains
   are unavailable and were not built.
@@ -56,12 +56,13 @@ configuration it loaded before this change.
   separately from inference acceptance.
 
 `validation.json` records hashes, config checks and the pending runtime status.
-There is no inference correctness, cache-reuse, zero-expert-I/O or performance
-pass claimed for efficiency14 yet. Earlier acceptance results remain historical.
+That initial file is retained as build-time history. The subsequent GPU pass
+is recorded in `runtime/validation.json` and `runtime/audited-summary.json`.
 
-## Pending private acceptance
+## Private acceptance procedure
 
-Once the existing user service has stopped and resources are free:
+Executed after the user explicitly released resources (actual output directory:
+`logs/p15-prefill-first-validated`):
 
 ```powershell
 .\.venv-native\Scripts\python.exe tools/native_visual_performance.py --config config/native/rtx5090-262k-mtp2.json --prefill-first --output logs/p15-prefill-first-runtime --rounds 3 --new 128
@@ -79,3 +80,26 @@ Reserve-only 3072's actual capacity is recorded rather than assumed.
 Image preparation, prefill, decode and TTFT are reported separately. This
 finite suite does not replace the earlier full 262K/cache-restore acceptance;
 long-context acceptance of the changed cache sizing remains pending too.
+
+## Measured acceptance
+
+Three fresh engines per profile, RTX 5090 32 GB / Ryzen 9950X3D / 96 GB,
+Windows / CUDA 13; same efficiency14 SHA256 in every run. GPU vision loaded
+first, official thinking sampling, seed 9950, 128 generated tokens per request.
+Startup is excluded. All 63 requests met their output limit; own-cache and
+repeat outputs match, and outputs match across the allocation order. Every
+post-residency expert/MTP source counter is zero. All profiles actually used
+4096 capacity; the prefill-first profile ended with 3286 MiB free each time.
+
+| Allocation / reserve | 8K text prefill | 24K text prefill | Image 8K prefill | 24K decode |
+| --- | ---: | ---: | ---: | ---: |
+| Reserve only / 3072 MiB | 2744 | 3095 | 2839 | 114.2 |
+| Reserve only / 3584 MiB | 2733 | 3068 | 2824 | 113.5 |
+| Prefill first / 3072 MiB | 2661 | 2979 | 2761 | 104.8 |
+
+Values are three-run medians in tokens/s for the cold requests. The fixed
+workspace is correct, but the old reserve is conservative after the allocation
+order changes: cache slots fall from 4998 to 4055, with about 3.2 GiB still free.
+This is a correctness/capacity pass, **not a speedup**. A smaller reserve needs
+its own measured acceptance before changing the desktop profile. Long-context
+KV growth and disk restore on this allocation policy remain pending here.
