@@ -1,0 +1,14 @@
+[
+  {
+    "Path": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency5.exe",
+    "Hash": "8D46167FE146B4A747D7F21BACF55C58EBBE46D23AF023A4264C1C9F52EA8560"
+  },
+  {
+    "Path": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_gpu_reuse_bench.exe",
+    "Hash": "1A5AF89E8B48CFBC442D0F1501AB20B5FDA7CB38D53CBB6294C5A820F0B80A88"
+  },
+  {
+    "Path": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+    "Hash": "68608F6C31CA4B8A01E4D310B81136574F211B14F7D1DD0CE107AA34BF331ED3"
+  }
+]

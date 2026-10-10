@@ -1,0 +1,1647 @@
+{
+  "note": "Canonical GPU arithmetic vs original GPU; same original weights, no draft tokens, 234 fixed teacher targets. Finite suite is not general quality proof.",
+  "positions": 234,
+  "top1_agreement": 0.9914529914529915,
+  "mean_nll_delta": -0.0005008503908488879,
+  "mean_kl": 9.994313607185176e-05,
+  "rows": [
+    {
+      "name": "teacher-english-0",
+      "nll_delta": -0.0026206023535237932,
+      "argmax_equal": true,
+      "max_abs": 0.008853316307067871,
+      "kl": 2.802914543604551e-08
+    },
+    {
+      "name": "teacher-english-1",
+      "nll_delta": 0.00032734047661264754,
+      "argmax_equal": true,
+      "max_abs": 0.01006019115447998,
+      "kl": 1.563874828944434e-07
+    },
+    {
+      "name": "teacher-english-2",
+      "nll_delta": -7.303701106664562e-05,
+      "argmax_equal": true,
+      "max_abs": 0.005623936653137207,
+      "kl": 4.0068711237620426e-08
+    },
+    {
+      "name": "teacher-english-3",
+      "nll_delta": 1.242553088331988e-05,
+      "argmax_equal": true,
+      "max_abs": 0.006978034973144531,
+      "kl": 2.6158460500898773e-08
+    },
+    {
+      "name": "teacher-english-4",
+      "nll_delta": 0.0007671385770535721,
+      "argmax_equal": true,
+      "max_abs": 0.008131980895996094,
+      "kl": 3.598728991177128e-07
+    },
+    {
+      "name": "teacher-english-5",
+      "nll_delta": -0.0013311784672787041,
+      "argmax_equal": true,
+      "max_abs": 0.006438255310058594,
+      "kl": 2.9096887651454373e-07
+    },
+    {
+      "name": "teacher-english-6",
+      "nll_delta": 3.2492251911264702e-06,
+      "argmax_equal": true,
+      "max_abs": 0.004789113998413086,
+      "kl": 2.0736365193120617e-07
+    },
+    {
+      "name": "teacher-english-7",
+      "nll_delta": -0.0001196348498346822,
+      "argmax_equal": true,
+      "max_abs": 0.006160736083984375,
+      "kl": 2.3612737927515914e-07
+    },
+    {
+      "name": "teacher-english-8",
+      "nll_delta": 0.00018980498656873124,
+      "argmax_equal": true,
+      "max_abs": 0.006949305534362793,
+      "kl": 8.786230291324744e-09
+    },
+    {
+      "name": "teacher-english-9",
+      "nll_delta": 0.00010346041260334005,
+      "argmax_equal": true,
+      "max_abs": 0.007558107376098633,
+      "kl": 5.553895826137574e-08
+    },
+    {
+      "name": "teacher-english-10",
+      "nll_delta": 8.977162860190901e-06,
+      "argmax_equal": true,
+      "max_abs": 0.006067037582397461,
+      "kl": 2.3363229363369616e-08
+    },
+    {
+      "name": "teacher-english-11",
+      "nll_delta": 3.9008884243685316e-05,
+      "argmax_equal": true,
+      "max_abs": 0.004539012908935547,
+      "kl": 2.8493926574476667e-08
+    },
+    {
+      "name": "teacher-english-12",
+      "nll_delta": -0.0002631116545792622,
+      "argmax_equal": true,
+      "max_abs": 0.03664219379425049,
+      "kl": 9.968328654590165e-07
+    },
+    {
+      "name": "teacher-english-13",
+      "nll_delta": -2.373247011533408e-05,
+      "argmax_equal": true,
+      "max_abs": 0.12987929582595825,
+      "kl": 1.1890470938010492e-06
+    },
+    {
+      "name": "teacher-english-14",
+      "nll_delta": -0.003189670768929176,
+      "argmax_equal": true,
+      "max_abs": 0.044089317321777344,
+      "kl": 3.6741346798085508e-06
+    },
+    {
+      "name": "teacher-english-15",
+      "nll_delta": -0.015506870618999358,
+      "argmax_equal": true,
+      "max_abs": 0.26701831817626953,
+      "kl": 0.0001993550353497197
+    },
+    {
+      "name": "teacher-english-16",
+      "nll_delta": -0.009313430246848498,
+      "argmax_equal": true,
+      "max_abs": 0.07551980018615723,
+      "kl": 1.2290026071140726e-05
+    },
+    {
+      "name": "teacher-english-17",
+      "nll_delta": 0.006721513929051071,
+      "argmax_equal": true,
+      "max_abs": 0.019522666931152344,
+      "kl": 1.2141333472123004e-05
+    },
+    {
+      "name": "teacher-english-18",
+      "nll_delta": 7.13371288689757e-05,
+      "argmax_equal": true,
+      "max_abs": 0.01813793182373047,
+      "kl": 5.56149552914108e-07
+    },
+    {
+      "name": "teacher-english-19",
+      "nll_delta": -5.879499249417108e-05,
+      "argmax_equal": true,
+      "max_abs": 0.023664474487304688,
+      "kl": 3.575051426641998e-07
+    },
+    {
+      "name": "teacher-english-20",
+      "nll_delta": -0.002742484935687628,
+      "argmax_equal": true,
+      "max_abs": 0.02367877960205078,
+      "kl": 1.6380723534666123e-05
+    },
+    {
+      "name": "teacher-english-21",
+      "nll_delta": -0.0007819759199989562,
+      "argmax_equal": true,
+      "max_abs": 0.029204368591308594,
+      "kl": 2.3228272124201483e-06
+    },
+    {
+      "name": "teacher-english-22",
+      "nll_delta": -0.0011162474486496876,
+      "argmax_equal": true,
+      "max_abs": 0.023350834846496582,
+      "kl": 2.9431435130852806e-06
+    },
+    {
+      "name": "teacher-english-23",
+      "nll_delta": 0.00019794033827835733,
+      "argmax_equal": true,
+      "max_abs": 0.04169183969497681,
+      "kl": 2.0491192980338147e-06
+    },
+    {
+      "name": "teacher-english-24",
+      "nll_delta": 0.0009351267931094753,
+      "argmax_equal": true,
+      "max_abs": 0.036670684814453125,
+      "kl": 4.415416429383112e-06
+    },
+    {
+      "name": "teacher-english-25",
+      "nll_delta": -0.007092579950729316,
+      "argmax_equal": true,
+      "max_abs": 0.03466224670410156,
+      "kl": 2.1855224863303447e-06
+    },
+    {
+      "name": "teacher-english-26",
+      "nll_delta": 0.005836536342222587,
+      "argmax_equal": true,
+      "max_abs": 0.01605510711669922,
+      "kl": 3.3535828413431867e-06
+    },
+    {
+      "name": "teacher-english-27",
+      "nll_delta": 0.0023711471220231317,
+      "argmax_equal": true,
+      "max_abs": 0.012882232666015625,
+      "kl": 1.7992540684372394e-06
+    },
+    {
+      "name": "teacher-english-28",
+      "nll_delta": 0.001723002411690544,
+      "argmax_equal": true,
+      "max_abs": 0.03351867198944092,
+      "kl": 5.488427785858934e-06
+    },
+    {
+      "name": "teacher-english-29",
+      "nll_delta": -0.00016587812020318893,
+      "argmax_equal": true,
+      "max_abs": 0.025597572326660156,
+      "kl": 8.439581274352391e-07
+    },
+    {
+      "name": "teacher-english-30",
+      "nll_delta": 0.00038011754254796415,
+      "argmax_equal": true,
+      "max_abs": 0.032003045082092285,
+      "kl": 2.618487041372355e-06
+    },
+    {
+      "name": "teacher-english-31",
+      "nll_delta": 0.006071259720968669,
+      "argmax_equal": true,
+      "max_abs": 0.040677011013031006,
+      "kl": 1.4772184393208303e-05
+    },
+    {
+      "name": "teacher-english-32",
+      "nll_delta": -0.01682595913251106,
+      "argmax_equal": true,
+      "max_abs": 0.3122960329055786,
+      "kl": 0.0005068290880534385
+    },
+    {
+      "name": "teacher-english-33",
+      "nll_delta": 0.045971041445223904,
+      "argmax_equal": true,
+      "max_abs": 0.13745784759521484,
+      "kl": 8.339379527732643e-05
+    },
+    {
+      "name": "teacher-english-34",
+      "nll_delta": 0.006394694940315304,
+      "argmax_equal": true,
+      "max_abs": 0.11363077163696289,
+      "kl": 7.940693555334576e-05
+    },
+    {
+      "name": "teacher-english-35",
+      "nll_delta": -0.0013883426209595484,
+      "argmax_equal": true,
+      "max_abs": 0.08949661254882812,
+      "kl": 8.838034516349825e-05
+    },
+    {
+      "name": "teacher-english-36",
+      "nll_delta": 0.00038695652656883794,
+      "argmax_equal": true,
+      "max_abs": 0.0793466567993164,
+      "kl": 7.635110047740949e-06
+    },
+    {
+      "name": "teacher-english-37",
+      "nll_delta": -0.007657906336135056,
+      "argmax_equal": true,
+      "max_abs": 0.031221389770507812,
+      "kl": 2.1257386927060945e-05
+    },
+    {
+      "name": "teacher-english-38",
+      "nll_delta": 0.00024239272961068536,
+      "argmax_equal": true,
+      "max_abs": 0.26318931579589844,
+      "kl": 1.893365457189426e-05
+    },
+    {
+      "name": "teacher-english-39",
+      "nll_delta": 5.035092027583232e-05,
+      "argmax_equal": true,
+      "max_abs": 0.04366612434387207,
+      "kl": 4.845645848596234e-07
+    },
+    {
+      "name": "teacher-english-40",
+      "nll_delta": 0.0007523547437244815,
+      "argmax_equal": true,
+      "max_abs": 0.031731605529785156,
+      "kl": 2.489188469866533e-06
+    },
+    {
+      "name": "teacher-english-41",
+      "nll_delta": 0.003137480145682048,
+      "argmax_equal": true,
+      "max_abs": 0.7839870452880859,
+      "kl": 5.121110916901482e-05
+    },
+    {
+      "name": "teacher-english-42",
+      "nll_delta": -0.002922502314902431,
+      "argmax_equal": true,
+      "max_abs": 0.053211212158203125,
+      "kl": 4.4213968876684914e-05
+    },
+    {
+      "name": "teacher-english-43",
+      "nll_delta": 0.005865492699022923,
+      "argmax_equal": true,
+      "max_abs": 0.038939476013183594,
+      "kl": 1.3360633659642436e-05
+    },
+    {
+      "name": "teacher-english-44",
+      "nll_delta": 0.0029940587505201677,
+      "argmax_equal": true,
+      "max_abs": 0.031577110290527344,
+      "kl": 1.7993741839837916e-05
+    },
+    {
+      "name": "teacher-english-45",
+      "nll_delta": 0.001548964449558099,
+      "argmax_equal": true,
+      "max_abs": 0.03161430358886719,
+      "kl": 4.192938179008004e-06
+    },
+    {
+      "name": "teacher-english-46",
+      "nll_delta": 4.574401301482567e-05,
+      "argmax_equal": true,
+      "max_abs": 0.10249114036560059,
+      "kl": 2.741822886858715e-06
+    },
+    {
+      "name": "teacher-english-47",
+      "nll_delta": 0.0020514965014371,
+      "argmax_equal": true,
+      "max_abs": 0.06370067596435547,
+      "kl": 5.3290759689998313e-05
+    },
+    {
+      "name": "teacher-english-48",
+      "nll_delta": 0.0003576817356183426,
+      "argmax_equal": true,
+      "max_abs": 0.03853130340576172,
+      "kl": 8.424008330131522e-07
+    },
+    {
+      "name": "teacher-english-49",
+      "nll_delta": 0.004020086638117704,
+      "argmax_equal": true,
+      "max_abs": 0.031748414039611816,
+      "kl": 1.2576268355804644e-05
+    },
+    {
+      "name": "teacher-english-50",
+      "nll_delta": 0.0010278827763698928,
+      "argmax_equal": true,
+      "max_abs": 0.06954288482666016,
+      "kl": 4.004957849166898e-06
+    },
+    {
+      "name": "teacher-english-51",
+      "nll_delta": -5.712221910769699e-05,
+      "argmax_equal": true,
+      "max_abs": 0.08062934875488281,
+      "kl": 4.897966440144085e-07
+    },
+    {
+      "name": "teacher-english-52",
+      "nll_delta": 0.0007148363273792313,
+      "argmax_equal": true,
+      "max_abs": 0.06596755981445312,
+      "kl": 6.0254922540271874e-06
+    },
+    {
+      "name": "teacher-english-53",
+      "nll_delta": -0.057670766678239005,
+      "argmax_equal": true,
+      "max_abs": 0.12185478210449219,
+      "kl": 0.00037146155235383467
+    },
+    {
+      "name": "teacher-english-54",
+      "nll_delta": 0.005525227545678746,
+      "argmax_equal": true,
+      "max_abs": 0.05740213394165039,
+      "kl": 2.2265138687979477e-05
+    },
+    {
+      "name": "teacher-english-55",
+      "nll_delta": 0.017772838336426844,
+      "argmax_equal": true,
+      "max_abs": 0.21724990010261536,
+      "kl": 0.00046002751796083325
+    },
+    {
+      "name": "teacher-english-56",
+      "nll_delta": 0.01453438370718274,
+      "argmax_equal": true,
+      "max_abs": 0.20166778564453125,
+      "kl": 0.00032374289289535137
+    },
+    {
+      "name": "teacher-english-57",
+      "nll_delta": -0.006869429383471015,
+      "argmax_equal": true,
+      "max_abs": 0.10921812057495117,
+      "kl": 0.00027229971763097216
+    },
+    {
+      "name": "teacher-english-58",
+      "nll_delta": 0.001167603877668455,
+      "argmax_equal": true,
+      "max_abs": 0.41968679428100586,
+      "kl": 0.0003433368706303145
+    },
+    {
+      "name": "teacher-english-59",
+      "nll_delta": -0.213309176886451,
+      "argmax_equal": true,
+      "max_abs": 0.32673192024230957,
+      "kl": 0.0008958444673177607
+    },
+    {
+      "name": "teacher-english-60",
+      "nll_delta": 0.003963196294865412,
+      "argmax_equal": true,
+      "max_abs": 0.4344806671142578,
+      "kl": 0.0013568938470450134
+    },
+    {
+      "name": "teacher-english-61",
+      "nll_delta": 0.0020818534741842143,
+      "argmax_equal": true,
+      "max_abs": 0.3003498315811157,
+      "kl": 6.768326879368284e-05
+    },
+    {
+      "name": "teacher-english-62",
+      "nll_delta": -0.022265823523692774,
+      "argmax_equal": true,
+      "max_abs": 0.3080458641052246,
+      "kl": 0.0007742291008623655
+    },
+    {
+      "name": "teacher-english-63",
+      "nll_delta": -0.009256695207394472,
+      "argmax_equal": true,
+      "max_abs": 0.10239505767822266,
+      "kl": 0.00017855681164685732
+    },
+    {
+      "name": "teacher-english-64",
+      "nll_delta": -0.005931925612919997,
+      "argmax_equal": true,
+      "max_abs": 0.04320526123046875,
+      "kl": 2.019053341116044e-05
+    },
+    {
+      "name": "teacher-english-65",
+      "nll_delta": -0.101801364197172,
+      "argmax_equal": true,
+      "max_abs": 0.09971046447753906,
+      "kl": 0.00017406152137102078
+    },
+    {
+      "name": "teacher-english-66",
+      "nll_delta": 8.519292790154509e-05,
+      "argmax_equal": true,
+      "max_abs": 0.054114341735839844,
+      "kl": 1.42570455219078e-06
+    },
+    {
+      "name": "teacher-english-67",
+      "nll_delta": 0.0028883051475148136,
+      "argmax_equal": true,
+      "max_abs": 0.31872427463531494,
+      "kl": 8.317399224207407e-05
+    },
+    {
+      "name": "teacher-chinese-0",
+      "nll_delta": 0.034187581264660594,
+      "argmax_equal": true,
+      "max_abs": 0.05955982208251953,
+      "kl": 4.886847667923613e-07
+    },
+    {
+      "name": "teacher-chinese-1",
+      "nll_delta": 1.807829185551668e-05,
+      "argmax_equal": true,
+      "max_abs": 0.03057551383972168,
+      "kl": 1.4018471941554832e-07
+    },
+    {
+      "name": "teacher-chinese-2",
+      "nll_delta": -0.01718329551042075,
+      "argmax_equal": true,
+      "max_abs": 0.03776121139526367,
+      "kl": 9.474659130196696e-06
+    },
+    {
+      "name": "teacher-chinese-3",
+      "nll_delta": -0.005164532162243773,
+      "argmax_equal": true,
+      "max_abs": 0.039398193359375,
+      "kl": 1.6899653092643966e-05
+    },
+    {
+      "name": "teacher-chinese-4",
+      "nll_delta": 0.001367307937037765,
+      "argmax_equal": true,
+      "max_abs": 0.037250518798828125,
+      "kl": 6.145980820580105e-06
+    },
+    {
+      "name": "teacher-chinese-5",
+      "nll_delta": 0.007770205175905431,
+      "argmax_equal": true,
+      "max_abs": 0.0415499210357666,
+      "kl": 2.5718191785058795e-05
+    },
+    {
+      "name": "teacher-chinese-6",
+      "nll_delta": -0.07768459073515643,
+      "argmax_equal": true,
+      "max_abs": 0.29375553131103516,
+      "kl": 0.0015135392991477057
+    },
+    {
+      "name": "teacher-chinese-7",
+      "nll_delta": 0.02889177978316937,
+      "argmax_equal": true,
+      "max_abs": 0.2175588607788086,
+      "kl": 0.0003601031268510105
+    },
+    {
+      "name": "teacher-chinese-8",
+      "nll_delta": 0.0064113537855803315,
+      "argmax_equal": true,
+      "max_abs": 0.10572290420532227,
+      "kl": 3.5604894274610025e-05
+    },
+    {
+      "name": "teacher-chinese-9",
+      "nll_delta": 1.6261177556486928e-05,
+      "argmax_equal": true,
+      "max_abs": 0.09583187103271484,
+      "kl": 1.9915456265686146e-07
+    },
+    {
+      "name": "teacher-chinese-10",
+      "nll_delta": 0.00556348583536348,
+      "argmax_equal": true,
+      "max_abs": 0.29166820645332336,
+      "kl": 0.0004668857970199215
+    },
+    {
+      "name": "teacher-chinese-11",
+      "nll_delta": -0.001112947740232073,
+      "argmax_equal": true,
+      "max_abs": 0.19085168838500977,
+      "kl": 3.482361482145164e-05
+    },
+    {
+      "name": "teacher-chinese-12",
+      "nll_delta": -0.000436864027726358,
+      "argmax_equal": true,
+      "max_abs": 0.1197199821472168,
+      "kl": 3.252498649336843e-05
+    },
+    {
+      "name": "teacher-chinese-13",
+      "nll_delta": -0.013508180689424165,
+      "argmax_equal": true,
+      "max_abs": 0.25052642822265625,
+      "kl": 0.0005128235284347244
+    },
+    {
+      "name": "teacher-chinese-14",
+      "nll_delta": 0.0006836525060656129,
+      "argmax_equal": true,
+      "max_abs": 0.34477025270462036,
+      "kl": 2.61021605794213e-05
+    },
+    {
+      "name": "teacher-chinese-15",
+      "nll_delta": 0.00018133701683709091,
+      "argmax_equal": true,
+      "max_abs": 0.5864138603210449,
+      "kl": 1.869176678329462e-05
+    },
+    {
+      "name": "teacher-chinese-16",
+      "nll_delta": 0.0011966329686146082,
+      "argmax_equal": true,
+      "max_abs": 0.3447883129119873,
+      "kl": 6.873377143616958e-05
+    },
+    {
+      "name": "teacher-chinese-17",
+      "nll_delta": 0.005357773610789707,
+      "argmax_equal": true,
+      "max_abs": 0.10008621215820312,
+      "kl": 0.0002279290294746398
+    },
+    {
+      "name": "teacher-chinese-18",
+      "nll_delta": 0.0008974488392361479,
+      "argmax_equal": true,
+      "max_abs": 0.0646519660949707,
+      "kl": 3.005808694001139e-06
+    },
+    {
+      "name": "teacher-chinese-19",
+      "nll_delta": -0.00109486252818769,
+      "argmax_equal": true,
+      "max_abs": 0.0782175064086914,
+      "kl": 1.1480469586493881e-05
+    },
+    {
+      "name": "teacher-chinese-20",
+      "nll_delta": -0.003912415404474956,
+      "argmax_equal": true,
+      "max_abs": 0.08319950103759766,
+      "kl": 1.611437352716118e-05
+    },
+    {
+      "name": "teacher-chinese-21",
+      "nll_delta": 6.499937204651474e-05,
+      "argmax_equal": true,
+      "max_abs": 0.09267282485961914,
+      "kl": 8.836260165271398e-07
+    },
+    {
+      "name": "teacher-chinese-22",
+      "nll_delta": 0.0013514164979753218,
+      "argmax_equal": true,
+      "max_abs": 0.11310291290283203,
+      "kl": 4.750361146522907e-06
+    },
+    {
+      "name": "teacher-chinese-23",
+      "nll_delta": -0.0029467251268222583,
+      "argmax_equal": true,
+      "max_abs": 0.35402417182922363,
+      "kl": 0.0004588068512873197
+    },
+    {
+      "name": "teacher-chinese-24",
+      "nll_delta": 0.0035160857108458288,
+      "argmax_equal": true,
+      "max_abs": 0.09508323669433594,
+      "kl": 5.9153573336896725e-05
+    },
+    {
+      "name": "teacher-chinese-25",
+      "nll_delta": 0.0013412000305770277,
+      "argmax_equal": true,
+      "max_abs": 0.5205067992210388,
+      "kl": 7.890105660792491e-05
+    },
+    {
+      "name": "teacher-chinese-26",
+      "nll_delta": 0.0017948684503430457,
+      "argmax_equal": true,
+      "max_abs": 0.08190345764160156,
+      "kl": 3.1105935480453024e-05
+    },
+    {
+      "name": "teacher-chinese-27",
+      "nll_delta": -0.0006037209583951153,
+      "argmax_equal": true,
+      "max_abs": 0.263871431350708,
+      "kl": 0.00025031698763129586
+    },
+    {
+      "name": "teacher-chinese-28",
+      "nll_delta": 0.0009518414819496002,
+      "argmax_equal": true,
+      "max_abs": 0.07954931259155273,
+      "kl": 7.520503953239086e-06
+    },
+    {
+      "name": "teacher-chinese-29",
+      "nll_delta": 0.00013255072283868685,
+      "argmax_equal": true,
+      "max_abs": 0.0931018590927124,
+      "kl": 6.531732584217432e-06
+    },
+    {
+      "name": "teacher-chinese-30",
+      "nll_delta": 0.013655248413311227,
+      "argmax_equal": true,
+      "max_abs": 0.20052433013916016,
+      "kl": 0.0015070525991506235
+    },
+    {
+      "name": "teacher-chinese-31",
+      "nll_delta": -0.015421938584033512,
+      "argmax_equal": true,
+      "max_abs": 0.08987146615982056,
+      "kl": 0.00010963275546102087
+    },
+    {
+      "name": "teacher-chinese-32",
+      "nll_delta": -0.021191714046150167,
+      "argmax_equal": true,
+      "max_abs": 0.08299946784973145,
+      "kl": 4.388442466459579e-06
+    },
+    {
+      "name": "teacher-chinese-33",
+      "nll_delta": -0.0004872592869169523,
+      "argmax_equal": true,
+      "max_abs": 0.07106614112854004,
+      "kl": 1.1976569794975222e-05
+    },
+    {
+      "name": "teacher-chinese-34",
+      "nll_delta": 0.0466939276064835,
+      "argmax_equal": true,
+      "max_abs": 0.0909585952758789,
+      "kl": 5.7205663616778776e-05
+    },
+    {
+      "name": "teacher-chinese-35",
+      "nll_delta": 0.05093536607965632,
+      "argmax_equal": true,
+      "max_abs": 0.30914485454559326,
+      "kl": 0.0008860023089746088
+    },
+    {
+      "name": "teacher-chinese-36",
+      "nll_delta": -0.0005968997549317123,
+      "argmax_equal": true,
+      "max_abs": 0.07669544219970703,
+      "kl": 1.978627341467184e-05
+    },
+    {
+      "name": "teacher-chinese-37",
+      "nll_delta": -0.0033726036341832355,
+      "argmax_equal": true,
+      "max_abs": 0.6402657330036163,
+      "kl": 0.00026622649547389785
+    },
+    {
+      "name": "teacher-chinese-38",
+      "nll_delta": 8.555116845343491e-05,
+      "argmax_equal": true,
+      "max_abs": 0.35123181343078613,
+      "kl": 4.373583970366608e-06
+    },
+    {
+      "name": "teacher-chinese-39",
+      "nll_delta": 0.002708260176586208,
+      "argmax_equal": true,
+      "max_abs": 0.12720012664794922,
+      "kl": 4.632922088057523e-05
+    },
+    {
+      "name": "teacher-chinese-40",
+      "nll_delta": -0.0013503312567415549,
+      "argmax_equal": true,
+      "max_abs": 0.10390347242355347,
+      "kl": 3.518505743621656e-05
+    },
+    {
+      "name": "teacher-chinese-41",
+      "nll_delta": 0.0024825937507131357,
+      "argmax_equal": true,
+      "max_abs": 0.32709312438964844,
+      "kl": 0.00024916870675735937
+    },
+    {
+      "name": "teacher-chinese-42",
+      "nll_delta": 0.0002987092213828646,
+      "argmax_equal": true,
+      "max_abs": 0.2314615249633789,
+      "kl": 1.423950110955039e-05
+    },
+    {
+      "name": "teacher-chinese-43",
+      "nll_delta": 0.0001585603600489094,
+      "argmax_equal": true,
+      "max_abs": 0.7569493055343628,
+      "kl": 1.3933455089527373e-05
+    },
+    {
+      "name": "teacher-chinese-44",
+      "nll_delta": 0.00010418151410718224,
+      "argmax_equal": true,
+      "max_abs": 0.3445730209350586,
+      "kl": 2.2864907211537193e-05
+    },
+    {
+      "name": "teacher-chinese-45",
+      "nll_delta": -0.0035061845996082752,
+      "argmax_equal": true,
+      "max_abs": 0.44083309173583984,
+      "kl": 0.0002555401814569484
+    },
+    {
+      "name": "teacher-chinese-46",
+      "nll_delta": -2.7712618894781826e-05,
+      "argmax_equal": true,
+      "max_abs": 0.3698160648345947,
+      "kl": 1.3292772201256295e-05
+    },
+    {
+      "name": "teacher-chinese-47",
+      "nll_delta": -0.0033188743594436687,
+      "argmax_equal": true,
+      "max_abs": 0.1786966323852539,
+      "kl": 0.00015299345158847574
+    },
+    {
+      "name": "teacher-chinese-48",
+      "nll_delta": -0.016940452554656815,
+      "argmax_equal": true,
+      "max_abs": 0.0936288833618164,
+      "kl": 9.8573574360426e-05
+    },
+    {
+      "name": "teacher-chinese-49",
+      "nll_delta": 0.0014000392960440422,
+      "argmax_equal": true,
+      "max_abs": 0.08716392517089844,
+      "kl": 1.7990315178526136e-05
+    },
+    {
+      "name": "teacher-chinese-50",
+      "nll_delta": -0.00022361437405393758,
+      "argmax_equal": true,
+      "max_abs": 0.08436989784240723,
+      "kl": 6.501722201344159e-06
+    },
+    {
+      "name": "teacher-chinese-51",
+      "nll_delta": -0.014507709519815393,
+      "argmax_equal": true,
+      "max_abs": 0.07807707786560059,
+      "kl": 3.499935571093763e-05
+    },
+    {
+      "name": "teacher-chinese-52",
+      "nll_delta": 0.005339027253938866,
+      "argmax_equal": true,
+      "max_abs": 0.31372642517089844,
+      "kl": 0.0009744719325038795
+    },
+    {
+      "name": "teacher-chinese-53",
+      "nll_delta": -0.0054466432550555055,
+      "argmax_equal": true,
+      "max_abs": 0.11843299865722656,
+      "kl": 6.657676941335743e-05
+    },
+    {
+      "name": "teacher-chinese-54",
+      "nll_delta": 0.053268272198632616,
+      "argmax_equal": true,
+      "max_abs": 0.2100677490234375,
+      "kl": 0.00034132497577627104
+    },
+    {
+      "name": "teacher-chinese-55",
+      "nll_delta": -0.004155003413664815,
+      "argmax_equal": true,
+      "max_abs": 0.14703989028930664,
+      "kl": 8.160067887783877e-05
+    },
+    {
+      "name": "teacher-chinese-56",
+      "nll_delta": 0.0026949916430822896,
+      "argmax_equal": true,
+      "max_abs": 0.07722616195678711,
+      "kl": 3.233828926384446e-05
+    },
+    {
+      "name": "teacher-chinese-57",
+      "nll_delta": 0.006632435123052005,
+      "argmax_equal": true,
+      "max_abs": 0.06684243679046631,
+      "kl": 5.054876427842213e-05
+    },
+    {
+      "name": "teacher-chinese-58",
+      "nll_delta": -0.0008727753281263517,
+      "argmax_equal": true,
+      "max_abs": 0.0880516767501831,
+      "kl": 3.4658977367800244e-05
+    },
+    {
+      "name": "teacher-chinese-59",
+      "nll_delta": 0.011245282056542294,
+      "argmax_equal": true,
+      "max_abs": 0.49848127365112305,
+      "kl": 0.00031511117388445097
+    },
+    {
+      "name": "teacher-chinese-60",
+      "nll_delta": -0.012430715614559773,
+      "argmax_equal": true,
+      "max_abs": 0.09934759140014648,
+      "kl": 9.755510112353471e-06
+    },
+    {
+      "name": "teacher-chinese-61",
+      "nll_delta": -0.013577910272136506,
+      "argmax_equal": true,
+      "max_abs": 0.06764888763427734,
+      "kl": 6.893618009830891e-05
+    },
+    {
+      "name": "teacher-chinese-62",
+      "nll_delta": -0.002682116542917612,
+      "argmax_equal": true,
+      "max_abs": 0.0697484016418457,
+      "kl": 2.7976112468874198e-05
+    },
+    {
+      "name": "teacher-chinese-63",
+      "nll_delta": 0.01237898500543011,
+      "argmax_equal": true,
+      "max_abs": 0.0911400318145752,
+      "kl": 5.716807708533243e-05
+    },
+    {
+      "name": "teacher-chinese-64",
+      "nll_delta": 0.002596237478122987,
+      "argmax_equal": true,
+      "max_abs": 0.47339606285095215,
+      "kl": 0.0003905106279295349
+    },
+    {
+      "name": "teacher-chinese-65",
+      "nll_delta": 0.025291406757077084,
+      "argmax_equal": true,
+      "max_abs": 0.3460664749145508,
+      "kl": 0.0023541000036879246
+    },
+    {
+      "name": "teacher-chinese-66",
+      "nll_delta": 0.002980642521087873,
+      "argmax_equal": true,
+      "max_abs": 0.16704463958740234,
+      "kl": 5.586311342562425e-05
+    },
+    {
+      "name": "teacher-chinese-67",
+      "nll_delta": 0.00015912770625448047,
+      "argmax_equal": true,
+      "max_abs": 0.5527034401893616,
+      "kl": 1.9300354415180087e-05
+    },
+    {
+      "name": "teacher-chinese-68",
+      "nll_delta": 0.004504694393101971,
+      "argmax_equal": true,
+      "max_abs": 0.22717726230621338,
+      "kl": 8.414795805762154e-05
+    },
+    {
+      "name": "teacher-chinese-69",
+      "nll_delta": -0.02105528399193446,
+      "argmax_equal": true,
+      "max_abs": 0.1781444549560547,
+      "kl": 0.00031093739548805816
+    },
+    {
+      "name": "teacher-chinese-70",
+      "nll_delta": 0.0036491053335723223,
+      "argmax_equal": true,
+      "max_abs": 0.08346080780029297,
+      "kl": 3.576083172258665e-05
+    },
+    {
+      "name": "teacher-chinese-71",
+      "nll_delta": -0.0006908697773333472,
+      "argmax_equal": true,
+      "max_abs": 0.5672681331634521,
+      "kl": 0.0004858496776661372
+    },
+    {
+      "name": "teacher-chinese-72",
+      "nll_delta": 0.002623043517047563,
+      "argmax_equal": true,
+      "max_abs": 0.15242481231689453,
+      "kl": 9.777534723048024e-05
+    },
+    {
+      "name": "teacher-chinese-73",
+      "nll_delta": 0.0024680811965431815,
+      "argmax_equal": true,
+      "max_abs": 0.22891098260879517,
+      "kl": 0.0001264029640141123
+    },
+    {
+      "name": "teacher-chinese-74",
+      "nll_delta": 0.01602878497293858,
+      "argmax_equal": true,
+      "max_abs": 0.3988633155822754,
+      "kl": 0.00020389536990892462
+    },
+    {
+      "name": "teacher-chinese-75",
+      "nll_delta": 0.008065757912596894,
+      "argmax_equal": true,
+      "max_abs": 0.08374172449111938,
+      "kl": 4.698008363380248e-07
+    },
+    {
+      "name": "teacher-chinese-76",
+      "nll_delta": 0.005321081703396402,
+      "argmax_equal": true,
+      "max_abs": 0.05999469757080078,
+      "kl": 3.651508137144299e-05
+    },
+    {
+      "name": "teacher-chinese-77",
+      "nll_delta": 0.016550408593712262,
+      "argmax_equal": true,
+      "max_abs": 0.06540441513061523,
+      "kl": 4.053285792599882e-05
+    },
+    {
+      "name": "teacher-chinese-78",
+      "nll_delta": 0.010477916937208676,
+      "argmax_equal": true,
+      "max_abs": 0.4466971158981323,
+      "kl": 0.0006591101863785536
+    },
+    {
+      "name": "teacher-chinese-79",
+      "nll_delta": -6.903283611237043e-05,
+      "argmax_equal": true,
+      "max_abs": 0.0969858169555664,
+      "kl": 2.611235923045991e-06
+    },
+    {
+      "name": "teacher-chinese-80",
+      "nll_delta": 0.0014416466326458988,
+      "argmax_equal": true,
+      "max_abs": 0.06877899169921875,
+      "kl": 1.195968318004815e-05
+    },
+    {
+      "name": "teacher-chinese-81",
+      "nll_delta": -0.0006455560673330751,
+      "argmax_equal": true,
+      "max_abs": 0.2685086727142334,
+      "kl": 2.9105967504119314e-05
+    },
+    {
+      "name": "teacher-code-0",
+      "nll_delta": 0.11864170980826216,
+      "argmax_equal": true,
+      "max_abs": 0.38796961307525635,
+      "kl": 0.00020727339615243375
+    },
+    {
+      "name": "teacher-code-1",
+      "nll_delta": -4.952878966335561e-05,
+      "argmax_equal": true,
+      "max_abs": 0.004954338073730469,
+      "kl": 3.0571206192003426e-08
+    },
+    {
+      "name": "teacher-code-2",
+      "nll_delta": 2.769692954984748e-07,
+      "argmax_equal": true,
+      "max_abs": 0.009419918060302734,
+      "kl": 2.115084661026885e-09
+    },
+    {
+      "name": "teacher-code-3",
+      "nll_delta": 0.0006086784195034056,
+      "argmax_equal": true,
+      "max_abs": 0.009113311767578125,
+      "kl": 1.060635215354636e-06
+    },
+    {
+      "name": "teacher-code-4",
+      "nll_delta": 4.483323062132172e-05,
+      "argmax_equal": true,
+      "max_abs": 0.004843235015869141,
+      "kl": 9.927028982109062e-09
+    },
+    {
+      "name": "teacher-code-5",
+      "nll_delta": -2.4477206007844643e-05,
+      "argmax_equal": true,
+      "max_abs": 0.0077173709869384766,
+      "kl": 4.6704306627753644e-08
+    },
+    {
+      "name": "teacher-code-6",
+      "nll_delta": 2.3148057934463395e-05,
+      "argmax_equal": true,
+      "max_abs": 0.010648488998413086,
+      "kl": 2.3569280223293576e-08
+    },
+    {
+      "name": "teacher-code-7",
+      "nll_delta": 8.233140972180308e-05,
+      "argmax_equal": true,
+      "max_abs": 0.013643980026245117,
+      "kl": 2.50076390204005e-07
+    },
+    {
+      "name": "teacher-code-8",
+      "nll_delta": 2.278410308065304e-05,
+      "argmax_equal": true,
+      "max_abs": 0.015186786651611328,
+      "kl": 1.1022181779714643e-07
+    },
+    {
+      "name": "teacher-code-9",
+      "nll_delta": 0.011211749884566302,
+      "argmax_equal": true,
+      "max_abs": 0.09282112121582031,
+      "kl": 6.40198194676786e-05
+    },
+    {
+      "name": "teacher-code-10",
+      "nll_delta": -0.004434387976878895,
+      "argmax_equal": false,
+      "max_abs": 0.43824005126953125,
+      "kl": 1.0383894861292216e-05
+    },
+    {
+      "name": "teacher-code-11",
+      "nll_delta": -8.231062743391249e-06,
+      "argmax_equal": true,
+      "max_abs": 0.07657051086425781,
+      "kl": 1.524596678391002e-07
+    },
+    {
+      "name": "teacher-code-12",
+      "nll_delta": -5.670940479518549e-05,
+      "argmax_equal": true,
+      "max_abs": 1.1038484573364258,
+      "kl": 4.1745131528463814e-06
+    },
+    {
+      "name": "teacher-code-13",
+      "nll_delta": 3.065377028477201e-05,
+      "argmax_equal": true,
+      "max_abs": 0.6681567430496216,
+      "kl": 9.70778328379175e-06
+    },
+    {
+      "name": "teacher-code-14",
+      "nll_delta": -4.595270098661786e-06,
+      "argmax_equal": true,
+      "max_abs": 0.5614571571350098,
+      "kl": 4.1481655744051966e-07
+    },
+    {
+      "name": "teacher-code-15",
+      "nll_delta": -5.39765993998742e-05,
+      "argmax_equal": true,
+      "max_abs": 0.21383941173553467,
+      "kl": 2.507122619898557e-06
+    },
+    {
+      "name": "teacher-code-16",
+      "nll_delta": 1.912506488110921e-05,
+      "argmax_equal": true,
+      "max_abs": 0.07300162315368652,
+      "kl": 5.30636662526599e-07
+    },
+    {
+      "name": "teacher-code-17",
+      "nll_delta": 1.0156402755256977e-05,
+      "argmax_equal": true,
+      "max_abs": 0.28840672969818115,
+      "kl": 7.350685043588974e-07
+    },
+    {
+      "name": "teacher-code-18",
+      "nll_delta": -5.4288835222848775e-06,
+      "argmax_equal": true,
+      "max_abs": 0.16019034385681152,
+      "kl": 7.06959744126339e-07
+    },
+    {
+      "name": "teacher-code-19",
+      "nll_delta": 0.03271104040513606,
+      "argmax_equal": true,
+      "max_abs": 0.13805294036865234,
+      "kl": 6.5647550778211915e-06
+    },
+    {
+      "name": "teacher-code-20",
+      "nll_delta": -0.0006308699831834019,
+      "argmax_equal": true,
+      "max_abs": 0.05537271499633789,
+      "kl": 4.928592432015992e-06
+    },
+    {
+      "name": "teacher-code-21",
+      "nll_delta": -0.003766630478921229,
+      "argmax_equal": true,
+      "max_abs": 0.15081310272216797,
+      "kl": 7.855183294706096e-05
+    },
+    {
+      "name": "teacher-code-22",
+      "nll_delta": -0.00031153141027928655,
+      "argmax_equal": true,
+      "max_abs": 0.1824491024017334,
+      "kl": 1.998089083688896e-05
+    },
+    {
+      "name": "teacher-code-23",
+      "nll_delta": -8.751146401309029e-05,
+      "argmax_equal": true,
+      "max_abs": 0.32062435150146484,
+      "kl": 3.559764108222557e-06
+    },
+    {
+      "name": "teacher-code-24",
+      "nll_delta": 5.717004079031085e-07,
+      "argmax_equal": true,
+      "max_abs": 0.24926424026489258,
+      "kl": 5.548203816120187e-07
+    },
+    {
+      "name": "teacher-code-25",
+      "nll_delta": 5.0654015772977345e-06,
+      "argmax_equal": true,
+      "max_abs": 0.10895061492919922,
+      "kl": 1.6627438075080347e-07
+    },
+    {
+      "name": "teacher-code-26",
+      "nll_delta": 2.804378046050715e-05,
+      "argmax_equal": true,
+      "max_abs": 0.04015779495239258,
+      "kl": 4.6905764241573453e-07
+    },
+    {
+      "name": "teacher-code-27",
+      "nll_delta": 5.342309621525487e-05,
+      "argmax_equal": true,
+      "max_abs": 0.1757265329360962,
+      "kl": 2.4373781259570226e-06
+    },
+    {
+      "name": "teacher-code-28",
+      "nll_delta": 0.0002991306050539322,
+      "argmax_equal": true,
+      "max_abs": 0.09519100189208984,
+      "kl": 5.789612904057728e-06
+    },
+    {
+      "name": "teacher-code-29",
+      "nll_delta": 1.7737044544219316e-06,
+      "argmax_equal": true,
+      "max_abs": 0.0472869873046875,
+      "kl": 2.4301732006777318e-08
+    },
+    {
+      "name": "teacher-code-30",
+      "nll_delta": -0.0005856423689820645,
+      "argmax_equal": true,
+      "max_abs": 0.04813194274902344,
+      "kl": 1.5265981545170103e-07
+    },
+    {
+      "name": "teacher-code-31",
+      "nll_delta": 2.1577028682884247e-05,
+      "argmax_equal": true,
+      "max_abs": 0.05740714073181152,
+      "kl": 4.056751505650435e-07
+    },
+    {
+      "name": "teacher-code-32",
+      "nll_delta": 4.641834724594673e-06,
+      "argmax_equal": true,
+      "max_abs": 0.20656490325927734,
+      "kl": 1.3194789976344585e-07
+    },
+    {
+      "name": "teacher-code-33",
+      "nll_delta": -8.113181603874864e-06,
+      "argmax_equal": true,
+      "max_abs": 0.19889402389526367,
+      "kl": 5.666464441659021e-07
+    },
+    {
+      "name": "teacher-code-34",
+      "nll_delta": 3.612875554637185e-05,
+      "argmax_equal": true,
+      "max_abs": 0.06641101837158203,
+      "kl": 1.4550262028881249e-06
+    },
+    {
+      "name": "teacher-code-35",
+      "nll_delta": 0.0004111541100080274,
+      "argmax_equal": true,
+      "max_abs": 0.184454083442688,
+      "kl": 1.766399505455597e-05
+    },
+    {
+      "name": "teacher-code-36",
+      "nll_delta": 2.604500217273653e-06,
+      "argmax_equal": true,
+      "max_abs": 0.04269742965698242,
+      "kl": 2.316340522680278e-08
+    },
+    {
+      "name": "teacher-code-37",
+      "nll_delta": 3.6007738763998987e-06,
+      "argmax_equal": true,
+      "max_abs": 0.2893533706665039,
+      "kl": 2.1613797904469756e-07
+    },
+    {
+      "name": "teacher-code-38",
+      "nll_delta": -0.0006984795129625354,
+      "argmax_equal": true,
+      "max_abs": 0.3868674039840698,
+      "kl": 5.407482729325255e-05
+    },
+    {
+      "name": "teacher-code-39",
+      "nll_delta": -2.9488319640336158e-05,
+      "argmax_equal": true,
+      "max_abs": 0.11874818801879883,
+      "kl": 7.856674826794986e-07
+    },
+    {
+      "name": "teacher-code-40",
+      "nll_delta": 5.8059726988801685e-05,
+      "argmax_equal": true,
+      "max_abs": 0.20164453983306885,
+      "kl": 2.0372948755235186e-06
+    },
+    {
+      "name": "teacher-code-41",
+      "nll_delta": 8.213251416933076e-05,
+      "argmax_equal": true,
+      "max_abs": 0.10469922423362732,
+      "kl": 2.1301420143388063e-06
+    },
+    {
+      "name": "teacher-code-42",
+      "nll_delta": 8.536239352707753e-06,
+      "argmax_equal": true,
+      "max_abs": 0.08795309066772461,
+      "kl": 2.39963997482151e-07
+    },
+    {
+      "name": "teacher-code-43",
+      "nll_delta": 1.2457009269439823e-05,
+      "argmax_equal": true,
+      "max_abs": 0.20610666275024414,
+      "kl": 2.8608624851870623e-07
+    },
+    {
+      "name": "teacher-code-44",
+      "nll_delta": -0.001903345808681678,
+      "argmax_equal": true,
+      "max_abs": 0.18943941593170166,
+      "kl": 2.278119611986086e-05
+    },
+    {
+      "name": "teacher-code-45",
+      "nll_delta": 4.027816931539974e-06,
+      "argmax_equal": true,
+      "max_abs": 0.40138792991638184,
+      "kl": 4.6089575555976856e-07
+    },
+    {
+      "name": "teacher-code-46",
+      "nll_delta": -4.387768537483794e-05,
+      "argmax_equal": true,
+      "max_abs": 0.5393695831298828,
+      "kl": 4.040972607901808e-06
+    },
+    {
+      "name": "teacher-code-47",
+      "nll_delta": -0.00019231703852184978,
+      "argmax_equal": true,
+      "max_abs": 0.18785333633422852,
+      "kl": 8.088878523788474e-06
+    },
+    {
+      "name": "teacher-code-48",
+      "nll_delta": -5.626265990699153e-05,
+      "argmax_equal": true,
+      "max_abs": 0.09027099609375,
+      "kl": 5.498236905610106e-07
+    },
+    {
+      "name": "teacher-code-49",
+      "nll_delta": 0.00020842021964995183,
+      "argmax_equal": true,
+      "max_abs": 0.3286079168319702,
+      "kl": 1.282205735290921e-05
+    },
+    {
+      "name": "teacher-code-50",
+      "nll_delta": -8.324516883817523e-06,
+      "argmax_equal": true,
+      "max_abs": 0.22688508033752441,
+      "kl": 2.311764374331705e-07
+    },
+    {
+      "name": "teacher-code-51",
+      "nll_delta": -7.848512410646435e-06,
+      "argmax_equal": true,
+      "max_abs": 0.16923469305038452,
+      "kl": 2.54961436348773e-07
+    },
+    {
+      "name": "teacher-code-52",
+      "nll_delta": -0.00016405336783620328,
+      "argmax_equal": true,
+      "max_abs": 0.32056427001953125,
+      "kl": 7.220385300374507e-06
+    },
+    {
+      "name": "teacher-code-53",
+      "nll_delta": 8.537569459576844e-05,
+      "argmax_equal": true,
+      "max_abs": 0.8477835655212402,
+      "kl": 8.147047458022235e-06
+    },
+    {
+      "name": "teacher-code-54",
+      "nll_delta": -9.699504254001567e-06,
+      "argmax_equal": true,
+      "max_abs": 0.6207408905029297,
+      "kl": 1.321146358147135e-06
+    },
+    {
+      "name": "teacher-code-55",
+      "nll_delta": -0.00028091797553031483,
+      "argmax_equal": true,
+      "max_abs": 0.4352078437805176,
+      "kl": 1.6091892489157372e-05
+    },
+    {
+      "name": "teacher-code-56",
+      "nll_delta": 7.526560153792161e-05,
+      "argmax_equal": true,
+      "max_abs": 0.6657187938690186,
+      "kl": 2.727275893579236e-05
+    },
+    {
+      "name": "teacher-code-57",
+      "nll_delta": -0.0010362567142543355,
+      "argmax_equal": true,
+      "max_abs": 0.5337648391723633,
+      "kl": 2.472260240605246e-05
+    },
+    {
+      "name": "teacher-code-58",
+      "nll_delta": -3.718571268862547e-05,
+      "argmax_equal": true,
+      "max_abs": 0.3076155185699463,
+      "kl": 1.8656554962179976e-06
+    },
+    {
+      "name": "teacher-code-59",
+      "nll_delta": 0.00017234815034328221,
+      "argmax_equal": true,
+      "max_abs": 0.5484800338745117,
+      "kl": 2.36904536986641e-05
+    },
+    {
+      "name": "teacher-code-60",
+      "nll_delta": -0.0002699699369976827,
+      "argmax_equal": true,
+      "max_abs": 0.4158039093017578,
+      "kl": 1.6654950180782546e-05
+    },
+    {
+      "name": "teacher-code-61",
+      "nll_delta": 0.000141913397179394,
+      "argmax_equal": true,
+      "max_abs": 0.45591992139816284,
+      "kl": 6.440633117241514e-06
+    },
+    {
+      "name": "teacher-code-62",
+      "nll_delta": -2.3230358728199008e-05,
+      "argmax_equal": true,
+      "max_abs": 0.6784782409667969,
+      "kl": 3.3284716993499944e-06
+    },
+    {
+      "name": "teacher-code-63",
+      "nll_delta": 9.748194635506024e-06,
+      "argmax_equal": true,
+      "max_abs": 0.20832252502441406,
+      "kl": 4.949580648397589e-07
+    },
+    {
+      "name": "teacher-code-64",
+      "nll_delta": -0.001681920494231548,
+      "argmax_equal": true,
+      "max_abs": 0.2626323252916336,
+      "kl": 5.4004152199580704e-05
+    },
+    {
+      "name": "teacher-code-65",
+      "nll_delta": 5.889207185916234e-05,
+      "argmax_equal": true,
+      "max_abs": 0.10842132568359375,
+      "kl": 2.3336408542523804e-06
+    },
+    {
+      "name": "teacher-code-66",
+      "nll_delta": -0.009413212927434245,
+      "argmax_equal": true,
+      "max_abs": 0.1747274398803711,
+      "kl": 1.817782613671376e-05
+    },
+    {
+      "name": "teacher-code-67",
+      "nll_delta": -2.329283308810659e-05,
+      "argmax_equal": true,
+      "max_abs": 0.056072235107421875,
+      "kl": 2.364999443398552e-06
+    },
+    {
+      "name": "teacher-code-68",
+      "nll_delta": -0.032386416013125086,
+      "argmax_equal": false,
+      "max_abs": 0.2786712646484375,
+      "kl": 0.0005432657172315079
+    },
+    {
+      "name": "teacher-code-69",
+      "nll_delta": -0.0003869552883770666,
+      "argmax_equal": true,
+      "max_abs": 0.13294601440429688,
+      "kl": 2.580430955021597e-05
+    },
+    {
+      "name": "teacher-code-70",
+      "nll_delta": 2.9174689625932615e-05,
+      "argmax_equal": true,
+      "max_abs": 0.08284831047058105,
+      "kl": 1.2897150841608535e-06
+    },
+    {
+      "name": "teacher-code-71",
+      "nll_delta": 4.6593122213778315e-05,
+      "argmax_equal": true,
+      "max_abs": 0.26677536964416504,
+      "kl": 1.8762872872500622e-06
+    },
+    {
+      "name": "teacher-code-72",
+      "nll_delta": 5.394988551898905e-05,
+      "argmax_equal": true,
+      "max_abs": 0.7729847431182861,
+      "kl": 6.9106437994596066e-06
+    },
+    {
+      "name": "teacher-code-73",
+      "nll_delta": -2.09377357265339e-05,
+      "argmax_equal": true,
+      "max_abs": 0.36368072032928467,
+      "kl": 1.6015074041242445e-06
+    },
+    {
+      "name": "teacher-code-74",
+      "nll_delta": 0.0013294776047096946,
+      "argmax_equal": true,
+      "max_abs": 0.3658781051635742,
+      "kl": 8.581722916507642e-05
+    },
+    {
+      "name": "teacher-code-75",
+      "nll_delta": -4.6937466283480944e-05,
+      "argmax_equal": true,
+      "max_abs": 0.49985218048095703,
+      "kl": 6.258770384052839e-06
+    },
+    {
+      "name": "teacher-code-76",
+      "nll_delta": -1.2477454369275165e-05,
+      "argmax_equal": true,
+      "max_abs": 0.16121649742126465,
+      "kl": 1.2258832051831784e-06
+    },
+    {
+      "name": "teacher-code-77",
+      "nll_delta": -5.7418942706277676e-05,
+      "argmax_equal": true,
+      "max_abs": 0.26163530349731445,
+      "kl": 5.686092022788125e-06
+    },
+    {
+      "name": "teacher-code-78",
+      "nll_delta": 4.134910136599501e-05,
+      "argmax_equal": true,
+      "max_abs": 0.27765655517578125,
+      "kl": 3.873900175783097e-06
+    },
+    {
+      "name": "teacher-code-79",
+      "nll_delta": -0.00028113325958756263,
+      "argmax_equal": true,
+      "max_abs": 0.727994441986084,
+      "kl": 1.5010476365361145e-05
+    },
+    {
+      "name": "teacher-code-80",
+      "nll_delta": 0.00025624721348194157,
+      "argmax_equal": true,
+      "max_abs": 0.46191078424453735,
+      "kl": 3.1493009433369076e-06
+    },
+    {
+      "name": "teacher-code-81",
+      "nll_delta": -0.0002819563794460578,
+      "argmax_equal": true,
+      "max_abs": 0.51251220703125,
+      "kl": 1.8912048319860318e-05
+    },
+    {
+      "name": "teacher-code-82",
+      "nll_delta": 0.0011038661144127104,
+      "argmax_equal": true,
+      "max_abs": 0.38945579528808594,
+      "kl": 0.00012044326212556412
+    },
+    {
+      "name": "teacher-code-83",
+      "nll_delta": -0.03256862787168657,
+      "argmax_equal": true,
+      "max_abs": 0.19526886940002441,
+      "kl": 1.7570150037145424e-06
+    }
+  ]
+}

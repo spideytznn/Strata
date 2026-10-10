@@ -23,6 +23,7 @@
 #include <cstdio>
 #include <utility>
 #include <cstdlib>
+#include <cstring>
 #include <type_traits>
 
 namespace strata::kernels {
@@ -3576,7 +3577,89 @@ __global__ void nvfp4_f32_grouped_kernel(NativeExpertLayout L, const unsigned lo
         }
     }
 }
+
+// The normal variant retains the original dequantization, lane FMA order,
+// reductions and SwiGLU. Decode weights once for several activation rows.
+// CANONICAL instead rounds a double exp to float, matching the CPU provider;
+// it is a separate opt-in arithmetic choice, not original-path bit equality.
+int g_nvfp4_f32_reuse = -1;
+bool nvfp4_f32_reuse_on() {
+    static const bool enabled=[] { const char* v=std::getenv("STRATA_NVFP4_F32_REUSE"); return v && std::strcmp(v,"1")==0; }();
+    return g_nvfp4_f32_reuse>=0 ? g_nvfp4_f32_reuse!=0 : enabled;
 }
+int nvfp4_f32_reuse_tile() {
+    static const int tile=[] { const char* v=std::getenv("STRATA_NVFP4_F32_REUSE_TILE");
+        return v && std::strcmp(v,"8")==0 ? 8 : v && std::strcmp(v,"4")==0 ? 4 : 3; }();
+    return tile;
+}
+bool nvfp4_f32_canonical_on() {
+    static const bool enabled=[] { const char* v=std::getenv("STRATA_NVFP4_F32_CANONICAL"); return v && std::strcmp(v,"1")==0; }();
+    return enabled;
+}
+template<bool DOWN,int TILE,bool CANONICAL=false>
+__global__ void nvfp4_f32_reuse_kernel(NativeExpertLayout L, const unsigned long long* ptr,
+    const int32_t* starts, const int32_t* ng, const int32_t* dst, const int32_t* tok,
+    const float* x, float* h, float* out) {
+    const int lane=threadIdx.x&31,row=blockIdx.x*8+threadIdx.x/32;
+    if(row>=(DOWN?int(L.n_embd):int(L.n_ff))) return;
+    for(int g=blockIdx.y;g<*ng;g+=gridDim.y) {
+        const uint8_t* blob=(const uint8_t*)ptr[g];
+        const float* tail=(const float*)(blob+L.tail_off);
+        const uint8_t* w=blob+(DOWN?L.down_off:0)+size_t(row)*(DOWN?L.d_row:L.gu_row);
+        const uint8_t* u=blob+L.up_off+size_t(row)*L.gu_row;
+        for(int e0=starts[g];e0<starts[g+1];e0+=TILE) {
+            auto pass=[&](auto count) {
+                constexpr int NT=decltype(count)::value;
+                float a[NT],b[NT];
+                const float* input[NT];
+#pragma unroll
+                for(int j=0;j<NT;++j) {
+                    a[j]=0.f;b[j]=0.f;
+                    input[j]=DOWN?h+size_t(e0+j)*L.n_ff:x+size_t(tok[e0+j])*L.n_embd;
+                }
+                const int kmax=DOWN?int(L.n_ff):int(L.n_embd);
+                for(int k=lane;k<kmax;k+=32) {
+                    const float v=nvfp4_value(w,k);
+                    [[maybe_unused]] float vu=0.f;
+                    if constexpr(!DOWN) vu=nvfp4_value(u,k);
+#pragma unroll
+                    for(int j=0;j<NT;++j) {
+                        a[j]+=v*input[j][k];
+                        if constexpr(!DOWN) b[j]+=vu*input[j][k];
+                    }
+                }
+#pragma unroll
+                for(int j=0;j<NT;++j) {
+                    a[j]=warp_sum(a[j]);
+                    if constexpr(!DOWN) b[j]=warp_sum(b[j]);
+                    if(lane==0) {
+                        if constexpr(DOWN) out[size_t(dst[e0+j])*L.n_embd+row]=a[j]*tail[2];
+                        else {
+                            const float gate=a[j]*tail[0],up=b[j]*tail[1];
+                            float e;
+                            if constexpr(CANONICAL) e=static_cast<float>(exp(-static_cast<double>(gate)));
+                            else e=expf(-gate);
+                            h[size_t(e0+j)*L.n_ff+row]=(gate/(1.f+e))*up;
+                        }
+                    }
+                }
+            };
+            switch(min(TILE,starts[g+1]-e0)) {
+                case 1:pass(std::integral_constant<int,1>{});break;
+                case 2:pass(std::integral_constant<int,2>{});break;
+                case 3:pass(std::integral_constant<int,3>{});break;
+                case 4:if constexpr(TILE>=4) pass(std::integral_constant<int,4>{});break;
+                case 5:if constexpr(TILE>=5) pass(std::integral_constant<int,5>{});break;
+                case 6:if constexpr(TILE>=6) pass(std::integral_constant<int,6>{});break;
+                case 7:if constexpr(TILE>=7) pass(std::integral_constant<int,7>{});break;
+                case 8:if constexpr(TILE>=8) pass(std::integral_constant<int,8>{});break;
+            }
+        }
+    }
+}
+}
+
+void native_nvfp4_f32_set_reuse(bool reuse) { g_nvfp4_f32_reuse=reuse?1:0; }
 
 void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long* grp_ptr, const int32_t* grp_start,
                            const int32_t* n_groups, const int32_t* ent_dst, const int32_t* ent_tok, int64_t cap_groups,
@@ -3602,6 +3685,34 @@ void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long
     if (fidelity_f32 && L.gu_type==40 && L.d_type==40) {
         if (!x_f32 || !L.tail_off) throw std::invalid_argument("STRATA_NVFP4_F32 requires original FP32 activations and scale tails");
         const unsigned gy=unsigned(grid_groups>0 ? grid_groups : cap_groups);
+        if(nvfp4_f32_canonical_on()) {
+            const dim3 gu(unsigned((L.n_ff+7)/8),gy),down(unsigned((L.n_embd+7)/8),gy);
+            if(nvfp4_f32_reuse_on()) {
+                nvfp4_f32_reuse_kernel<false,4,true><<<gu,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+                nvfp4_f32_reuse_kernel<true,4,true><<<down,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+            } else {
+                nvfp4_f32_reuse_kernel<false,1,true><<<gu,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+                nvfp4_f32_reuse_kernel<true,1,true><<<down,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+            }
+            check("NVFP4 canonical FP32 decode");
+            return;
+        }
+        if(nvfp4_f32_reuse_on()) {
+            const dim3 gu(unsigned((L.n_ff+7)/8),gy),down(unsigned((L.n_embd+7)/8),gy);
+            const int tile=nvfp4_f32_reuse_tile();
+            if(tile==8) {
+                nvfp4_f32_reuse_kernel<false,8><<<gu,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+                nvfp4_f32_reuse_kernel<true,8><<<down,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+            } else if(tile==4) {
+                nvfp4_f32_reuse_kernel<false,4><<<gu,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+                nvfp4_f32_reuse_kernel<true,4><<<down,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+            } else {
+                nvfp4_f32_reuse_kernel<false,3><<<gu,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+                nvfp4_f32_reuse_kernel<true,3><<<down,256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
+            }
+            check("NVFP4 FP32 weight reuse decode");
+            return;
+        }
         nvfp4_f32_grouped_kernel<false><<<dim3(unsigned((L.n_ff+7)/8),gy),256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
         nvfp4_f32_grouped_kernel<true><<<dim3(unsigned((L.n_embd+7)/8),gy),256,0,s>>>(L,grp_ptr,grp_start,n_groups,ent_dst,ent_tok,x_f32,h,out);
         check("NVFP4 FP32 reference decode");

@@ -1,0 +1,56 @@
+[
+  {
+    "expert": "0-0",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  },
+  {
+    "expert": "0-7",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  },
+  {
+    "expert": "12-100",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  },
+  {
+    "expert": "24-300",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  },
+  {
+    "expert": "40-5",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  },
+  {
+    "expert": "47-511",
+    "h_bits_equal": 2560,
+    "h_total": 2560,
+    "y_bits_equal": 10240,
+    "y_total": 10240,
+    "h_rel": 0.0,
+    "y_rel": 0.0
+  }
+]

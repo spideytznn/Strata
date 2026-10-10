@@ -1,0 +1,2 @@
+layer  0 expert   0: s_gate 0.000117 s_up 0.000117 s_down 0.000161 -> expert output rel. error 0.000024%
+RESULT: ok (worst 0.000024%)

@@ -1,0 +1,344 @@
+[
+  {
+    "name": "combo100",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2903.5,
+      "tokens_per_second": 2823.53
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1604.4,
+      "tokens_per_second": 79.78
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 50.03858036812234
+  },
+  {
+    "name": "combo50",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 3381.8,
+      "tokens_per_second": 2424.18
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1748.7,
+      "tokens_per_second": 73.2
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.151244039297374
+  },
+  {
+    "name": "combo75",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2952.2,
+      "tokens_per_second": 2776.94
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1646.5,
+      "tokens_per_second": 77.74
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.619026423419314
+  },
+  {
+    "name": "combo75-kernel",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2901.5,
+      "tokens_per_second": 2825.42
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1569.6,
+      "tokens_per_second": 81.55
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 47.27320949294333
+  },
+  {
+    "name": "combo75-reuse",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2963.7,
+      "tokens_per_second": 2766.14
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1620.1,
+      "tokens_per_second": 79.01
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.70306619816441
+  },
+  {
+    "name": "combo75-task40",
+    "exe_sha256": "3407f3301417636cdc5b3bcbedfef315872158340b8ff6ea5aaa0483e195ca3e",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2956.9,
+      "tokens_per_second": 2772.51
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1607.3,
+      "tokens_per_second": 79.64
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.500163235815265
+  },
+  {
+    "name": "screen-cpu25-unroll",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 3058.3,
+      "tokens_per_second": 2680.6
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2375.9,
+      "tokens_per_second": 53.87
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 49.060160191852944
+  },
+  {
+    "name": "screen-cpu50-rolled",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2950.7,
+      "tokens_per_second": 2778.3
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2069.1,
+      "tokens_per_second": 61.86
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.609874044648734
+  },
+  {
+    "name": "screen-cpu50-unroll",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 3013.0,
+      "tokens_per_second": 2720.89
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1996.9,
+      "tokens_per_second": 64.1
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.72452704783792
+  },
+  {
+    "name": "screen-cpu75-unroll",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2914.2,
+      "tokens_per_second": 2813.16
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1791.3,
+      "tokens_per_second": 71.46
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 44.46779243766908
+  },
+  {
+    "name": "screen-dma-batch",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 3004.5,
+      "tokens_per_second": 2728.61
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2909.0,
+      "tokens_per_second": 44.0
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 4.719093141803014
+  },
+  {
+    "name": "screen-elastic-exact",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2882.3,
+      "tokens_per_second": 2844.3
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2483.1,
+      "tokens_per_second": 51.55
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 4.8939457560227515
+  },
+  {
+    "name": "screen-exact",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2924.0,
+      "tokens_per_second": 2803.66
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2803.2,
+      "tokens_per_second": 45.66
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 5.051775686428833
+  },
+  {
+    "name": "screen-kernel",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2880.5,
+      "tokens_per_second": 2846.08
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2814.9,
+      "tokens_per_second": 45.47
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 5.3010717524844395
+  },
+  {
+    "name": "screen-mmvf-rows",
+    "exe_sha256": "8290c4a9b3a7eed8275f0a622d75bdb3f07bc69dc0d6c93503ff982e7cf3e605",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 3759.8,
+      "tokens_per_second": 2180.43
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 2989.9,
+      "tokens_per_second": 42.81
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 5.387081248664239
+  },
+  {
+    "name": "tile3-workers11",
+    "exe_sha256": "8d46167fe146b4a747d7f21bacf55c58ebbe46d23af023a4264c1c9f52ea8560",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2836.1,
+      "tokens_per_second": 2890.55
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1546.1,
+      "tokens_per_second": 82.79
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 29.069188062719245
+  },
+  {
+    "name": "tile3-workers15",
+    "exe_sha256": "8d46167fe146b4a747d7f21bacf55c58ebbe46d23af023a4264c1c9f52ea8560",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2931.2,
+      "tokens_per_second": 2796.82
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1568.7,
+      "tokens_per_second": 81.6
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 49.139157668356944
+  },
+  {
+    "name": "tile3-workers7",
+    "exe_sha256": "8d46167fe146b4a747d7f21bacf55c58ebbe46d23af023a4264c1c9f52ea8560",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2964.3,
+      "tokens_per_second": 2765.54
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1701.0,
+      "tokens_per_second": 75.25
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 25.079233646494387
+  },
+  {
+    "name": "tile4-workers15",
+    "exe_sha256": "8d46167fe146b4a747d7f21bacf55c58ebbe46d23af023a4264c1c9f52ea8560",
+    "input_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+    "prefill": {
+      "tokens": 8198,
+      "ms": 2906.2,
+      "tokens_per_second": 2820.84
+    },
+    "decode": {
+      "tokens": 128,
+      "ms": 1546.4,
+      "tokens_per_second": 82.77
+    },
+    "same_128_tokens": true,
+    "zero_expert_mtp_source_bytes": true,
+    "cpu_peak_percent": 48.77510456939625
+  }
+]

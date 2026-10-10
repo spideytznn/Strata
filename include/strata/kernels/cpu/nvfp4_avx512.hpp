@@ -17,6 +17,10 @@ void nvfp4_512_f32_gu_rows(const uint8_t*, size_t, size_t, int, const void* cons
                           float* const*, int, int, float, float);
 void nvfp4_512_f32_rows(const uint8_t*, size_t, int, const void* const*, int,
                        float* const*, int, int, float);
+/// Explicit experiment for parity/timing; production enables it only with
+/// STRATA_NVFP4_F32_UNROLL=1. Both layouts retain the original FP32 FMA order.
+void nvfp4_512_f32_rows_layout(const uint8_t*, size_t, int, const void* const*, int,
+                              float* const*, int, int, float, bool);
 
 /// Gate/up rows [r0, r1) of an NVFP4 expert blob for `nt` tokens: ff[t][r] = silu(s_gate * g) * (s_up * u), where g
 /// and u are the raw NVFP4 dot products of gate row r and up row r (at `up_off`) with activation t (Q8_0, `n` values).

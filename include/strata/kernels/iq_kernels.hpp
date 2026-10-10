@@ -73,6 +73,9 @@ void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long
 /// per possible group, SwiGLU and the q8_1 quantization as two kernels over all cap_entries.  Bitwise the same results
 /// (native_grouped_parity checks it); kept for A/B timing.  Set before graph capture; captured graphs keep theirs.
 void native_grouped_set_v1(bool v1);
+/// Benchmark override for the opt-in NVFP4 FP32 weight-reuse loop. Set before
+/// graph capture; captured graphs retain their selected kernels.
+void native_nvfp4_f32_set_reuse(bool reuse);
 
 /// The bench only: the AMD kernel layout (STRATA_EXP_MODE values; -1 = the environment's) and the phase
 /// (0 all, 1 gate/up + SwiGLU + quantize, 2 down).

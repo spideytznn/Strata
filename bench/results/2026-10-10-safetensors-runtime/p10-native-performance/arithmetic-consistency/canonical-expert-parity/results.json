@@ -1,0 +1,179 @@
+{
+  "env": {
+    "STRATA_NVFP4_F32": "1",
+    "STRATA_NVFP4_TC": "0",
+    "STRATA_NVFP4_F32_CANONICAL": "1",
+    "STRATA_NVFP4_F32_UNROLL": "1",
+    "STRATA_NVFP4_F32_REUSE": "1",
+    "STRATA_NVFP4_F32_REUSE_TILE": "4",
+    "STRATA_PARITY_SEED": "9950"
+  },
+  "binaries": {
+    "nvfp4_expert_gpu_parity": "50cea540a51d27869d5b0249cb5c0d8ee8c8d79f3c666f8b08c6ad5a194a5ea9",
+    "nvfp4_cpu_f32_test": "61911360bdd12c18adbba4a412ddeb5ca70da97c80a7584b74111eedf8b33cde",
+    "nvfp4_gpu_reuse_bench": "b52efd75ce3c909aa62772d6baa0f7db43983bb4eb9239979ccc2aab9185d47a"
+  },
+  "commands": [
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-0-0.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-0-0.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-0-0.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-0-0.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-0-7.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-0-7.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-0-7.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-0-7.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-12-100.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-12-100.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-12-100.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-12-100.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-24-300.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-24-300.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-24-300.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-24-300.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-40-5.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-40-5.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-40-5.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-40-5.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_expert_gpu_parity.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-47-511.bin",
+        "0",
+        "0"
+      ],
+      "dump": "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\gpu-47-511.bin"
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_cpu_f32_test.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final\\expert-47-511.bin",
+        "G:\\Strata\\Strata-Safetensors\\logs\\efficiency\\canonical-expert-parity\\cpu-47-511.bin"
+      ],
+      "dump": null
+    },
+    {
+      "argv": [
+        "G:\\Strata\\Strata-Safetensors\\build-native-engine\\nvfp4_gpu_reuse_bench.exe",
+        "G:\\Strata\\Strata-Safetensors\\build-safetensors\\checkpoint-validation-final"
+      ],
+      "dump": null
+    }
+  ],
+  "experts": [
+    {
+      "expert": "0-0",
+      "blob_sha256": "cef9cb74833d1c2354ab30c15e5d8ed088e9c4aceec38fd000e5a00336594800",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    },
+    {
+      "expert": "0-7",
+      "blob_sha256": "37ecee7b084f9b4426550ae24745020d3ae292557122eb855249dd5d99ebd380",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    },
+    {
+      "expert": "12-100",
+      "blob_sha256": "6a97a6287667b193938874e43a88eeedb9c5e8ef8e0f12056043808e79fc4d79",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    },
+    {
+      "expert": "24-300",
+      "blob_sha256": "223d02f82caf33ec59988267ca7aa21919f23ccbb6e6972bda54679a57bd5d7b",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    },
+    {
+      "expert": "40-5",
+      "blob_sha256": "fab41835457bd3585032aafca7f566bf6e04dd0e51adc3a60cd61998b6368d19",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    },
+    {
+      "expert": "47-511",
+      "blob_sha256": "15fb1a0875f30077d46758cdd142badc6a75a14cbd9b5a2ff24ab807ccbaf8d2",
+      "hidden_bits_equal": 2560,
+      "hidden_values": 2560,
+      "output_bits_equal": 10240,
+      "output_values": 10240
+    }
+  ],
+  "status": "pass",
+  "reuse_cases": 24
+}

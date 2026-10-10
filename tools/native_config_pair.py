@@ -27,11 +27,16 @@ def main():
     p.add_argument('--fixture', type=Path, required=True)
     p.add_argument('--cases', default='details-8199,details-24583')
     p.add_argument('--reference', type=Path, help='previous passing result; compare against its last config')
+    p.add_argument('--state-comparison', choices=('exact', 'report'), default='exact',
+                   help='report records state differences when CPU/GPU assignments intentionally change')
+    p.add_argument('--long-restore', action='store_true',
+                   help='save the last long session, then restore it after the short A/B/A sequence')
     p.add_argument('--output', type=Path, required=True)
     a = p.parse_args()
     a.output.mkdir(parents=True, exist_ok=False)
     fixtures = {name: ids for name, ids, _ in json.loads(a.fixture.read_text())}
-    results = {'runs': [], 'note': 'Private stdin engines only; state hashing adds overhead.'}
+    results = {'runs': [], 'state_comparison': a.state_comparison,
+               'note': 'Private stdin engines only; state hashing adds overhead.'}
     reference = None
     if a.reference:
         previous = json.loads(a.reference.read_text(encoding='utf8'))
@@ -91,6 +96,10 @@ def main():
                 # after the last full chunk is legitimately read again.
                 checkpoint = ((len(ids)-1)//chunk)*chunk
                 assert row['requests'][-1]['reused'] >= checkpoint > 0, f'{case}: warm prefix not reused'
+            if a.long_restore:
+                long_ids, long_output, long_case = ids, initial, case
+                long_snapshot = folder / 'long-session.bin'
+                row['long_saved'] = engine.session_file('save', str(long_snapshot.resolve()))
             pa = prompt('Remember this exact code: ZEBRA-417. Say OK.')
             pb = prompt('Remember this different code: ORBIT-926. Say OK.')
             first = generate('A', pa, 1)
@@ -106,6 +115,11 @@ def main():
             generate('A+-restored', continuation, 16)
             assert row['requests'][-1]['reused'] > 0, 'snapshot restore did not reuse'
             assert row['requests'][-1]['ids'] == row['requests'][-3]['ids'], 'snapshot continuation differs'
+            if a.long_restore:
+                row['long_restored'] = engine.session_file('restore', str(long_snapshot.resolve()))
+                restored = generate(long_case+'-disk-restored-after-short', long_ids, 128)
+                assert restored == long_output, 'long disk restore changed output'
+                assert row['requests'][-1]['reused'] >= ((len(long_ids)-1)//chunk)*chunk, 'long restore did not reuse'
         except Exception as error:
             row.update(status='failed', error=str(error))
             raise
@@ -119,7 +133,9 @@ def main():
         assert len(row['states']) == len(row['requests']), 'missing state fingerprints'
         before = results['runs'][0] if index else reference
         if before:
-            assert row['states'] == before['states'], 'committed state differs'
+            row['committed_state_equal'] = row['states'] == before['states']
+            if a.state_comparison == 'exact':
+                assert row['committed_state_equal'], 'committed state differs'
         assert 'post-residency expert source bytes=0' in text
         assert 'post-residency MTP source bytes=0' in text
         assert 'tokens=8192 max_chunk=8192' in text, '8192 prefill was not executed'
@@ -127,7 +143,8 @@ def main():
         save()
     results['status'] = 'pass'
     save()
-    print('PASS: complete config tokens, committed states, long prefill, prefix reuse, A/B/A, disk restore, zero expert/MTP reads', flush=True)
+    state_note = 'exact committed states' if a.state_comparison == 'exact' else 'state differences recorded, not gated'
+    print(f'PASS: complete config tokens, {state_note}, long prefill, prefix reuse, A/B/A, disk restore, zero expert/MTP reads', flush=True)
 
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <filesystem>
 #include <random>
 #include <stdexcept>
 #include <vector>
@@ -12,15 +13,19 @@
 namespace c=strata::kernels::cpu;
 int main(int argc,char** argv) {
     try {
-        if(argc!=2) throw std::runtime_error("usage: nvfp4_cpu_f32_test experts.bin");
+        if(argc<2 || argc>3) throw std::runtime_error("usage: nvfp4_cpu_f32_test experts.bin|single-expert.bin [output-bits.bin]");
         c::NativeFmt fmt; std::string err;
         if(!c::native_fmt(40,40,2560,640,fmt,err)) throw std::runtime_error(err);
         fmt.fp32_activations=true; fmt.act_bytes=2560*4; fmt.h_bytes=640*4;
         constexpr int T=4,N=2560,F=640;
         std::ifstream input(argv[1],std::ios::binary);
+        std::ofstream dump;
+        if(argc==3) { dump.open(argv[2],std::ios::binary);if(!dump) throw std::runtime_error("output open failed"); }
         std::mt19937 rng(9950); std::normal_distribution<float> random;
         double worst=0;
-        for(int expert:{0,47*512+511}) {
+        const std::vector<int> experts=std::filesystem::file_size(argv[1])==fmt.bytes
+            ?std::vector<int>{0}:std::vector<int>{0,47*512+511};
+        for(int expert:experts) {
             std::vector<uint8_t> b(fmt.bytes);
             input.seekg(uint64_t(expert)*fmt.bytes); input.read(reinterpret_cast<char*>(b.data()),b.size());
             if(!input) throw std::runtime_error("expert read failed");
@@ -39,6 +44,11 @@ int main(int argc,char** argv) {
                 c::native_gu_rows(fmt,b.data(),a+t,1,hs+t,0,F); c::native_down_rows(fmt,b.data(),hp+t,1,&dest,0,N);
             }
             if(std::memcmp(y.data(),one.data(),y.size()*4)) throw std::runtime_error("token grouping changed output");
+            if(dump.is_open()) {
+                dump.write(reinterpret_cast<const char*>(h.data()),h.size()*sizeof(float));
+                dump.write(reinterpret_cast<const char*>(y.data()),y.size()*sizeof(float));
+                if(!dump) throw std::runtime_error("output write failed");
+            }
             float scales[4]; std::memcpy(scales,b.data()+fmt.tail_off,16);
             double se=0,sr=0;
             for(int t=0;t<T;++t) {

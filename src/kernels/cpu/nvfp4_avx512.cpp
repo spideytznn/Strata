@@ -186,7 +186,7 @@ void nvfp4_512_rows(const uint8_t* w, size_t row_bytes, int n, const void* const
 namespace {
 // Same original blocks, with unquantized activations. Decode each weight tile
 // once for all tokens; each token retains an independent FP32 accumulator.
-void f32_dot(const uint8_t* row,int n,const void* const* acts,int nt,float* out) {
+void f32_dot_rolled(const uint8_t* row,int n,const void* const* acts,int nt,float* out) {
     const __m512 lut=_mm512_setr_ps(0,.5f,1,1.5f,2,3,4,6,-0.f,-.5f,-1,-1.5f,-2,-3,-4,-6);
     __m512 acc[8];
     for(int t=0;t<nt;++t) acc[t]=_mm512_setzero_ps();
@@ -203,20 +203,120 @@ void f32_dot(const uint8_t* row,int n,const void* const* acts,int nt,float* out)
     }
     for(int t=0;t<nt;++t) out[t]=_mm512_reduce_add_ps(acc[t]);
 }
+
+// Preserve each lane's FMA order. Compile-time token/sub-block counts keep the
+// accumulators in registers and extract codes without a stack round trip.
+template<int NT,int SUB>
+inline void f32_sub(__m512i codes,const block_nvfp4& w,const void* const* acts,int b,
+                    __m512 lut,__m512* acc) {
+    const __m512i idx=_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32(codes,SUB));
+    const __m512 v=_mm512_mul_ps(_mm512_permutexvar_ps(idx,lut),_mm512_set1_ps(kUe4m3.v[w.d[SUB]]*2.f));
+    for(int t=0;t<NT;++t)
+        acc[t]=_mm512_fmadd_ps(v,_mm512_loadu_ps(static_cast<const float*>(acts[t])+b*64+SUB*16),acc[t]);
+}
+// Match the CUDA warp's 32 lanes and XOR 16/8/4/2/1 reduction explicitly.
+// The normal 16-lane CPU tree remains available unchanged.
+float gpu_order_reduce(__m512 lo,__m512 hi) {
+    const __m512 both=_mm512_add_ps(lo,hi);
+    const __m256 a=_mm256_add_ps(_mm512_castps512_ps256(both),
+        _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(both),1)));
+    const __m128 b=_mm_add_ps(_mm256_castps256_ps128(a),_mm256_extractf128_ps(a,1));
+    const __m128 c=_mm_add_ps(b,_mm_shuffle_ps(b,b,_MM_SHUFFLE(1,0,3,2)));
+    return _mm_cvtss_f32(_mm_add_ps(c,_mm_shuffle_ps(c,c,_MM_SHUFFLE(2,3,0,1))));
+}
+template<int NT,bool GPU_ORDER=false>
+void f32_dot_unrolled(const uint8_t* row,int n,const void* const* acts,float* out) {
+    const __m512 lut=_mm512_setr_ps(0,.5f,1,1.5f,2,3,4,6,-0.f,-.5f,-1,-1.5f,-2,-3,-4,-6);
+    __m512 acc[NT];
+    __m512 high[NT];
+    for(int t=0;t<NT;++t) acc[t]=_mm512_setzero_ps();
+    if constexpr(GPU_ORDER) for(int t=0;t<NT;++t) high[t]=_mm512_setzero_ps();
+    const auto* w=reinterpret_cast<const block_nvfp4*>(row);
+    for(int b=0;b<n/64;++b) {
+        const __m512i codes=codes64(w[b].qs);
+        f32_sub<NT,0>(codes,w[b],acts,b,lut,acc);
+        f32_sub<NT,1>(codes,w[b],acts,b,lut,GPU_ORDER?high:acc);
+        f32_sub<NT,2>(codes,w[b],acts,b,lut,acc);
+        f32_sub<NT,3>(codes,w[b],acts,b,lut,GPU_ORDER?high:acc);
+    }
+    for(int t=0;t<NT;++t) {
+        if constexpr(GPU_ORDER) out[t]=gpu_order_reduce(acc[t],high[t]);
+        else out[t]=_mm512_reduce_add_ps(acc[t]);
+    }
+}
+bool f32_unroll_on() {
+    static const bool enabled=[] { const char* v=std::getenv("STRATA_NVFP4_F32_UNROLL"); return v && std::strcmp(v,"1")==0; }();
+    return enabled;
+}
+bool f32_gpu_order_on() {
+    static const bool enabled=[] { const char* v=std::getenv("STRATA_NVFP4_F32_GPU_ORDER");
+        const char* c=std::getenv("STRATA_NVFP4_F32_CANONICAL");
+        return (v && std::strcmp(v,"1")==0) || (c && std::strcmp(c,"1")==0); }();
+    return enabled;
+}
+bool f32_canonical_on() {
+    static const bool enabled=[] { const char* v=std::getenv("STRATA_NVFP4_F32_CANONICAL"); return v && std::strcmp(v,"1")==0; }();
+    return enabled;
+}
+void f32_dot(const uint8_t* row,int n,const void* const* acts,int nt,float* out,bool unroll,bool gpu_order=false) {
+    if(gpu_order) {
+        switch(nt) {
+            case 1:f32_dot_unrolled<1,true>(row,n,acts,out);return;
+            case 2:f32_dot_unrolled<2,true>(row,n,acts,out);return;
+            case 3:f32_dot_unrolled<3,true>(row,n,acts,out);return;
+            case 4:f32_dot_unrolled<4,true>(row,n,acts,out);return;
+            case 5:f32_dot_unrolled<5,true>(row,n,acts,out);return;
+            case 6:f32_dot_unrolled<6,true>(row,n,acts,out);return;
+            case 7:f32_dot_unrolled<7,true>(row,n,acts,out);return;
+            case 8:f32_dot_unrolled<8,true>(row,n,acts,out);return;
+        }
+    }
+    if(!unroll) { f32_dot_rolled(row,n,acts,nt,out); return; }
+    switch(nt) {
+        case 1: f32_dot_unrolled<1>(row,n,acts,out); break;
+        case 2: f32_dot_unrolled<2>(row,n,acts,out); break;
+        case 3: f32_dot_unrolled<3>(row,n,acts,out); break;
+        case 4: f32_dot_unrolled<4>(row,n,acts,out); break;
+        case 5: f32_dot_unrolled<5>(row,n,acts,out); break;
+        case 6: f32_dot_unrolled<6>(row,n,acts,out); break;
+        case 7: f32_dot_unrolled<7>(row,n,acts,out); break;
+        case 8: f32_dot_unrolled<8>(row,n,acts,out); break;
+        default: f32_dot_rolled(row,n,acts,nt,out); break;
+    }
+}
 }
 void nvfp4_512_f32_gu_rows(const uint8_t* blob,size_t stride,size_t up,int n,const void* const* acts,int nt,
                           float* const* ff,int r0,int r1,float sg,float su) {
     float g[8],u[8];
+    const bool unroll=f32_unroll_on();
+    const bool gpu_order=f32_gpu_order_on();
+    const bool canonical=f32_canonical_on();
     for(int r=r0;r<r1;++r) {
-        f32_dot(blob+r*stride,n,acts,nt,g); f32_dot(blob+up+r*stride,n,acts,nt,u);
-        for(int t=0;t<nt;++t) { const float v=g[t]*sg; ff[t][r]=(v/(1.f+std::exp(-v)))*(u[t]*su); }
+        f32_dot(blob+r*stride,n,acts,nt,g,unroll,gpu_order); f32_dot(blob+up+r*stride,n,acts,nt,u,unroll,gpu_order);
+        for(int t=0;t<nt;++t) {
+            const float v=g[t]*sg;
+            const float e=canonical?static_cast<float>(std::exp(-static_cast<double>(v))):std::exp(-v);
+            ff[t][r]=(v/(1.f+e))*(u[t]*su);
+        }
     }
 }
 void nvfp4_512_f32_rows(const uint8_t* w,size_t stride,int n,const void* const* acts,int nt,
                        float* const* out,int r0,int r1,float scale) {
+    if(f32_gpu_order_on()) {
+        float y[8];
+        for(int r=r0;r<r1;++r) {
+            f32_dot(w+r*stride,n,acts,nt,y,true,true);
+            for(int t=0;t<nt;++t) out[t][r]=y[t]*scale;
+        }
+        return;
+    }
+    nvfp4_512_f32_rows_layout(w,stride,n,acts,nt,out,r0,r1,scale,f32_unroll_on());
+}
+void nvfp4_512_f32_rows_layout(const uint8_t* w,size_t stride,int n,const void* const* acts,int nt,
+                              float* const* out,int r0,int r1,float scale,bool unroll) {
     float y[8];
     for(int r=r0;r<r1;++r) {
-        f32_dot(w+r*stride,n,acts,nt,y);
+        f32_dot(w+r*stride,n,acts,nt,y,unroll);
         for(int t=0;t<nt;++t) out[t][r]=y[t]*scale;
     }
 }

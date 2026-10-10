@@ -1,0 +1,25 @@
+{
+  "positions": 234,
+  "unequal_positions": [],
+  "summary": {
+    "positions": 234,
+    "mean_nll": 1.1880753511351123,
+    "by_category": {
+      "english": {
+        "positions": 68,
+        "mean_nll": 1.4506620267684023
+      },
+      "chinese": {
+        "positions": 82,
+        "mean_nll": 1.7029921657558063
+      },
+      "code": {
+        "positions": 84,
+        "mean_nll": 0.47284829468320055
+      }
+    },
+    "mean_kl": 0.0,
+    "top1_agreement": 1.0,
+    "mean_nll_delta": 0.0
+  }
+}

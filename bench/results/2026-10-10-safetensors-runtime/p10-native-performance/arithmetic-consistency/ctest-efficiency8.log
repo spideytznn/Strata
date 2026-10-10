@@ -1,0 +1,19 @@
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: G:/Strata/Strata-Safetensors/build-safetensors
+ninja: no work to do.
+Test project G:/Strata/Strata-Safetensors/build-safetensors
+    Start 1: safetensors_layout
+1/5 Test #1: safetensors_layout ...............   Passed    0.09 sec
+    Start 2: safetensors_source
+2/5 Test #2: safetensors_source ...............   Passed    0.01 sec
+    Start 3: safetensors_segments
+3/5 Test #3: safetensors_segments .............   Passed    0.02 sec
+    Start 4: spec_visible_boundaries
+4/5 Test #4: spec_visible_boundaries ..........   Passed    0.01 sec
+    Start 5: safetensors_reader
+5/5 Test #5: safetensors_reader ...............   Passed    7.32 sec
+
+100% tests passed out of 5
+
+Total Test time (real) =   7.47 sec

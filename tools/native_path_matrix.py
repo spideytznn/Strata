@@ -31,6 +31,11 @@ CASES={
  'tc1':{'STRATA_NVFP4_TC':'1'},'tc2':{'STRATA_NVFP4_TC':'2'},'tc3':{'STRATA_NVFP4_TC':'3'},
  # Percentages concern cold experts only; hot experts remain on the GPU.
  'cpu50':{'pcie':0.5},'cpu100':{'pcie':0},
+ 'cpu25-unroll':{'pcie':0.75,'STRATA_NVFP4_F32_UNROLL':'1'},
+ 'cpu50-unroll':{'pcie':0.5,'STRATA_NVFP4_F32_UNROLL':'1'},
+ 'cpu75-unroll':{'pcie':0.25,'STRATA_NVFP4_F32_UNROLL':'1'},
+ 'cpu75-rolled':{'pcie':0.25,'STRATA_NVFP4_F32_UNROLL':'0','STRATA_NVFP4_F32_GPU_ORDER':'0'},
+ 'cpu75-gpuorder':{'pcie':0.25,'STRATA_NVFP4_F32_UNROLL':'1','STRATA_NVFP4_F32_GPU_ORDER':'1'},
  'adaptive':{'adapt':True},
  'mtp1':{'mtp':1},'mtp2':{'mtp':2},'mtp4':{'mtp':4},
  'prefill-int8':{'STRATA_PREFILL_NVFP4':'w4a8'},
