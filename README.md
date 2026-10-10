@@ -7,6 +7,12 @@ independent native safetensors project built on
 The active release branch is `main`. Original authorship and licenses are retained.
 The engine executable and CLI remain `strata` for compatibility.
 
+The [upstream project/community proposal](https://github.com/Niko1221/Strata/issues/1858)
+describes the complete implementation and its limits. The
+[first upstream PR](https://github.com/Niko1221/Strata/pull/1859) contributes
+only the standalone safetensors source; the full inference integration has
+not been merged into upstream Strata.
+
 The local deployment stays in `G:\Strata\Strata-Safetensors`, so existing
 desktop launchers and model/config paths continue to work. The former personal
 GGUF main branch is preserved as `archive/gguf-main-20261011`; its separate
