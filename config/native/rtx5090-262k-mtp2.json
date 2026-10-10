@@ -6,7 +6,7 @@
     "--max-context",
     "262144",
     "--prefill",
-    "8192",
+    "4096",
     "--expert-cache",
     "auto",
     "--vram-reserve-mib",

@@ -19,11 +19,14 @@ This startup does not modify the existing deployment. The desktop profile below 
 Multi-GPU is unsupported; HIP and SYCL have not been built or validated.
 
 The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 total
-context, 8,192-token prefill and `127.0.0.1:8880`**. Its config is
+context, 4,096-token prefill and `127.0.0.1:8880`**. Its config is
 `config/native/rtx5090-262k-mtp2.json`; the desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 An already-running engine keeps its settings until restarted.
+The desktop prefill cap was reduced to 4096 at the user's request; no speed
+comparison was run. Actual chunks can be smaller than this cap. Earlier
+measurements and the image smoke check below used an 8192 cap.
 
 The desktop profile now selects `strata-efficiency12.exe`, enables images with
 `--vision`, and reuses the installed BF16 mmproj / `strata-vision` sidecar read-only.

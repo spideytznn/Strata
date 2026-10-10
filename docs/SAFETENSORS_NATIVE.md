@@ -415,11 +415,13 @@ SSD reads during inference.
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-mtp2.json` and
 `build-native-engine/strata-efficiency12.exe`. Settings are 262144 total context,
-8192 dedicated prefill, INT8 KV, original BF16 MTP2, CPU75 cold decode experts,
+4096 dedicated prefill, INT8 KV, original BF16 MTP2, CPU75 cold decode experts,
 kernel copying, elastic KV, canonical FP32 arithmetic and ordinary T1 commit.
 FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
 startup handles remain enabled. It serves `127.0.0.1:8880` in the foreground;
-Ctrl+C stops it. Wildcard Host accepts any HTTP Host header. Restarting loads
+Ctrl+C stops it. Wildcard Host accepts any HTTP Host header. The prefill cap
+was changed from 8192 to 4096 at the user's request, without a performance
+comparison. Actual chunks can be smaller; prior evidence used 8192. Restarting loads
 the new profile; tests do not start the public server. Logs append to
 `logs/native-262k-int8.log`, whose directory the launcher creates.
 
