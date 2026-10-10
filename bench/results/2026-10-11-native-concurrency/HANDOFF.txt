@@ -1,0 +1,65 @@
+strata-safetensors 并发优化交接（2026-10-11）
+
+仓库：G:\Strata\Strata-Safetensors
+分支：codex/native-concurrency
+远端：https://github.com/spideytznn/strata-safetensors/tree/codex/native-concurrency
+本文件所在提交包含实现、有效配置、原始测试记录及测量摘要。
+
+桌面入口：C:\Users\spideytznn\Desktop\Start-Strata-Safetensors-Parallel.bat
+入口调用 START-NATIVE-262K-PARALLEL.bat，端口 8880，绑定 localhost。
+配置：config/native/rtx5090-262k-parallel.json
+引擎：build-native-engine/strata-concurrency5.exe
+SHA256：257208bff0788021c843205f2f8f222309e9ad1ae4aac536c4a8126ac5359b68
+262144 上下文，INT8 弹性 KV，4096 行专用 prefill，1536 MiB 预留，视觉开启。
+MTP 完全不加载；并发和单请求均 target-only。Host 无白名单。
+热专家交换 adapt-every=4 / adapt-swaps=96，保留已有 CPU/GPU 协作策略。
+开启 STRATA_NATIVE_KV_INDEPENDENT=1 和 STRATA_NATIVE_SLOT_COPY=1。
+引擎两个开关默认仍关闭；单路主力配置及现有 Q4XL 部署未改动。
+
+实现：
+1. 主会话和两个槽位分别伸缩 KV；目标先扩容后复制，替换短会话可回收多余页。
+2. 槽位 KV/GDN/PLE 直接在显存内复制，保留早期 checkpoint 的主状态恢复逻辑。
+3. 原始权重、投影、量化和计算内核不变；缓存格式不变。
+4. 沿用现有专家 VMM 页分配与热专家调度，不重写全部内核。
+
+验收：
+- CUDA SM120 构建成功；4219 项状态/字节/VMM 检查通过。
+- 37 项服务端、配置、并发门及视觉排队单元测试通过。
+- 原始协议：贪心、不同采样参数、惩罚、取消续跑、后续轮次、上限和 EOS 均匹配单路 token。
+- 两路 261000 / 261007 token 提示词，各生成 256 token，实际重叠并逐 token 匹配单路。
+- 124135 token 长会话与短请求混跑、live-slot 续接、替换后重新接入正确。
+- 最后的长会话重新接入是重算，不可宣称为 RAM 缓存命中；此前 live-slot 命中有记录。
+- 175 轮实际双路专家交换，晋升 15279 个专家。
+- 关停日志确认专家/MTP 在驻留后源文件读取字节为零；ngram SSD 读取允许。
+- HTTP：OpenAI SSE、三客户端排队、断开与恢复、图片独占及 Anthropic 通过。
+
+同一可执行文件开关优化的三轮中位数，均关闭 MTP，加载视觉，每请求 96 贪心 token：
+长短混跑（长提示词已热缓存）：
+客户端数      关闭优化 tok/s      开启优化 tok/s
+1             42.47               47.11
+2             44.33               51.97（+17.2%）
+3             42.21               49.84（+18.1%）
+双客户端最晚首字 1.260 -> 1.273 秒，基本持平；三客户端 4.776 -> 3.865 秒。
+全短请求：
+1             65.26               66.18
+2             75.00               78.43（+4.6%）
+3             66.02               69.75（+5.6%）
+每组开关对照 27 个完整回答一致。
+这是顺序执行、未锁 GPU 频率的有限热缓存测量；不代表普遍峰值或冷长提示词性能。
+
+KV：关闭优化共同扩到 131072 cells 时 4.64 GiB；开启后一个长组加两个短组 1872 MiB，
+两个长组加一个短组 3312 MiB。迁移时主会话和槽位可能同时占长 KV。
+三组满容量 target KV 9504 MiB（9.28 GiB）；满两路仍需要完整 KV。
+历史 9.54 GiB 含 draft KV，不可当成本次无 MTP 的同条件基线。
+
+证据与复现：本目录 README.md、optimized5-acceptance、http5-long-*、http5-short-*、
+optimized5-long-http-summary.json、optimized5-short-http-summary.json。
+详解：docs/NATIVE_CONCURRENCY.md。
+仅本机 RTX 5090 32GB / Ryzen 9950X3D / 96GB / Windows CUDA 验证。
+HIP/SYCL、其他 GPU、多 GPU、超过两路未验证；图片仍独占，尚无真正同时 prompt GEMM。
+有限 token 对照不是广泛质量/检索评测。没有使用有重复 bug 的 171.6 tok/s。
+
+本次所有测速使用私有子进程，不启动用户桌面服务；结束后关闭私有 engine 与 vision。
+原始模型 D:\迅雷下载\Qwen3.8-flash-next-nvfp4 未修改。
+保留用户已有 rtx5090-262k-fast.json 修改、.bak 及 shared-settings.json，不纳入提交。
+用户明确要求工作完成后关机：先推送并核对远端，再执行关机。

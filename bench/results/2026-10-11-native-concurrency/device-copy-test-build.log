@@ -1,0 +1,146 @@
+-- Strata: CUDA enabled, arch 120
+-- strata: pack/full/experts.bin absent - the expert arena load test is NOT registered
+-- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+-- CMAKE_SYSTEM_PROCESSOR: AMD64
+-- CMAKE_GENERATOR_PLATFORM:
+-- GGML_SYSTEM_ARCH: x86
+-- Including CPU backend
+-- x86 detected
+-- Adding CPU backend variant ggml-cpu: /arch:AVX512 GGML_AVX512
+-- ggml version: 0.24.0
+-- ggml commit:  unknown
+-- Configuring done (11.9s)
+-- Generating done (0.3s)
+-- Build files have been written to: G:/Strata/Strata-Safetensors/build-native-engine
+[1/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\conversation_snapshot.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+[2/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\conversation_state.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+[3/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\session.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\src\core\session.cpp(922): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+[4/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\layer.cpp.obj
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(405): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(417): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(667): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(668): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(1052): warning C4189: “n_kv”: 局部变量已初始化但不引用
+G:\Strata\Strata-Safetensors\src\core\layer.cpp(1385): warning C4189: “hcd”: 局部变量已初始化但不引用
+[5/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\mtp.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(59): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/coupled_draft.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(47): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(57): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/platform/memory.hpp(58): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(63): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(112): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(431): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(310): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(468): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(474): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(501): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(786): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(904): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(911): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(921): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(947): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(947): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(972): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(976): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(976): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(985): warning C4127: 条件表达式是常量
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(985): note: 考虑改用 "if constexpr" 语句
+G:\Strata\Strata-Safetensors\src\core\mtp.cpp(1213): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+[6/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\safetensors_mtp.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\src\core\safetensors_mtp.cpp(20): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+[7/10] Building CXX object CMakeFiles\conversation_snapshot_test.dir\src\core\conversation_snapshot_test.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+[8/10] Building CXX object CMakeFiles\strata_engine.dir\src\core\verify.cpp.obj
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/expert.hpp(74): warning C4324: “strata::kernels::cpu::ActQ”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(267): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(268): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(269): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(270): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(271): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/kernels/cpu/pool.hpp(274): warning C4324: “strata::kernels::cpu::ExpertPool”: 由于对齐说明符，结构被填充
+G:\Strata\Strata-Safetensors\include\strata/core/dma_batch.hpp(32): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(47): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(57): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\include\strata/core/spec_prob.hpp(69): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(65): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(66): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(95): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(96): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(101): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(102): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(103): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(107): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(108): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(125): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(146): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(166): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(178): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(268): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(430): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(432): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(607): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(645): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(663): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(680): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(740): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(857): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(866): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(901): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1107): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1190): warning C4456: “st”的声明隐藏了上一个本地声明
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1073): note: 参见“st”的声明
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1319): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1447): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1766): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(1883): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(2136): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(2199): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(2348): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(2366): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Strata\Strata-Safetensors\src\core\verify.cpp(2547): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+[9/10] Linking CXX static library strata_engine.lib
+[10/10] Linking CXX executable conversation_snapshot_test.exe

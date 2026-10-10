@@ -288,15 +288,18 @@ void qsa_set_kv_resident(int64_t cells);
 /// captured graphs stay valid.  Set before sizing and initializing the session and the drafter.
 void qsa_set_kv_elastic(bool enabled, int64_t init_cells);
 bool qsa_kv_elastic();
-/// Cells every elastic state can hold now (INT64_MAX when none is elastic).
-int64_t qsa_kv_elastic_cells();
+/// Optional pool IDs restrict operations to one session; nullptr retains the all-pool path.
+/// Cells every selected elastic state can hold now (INT64_MAX when none is selected).
+int64_t qsa_kv_elastic_cells(const std::vector<int32_t>* pools = nullptr);
 /// Chunks still to map for every elastic state to hold `cells` cells.
-int64_t qsa_kv_elastic_need(int64_t cells);
+int64_t qsa_kv_elastic_need(int64_t cells, const std::vector<int32_t>* pools = nullptr);
 /// Maps them, each from `take()` (0: a new chunk), the new memory zeroed.  Synchronous; nothing may be running on
 /// the device.  false: out of memory.
-bool qsa_kv_elastic_grow(int64_t cells, const std::function<VmmChunk()>& take);
+bool qsa_kv_elastic_grow(int64_t cells, const std::function<VmmChunk()>& take,
+                         const std::vector<int32_t>* pools = nullptr);
 /// Unmaps the chunks past `cells` cells, each handed to `give`.  Returns how many.
-int64_t qsa_kv_elastic_shrink(int64_t cells, const std::function<void(VmmChunk)>& give);
+int64_t qsa_kv_elastic_shrink(int64_t cells, const std::function<void(VmmChunk)>& give,
+                             const std::vector<int32_t>* pools = nullptr);
 /// Physical bytes the elastic pools hold, and what all of them would at the full context.
 uint64_t qsa_kv_elastic_mapped_bytes();
 uint64_t qsa_kv_elastic_full_bytes();

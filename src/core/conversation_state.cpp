@@ -192,6 +192,34 @@ bool conversation_checkpoint_restore(const ConversationCheckpoint& c, SessionSta
     return sync(error);
 }
 
+bool conversation_checkpoint_copy(const SessionState& from, SessionState& to, const ModelGeometry& g,
+                                   const std::vector<int32_t>& ids, std::string& error) {
+    ConversationStateSizes a, b;
+    if (!checkpoint_targets(from, g, ids.size(), a, error) ||
+        !checkpoint_targets(to, g, ids.size(), b, error)) return false;
+    if (from.gdn_alloc != to.gdn_alloc || from.qsa_ord0 != to.qsa_ord0 || from.qsa_alloc != to.qsa_alloc ||
+        (from.ple_hist == nullptr) != (to.ple_hist == nullptr))
+        return fail(error, "incompatible device-copy session carve");
+    auto enqueue = [&](void* dst, const void* src, size_t n) {
+        if (!n || dst == src) return true;
+        const auto status = cudaMemcpyAsync(dst, src, n, cudaMemcpyDeviceToDevice, nullptr);
+        if (status == cudaSuccess) return true;
+        error = std::string("conversation slot running-state copy: ") + cudaGetErrorString(status);
+        return false;
+    };
+    if (!enqueue(to.gdn_state, from.gdn_state, a.gdn) ||
+        !enqueue(to.ple_hist, from.ple_hist, from.ple_hist ? a.ple : 0)) return false;
+    for (size_t j = 0; j < owned_qsa(from); ++j) {
+        const auto& src = owned(from, j);
+        const auto& dst = owned(to, j);
+        if (!enqueue(dst.idx_tail, src.idx_tail, a.tail) || !enqueue(dst.idx_dead, src.idx_dead, a.dead) ||
+            !enqueue(dst.idx_block_pos, src.idx_block_pos, a.block_pos)) return false;
+    }
+    to.ple_prev[0] = ids.size() >= 2 ? ids[ids.size() - 2] : -1;
+    to.ple_prev[1] = ids.empty() ? -1 : ids.back();
+    return true;
+}
+
 bool conversation_snapshot_bytes(const ConversationView& view, const SessionState& ss,
                                  const ModelGeometry& g, const QsaState* draft, size_t& bytes, std::string& error) {
     bytes = 0;

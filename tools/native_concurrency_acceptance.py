@@ -137,6 +137,8 @@ def main():
     ap.add_argument("--context", type=int, default=8192)
     ap.add_argument("--vision", action="store_true")
     ap.add_argument("--adaptive", action="store_true", help="retain adaptive settings and require real two-row batch promotions")
+    ap.add_argument("--independent-kv", action="store_true", help="opt into per-session elastic KV mappings")
+    ap.add_argument("--device-slot-copy", action="store_true", help="opt into direct device slot migration")
     ap.add_argument("--limit", type=int, default=64)
     ap.add_argument("--growth-tokens", type=int, default=0, help="also test long-slot KV growth beside a short admission")
     ap.add_argument("--capacity-tokens", type=int, default=0, help="exact token count for a near-capacity two-long-slot check")
@@ -157,6 +159,8 @@ def main():
         setting("--adapt-every", 1000000)
         setting("--adapt-swaps", 0)
     cfg["env"]["STRATA_NATIVE_PREFILL_FIRST"] = "1"
+    cfg["env"]["STRATA_NATIVE_KV_INDEPENDENT"] = "1" if a.independent_kv else "0"
+    cfg["env"]["STRATA_NATIVE_SLOT_COPY"] = "1" if a.device_slot_copy else "0"
     tok = SafetensorsTokenizer.from_directory(cfg["tokenizer"])
     template = ChatTemplate(Path(cfg["chat_template"]))
     def prompt(text):
@@ -247,8 +251,16 @@ def main():
             next_ref = eng.solo(follow, 24, keys)
             next_batch = eng.batch([(follow, 24, keys), (prompts[1], a.limit, keys)])
             assert next_batch["jobs"][0]["ids"] == next_ref["ids"]
+            # Replacing the long slot may release its physical pages. Re-admitting the
+            # long conversation must restore those pages before copying cached KV.
+            replaced = eng.batch([(ids, a.limit, keys) for ids in prompts])
+            assert all(x["ids"] == y["ids"] for x, y in zip(refs, replaced["jobs"]))
+            restored = eng.batch([(follow, 24, keys), (prompts[1], a.limit, keys)])
+            assert restored["jobs"][0]["ids"] == next_ref["ids"]
+            assert restored["jobs"][1]["ids"] == refs[1]["ids"]
             result["cases"].append({"name": "kv_growth_long_slot", "prompt_tokens": len(long_ids),
-                                    "solo": long_ref, "batch": grown, "followup": next_batch})
+                                    "solo": long_ref, "batch": grown, "followup": next_batch,
+                                    "replaced": replaced, "restored": restored})
             print(f"long-slot grow/reuse beside short admission: {len(long_ids)} tokens, identical", flush=True)
         if a.adaptive:
             log = eng.log_path.read_text(encoding="utf8")

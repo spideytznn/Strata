@@ -225,6 +225,37 @@ bool conversation_kv_restore(const ConversationKv& image, const QsaState& st, co
     return false;
 }
 
+bool conversation_kv_copy(const QsaState& from, const QsaState& to, const ModelGeometry& g,
+                          int64_t upto, bool index, std::string& error) {
+    Layout a{}, b{};
+    if (from.kv_mode != 0 || to.kv_mode != 0) {
+        error = "conversation slot copy: fully resident device pools required";
+        return false;
+    }
+    if (!layout(from, g, upto, index, a, error) || !valid(from, a, upto, error) ||
+        !layout(to, g, upto, index, b, error) || !valid(to, b, upto, error)) return false;
+    const std::array<size_t, 5> sizes = {a.data, a.value_data, a.scales, a.value_scales, a.pooled};
+    if (a.format != b.format || sizes != std::array<size_t, 5>{b.data, b.value_data, b.scales, b.value_scales, b.pooled}) {
+        error = "conversation slot copy: incompatible K/V geometry";
+        return false;
+    }
+    const auto src = pools(from), dst = pools(to);
+    for (size_t i = 0; i < sizes.size(); ++i)
+        if (sizes[i] && (!src[i] || !dst[i])) {
+            error = "conversation slot copy: missing K/V buffer";
+            return false;
+        }
+    for (size_t i = 0; i < sizes.size(); ++i) {
+        if (!sizes[i] || src[i] == dst[i]) continue;
+        const auto status = cudaMemcpyAsync(dst[i], src[i], sizes[i], cudaMemcpyDeviceToDevice, nullptr);
+        if (status != cudaSuccess) {
+            error = std::string("conversation slot K/V copy: ") + cudaGetErrorString(status);
+            return false;
+        }
+    }
+    return true;
+}
+
 bool conversation_kv_part_sizes(const QsaState& st, const ModelGeometry& g, int64_t upto, bool index,
                                 std::array<uint64_t, 5>& sizes, std::string& error) {
     Layout l{};

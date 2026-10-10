@@ -6314,15 +6314,53 @@ int strata_main(int argc, char** argv) {
     // request hands them back and the slots are refilled with the profile's hottest experts.  Neither side's
     // addresses move, so every captured graph stays valid.  The context is never smaller: --max-context cells always
     // fit, the cache simply holds fewer experts while a long one is live.
+    const bool native_kv_independent = safetensors && o.batch > 0 && o.mtp.empty() && [] {
+        const char* v = std::getenv("STRATA_NATIVE_KV_INDEPENDENT");
+        return v != nullptr && std::atoi(v) != 0;
+    }();
+    // Pool IDs and virtual addresses remain stable for the lifetime of each session.
+    std::vector<std::pair<strata::core::SessionState*, std::vector<int32_t>>> kv_session_pools;
+    auto register_kv_session = [&](strata::core::SessionState& session) {
+        std::vector<int32_t> ids;
+        for (int64_t j = 0; j < session.qsa_alloc; ++j) {
+            const int32_t id = session.qsa_states[session.qsa_ord0 + j].kv_elastic;
+            if (id >= 0) ids.push_back(id);
+        }
+        kv_session_pools.emplace_back(&session, std::move(ids));
+    };
+    if (native_kv_independent) {
+        register_kv_session(ss);
+        for (auto& slots : bslot_ss)
+            for (auto& session : slots) register_kv_session(*session);
+        std::fprintf(stderr, "strata: native elastic K/V: independent session pools enabled\n");
+    }
+    auto kv_pools = [&](strata::core::SessionState* session) -> const std::vector<int32_t>* {
+        if (!native_kv_independent) return nullptr;
+        if (session == nullptr) session = &ss;
+        for (const auto& entry : kv_session_pools)
+            if (entry.first == session) return &entry.second;
+        std::fprintf(stderr, "strata: unregistered independent K/V session\n");
+        std::abort();
+    };
     struct KvGrow {
         bool on = false;
         int64_t top = 0, lo = 0;          // slots [lo, top) hold no expert; their whole chunks may be with the K/V
         int64_t floor = 128;              // the cache keeps at least these slots
         int64_t step = 8192;              // the K/V grows in whole steps of cells
-        int64_t cells = 0;                // what every K/V pool holds now
+        int64_t cells = 0;                // cells mapped in the last selected session (all pools by default)
         std::vector<strata::core::VmmChunk> spare;   // out of the cache, not (yet) in the K/V
         int64_t grows = 0, trims = 0, fresh = 0, evicted = 0, refilled = 0;
     } kvg;
+    auto kvg_report_sessions = [&] {
+        if (!native_kv_independent) return;
+        std::fprintf(stderr, "strata native K/V sessions:");
+        for (size_t i = 0; i < kv_session_pools.size(); ++i)
+            std::fprintf(stderr, " session%zu=%lld", i,
+                         (long long) strata::core::qsa_kv_elastic_cells(&kv_session_pools[i].second));
+        std::fprintf(stderr, " mapped_mib=%.1f expert_slots=%lld\n",
+                     (double) strata::core::qsa_kv_elastic_mapped_bytes() / 1048576.0,
+                     (long long) (kvg.lo + xcache.slots() - kvg.top));
+    };
     auto kvg_start = [&](int64_t top) {
         kvg.on = strata::core::qsa_kv_elastic() && xcache.vmm_range() != nullptr && d_res != nullptr &&
                  !host_res.empty() && srcp != nullptr && top > kvg.floor;
@@ -6357,11 +6395,15 @@ int strata_main(int argc, char** argv) {
     std::function<void(const char*, bool)> kvg_audit;
     // Room for `cells` cells (rounded up to a step).  `quiesce` must leave nothing running on the device and land
     // the adaptive tier's swaps (a swap in flight could still be writing a slot given up here).
-    auto kvg_ensure = [&](int64_t cells, const std::function<void()>& quiesce) -> bool {
-        if (!kvg.on || cells <= kvg.cells) return true;
+    auto kvg_ensure = [&](int64_t cells, const std::function<void()>& quiesce,
+                          strata::core::SessionState* session = nullptr) -> bool {
+        if (!kvg.on) return true;
+        const auto* pools = kv_pools(session);
+        if (native_kv_independent) kvg.cells = strata::core::qsa_kv_elastic_cells(pools);
+        if (cells <= kvg.cells) return true;
         const int64_t target = std::min<int64_t>(o.max_context, (cells + kvg.step - 1) / kvg.step * kvg.step);
-        const int64_t need = strata::core::qsa_kv_elastic_need(target);
-        if (need == 0) { kvg.cells = strata::core::qsa_kv_elastic_cells(); return true; }
+        const int64_t need = strata::core::qsa_kv_elastic_need(target, pools);
+        if (need == 0) { kvg.cells = strata::core::qsa_kv_elastic_cells(pools); return true; }
         quiesce();
         strata::core::VmmRange& r = *xcache.vmm_range();
         const uint64_t G = strata::core::vmm_granularity();
@@ -6448,9 +6490,9 @@ int strata_main(int argc, char** argv) {
             const strata::core::VmmChunk h = kvg.spare.back();
             kvg.spare.pop_back();
             return h;
-        });
+        }, pools);
         kvg.fresh += fresh;
-        kvg.cells = strata::core::qsa_kv_elastic_cells();
+        kvg.cells = strata::core::qsa_kv_elastic_cells(pools);
         ++kvg.grows;
         std::fprintf(stderr, "strata: K/V grown to %lld cells (%.2f GiB); the expert cache gave %lld slots for it, "
                              "%lld hotter experts moved to colder ones' slots (%lld of %lld slots hold experts)%s\n",
@@ -6462,20 +6504,24 @@ int strata_main(int argc, char** argv) {
             std::fprintf(stderr, "strata: the K/V could not grow to %lld cells (%s)\n", (long long) target,
                          cudaGetErrorString(cudaGetLastError()));
         if (kvg_audit) kvg_audit("grow", true);
+        kvg_report_sessions();
         return ok;
     };
     // A request that needs far fewer cells than the K/V holds gives the rest back: the slots refill with the
     // profile's hottest experts the GPU does not hold.  Run on a quiet device (as kvg_ensure's `quiesce`).
-    auto kvg_trim = [&](int64_t cells, int64_t hold) -> bool {   // `hold`: the cells a parked conversation could need
+    auto kvg_trim = [&](int64_t cells, int64_t hold,
+                        strata::core::SessionState* session = nullptr) -> bool {   // `hold`: the cells a parked conversation could need
         if (!kvg.on) return true;
+        const auto* pools = kv_pools(session);
+        if (native_kv_independent) kvg.cells = strata::core::qsa_kv_elastic_cells(pools);
         // #1128: a parked conversation comes back through kvg_ensure's grow, so a K/V that fell to a short request's
         // size is grown again (its experts shuffled again) after every short request in between: the K/V keeps the
         // longest parked conversation's cells while it is parked
         const int64_t want = std::max<int64_t>(cells, hold);
         const int64_t target = std::max<int64_t>(kvg.step, (want + kvg.step - 1) / kvg.step * kvg.step);
         if (kvg.cells < target + 2 * kvg.step || kvg.lo >= kvg.top) return true;
-        strata::core::qsa_kv_elastic_shrink(target, [&](strata::core::VmmChunk h) { kvg.spare.push_back(h); });
-        kvg.cells = strata::core::qsa_kv_elastic_cells();
+        strata::core::qsa_kv_elastic_shrink(target, [&](strata::core::VmmChunk h) { kvg.spare.push_back(h); }, pools);
+        kvg.cells = strata::core::qsa_kv_elastic_cells(pools);
         strata::core::VmmRange& r = *xcache.vmm_range();
         const uint64_t G = strata::core::vmm_granularity();
         const int64_t c1 = (int64_t) (xcache.slot_offset(kvg.top) / G);
@@ -6533,6 +6579,7 @@ int strata_main(int argc, char** argv) {
         std::fprintf(stderr, "strata: K/V trimmed to %lld cells; %lld slots back to the expert cache, refilled from "
                              "the profile\n", (long long) kvg.cells, (long long) (kvg.lo - lo0));
         if (kvg_audit) kvg_audit("trim", true);
+        kvg_report_sessions();
         return true;
     };
     // ---- the resident RAM mode (--resident-experts / --resident-cpu-experts): the experts the GPU cache does not
@@ -9172,6 +9219,12 @@ int strata_main(int argc, char** argv) {
         int64_t bt_miss0 = 0, bt_hits0 = 0, bt_pcie0 = 0;
         int64_t bt_windows = 0, bt_rows = 0, bt_tokens = 0;
         int64_t native_batch_adapt_windows = 0, native_batch_adapt_rounds = 0;
+        const bool native_slot_copy = safetensors && o.mtp.empty() && [] {
+            const char* v = std::getenv("STRATA_NATIVE_SLOT_COPY");
+            return v != nullptr && std::atoi(v) != 0;
+        }();
+        if (native_slot_copy)
+            std::fprintf(stderr, "strata: native batch slot copies stay on the device\n");
         Clock::time_point bt_start = Clock::now();
         int admit_slot = -1;               ///< the slot the request being read will continue in (BGEN)
         long long admit_max_new = 0;
@@ -9186,11 +9239,24 @@ int strata_main(int argc, char** argv) {
         // the session a request just left behind (its prompt) -> slot b's sessions, on every stage
         auto copy_to_slot = [&](int b, const std::vector<int32_t>& ids, std::string& e) -> bool {
             const int64_t upto = (int64_t) ids.size();
+            if (native_kv_independent &&
+                !kvg_ensure(upto + 256, [&] { cudaDeviceSynchronize(); apply_pending(true); }, bslot_ss[0][(size_t) b].get())) {
+                e = "batch admission: destination K/V cannot grow";
+                return false;
+            }
             for (size_t k = 0; k < bslot_ss.size(); ++k) {
                 strata::core::SessionState& from = k == 0 ? ss : stages[k - 1]->ss;
                 strata::core::SessionState& to = *bslot_ss[k][(size_t) b];
                 const strata::core::OnDevice on_k(k == 0 ? 0 : stages[k - 1]->dev);
                 if (cudaDeviceSynchronize() != cudaSuccess) { e = "batch admission: device sync failed"; return false; }
+                if (native_slot_copy) {
+                    if (!strata::core::conversation_checkpoint_copy(from, to, g, ids, e)) return false;
+                    for (int64_t j = 0; j < from.qsa_alloc; ++j)
+                        if (!strata::core::conversation_kv_copy(from.qsa_states[from.qsa_ord0 + j],
+                                                               to.qsa_states[to.qsa_ord0 + j], g, upto, true, e)) return false;
+                    if (cudaDeviceSynchronize() != cudaSuccess) { e = "batch admission: device copy failed"; return false; }
+                    continue;
+                }
                 strata::core::ConversationCheckpoint ck;
                 ck.ids = ids;
                 if (!strata::core::conversation_checkpoint_save(ck, from, g, e) ||
@@ -9205,6 +9271,10 @@ int strata_main(int argc, char** argv) {
                         return false;
                 }
                 if (cudaDeviceSynchronize() != cudaSuccess) { e = "batch admission: device sync failed"; return false; }
+            }
+            if (native_kv_independent && !kvg_trim(upto + 256, 0, bslot_ss[0][(size_t) b].get())) {
+                e = "batch admission: destination K/V cannot shrink";
+                return false;
             }
             if (batch_mtp) {
                 // Admission first builds the solo draft KV; copy it into the slot before drafting.
@@ -9224,12 +9294,28 @@ int strata_main(int argc, char** argv) {
         // `at`: one of the slot's checkpoints - only the K/V up to it is copied and its state restored instead
         auto copy_from_slot = [&](int b, const ConvCheckpoint* at, std::string& e) -> bool {
             const int64_t upto = at != nullptr ? (int64_t) at->ids.size() : (int64_t) bs[(size_t) b].ids.size();
+            if (native_kv_independent &&
+                !kvg_ensure(upto + 256, [&] { cudaDeviceSynchronize(); apply_pending(true); })) {
+                e = "batch slot restore: destination K/V cannot grow";
+                return false;
+            }
             if (at != nullptr && at->stage_parts.size() != stages.size()) { e = "a checkpoint without its stage parts"; return false; }
             for (size_t k = 0; k < bslot_ss.size(); ++k) {
                 strata::core::SessionState& from = *bslot_ss[k][(size_t) b];
                 strata::core::SessionState& to = k == 0 ? ss : stages[k - 1]->ss;
                 const strata::core::OnDevice on_k(k == 0 ? 0 : stages[k - 1]->dev);
                 if (cudaDeviceSynchronize() != cudaSuccess) { e = "batch slot restore: device sync failed"; return false; }
+                if (native_slot_copy) {
+                    if (at != nullptr) {
+                        if (!strata::core::conversation_checkpoint_restore(k == 0 ? *at : at->stage_parts[k - 1], to, g, e))
+                            return false;
+                    } else if (!strata::core::conversation_checkpoint_copy(from, to, g, bs[(size_t) b].ids, e)) return false;
+                    for (int64_t j = 0; j < from.qsa_alloc; ++j)
+                        if (!strata::core::conversation_kv_copy(from.qsa_states[from.qsa_ord0 + j],
+                                                               to.qsa_states[to.qsa_ord0 + j], g, upto, true, e)) return false;
+                    if (cudaDeviceSynchronize() != cudaSuccess) { e = "batch slot restore: device copy failed"; return false; }
+                    continue;
+                }
                 if (at != nullptr) {
                     if (!strata::core::conversation_checkpoint_restore(k == 0 ? *at : at->stage_parts[k - 1], to, g, e))
                         return false;
@@ -9298,10 +9384,19 @@ int strata_main(int argc, char** argv) {
             if (batch_mtp && A > 0) next_slot = ((size_t) active[A - 1] + 1) % bs.size();
             if (S == 0) return true;
             if (kvg.on) {
-                const int64_t upto = *std::max_element(pos, pos + S) + 256;
-                if (!kvg_ensure(upto, [&] { cudaDeviceSynchronize(); apply_pending(true); })) {
-                    err = "native batch: the K/V cannot grow to a slot's next position";
-                    return false;
+                if (native_kv_independent) {
+                    for (int row = 0; row < S; ++row)
+                        if (!kvg_ensure(pos[row] + 256, [&] { cudaDeviceSynchronize(); apply_pending(true); },
+                                        bslot_ss[0][(size_t) rows[row]].get())) {
+                            err = "native batch: the slot K/V cannot grow to its next position";
+                            return false;
+                        }
+                } else {
+                    const int64_t upto = *std::max_element(pos, pos + S) + 256;
+                    if (!kvg_ensure(upto, [&] { cudaDeviceSynchronize(); apply_pending(true); })) {
+                        err = "native batch: the K/V cannot grow to a slot's next position";
+                        return false;
+                    }
                 }
             }
             const bool was_busy = strata::core::progress().busy.load();
@@ -10275,7 +10370,7 @@ int strata_main(int argc, char** argv) {
                 int64_t hold_cells = hold_on ? conversations.longest_tokens() + 256 : 0;
                 // Elastic native pools share a mapping size. A short admission must not unmap a longer
                 // active, yielded or cached slot's K/V; its next turn copies those cells back to ss.
-                if (safetensors)
+                if (safetensors && !native_kv_independent)
                     for (const BSlot& slot : bs)
                         if (slot.active || slot.cached || slot.partial)
                             hold_cells = std::max<int64_t>(hold_cells, (int64_t) slot.ids.size() + 256);
@@ -11643,7 +11738,7 @@ int strata_main(int argc, char** argv) {
                                cudaMemcpyHostToDevice);
                 }
                 // the elastic K/V: the window's cells and the drafter's beyond them
-                if (kvg.on && p + T + 64 > kvg.cells &&
+                if (kvg.on && (native_kv_independent || p + T + 64 > kvg.cells) &&
                     !kvg_ensure(p + T + 64, [&] { cudaDeviceSynchronize(); apply_pending(true); })) {
                     std::printf("ERR the K/V cannot grow: no VRAM is left\n");
                     return 1;

@@ -584,15 +584,21 @@ void qsa_set_kv_elastic(bool enabled, int64_t init_cells) {
     if (init_cells > 0) g_kv_elastic_init = init_cells;
 }
 bool qsa_kv_elastic() { return g_kv_elastic; }
-int64_t qsa_kv_elastic_cells() {
+int64_t qsa_kv_elastic_cells(const std::vector<int32_t>* pools) {
     int64_t cells = std::numeric_limits<int64_t>::max();
-    for (const auto& p : g_pools) cells = std::min<int64_t>(cells, pool_slots_mapped(*p) * p->page_size);
+    for (size_t i = 0; i < g_pools.size(); ++i) {
+        if (pools && std::find(pools->begin(), pools->end(), (int32_t) i) == pools->end()) continue;
+        const auto& p = g_pools[i];
+        cells = std::min<int64_t>(cells, pool_slots_mapped(*p) * p->page_size);
+    }
     return cells;
 }
-int64_t qsa_kv_elastic_need(int64_t cells) {
+int64_t qsa_kv_elastic_need(int64_t cells, const std::vector<int32_t>* pools) {
     const uint64_t G = strata::core::vmm_granularity();
     int64_t n = 0;
-    for (const auto& p : g_pools) {
+    for (size_t i = 0; i < g_pools.size(); ++i) {
+        if (pools && std::find(pools->begin(), pools->end(), (int32_t) i) == pools->end()) continue;
+        const auto& p = g_pools[i];
         const int64_t slots = pool_slots(*p, cells);
         for (size_t a = 0; a < p->off.size(); ++a) {
             const int64_t c0 = (int64_t) (p->off[a] / G), c1 = c0 + pool_chunks(*p, a, slots);
@@ -601,15 +607,22 @@ int64_t qsa_kv_elastic_need(int64_t cells) {
     }
     return n;
 }
-bool qsa_kv_elastic_grow(int64_t cells, const std::function<strata::core::VmmChunk()>& take) {
-    for (auto& p : g_pools)
+bool qsa_kv_elastic_grow(int64_t cells, const std::function<strata::core::VmmChunk()>& take,
+                         const std::vector<int32_t>* pools) {
+    for (size_t i = 0; i < g_pools.size(); ++i) {
+        if (pools && std::find(pools->begin(), pools->end(), (int32_t) i) == pools->end()) continue;
+        auto& p = g_pools[i];
         if (!pool_grow(*p, cells, take)) return false;
+    }
     return cudaDeviceSynchronize() == cudaSuccess;
 }
-int64_t qsa_kv_elastic_shrink(int64_t cells, const std::function<void(strata::core::VmmChunk)>& give) {
+int64_t qsa_kv_elastic_shrink(int64_t cells, const std::function<void(strata::core::VmmChunk)>& give,
+                             const std::vector<int32_t>* pools) {
     const uint64_t G = strata::core::vmm_granularity();
     int64_t n = 0;
-    for (auto& p : g_pools) {
+    for (size_t i = 0; i < g_pools.size(); ++i) {
+        if (pools && std::find(pools->begin(), pools->end(), (int32_t) i) == pools->end()) continue;
+        auto& p = g_pools[i];
         const int64_t slots = pool_slots(*p, cells);
         for (size_t a = 0; a < p->off.size(); ++a) {
             const int64_t c0 = (int64_t) (p->off[a] / G), c1 = c0 + pool_chunks(*p, a, slots);

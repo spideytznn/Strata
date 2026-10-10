@@ -25,6 +25,12 @@ bool conversation_kv_validate(const ConversationKv& image, const QsaState& state
                               int64_t upto, bool include_index, std::string& error);
 bool conversation_kv_restore(const ConversationKv& image, const QsaState& state, const ModelGeometry& g,
                              int64_t upto, bool include_index, std::string& error);
+// Direct slot migration for fully resident device pools (mode 0). Copies the same
+// rounded pages/spare index row as save/restore, without a host snapshot. Caller
+// keeps both sessions idle and mapped, then synchronizes after all enqueued copies.
+// Failure may leave partial destination state; do not continue inference from it.
+bool conversation_kv_copy(const QsaState& from, const QsaState& to, const ModelGeometry& g,
+                          int64_t upto, bool include_index, std::string& error);
 // Diagnostic read-back after a synchronized restore. Uses 64 KiB of stack
 // workspace, compares authoritative bytes and resident draft-ring pages, and
 // fingerprints the authoritative payload only. Never changes model state.
@@ -65,6 +71,11 @@ bool conversation_checkpoint_save(ConversationCheckpoint& checkpoint, const Sess
                                   const ModelGeometry& g, std::string& error);
 bool conversation_checkpoint_restore(const ConversationCheckpoint& checkpoint, SessionState& session,
                                      const ModelGeometry& g, std::string& error);
+// Enqueues running-state device copies for matching session carves; `ids` defines
+// PLE's previous tokens, just as checkpoint_restore does. Follow with kv_copy for
+// every QSA layer (including its spare row), then synchronize before execution.
+bool conversation_checkpoint_copy(const SessionState& from, SessionState& to, const ModelGeometry& g,
+                                   const std::vector<int32_t>& ids, std::string& error);
 
 struct ConversationView {
     const std::vector<int32_t>& ids;

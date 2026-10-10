@@ -1,6 +1,7 @@
 """Private HTTP acceptance for native parallel requests. Does not start the desktop service."""
 import argparse
 import base64
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
@@ -24,14 +25,19 @@ def main():
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--parallel", type=int, default=2)
     ap.add_argument("--rounds", type=int, default=3)
+    ap.add_argument("--independent-kv", action="store_true", help="opt into per-session elastic KV mappings")
+    ap.add_argument("--device-slot-copy", action="store_true", help="opt into direct device slot migration")
+    ap.add_argument("--long-tokens", type=int, default=0, help="replace the first fixture with a repeated-text long prompt")
     a = ap.parse_args()
     a.output.mkdir(parents=True, exist_ok=False)
     cfg = json.loads(a.config.read_text(encoding="utf8"))
     cfg["exe"] = str(a.exe.resolve())
     cfg["parallel"] = a.parallel
+    cfg["env"]["STRATA_NATIVE_KV_INDEPENDENT"] = "1" if a.independent_kv else "0"
+    cfg["env"]["STRATA_NATIVE_SLOT_COPY"] = "1" if a.device_slot_copy else "0"
     args = cfg["args"]
     args[args.index("--vram-reserve-mib") + 1] = "1536"
-    result = {"config": cfg, "rounds": [], "requests": []}
+    result = {"config": cfg, "exe_sha256": hashlib.sha256(a.exe.read_bytes()).hexdigest(), "rounds": [], "requests": []}
     def save():
         (a.output / "results.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf8")
     save()
@@ -99,6 +105,11 @@ def main():
         questions = ["Explain TCP and QUIC in detail, including congestion control and multiplexing.",
                      "写一个 Python 二分查找函数，解释边界条件和时间复杂度。",
                      "Explain how a B-tree splits a node; give a worked example."]
+        if a.long_tokens:
+            paragraph = "The committee reviewed the budget, the schedule and open questions. A report follows next quarter. "
+            questions[0] = paragraph * (a.long_tokens // len(tok.encode(paragraph)) + 1) + \
+                "\nExplain why a written schedule is useful, in detail."
+        result["fixture_body_tokens"] = [len(tok.encode(q)) for q in questions]
         refs = [chat(f"reference-{i}", text) for i, text in enumerate(questions)]
         save()
         with ThreadPoolExecutor(max_workers=4) as pool:

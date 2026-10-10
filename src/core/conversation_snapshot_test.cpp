@@ -148,6 +148,27 @@ void full_session(int fmt, int mode, int experts) {
     const ConversationView view{ids,images,checkpoints,true};
     SavedConversation a,b,restored;
     check(conversation_snapshot_save(a,view,ss,g,draft.state,err),"capture complete A");
+    if (mode == 0) {
+        Fixture target(fmt, 0);
+        SessionState dst = ss;
+        dst.qsa_states = &target.state;
+        target.alloc(dst.gdn_state, sizes.gdn); target.alloc(dst.ple_hist, sizes.ple);
+        target.alloc(target.state.idx_tail, sizes.tail); target.alloc(target.state.idx_dead, sizes.dead);
+        target.alloc(target.state.idx_block_pos, sizes.block_pos);
+        target.fill(91);
+        check(conversation_checkpoint_copy(ss, dst, g, ids, err), "direct running-state copy");
+        check(conversation_kv_copy(main.state, target.state, g, ids.size(), true, err), "direct session K/V copy");
+        cuda_check(cudaDeviceSynchronize());
+        ConversationCheckpoint got;
+        got.ids = ids;
+        ConversationKv kv;
+        check(conversation_checkpoint_save(got, dst, g, err) &&
+              conversation_kv_save(kv, target.state, g, ids.size(), true, err), "capture directly copied session");
+        check(got.gdn == a.live.gdn && got.ple == a.live.ple && got.tails == a.live.tails &&
+              got.dead == a.live.dead && got.block_pos == a.live.block_pos && equal(kv, a.kv[0]),
+              "direct session copy byte-identical to snapshot path");
+        check(dst.ple_prev[0] == 64 && dst.ple_prev[1] == 65, "direct copy reconstructs PLE token window");
+    }
     check(a.checkpoints[0].used == 17,"upstream checkpoint LRU stamp survives capture");
     fill(177);
     check(conversation_snapshot_save(b,view,ss,g,draft.state,err),"capture complete B");
@@ -320,6 +341,25 @@ int main() {
             ConversationKv a,b,restored;
             cuda_check(cudaDeviceSynchronize());
             check(conversation_kv_save(a,f.state,f.g,upto,index,err),"save A");
+            if (mode == 0) {
+                Fixture target(fmt, 0);
+                target.fill(91);
+                check(conversation_kv_copy(f.state,target.state,f.g,upto,index,err), "direct resident K/V copy");
+                cuda_check(cudaDeviceSynchronize());
+                ConversationKv direct;
+                check(conversation_kv_save(direct,target.state,f.g,upto,index,err) && equal(direct,a),
+                      "direct copy matches snapshot at page/block boundaries");
+                auto incompatible = target.state;
+                incompatible.kv_rot = !target.state.kv_rot;
+                if (fmt == kKvInt8 || fmt == kKvF16)
+                    check(!conversation_kv_copy(f.state,incompatible,f.g,upto,index,err), "reject incompatible rotation");
+                incompatible = target.state; incompatible.kv_mode = 1;
+                check(!conversation_kv_copy(f.state,incompatible,f.g,upto,index,err), "reject nonresident destination");
+                check(!conversation_kv_copy(f.state,target.state,f.g,-1,index,err), "reject negative direct-copy extent");
+                ConversationKv unchanged;
+                check(conversation_kv_save(unchanged,target.state,f.g,upto,index,err) && equal(unchanged,a),
+                      "invalid direct copy preserves destination");
+            }
             check(a.bytes()==conversation_kv_bytes(f.state,f.g,upto,index),"size estimate equals snapshot payload");
             f.fill(177);
             check(conversation_kv_save(b,f.state,f.g,upto,index,err),"save B");
@@ -391,5 +431,37 @@ int main() {
     for (int fmt : {kKvF16,kKvInt8,kKvQ4}) for (int mode : {0,1}) for (int experts : {256,512})
         full_session(fmt,mode,experts);
     for (int experts : {256,512}) full_session(3,0,experts);
+    if (vmm_available()) {
+        ModelGeometry g;
+        qsa_set_kv_resident(0); qsa_set_kv_q4(false); qsa_set_kv_hybrid(false); qsa_set_kv_int8(true);
+        qsa_set_kv_elastic(true, 8192);
+        std::array<QsaState, 3> states;
+        std::array<void*, 3> buffers{};
+        for (size_t i = 0; i < states.size(); ++i) {
+            cuda_check(cudaMalloc(&buffers[i], qsa_state_bytes(g, 32768, i == 0)));
+            check(qsa_state_init(g, 32768, buffers[i], states[i], i ? &states[0] : nullptr) > 0,
+                  "initialize elastic session pool");
+        }
+        const std::vector<int32_t> a{states[0].kv_elastic}, b{states[1].kv_elastic}, c{states[2].kv_elastic};
+        const auto initial_b = qsa_kv_elastic_cells(&b), initial_c = qsa_kv_elastic_cells(&c);
+        cuda_check(cudaMemset(states[1].k_q, 91, 64));
+        check(qsa_kv_elastic_need(24576, &a) > 0, "selected pool needs growth");
+        check(qsa_kv_elastic_grow(24576, [] { return VmmChunk(0); }, &a), "grow one session only");
+        check(qsa_kv_elastic_cells(&a) >= 24576 && qsa_kv_elastic_cells(&b) == initial_b &&
+              qsa_kv_elastic_cells(&c) == initial_c, "growth preserves other sessions' mapping sizes");
+        check(qsa_kv_elastic_shrink(8192, [](VmmChunk h) { vmm_chunk_free(h); }, &a) > 0,
+              "shrink one session only");
+        check(qsa_kv_elastic_cells(&a) < 24576 && qsa_kv_elastic_cells(&b) == initial_b &&
+              qsa_kv_elastic_cells(&c) == initial_c, "shrink preserves other sessions' mapping sizes");
+        uint8_t sentinel = 0;
+        cuda_check(cudaMemcpy(&sentinel, states[1].k_q, 1, cudaMemcpyDeviceToHost));
+        check(sentinel == 91, "another session's KV bytes survive growth and shrink");
+        check(qsa_kv_elastic_grow(32768, [] { return VmmChunk(0); }) &&
+              qsa_kv_elastic_cells() >= 32768, "default all-pool growth remains supported");
+        for (size_t i = 0; i < states.size(); ++i) {
+            cuda_check(cudaFreeHost(states[i].host_step)); cuda_check(cudaFreeHost(states[i].host_pos));
+            cuda_check(cudaFree(buffers[i]));
+        }
+    }
     std::printf("conversation_snapshot_test: %d checks passed\n",checks);
 }

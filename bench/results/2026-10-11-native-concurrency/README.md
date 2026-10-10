@@ -17,8 +17,9 @@ the measured executable accumulates routing heat, but periodic exchange is
 scheduled only by solo generation. The recorded measurements remain observations
 of that executable; configured adaptation and cumulative promotions do not prove
 two-row batch promotions. A correction was compiled as `strata-concurrency3.exe`
-(`adaptive-fix-build.log`), with GPU acceptance pending resource availability;
-see [the staged correction](../../../docs/NATIVE_CONCURRENCY.md#adaptive-exchange-correction-staged-after-initial-acceptance).
+(`adaptive-fix-build.log`). The correction passed new target-only GPU acceptance
+with 98 real two-row adaptive rounds and 9367 promotions in those rounds;
+see [the correction](../../../docs/NATIVE_CONCURRENCY.md#adaptive-exchange-correction).
 
 ## Functional results
 
@@ -31,6 +32,14 @@ see [the staged correction](../../../docs/NATIVE_CONCURRENCY.md#adaptive-exchang
 | `capacity-decode-262k` | 261000 / 261007 token prompts, 256 generated tokens each | Passed; exact solo parity and overlapping decode at full KV allocation |
 | `http-262k` | Two-slot OpenAI SSE, three-client queue, disconnect/recovery, image exclusion, Anthropic | Passed; text matched serial reference; image returned red |
 | `http-serial-262k` | Same executable with batching disabled, same-day HTTP comparison | Passed |
+| `adaptive3-acceptance` | No MTP loaded, vision loaded, 128-token sampling pairs, real batch promotions | Passed; exact solo parity, cancellation/resume, followups, limits and EOS |
+| `http3-no-mtp-parallel` | Corrected batch adaptation, target-only HTTP, three rounds per client count | Passed; vision exclusion, disconnect/recovery and Anthropic |
+| `http3-no-mtp-serial` | Same target-only executable/config with parallel disabled | Passed; 24 shared completed responses also match the parallel run |
+| `optimized5-acceptance` | Independent session KV and device slot copies, no MTP, vision loaded | Passed; two overlapping 261000/261007-token slots, 256 outputs each, 124135-token live-slot continuation and replacement/readmission |
+| `http5-long-baseline` | Same `concurrency5` executable, both new flags off, 124135-token/short mixed HTTP | Passed; three rounds per client count, disconnect/recovery, image exclusion and Anthropic |
+| `http5-long-optimized` | Same executable and fixture with both new flags on | Passed; all 27 shared completed responses matched flags-off run |
+| `http5-short-baseline` | Same executable, both flags off, all short HTTP prompts | Passed; three rounds per client count and all HTTP/residency checks |
+| `http5-short-optimized` | Same short fixture with both flags on | Passed; all 27 shared completed responses matched flags-off run |
 
 Greedy, seeded sampling with different per-request temperature/top-k/top-p,
 greedy and stochastic repetition/frequency/presence penalties, cancellation and
@@ -59,6 +68,70 @@ SYCL build was performed on this machine.
 Config-generator smoke checks confirmed that default generation omits `parallel`,
 `--parallel 2` emits it, and parallel plus serial-only minimum drafts is rejected.
 The native engine also returned code 2 for `--batch-mtp` before weight loading.
+
+## Target-only follow-up and state-copy validation
+
+`no-mtp3-http-summary.json` compares the corrected executable with one/two slots,
+MTP entirely unloaded, otherwise the same 262K INT8/dedicated-4096/vision profile.
+The three-round medians for 1/2/3 clients were 64.67/58.10/55.19 aggregate tok/s
+serial and 61.43/73.27/62.24 with two slots. Two-client last first-content wait
+was 1.640 versus 0.420 seconds. This warm-cache screen supports a measured 26.1%
+two-client throughput gain, with a 5.0% one-client regression. Startup was excluded
+and varied substantially; GPU clocks were not controlled.
+
+`optimized5-acceptance` additionally checks independent KV and direct device
+copies with real expert adaptation: 175 actual two-row rounds, 15279 promotions,
+zero post-residency expert/MTP source bytes. At full target-only capacity the
+three KV groups mapped 9504 MiB (9.28 GiB). With one 131072-cell slot and the
+main/other slot at 8192 cells, they mapped 1872 MiB. Two full slots still require
+their full KV. The historical 9.54 GiB above also included draft KV.
+
+Live-slot reuse and replacement/readmission matched solo output; the last long
+readmission recomputed its prompt, so it is not evidence of a RAM-cache hit.
+Repeated-text capacity fixtures do not establish retrieval quality.
+`device-copy-bytes-test.log` records 4219 passing CUDA snapshot/mapping checks;
+`python-tests-optimized.log` and `python-native-gate-optimized.log` record 37
+distinct passing server/config/gate checks. `device-copy-build.log` is the final
+SM120 build, SHA256 `257208bff0788021c843205f2f8f222309e9ad1ae4aac536c4a8126ac5359b68`.
+`independent-kv-build.log` is the intermediate independent-KV build, not the
+accepted final executable. HIP/SYCL were not built or validated.
+
+`optimized5-long-http-summary.json` compares both flags off/on in the exact same
+binary, with 124135 formatted long tokens plus short questions, 96 greedy output
+tokens, three rounds per client count. Long prompts reuse 124128 tokens after
+reference warmups. Aggregate rates for 1/2/3 clients were 42.47/44.33/42.21 tok/s
+off versus 47.11/51.97/49.84 on, gains of 10.9%/17.2%/18.1%. Last first-content
+latency was 0.587/1.260/4.776 s off versus 0.367/1.273/3.865 s on.
+Median slot admission increased 56 to 107 ms including independent mapping/cache
+adjustments; restoration decreased 41.9 to 22.05 ms. This is an end-to-end warm
+conversation screen, not a cold long-prompt prefill benchmark. Sequential runs,
+uncontrolled clocks and adapting expert placement limit the comparison.
+
+`optimized5-short-http-summary.json` repeats the same off/on comparison with
+all-short prompts. Aggregate rates for 1/2/3 clients were 65.26/75.00/66.02 tok/s
+off and 66.18/78.43/69.75 on (+1.4%/+4.6%/+5.6%). Last first-content latency
+was 0.134/0.429/2.679 s off and 0.124/0.376/2.574 s on. Median slot admission
+was 63.4 versus 22.8 ms; restoration was 35.1 versus 27.9 ms. All 27 shared
+completed responses matched; disconnect/recovery, vision exclusion, Anthropic
+and zero post-residency expert/MTP source counters passed. The small differences
+are not guaranteed gains. Omit `--long-tokens` in the commands below to reproduce
+the short fixture. The separate parallel desktop profile now opts into both
+paths; engine defaults and the original serial desktop profile stay unchanged.
+
+Reproduce the final state and mixed-length screens with:
+
+```powershell
+tools/build_safetensors_engine.ps1 -Jobs 8 -OutputName strata-concurrency5
+.venv-native/Scripts/python.exe tools/native_concurrency_acceptance.py --config config/native/rtx5090-262k-parallel.json --exe build-native-engine/strata-concurrency5.exe --output bench/results/local-independent-acceptance --context 262144 --vision --limit 128 --adaptive --independent-kv --device-slot-copy --growth-tokens 131000 --capacity-tokens 261000
+.venv-native/Scripts/python.exe tools/native_concurrency_http.py --config config/native/rtx5090-262k-parallel.json --exe build-native-engine/strata-concurrency5.exe --output bench/results/local-mixed-off --parallel 2 --rounds 3 --long-tokens 131000
+.venv-native/Scripts/python.exe tools/native_concurrency_http.py --config config/native/rtx5090-262k-parallel.json --exe build-native-engine/strata-concurrency5.exe --output bench/results/local-mixed-on --parallel 2 --rounds 3 --long-tokens 131000 --independent-kv --device-slot-copy
+.venv-native/Scripts/python.exe tools/native_concurrency_report.py --baseline bench/results/local-mixed-off --candidate bench/results/local-mixed-on --output bench/results/local-mixed-summary.json
+```
+
+The harness explicitly sets both new flags from its command-line switches,
+so omitting a switch disables that path even if the desktop config enables it.
+The requested fixture size is approximate: token merges produce 124123 body
+tokens (124135 with chat formatting) for `--long-tokens 131000`.
 
 ## HTTP latency and throughput screen
 
