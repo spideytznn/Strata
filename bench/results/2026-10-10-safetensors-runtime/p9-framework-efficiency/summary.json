@@ -1,0 +1,128 @@
+{
+  "runs": {
+    "fullkv-r1": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "8914cbcc43e8ffe2b847a3a9416c8d3bf2986625f6f8eba7e3a160404de4be33",
+      "tokens_sha256": "4b47c66c99ad34c4e87169088359c6ca1725e7b856d7192986ab16bf378b3db9",
+      "prompt_tokens": 8199,
+      "process_seconds": 70.7202742999998,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 4079.8,
+        "tokens_per_second": 2009.43
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2866.2,
+        "tokens_per_second": 44.66
+      }
+    },
+    "elastic-r1": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "8914cbcc43e8ffe2b847a3a9416c8d3bf2986625f6f8eba7e3a160404de4be33",
+      "tokens_sha256": "4b47c66c99ad34c4e87169088359c6ca1725e7b856d7192986ab16bf378b3db9",
+      "prompt_tokens": 8199,
+      "process_seconds": 67.03103039999996,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2598.5,
+        "tokens_per_second": 3154.85
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2435.5,
+        "tokens_per_second": 52.55
+      }
+    },
+    "details-fullkv-r1": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "8914cbcc43e8ffe2b847a3a9416c8d3bf2986625f6f8eba7e3a160404de4be33",
+      "tokens_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+      "prompt_tokens": 8199,
+      "process_seconds": 76.06655629999977,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 9963.8,
+        "tokens_per_second": 822.78
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2884.8,
+        "tokens_per_second": 44.37
+      },
+      "output_equals_details_reference": true
+    },
+    "details-elastic-r1": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "8914cbcc43e8ffe2b847a3a9416c8d3bf2986625f6f8eba7e3a160404de4be33",
+      "tokens_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+      "prompt_tokens": 8199,
+      "process_seconds": 98.40611760000002,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 10103.3,
+        "tokens_per_second": 811.42
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2585.9,
+        "tokens_per_second": 49.5
+      },
+      "output_equals_details_reference": true
+    },
+    "details-close-r1": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "tokens_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+      "prompt_tokens": 8199,
+      "process_seconds": 68.20185939999965,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 3298.5,
+        "tokens_per_second": 2485.34
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2863.7,
+        "tokens_per_second": 44.7
+      },
+      "output_equals_details_reference": true
+    },
+    "details-off-r2": {
+      "exit_code": 0,
+      "status": null,
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "tokens_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+      "prompt_tokens": 8199,
+      "process_seconds": 74.75666799999999,
+      "prefill": {
+        "tokens": 8198,
+        "ms": 10361.1,
+        "tokens_per_second": 791.23
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2989.9,
+        "tokens_per_second": 42.81
+      },
+      "output_equals_details_reference": true
+    },
+    "details-close-r2": {
+      "exit_code": 4294967295,
+      "status": "interrupted_user_reboot",
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "tokens_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+      "prompt_tokens": 8199,
+      "process_seconds": 40.94818280000027,
+      "prefill": null,
+      "decode": null
+    }
+  },
+  "status": "prefill_fix_screened_repeat_acceptance_pending",
+  "note": "No claim of 2x decode. details-close-r2 stopped at the user reboot request."
+}

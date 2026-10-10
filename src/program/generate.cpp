@@ -3093,6 +3093,16 @@ int strata_main(int argc, char** argv) {
                                       o.shared_expert_arena);
         });
     }
+    // Native safetensors bypasses arena_async, which is where the inherited
+    // engine starts cuBLAS prewarming. Reuse that warmup during expert loading.
+    // Opt-in until paired first-prompt measurements establish the benefit.
+    if (safetensors) {
+        const char* warm = std::getenv("STRATA_NATIVE_PREWARM");
+        if (warm && warm[0] == '1' && warm[1] == '\0') {
+            strata::prefill::gemm_prewarm(o.prefill_chunk > 0);
+            std::fprintf(stderr,"safetensors: native GEMM prewarm started alongside resident weight loading\n");
+        }
+    }
     strata::core::NativeDense native_dense;
     if (!o.native_dense_gguf.empty()) {
         if (!native_dense.load(o.native_dense_gguf, wt, err, o.native_ple_key)) {

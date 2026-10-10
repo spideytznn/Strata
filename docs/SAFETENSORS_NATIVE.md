@@ -40,6 +40,17 @@ v22.5 template is retained in `config/native/froggeric-v22.5.jinja`.
 
 ## Runtime correctness evidence
 
+The next framework-efficiency investigation is recorded in
+[`p9-framework-efficiency`](../bench/results/2026-10-10-safetensors-runtime/p9-framework-efficiency/README.md).
+An opt-in startup-handle release (`STRATA_NATIVE_CLOSE_FILES=1`) improves one
+varied 8199-token document from 823 to 2485 prefill tok/s; a same-binary control
+with the option off measures 791 tok/s. All 128 output tokens match and expert/MTP
+source reads remain zero. Repeated acceptance was interrupted for the user's
+reboot, so desktop defaults remain unchanged. Decode is still about 45 tok/s;
+there is no claim that it doubled. An optional staged profile is
+`config/native/rtx5090-262k-io-fix-test.json`. Native GEMM prewarm is separately
+opt-in and has not yet been measured end to end.
+
 These are correctness checks on the RTX 5090 / Ryzen 9950X3D / 96 GB machine.
 Repeated throughput measurements are recorded separately below. Raw summaries are under
 `bench/results/2026-10-10-safetensors-runtime/`.

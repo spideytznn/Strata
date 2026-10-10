@@ -339,6 +339,13 @@ void bf16_gemv_fp32_mmvf_multi(const float* x, int64_t ldx, const uint16_t* w, f
 
 void bf16_gemv_fp32_mmvf(const float* x, const uint16_t* w, float* y,
                          int64_t n_in, int64_t n_out, void* stream) {
+    bf16_gemv_fp32_mmvf_layout(x, w, y, n_in, n_out, 1, stream);
+}
+
+void bf16_gemv_fp32_mmvf_layout(const float* x, const uint16_t* w, float* y,
+                                int64_t n_in, int64_t n_out, int rows_per_block, void* stream) {
+    if (rows_per_block != 1 && rows_per_block != 4)
+        throw std::invalid_argument("BF16 MMVF rows per block must be 1 or 4");
     if (n_in <= 0 || (n_in & 1) != 0 || n_in > std::numeric_limits<int>::max() ||
         n_out <= 0 || n_out > std::numeric_limits<int>::max())
         throw std::invalid_argument("bf16_gemv_fp32_mmvf: require positive even n_in and positive n_out <= INT_MAX");
@@ -349,7 +356,9 @@ void bf16_gemv_fp32_mmvf(const float* x, const uint16_t* w, float* y,
         throw std::invalid_argument("bf16_gemv_fp32_mmvf: null or misaligned pointer");
     const cudaStream_t st = (cudaStream_t) stream;
 #define STRATA_MMVF_CASE(N) case N: \
-    bf16_f32_mmvf_kernel<N><<<(unsigned) n_out, N, 0, st>>>(x, w, y, (int) n_in); break
+    if (rows_per_block == 4) \
+        bf16_f32_mmvf_rows_kernel<N, 1, 4><<<(unsigned)((n_out+3)/4), N, 0, st>>>(x, n_in, w, y, n_out, (int)n_in, (int)n_out, 1); \
+    else bf16_f32_mmvf_kernel<N><<<(unsigned) n_out, N, 0, st>>>(x, w, y, (int) n_in); break
     switch (mmvf_block_size(n_in)) {
         STRATA_MMVF_CASE(32);
         STRATA_MMVF_CASE(64);

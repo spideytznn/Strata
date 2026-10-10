@@ -64,6 +64,10 @@ public:
     const IoStats& io_stats() const override;
     // Once sealed, expert fetches fail instead of quietly falling back to disk.
     void seal_expert_reads();
+    // After all resident families have loaded, release startup file handles.
+    // Tensor descriptions and counters remain valid; any later payload read fails.
+    // PLE owns independent DirectFile handles and is unaffected.
+    void seal_resident_reads();
     std::string metadata_text(const std::string& filename);
 private:
     struct Impl;

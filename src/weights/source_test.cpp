@@ -59,6 +59,14 @@ int main() {
             for (int i=0;i<100;++i) require(e.data()==address && e[3]==11,"resident sample changed");
             require(source.io_stats().data_calls==before,"sample reuse read the source");
             source.read(source.tensor("a")); // sealing experts must not disable other families
+            before=source.io_stats().data_calls;
+            source.seal_resident_reads();
+            source.seal_resident_reads(); // idempotent; descriptions remain owned
+            source.read_many({});
+            refused=false;
+            try { source.read(source.tensor("a")); } catch(const std::runtime_error&) { refused=true; }
+            require(refused && source.io_stats().data_calls==before,"resident read reopened a startup file");
+            require(source.tensor("a").bytes==4 && source.shards().size()==1,"sealing lost metadata");
         }
         const auto cleanup = fs::canonical(root);
         require(cleanup.parent_path()==fs::canonical(fs::temp_directory_path()) &&

@@ -109,6 +109,7 @@ struct SafetensorsSource::Impl {
     std::vector<std::unique_ptr<File>> files;
     IoStats stats;
     bool experts_sealed = false;
+    bool resident_sealed = false;
     std::string metadata(const std::string& name) {
         File f(contained_file(root, name));
         require(f.size <= kMaxMetadata, "metadata JSON exceeds 100 MB");
@@ -218,11 +219,17 @@ const std::map<std::string, TensorDesc>& SafetensorsSource::tensors() const { re
 const std::vector<ShardDesc>& SafetensorsSource::shards() const { return impl_->shards; }
 const IoStats& SafetensorsSource::io_stats() const { return impl_->stats; }
 void SafetensorsSource::seal_expert_reads() { impl_->experts_sealed = true; }
+void SafetensorsSource::seal_resident_reads() {
+    require(impl_->experts_sealed, "expert residency must be sealed before releasing startup files");
+    impl_->resident_sealed = true;
+    impl_->files.clear();
+}
 std::string SafetensorsSource::metadata_text(const std::string& name) { return impl_->metadata(name); }
 void SafetensorsSource::read_many(std::span<const ReadRequest> requests) {
     auto& p = *impl_;
     std::vector<const ReadRequest*> ordered;
     for (const auto& r : requests) {
+        require(!p.resident_sealed, "resident weight source reads sealed after startup");
         require(r.tensor != nullptr, "null read descriptor");
         const auto& t = tensor(r.tensor->name);
         require(&t == r.tensor, "read descriptor does not belong to this source");

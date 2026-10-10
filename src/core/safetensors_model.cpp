@@ -243,6 +243,11 @@ bool SafetensorsModel::load_experts(FileExpertSource& s,std::string& err) {
             allocate_pinned ? "page-locked and GPU-mapped via cudaHostAlloc" : "locked",
             s.native_stage_host_ ? 128.0*l.max_blob/(1ull<<20) : 0.0);
         source_.seal_expert_reads();
+        const char* close_files = std::getenv("STRATA_NATIVE_CLOSE_FILES");
+        if (close_files && close_files[0] == '1' && close_files[1] == '\0') {
+            source_.seal_resident_reads();
+            std::fprintf(stderr,"safetensors: startup weight handles closed; all resident payload reads sealed\n");
+        }
         sealed_mtp_bytes_=source_.io_stats().data_bytes[static_cast<size_t>(weights::Family::Mtp)];
         sealed_expert_bytes_=source_.io_stats().data_bytes[static_cast<size_t>(weights::Family::Expert)];
         std::fprintf(stderr,"safetensors: expert startup complete: %.2f s, batch=%d workers=%u scratch_peak_mib=%.2f "

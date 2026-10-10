@@ -44,6 +44,11 @@ void bf16_gemv_split(const uint16_t* x, const uint16_t* w, float* y, int64_t n_i
 /// No allocations or synchronization, including when stream is null (the CUDA default stream).
 void bf16_gemv_fp32_mmvf(const float* x, const uint16_t* w, float* y,
                          int64_t n_in, int64_t n_out, void* stream);
+/// Same ordered FP32 arithmetic, with 1 (reference) or 4 output rows per block.
+/// Explicit benchmark entry point only. The normal entry point stays at layout 1:
+/// layout 4 was slower on the RTX 5090 main-model projection shapes.
+void bf16_gemv_fp32_mmvf_layout(const float* x, const uint16_t* w, float* y,
+                                int64_t n_in, int64_t n_out, int rows_per_block, void* stream);
 /// `ncols` columns at once: x is [ncols][n_in], y is [ncols][n_out]; each column bitwise equal to a
 /// `bf16_gemv_fp32_mmvf` call on it.
 void bf16_gemv_fp32_mmvf_cols(const float* x, const uint16_t* w, float* y, int64_t n_in, int64_t n_out, int ncols,
