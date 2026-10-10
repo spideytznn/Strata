@@ -40,6 +40,27 @@ v22.5 template is retained in `config/native/froggeric-v22.5.jinja`.
 
 ## Runtime correctness evidence
 
+The desktop MTP2 profile currently uses `--pcie-frac 1` and
+`STRATA_PREFILL_CPU_SHARE=0`: cached experts run on the GPU, every cold decode
+expert is transferred to the GPU, and prefill schedules no CPU experts. The
+presence of 15 pool workers at startup does not imply they compute experts.
+Native CPU AVX-512 gate/up and down paths already support the original NVFP4
+blocks with FP32 activations and intermediates; the desktop split gives them
+no work. The most recent 2665-token interactive request records 1,672,741 GPU
+hits plus 440,219 GPU PCIe routes, accounting for all 2,112,960 routed entries.
+
+Optional `rtx5090-262k-cpu25-test.json`, `cpu50-test.json` and `cpu75-test.json`
+profiles in `config/native/` assign respectively 25%, 50% and 75% of cold decode
+experts to the CPU (`--pcie-frac 0.75`, `0.5`, `0.25`). They change only that split
+and the log destination from the desktop profile. All weight/activation formats,
+262144 context, INT8 KV, MTP2, dedicated 8192 prefill, cache and Host settings stay
+identical. Their new 262K throughput and output parity have not been measured:
+the user's interactive engine was running, so no benchmark or restart was issued.
+The fractions describe cold experts, not total model work or CPU utilization.
+Prefill CPU sharing remains a separate experiment; compare decode splits first
+without changing executed prefill shape or precision. Select defaults by latency
+and output checks, not by achieving a particular CPU utilization percentage.
+
 The next framework-efficiency investigation is recorded in
 [`p9-framework-efficiency`](../bench/results/2026-10-10-safetensors-runtime/p9-framework-efficiency/README.md).
 An opt-in startup-handle release (`STRATA_NATIVE_CLOSE_FILES=1`) improves one
