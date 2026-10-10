@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-diagnostics.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency2.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -67,7 +67,8 @@
     "STRATA_MTP_NATIVE_PROJECTIONS": "bf16",
     "STRATA_MTP_BATCH_BF16": "0",
     "STRATA_PLE_TRACE": "1",
-    "STRATA_NATIVE_KV_GROW": "0"
+    "STRATA_NATIVE_KV_GROW": "0",
+    "STRATA_NATIVE_CLOSE_FILES": "1"
   },
   "allowed_hosts": [
     "*"

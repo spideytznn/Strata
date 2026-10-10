@@ -1,13 +1,38 @@
 """Bounded telemetry for one private benchmark process, with raw GPU samples."""
 import csv,ctypes,io,json,os,subprocess,threading,time
 from pathlib import Path
+
+def process_cpu_seconds(pid):
+ """Read cumulative process CPU time; no sampling or process mutation."""
+ if os.name != 'nt': return None
+ from ctypes import wintypes
+ kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+ kernel.OpenProcess.argtypes=[wintypes.DWORD,wintypes.BOOL,wintypes.DWORD]
+ kernel.OpenProcess.restype=wintypes.HANDLE
+ kernel.CloseHandle.argtypes=[wintypes.HANDLE]
+ kernel.GetProcessTimes.argtypes=[wintypes.HANDLE,*([ctypes.POINTER(wintypes.FILETIME)]*4)]
+ h=kernel.OpenProcess(0x1000,False,pid)
+ if not h:return None
+ try:
+  times=[wintypes.FILETIME() for _ in range(4)]
+  if not kernel.GetProcessTimes(h,*[ctypes.byref(t) for t in times]):return None
+  return sum((t.dwHighDateTime<<32)+t.dwLowDateTime for t in times[2:])/1e7
+ finally:kernel.CloseHandle(h)
+
 class Telemetry:
  def __init__(self,path):
   self.path=Path(path);self.pid=None;self.rows=[];self.stop=threading.Event()
   self.thread=threading.Thread(target=self._run,daemon=True);self.thread.start()
  def _run(self):
+  previous_cpu=None;previous_time=None
   while not self.stop.is_set():
    row={'unix_s':time.time(),'pid':self.pid}
+   if self.pid:
+    now=time.monotonic();cpu=process_cpu_seconds(self.pid)
+    row['cpu_seconds']=cpu
+    if cpu is not None and previous_cpu is not None:
+     row['cpu_percent']=100*(cpu-previous_cpu)/(now-previous_time)/(os.cpu_count() or 1)
+    if cpu is not None:previous_cpu=cpu;previous_time=now
    try:
     p=subprocess.run(['nvidia-smi','--query-gpu=index,name,driver_version,memory.used,memory.total,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu','--format=csv,noheader,nounits'],capture_output=True,text=True,timeout=5,creationflags=0x08000000 if os.name=='nt' else 0)
     row['gpu_csv']=p.stdout.strip();row['gpu_returncode']=p.returncode

@@ -31,7 +31,14 @@ acceptance suite reaches 32K; this desktop profile has not completed a separate
 262K acceptance run. Interactive timing of the preceding MTP4/Q8 profile was
 1,127.5 tok/s prefill and 32.5 tok/s decode after a 24,332-token prompt; the speed
 target is not met. MTP4 and Q8 have been rolled back at the user's request.
-Restarting the desktop launcher selects `strata-diagnostics.exe`; an already-running
+Restarting the desktop launcher selects `strata-efficiency2.exe` and closes buffered
+startup weight handles before runtime ngram reads. Three alternating pairs on a
+varied 8199-token document measure median prefill **822 -> 2465 tok/s**, with equal
+128-token outputs. Complete 8K/24K, prefix, A/B/A and disk-restore checks preserve
+committed main-model state and zero expert/MTP source reads. Median decode remains
+about **44 tok/s**; doubling decode is still an optimization target. See
+[the measured follow-up](bench/results/2026-10-10-safetensors-runtime/p10-native-performance/README.md).
+An already-running
 engine keeps its previous settings. Diagnostics append to `logs/native-262k-int8.log`.
 The optional MTP4/Q8 and BF16 batch comparison profiles remain available separately.
 The desktop uses the existing BF16 token-group MTP path, with BF16 batching off.

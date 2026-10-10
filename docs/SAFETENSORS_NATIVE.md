@@ -61,16 +61,18 @@ Prefill CPU sharing remains a separate experiment; compare decode splits first
 without changing executed prefill shape or precision. Select defaults by latency
 and output checks, not by achieving a particular CPU utilization percentage.
 
-The next framework-efficiency investigation is recorded in
+The framework-efficiency investigation started in
 [`p9-framework-efficiency`](../bench/results/2026-10-10-safetensors-runtime/p9-framework-efficiency/README.md).
-An opt-in startup-handle release (`STRATA_NATIVE_CLOSE_FILES=1`) improves one
-varied 8199-token document from 823 to 2485 prefill tok/s; a same-binary control
-with the option off measures 791 tok/s. All 128 output tokens match and expert/MTP
-source reads remain zero. Repeated acceptance was interrupted for the user's
-reboot, so desktop defaults remain unchanged. Decode is still about 45 tok/s;
-there is no claim that it doubled. An optional staged profile is
-`config/native/rtx5090-262k-io-fix-test.json`. Native GEMM prewarm is separately
-opt-in and has not yet been measured end to end.
+After reboot, three alternating same-binary pairs on the varied 8199-token
+document measure prefill 815..834 tok/s with startup handles kept and 2464..2473
+with `STRATA_NATIVE_CLOSE_FILES=1` (medians 822 and 2465). All 128 output tokens
+match. Complete operator-config checks also pass on 8K/24K prompts, prefix
+reuse, A/B/A and disk restore, with equal committed main-model state and zero
+expert/MTP source bytes. The desktop now selects `strata-efficiency2.exe` and
+enables the handle release; context, INT8 KV, dedicated workspace and MTP2 stay
+the same. Median decode remains about 44 tok/s, not doubled. Evidence is in
+[`p10-native-performance`](../bench/results/2026-10-10-safetensors-runtime/p10-native-performance/README.md).
+Native GEMM prewarm is separately opt-in and has not yet been measured end to end.
 
 These are correctness checks on the RTX 5090 / Ryzen 9950X3D / 96 GB machine.
 Repeated throughput measurements are recorded separately below. Raw summaries are under
@@ -382,7 +384,7 @@ workspace beside the expert cache. FP32 decode activations and BF16x2 dense
 prefill remain enabled. This combination has not completed GPU acceptance or
 end-to-end timing. The user is testing the service interactively; no second
 engine is started alongside it. Restart the desktop launcher to load the staged
-`build-native-engine/strata-diagnostics.exe`. Diagnostics append to
+`build-native-engine/strata-efficiency2.exe`. Diagnostics append to
 `logs/native-262k-int8.log`; the launcher creates its directory. The desktop was
 rolled back from MTP4/Q8 at the user's request; BF16 MTP batching is explicitly off.
 

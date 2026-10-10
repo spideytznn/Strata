@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import subprocess
 import time
+from native_telemetry import process_cpu_seconds
 
 
 def main():
@@ -60,8 +61,20 @@ def main():
     start = time.perf_counter()
     with (out / 'stdout.txt').open('wb') as stdout, (out / 'stderr.txt').open('wb') as stderr:
         result = subprocess.Popen(cmd, env=env, stdout=stdout, stderr=stderr, cwd=cfg['cwd'])
-        with (out / 'gpu.csv').open('w', encoding='utf-8') as samples:
+        previous_cpu = None
+        previous_time = None
+        with (out / 'gpu.csv').open('w', encoding='utf-8') as samples, (out / 'cpu.jsonl').open('w', encoding='utf-8') as cpu_samples:
             while result.poll() is None:
+                now = time.perf_counter()
+                cpu = process_cpu_seconds(result.pid)
+                cpu_percent = None
+                if cpu is not None and previous_cpu is not None:
+                    cpu_percent = 100 * (cpu - previous_cpu) / (now - previous_time) / (os.cpu_count() or 1)
+                cpu_samples.write(json.dumps(dict(elapsed_s=now-start, cpu_seconds=cpu,
+                    cpu_percent=cpu_percent, logical_processors=os.cpu_count()))+'\n')
+                cpu_samples.flush()
+                if cpu is not None:
+                    previous_cpu, previous_time = cpu, now
                 sample = subprocess.run(['nvidia-smi',
                     '--query-gpu=timestamp,memory.used,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu',
                     '--format=csv,noheader,nounits'], capture_output=True, text=True)
@@ -73,7 +86,8 @@ def main():
                     pass
     manifest.update(exit_code=result.returncode, process_seconds=time.perf_counter() - start,
                     gpu_columns=['elapsed_s', 'timestamp', 'memory_used_mib', 'gpu_util_percent',
-                                 'sm_mhz', 'mem_mhz', 'power_w', 'temp_c'])
+                                 'sm_mhz', 'mem_mhz', 'power_w', 'temp_c'],
+                    cpu_note='GetProcessTimes delta / elapsed / logical processors; includes all process threads')
     stdout = (out / 'stdout.txt').read_text(encoding='utf-8', errors='replace')
     for phase in ('decode', 'prefill'):
         m = re.search(rf'^{phase}\s+(\d+) tokens in ([\d.]+) ms\s+->\s+([\d.]+) tok/s', stdout, re.M)
