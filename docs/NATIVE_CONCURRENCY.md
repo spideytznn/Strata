@@ -13,7 +13,7 @@ Use `START-NATIVE-262K-PARALLEL.bat`, or the desktop
 using that port before launching this one. The profile keeps original safetensors
 weights, INT8 KV, 262144 context, a dedicated 4096-row prefill workspace, the
 existing external GPU vision encoder and unrestricted HTTP Host headers.
-It uses `strata-concurrency2.exe` and a 1536 MiB explicit reserve for runtime
+It uses `strata-concurrency3.exe` and a 1536 MiB explicit reserve for runtime
 graph allocations. The profile contains this PC's paths; adapt them elsewhere.
 
 For a generic local config, `tools/native_config.py --parallel 2` adds the
@@ -53,7 +53,9 @@ rounds there. Solo generation still exchanges experts. Initial logs' cumulative
 promotion counts therefore do not prove promotions during two-row decode.
 
 The correction is built separately as `strata-concurrency3.exe`; the desktop
-config still selects the previously tested executable until GPU acceptance.
+config now selects it for the user's next-start validation. No running process
+was stopped or replaced. The initial acceptance data below use `concurrency2`;
+the correction has not yet passed full GPU acceptance.
 The native batch boundary now reuses the existing hot/cold swap policy every
 `--adapt-every` windows, with at most `--adapt-swaps` promotions per round (4 and
 96 in this profile). Heat includes routed entries from all active rows. Copies
