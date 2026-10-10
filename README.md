@@ -27,6 +27,11 @@ An already-running engine keeps its settings until restarted.
 The desktop prefill cap was reduced to 4096 at the user's request; no speed
 comparison was run. Actual chunks can be smaller than this cap. Earlier
 measurements and the image smoke check below used an 8192 cap.
+The desktop VRAM reserve is now 3072 MiB. The previous 2048 MiB setting
+let expert caching crowd the visual profile: one user startup fell back to
+3072 prefill rows and reported only 22 MiB free after loading. No throughput
+gain is claimed from changing this reserve. The [startup allocation check](bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
+confirms 4096 rows with the visual encoder loaded and 746 MiB free.
 
 The desktop profile now selects `strata-efficiency12.exe`, enables images with
 `--vision`, and reuses the installed BF16 mmproj / `strata-vision` sidecar read-only.

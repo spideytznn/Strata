@@ -421,7 +421,13 @@ FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
 startup handles remain enabled. It serves `127.0.0.1:8880` in the foreground;
 Ctrl+C stops it. Wildcard Host accepts any HTTP Host header. The prefill cap
 was changed from 8192 to 4096 at the user's request, without a performance
-comparison. Actual chunks can be smaller; prior evidence used 8192. Restarting loads
+comparison. Actual chunks can be smaller; prior evidence used 8192.
+The desktop VRAM reserve is 3072 MiB. A recorded visual startup with the
+previous 2048 MiB reserve reduced configured 4096 to effective 3072 prompt rows
+and reported 22 MiB free after loading. The larger reserve keeps more space
+out of the expert cache; it does not unload experts from RAM or disable images.
+This is a memory-allocation correction, not a measured throughput improvement. The [startup allocation check](../bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
+confirms 4096 rows with the visual encoder loaded and 746 MiB free. Restarting loads
 the new profile; tests do not start the public server. Logs append to
 `logs/native-262k-int8.log`, whose directory the launcher creates.
 

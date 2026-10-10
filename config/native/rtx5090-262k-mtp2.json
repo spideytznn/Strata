@@ -10,7 +10,7 @@
     "--expert-cache",
     "auto",
     "--vram-reserve-mib",
-    "2048",
+    "3072",
     "--spec",
     "3",
     "--suffix-draft",

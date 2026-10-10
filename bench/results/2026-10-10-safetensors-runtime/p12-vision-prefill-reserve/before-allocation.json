@@ -1,0 +1,18 @@
+{
+  "source": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-int8.log",
+  "source_sha256": "8817b91db10e6f10b0c929524774b70e7fcad4b1fb54c1c39ee0e940e7e7b9b5",
+  "selected_lines": [
+    {
+      "line": 992,
+      "text": "strata serve: a 4096-token chunk's prompt buffers need 2819 MiB on CUDA0, 2994 MiB free: 3072-token chunks"
+    },
+    {
+      "line": 993,
+      "text": "strata prefill allocation: requested=3072 effective=3072 capacity=3072 workspace_bytes=2486180608 free_vram_bytes=405385216"
+    },
+    {
+      "line": 999,
+      "text": "strata serve: 22 MiB of VRAM free with everything loaded - LOW: requests may stall; add --vram-reserve-mib 2538 to the config's args (or lower --max-context)"
+    }
+  ]
+}
