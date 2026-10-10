@@ -1,200 +1,138 @@
-<h1 align="center">Strata</h1>
+# strata-safetensors
 
-[English](README.md) · **简体中文** · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)
+**在单张 GPU 和系统内存上，直接运行原始 NVIDIA NVFP4 safetensors 格式的 Qwen3.8-Flash-Next。**
 
-<p align="center"><b>在你自己的游戏电脑上运行 1250 亿参数的 AI 模型</b><br>
-NVIDIA 或 AMD 显卡（12 GB 及以上）· Windows 或 Linux · 免费开源</p>
+[English](README.md) · [实现与验收](docs/SAFETENSORS_NATIVE.md) · [测速记录](bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/README.md) · [上游 Strata](https://github.com/Niko1221/Strata)
 
-<p align="center"><a href="https://github.com/Niko1221/Strata/releases/download/v0.1.10/Pagoda.mp4"><img src="docs/media/pagoda-preview.webp" width="720" alt="Strata 的模型写出的体素宝塔花园，在浏览器中运行"></a><br>
-<sub>体素宝塔花园，一次提示生成，在 RTX 5070 上用 Strata 运行（IQ3_S，128K 上下文）·
-<a href="https://github.com/Niko1221/Strata/releases/download/v0.1.10/Pagoda.mp4">完整视频（49 秒）</a></sub></p>
+本项目把 Strata 已有的前向计算、专家调度与会话缓存接到原始 Hugging Face
+模型目录。保留专家的 NVFP4 编码和缩放参数，将专家放入锁定内存，热专家缓存在显存，
+ngram 表按需从 SSD 读取。主模型不需要先转换成 GGUF，也不生成必须持久保存的专家包。
 
-Strata 能在普通电脑上运行 **[Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)**。这是一个又大又聪明的
-AI 模型，通常要用服务器才能跑。它能聊天、写代码、看图片，还能配合你的应用和编程智能体一起工作。所有数据都留在你的电脑上。
+当前实际验证的平台是 **Windows + RTX 5090 32 GB + Ryzen 9950X3D + 96 GB RAM**。
+主分支为 `main`，引擎程序和命令仍叫 `strata`。
 
-## 速度有多快？
+## 当前能力
 
-我们在两台普通的游戏电脑上做了测试。一个 token 大约相当于 ¾ 个英文单词。
+| 能力 | 实现范围 |
+|---|---|
+| 原始权重 | 直接读取 NVIDIA NVFP4 safetensors、BF16 dense 权重、FP8 ngram 数据和原生 MTP 权重。专家仅做布局适配，保留编码与缩放参数。 |
+| 专家常驻 | 全部主模型专家保留锁定 RAM 副本，包括已进入 GPU 缓存的专家。加载结束后封闭专家与已加载 MTP 权重的源文件读取。 |
+| CPU/GPU 协同 | 热专家在 GPU 计算；冷专家可用 CPU AVX-512 计算，或传到 GPU。自适应交换更新热专家集合。 |
+| Prefill | 专用工作区、W4A8 专家批量计算、BF16 dense 投影及激活余项补偿；优化后的桌面配置先分配工作区，再确定专家缓存大小。 |
+| 上下文 | 支持 FP16 / INT8 KV；桌面使用 INT8 和按需增长。已验证 262,000-token 输入及 262,144-token 总窗口的容量与状态复用。 |
+| MTP | 直接使用模型原生草稿权重，由主模型验证；可调整草稿长度和置信度门槛，也可完整卸载 MTP。 |
+| 多会话缓存 | 前缀复用、会话驻留与切回、A/B/A 切换，以及 KV 和线性注意力状态的磁盘保存/恢复。 |
+| 视觉 | 通过已有外部 BF16 编码器接入图片；视觉侧车仍使用 mmproj / 词表 GGUF，主模型保持 safetensors。 |
+| 服务 | 网页聊天、OpenAI / Anthropic 兼容 API、流式输出、工具调用。原生推理串行执行，请求排队。 |
 
-- **写回答：** 短对话中回复出现的速度。每秒 60 个 token 已经比你的阅读速度还快。
-- **读提示：** 读入你发送内容的速度（这里是一份 32K token 的文档、代码或聊天记录）。
+这是针对该模型结构的后端，尚不是通用 safetensors 推理框架。
 
-<table>
-<tr><th>NVIDIA：RTX 5070（12 GB）、Ryzen 5 7600、64 GB 内存</th><th>AMD：RX 9070 XT（16 GB）、Ryzen 9 3900X、47 GB 内存</th></tr>
-<tr><td>
+## 为什么速度提升了
 
-| 规格 | 写回答 | 读提示 |
-| --- | ---: | ---: |
-| **Q2_0** | 94 tokens/s | 2,650 tokens/s |
-| **IQ2_XS** | 79 tokens/s | 2,090 tokens/s |
-| **IQ3_XXS** | 62 tokens/s | 1,750 tokens/s |
-| **IQ3_S** | 53 tokens/s | 1,620 tokens/s |
-| **Coder** | 55 tokens/s | 2,180 tokens/s |
+- **减少搬运。** 整个专家内存区通过 CUDA 锁页并映射给 GPU，省去额外的主机 staging 复制。
+  推理阶段按需读取 ngram 行；主动保存/恢复会话时另有会话文件读写。
+- **使用 CPU 和 GPU。** 桌面配置约 75% 冷专家在 CPU 计算，25% 在 GPU 计算；
+  比例只针对缓存未命中的专家。CPU 行循环展开、GPU 同专家多 token 权重复用减少重复工作。
+- **保证 prefill 空间。** 先实际分配并写入工作区，再分配专家缓存，同时计算 MTP 等后续分配的预算。
+  启动容量不足会报错，不再静默缩小工作区。
+- **减少运行时等待。** 专家常驻后关闭启动阶段的缓冲权重句柄；Windows 上的配对测量显示明显收益，
+  但具体缓存或驱动机制尚未确定。
+- **复用会话。** 同时保存 KV 和线性注意力状态，续聊时处理新增后缀，减少完整历史重算。
 
-</td><td>
+真正的 **SM120 FP4 Tensor Core** 路径已经接入，可显式选择。
+当前桌面默认 decode 使用 NVFP4 权重和 FP32 激活；专家 prefill 使用 W4A8，
+dense 投影保留 BF16。此前 FP4 decode 未测出明确的端到端优势，FP4 prefill 会改变输出，
+因此未把 FP4 路径设为默认。保留权重编码不代表所有算术逐位相同，也不代表等同于未量化 BF16 模型。
 
-| 规格 | 写回答 | 读提示 |
-| --- | ---: | ---: |
-| **Q2_0** | 60 tokens/s | 1,160 tokens/s |
-| **IQ2_XS** | 52 tokens/s | 1,110 tokens/s |
-| **Coder** | 44 tokens/s | 1,420 tokens/s |
+## 有条件的实测结果
 
-</td></tr>
-</table>
+以下均为 **2026-10-10，RTX 5090 32 GB / 9950X3D / 96 GB RAM，Windows，
+原始 NVIDIA 权重**的历史对照。各行是不同阶段的实验，提升比例不能相乘。
 
-NVIDIA：Q2_0 用的是引擎 0.1.36，其他各行用的是 0.1.26（4K 回答，32K 提示）。完整表格见
-[DETAILS.md](docs/DETAILS.md#speed-measured)。显存越大的显卡越快：RTX 3090（24 GB）写回答应该能达到每秒约
-100-140 个 token。长对话和其他显卡的数据：[各模型的速度](docs/MODELS.md#how-fast-is-each-size)、
-[社区测试结果](docs/COMMUNITY_BENCHMARKS.md)。
+| 实验 | 之前 → 优化后 | 条件 |
+|---|---|---|
+| 关闭启动权重句柄，prefill | 822 → 2465 tok/s | 同一程序，约 8K 输入，三组交替配对，128-token 完整输出一致。 |
+| CPU/GPU 与内核组合，decode | 45.28 → 81.59 tok/s | 三组交替配对，两边都用两枚草稿，128-token 完整输出一致；候选范围 64.57–85.16。 |
+| 后期 4096 行配置，文本 prefill | 2968 → 3331 tok/s | 约 24K 文本，视觉编码器已加载，三次启动中位数；首个约 8K 文本请求反而从 2688 降到 2558。 |
+| 后期配置，图片请求 prefill | 2741 → 3089 tok/s | 约 8K 输入含 1024 个图片 token，三次启动中位数；总耗时从 4.51 降到 3.94 秒。 |
 
-<p align="center"><a href="https://buymeacoffee.com/strataengine"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="请我喝杯咖啡" height="50"></a><br>
-<sub>Strata 是免费的。如果它在你的电脑上跑得不错，请我喝杯咖啡，让这个项目继续下去。</sub></p>
+另一次英文、中文、代码长回答筛查测得 warm aggregate decode **91.93 → 100.82 tok/s**。
+每套配置只启动一台引擎，不能当成多轮稳定吞吐估计；该候选使用四枚草稿、0.7 草稿门槛及两枚强制草稿。
 
-## 你需要什么
+**当前温度 0.7、两枚草稿、门槛 0.5 的桌面试用组合尚未重新测速。**
+上述成绩只对应归档配置，不构成当前配置或所有任务的速度承诺。
 
-| | |
-| --- | --- |
-| **显卡** | **NVIDIA** GeForce RTX 20、30、40 或 50 系列，或 **AMD** Radeon RX 7900 XT / XTX、RX 7800 XT / 7700 XT、RX 9060 XT、RX 9070 / 9070 XT、Radeon AI PRO R9700 或 RX 6800 / 6900 系列。需要 **12 GB 或以上显存**。 |
-| **内存** | 32 GB 或以上。内存大小决定能装下[哪个模型](#该选哪个模型)。64 GB 可以运行所有规格。 |
-| **硬盘** | 约 80 GB 可用空间。尽量用 SSD：第一次启动会快很多。 |
-| **系统** | Windows 10 / 11 或 Linux，以及 NVIDIA 或 AMD 的最新显卡驱动。 |
+完整命令、全部样本和验收范围见
+[P10](bench/results/2026-10-10-safetensors-runtime/p10-native-performance/README.md)、
+[P16](bench/results/2026-10-10-safetensors-runtime/p16-speed-tuning/README.md)。
 
-其他的都由安装程序搞定。两到三张显卡可以分担同一个模型（[多 GPU](docs/MULTI_GPU.md)）。
+## 构建与运行
 
-实验性支持，由社区成员在自己的机器上编写和测试：
+新机器请使用 [英文 README 的源码构建步骤](README.md#build-and-run-on-windows)：
+需要 Git、Python 3.12+、Visual Studio 2022 C++ Build Tools、CUDA 13、
+CMake 3.24+ 和 Ninja。原始模型下载到仓库外，使用配置生成器填入自己的路径。
 
-- **较老的显卡**（Tesla P40 / V100、GTX 10、Radeon VII / MI50、RX 6700 XT、RX 5500 XT）：[较老的 GPU](docs/OLDER_GPUS.md)。
-- **Intel Arc**，在 Linux 上从源码构建：[Intel Arc](docs/INTEL_ARC.md)。
-- **AMD Ryzen AI Max（Strix Halo）**，在 Linux 上从源码构建：[Strix Halo](docs/STRIX_HALO.md)。
-- **不支持 AVX2 的老处理器**：能用，但很慢。[较老的 CPU](docs/INSTALL.md#older-cpus-experimental)。
+生成器保留参考 FP16 prefill 设置，不能直接复现全部桌面优化参数；采样参数需在生成配置的
+`sampling` 字段中明确设置。视觉还需要另行配置编码器资源。
+专家内存区本身占 **63.282 GiB**，其他权重、会话、运行缓冲和操作系统还需要额外内存。
+96 GB 是已验证配置；尚未验证 64 GB 下的完整原生常驻方案。
 
-完整列表：[docs/INSTALL.md](docs/INSTALL.md#what-you-need)。
+现有桌面部署使用：
 
-## 安装
-
-### 让你的 AI 帮你装
-
-你在用 AI 编程助手吗（Claude Code、Cursor、Codex、GitHub Copilot 等）？把下面这段粘贴给它：
-
-```text
-Set up Strata on this PC for me: https://github.com/Niko1221/Strata - follow docs/AI_SETUP.md in that repository.
+```powershell
+.\START-NATIVE-262K.bat
 ```
 
-它会检查你的显卡、内存和硬盘，选出合适的模型。然后安装并启动它，再告诉你怎么连接你的应用。AI 工具也可以通过
-Strata 的 [MCP 服务器](docs/MCP_SERVER.md)来安装、启动和停止 Strata。
+该脚本读取 [桌面配置](config/native/rtx5090-262k-fast.json)。
+配置和本地构建辅助脚本含部署机器的绝对路径，其他机器必须适配。
+服务在前台运行，Ctrl+C 停止。网页地址为 **http://127.0.0.1:8880**，
+OpenAI 客户端地址为 **http://127.0.0.1:8880/v1**。
+可用 `/health`、`/v1/models` 检查就绪状态和模型 ID。
+对外监听前需配置 `--api-key`。
 
-### 或者自己动手
+| 参数 | 当前桌面试用配置 |
+|---|---|
+| 总上下文 / 专用 prefill | 262144 token / 4096 行 |
+| KV / 视觉 | INT8 按需增长 / 外部 GPU 编码器，每张图最多 1024 token |
+| MTP | `--mtp native --spec 3 --spec-min-p 0.5`，最多两枚草稿，无强制最小数量 |
+| 采样 | temperature **0.7**、top_p 0.95、top_k 20、min_p 0、presence_penalty 0、repetition_penalty 1 |
+| 模板 | Froggeric v22.5，默认开启思考；请求未指定强度时默认 medium |
+| 服务 | 127.0.0.1:8880，HTTP Host 头不设白名单 |
+| 输出预算 | `fit_max_tokens: true`，把请求输出上限缩至剩余窗口，输入不截断 |
 
-[下载 Strata](https://github.com/Niko1221/Strata/archive/refs/heads/main.zip) 并解压（或者用 `git clone`）。
-**Windows：** 双击 **`START-HERE.bat`**。**Linux：** 在 Strata 文件夹里运行 **`./setup.sh`**。
+温度 0.7 是用户选择的试用设置。[Qwen 官方思考模式](https://huggingface.co/Qwen/Qwen3.8-Flash-Next#best-practices)推荐温度 **1.0**，
+其模板默认思考强度 **xhigh**。客户端显式参数及网页持久化设置可以覆盖服务默认值。
+输出预算适配不改变 ZCode 等客户端自己的压缩策略，客户端上下文也应设为 262144。
 
-NVIDIA 和 AMD 的步骤完全一样。安装程序会识别你的显卡，并装好对应的引擎。它会问你几个问题：
+完整关闭 MTP 可选 [no-mtp 配置](config/native/rtx5090-262k-no-mtp.json)；
+`START-NATIVE-262K-STABLE.bat` 保留较早的 efficiency14 配置。
 
-- 用哪个模型、哪个规格，
-- 上下文多大（模型能记住多少文字），
-- 是否要识别图片。
+## 验收与边界
 
-每次直接按回车就是推荐选项。之后它会下载模型（约 70 GB）并启动。如果下载中断了，再运行一次即可：它会从中断的地方继续。
-浏览器会打开 Strata 应用，地址是 `http://127.0.0.1:8080`。
+- 已记录权重布局往返、真实专家 FP64 对照、完整 logits 比较，以及采样、EOS、
+  输出上限、取消与恢复检查。
+- efficiency17 最终验收覆盖 80 个完成请求和 4 次取消，跨零/两/四/六枚草稿，
+  检查对应输出和主状态、切换会话、磁盘恢复。这些是有限回归测试，不是全面质量基准。
+- 262K 文档测试证明容量及测试范围内的缓存正确性，不证明通用长上下文推理、
+  检索质量或 262K 吞吐。
+- 原生路径不支持多 GPU、连续批处理、流水线并行及外部草稿模型。
+  多会话驻留不等于同时生成。
+- 本地验证了 CUDA SM120；Linux、HIP、SYCL 和其他硬件尚未验证原生后端。
+- 主模型无需 GGUF；视觉仍需 GGUF 侧车。尚未实现原生视觉塔或通用原生一键安装器。
 
-> **模型启动时，你的电脑可能会变慢或卡住 1-3 分钟**（第一次最久）。
-> Strata 会把 35-55 GB 加载到内存，并为显卡锁定其中一部分。这是正常的。请耐心等待，不要关闭窗口。
-> 窗口里会显示 Strata 正在做什么。
+## 文档、来源与许可证
 
-**下次使用时**，再运行一次 `START-HERE.bat`（或 `./setup.sh`）。它会马上启动，已下载的东西不会重复下载。关闭它的窗口就能停止模型。
-`UPDATE.bat`（`./update.sh`）只更新 Strata，不启动。更新、Docker、多张显卡、文件存放位置以及所有选项：
-[docs/INSTALL.md](docs/INSTALL.md)。
+[原生实现详情](docs/SAFETENSORS_NATIVE.md) ·
+[历史 NVFP4 / GGUF 文档](README.legacy-nvfp4.md) ·
+[原始 Strata README](README.upstream.md)
 
-## 该选哪个模型
+基于 [Niko1221/Strata](https://github.com/Niko1221/Strata) 和
+[sergqwer/strata-nvfp4](https://github.com/sergqwer/strata-nvfp4)，
+起点为 NVFP4 fidelity 提交 `d167eb89301a02e0d6299f49d35494ba5096bc10`，
+保留原作者署名与许可证。原个人 GGUF 主分支保存于 `archive/gguf-main-20261011`。
 
-安装程序会根据你的内存推荐一个。同一个模型有几种规格，压缩程度不同。规格越小越快，越大越聪明一些。
+截至 2026-10-11，[上游项目提案](https://github.com/Niko1221/Strata/issues/1858)
+与 [独立 safetensors 读取接口 PR](https://github.com/Niko1221/Strata/pull/1859)
+均为开放状态，完整原生推理尚未合并进上游。
 
-| 你的内存 | 选择 | 原因 |
-| --- | --- | --- |
-| **32 GB** | **Coder** | 32 GB 装得下，而且专为代码打造（如果显卡是 24 GB，Q2_0 和 IQ2_XS 也能跑） |
-| **48 GB** | **IQ2_XS**（或 Q2_0，最快） | 更大的规格装不下 |
-| **64 GB** | **IQ2_XS**（推荐），或 IQ3_XXS / IQ3_S | 所有规格都装得下；IQ3_S 最好，也最慢 |
-| **96 GB 或以上** | **IQ3_S**，或 Unsloth 的 UD-IQ4_XS（约 4-bit） | 开着其他程序也能放下最大的规格 |
-
-- **[Coder](docs/MODELS.md#coder)：** 编程版本，去掉了一半专家。它达到完整模型 SWE-bench Verified 分数的 91%（由其作者测得），
-  32 GB 内存就能装下。代码以外的能力较弱，包括中文和其他中日韩文本（#438）。这类用途请选 Q2_0、IQ2_XS 或 IQ3_S，
-  它们保留了所有专家。
-- **[Swift 1.5](docs/MODELS.md#swift-15)：** 一个微调版本，回答前思考的时间短得多。你能更早拿到答案，质量基本不变。
-- **[Unsloth UD-IQ4_XS](docs/MODELS.md#unsloth-ud-iq4_xs)：** Unsloth 的约 4-bit 版本，质量介于 IQ3_S 和 UD-Q4_K_XL 之间。
-  下载 94 GB。内存少于约 80 GB 时，Strata 回答时要从 SSD 读取其中一部分，所以会更慢（NVMe SSD 有帮助）。
-- **[Unsloth UD-Q4_K_XL](docs/MODELS.md#unsloth-ud-q4_k_xl-experimental)**（实验性）：最接近完整模型。但 Strata
-  回答时要从 SSD 读取其中大部分内容，所以在 64 GB 的电脑上每秒只能写 7-8.5 个 token。
-- **[OrcaRouter 的 Uncensored IQ3_XXS](docs/MODELS.md#orcarouter-uncensored-iq3_xxs)：** 需要手动设置，不在安装程序的菜单里。
-
-规格、下载以及各配置能装下什么：[docs/MODELS.md](docs/MODELS.md)。以后想再添加模型，运行
-`SETUP.bat`（Linux：`./setup.sh --setup`）。
-
-## 使用方法
-
-<p align="center"><img src="docs/media/runpagoda.png" width="900" alt="Strata 应用的 Monitor 标签页，旁边是一个编程智能体"><br>
-<sub>Strata 应用的 <b>Monitor</b>（左），编程智能体正在写视频里的宝塔花园（右）</sub></p>
-
-- **在浏览器里：** 打开 `http://127.0.0.1:8080`。里面有 **Chat**（聊天）、实时 **Monitor**（监控模型和你的
-  GPU/CPU/内存），以及 **About**（设置和地址）。
-- **你的应用和编程智能体：** 添加一个“OpenAI 兼容”的提供商，base URL 填 **`http://127.0.0.1:8080/v1`**。
-  API key 和模型名随便填都行。
-  - 使用 Anthropic API 的应用：`http://127.0.0.1:8080/v1/messages`（Claude Code：
-    `ANTHROPIC_BASE_URL=http://127.0.0.1:8080`）。
-  - Codex CLI 和其他使用 OpenAI Responses API 的应用：`/v1/responses`
-    （[设置方法](docs/DETAILS.md#the-responses-api-and-codex-cli)）。
-- **思考：** 在聊天菜单或应用的“reasoning effort”里选择 **off、low、medium 或 high**。off 最快，
-  high 最适合难题。
-- **图片：** 在安装时对“Images?”选是。然后在聊天里点 **Picture**，或在你的应用里附上图片。
-  AMD 显卡在 Linux 上通过处理器识别图片；在 Windows 上暂时还不行。
-- **从手机或另一台电脑访问：** `START-HERE.bat --setup --host 0.0.0.0 --api-key <secret>`。一定要设置 key。
-- **一次处理一个请求：** 默认情况下 Strata 一次只回答一个请求，其他请求排队等待。想同时回答多个，
-  设置 `"parallel": 2`（[BATCHING.md](docs/BATCHING.md)）。在 12 GB 显卡上，这会让每个回答变慢。
-- **长提示：** Strata 会完整读入对话的第一条消息，大约每 30,000 个 token 需要 1 分钟。之后的消息几秒内就开始回答。
-
-更多：[聊天记录存在哪里](docs/INSTALL.md#where-things-are-stored)、[API](docs/DETAILS.md#using-it)。
-
-## 出问题了？
-
-- **Strata 第一次启动时电脑卡死了。** 加载模型时这是正常的。请耐心等待，不要关闭窗口。
-  10 分钟后还卡着？重启电脑，关掉其他程序再试一次，或者换一个更小的规格。
-- **下载或安装时中断了。** 再运行一次 `START-HERE.bat`（或 `./setup.sh`）。它会从中断的地方继续。
-- **非常慢，硬盘灯一直闪，或者提示“the engine stopped unexpectedly”。** 你的电脑可用内存不够。
-  关掉其他程序（浏览器很占内存），或者换一个更小的规格（Q2_0 或 IQ2_XS）。
-- **提示 8080 端口已被占用。** Strata 已经在运行了。找一下它的窗口。
-
-更多问题和解决办法：[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)。还是解决不了？提交一个
-[issue](https://github.com/Niko1221/Strata/issues)，并附上 Strata 文件夹里的 `strata-<model>.log`。发现了安全问题？
-请私下报告：[SECURITY.md](SECURITY.md)。
-
-## 它是怎么工作的？
-
-这类模型通常运行在拥有数百 GB 显存的服务器上。而你的显卡只有 12-24 GB。Strata 让模型装得下的办法是
-**把工作分摊到整台电脑上**。可以想象一个厨房：常用的东西放在台面上，其余的放在储藏室里。
-
-<p align="center"><img src="docs/media/how-it-works.svg" width="860" alt="模型的 24,576 个专家：最常用的在显卡上，全部在内存里，一张查找表在 SSD 上"></p>
-
-- **这个模型是由 24,576 个小专家（“experts”）组成的团队。** 每个词只需要其中 10 个。
-- **你的显卡** 存放最常用的几千个专家。**你的内存** 存放全部专家，
-  **你的处理器** 同时处理其余的部分。**你的 SSD** 存放一张大查找表。
-
-<p align="center"><img src="docs/media/guess-and-check.svg" width="860" alt="一个小助手猜测接下来的几个词；大模型一次性全部检查，保留正确的"></p>
-
-- **先猜，再检查：** 一个小助手先猜接下来的几个词，大模型再一次性检查它们。答案完全一样，但快 1.6-1.8 倍。
-- **长文本分大块读入**（每次最多 8,192 个 token），速度超过每秒 1,000 个 token。
-
-更详细的解释：[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)。每个部分及其数据：
-[详细说明](docs/DETAILS.md#how-it-works)和[论文](docs/paper/Strata-Paper.pdf)。
-
-## 致谢与许可证
-
-模型是 Qwen 团队的 [Qwen3.8-Flash-Next](https://huggingface.co/Qwen/Qwen3.8-Flash-Next)。它由
-[ISTA-DASLab](https://huggingface.co/ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF)、UkisAI（Swift 1.5）
-和 Unsloth 压缩。Strata 使用了 [llama.cpp / ggml](https://github.com/ggml-org/llama.cpp) 的部分代码。完整致谢：
-[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#credits)。Strata 以 [MIT 许可证](LICENSE)开源。少数部分和每个模型
-有各自的许可证（[具体是哪些](docs/HOW_IT_WORKS.md#license)）。
-
-## 支持 Strata
-
-Strata 免费且开源。如果它对你有用，欢迎支持它的开发：
-
-<p align="center"><a href="https://buymeacoffee.com/strataengine"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="请我喝杯咖啡" height="50"></a></p>
+引擎源码使用 [MIT 许可证](LICENSE)；模型与视觉资源遵循各自许可证，仓库不分发权重。

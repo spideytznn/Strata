@@ -40,9 +40,12 @@ the installed external BF16 image encoder, including image rotary positions
 and image-aware conversation reuse. Main-model weights remain safetensors;
 the read-only visual sidecar uses the existing BF16 mmproj GGUF and vocabulary
 metadata GGUF, without converting the main model. It uses the GPU and caps
-each image at 1024 tokens. Default sampling is the official thinking preset
+each image at 1024 tokens. The official thinking sampling baseline is
 (temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0,
-repetition_penalty 1). Explicit requests and shared web settings override it.
+repetition_penalty 1). The current desktop trial selects temperature 0.7,
+keeping those other values. Explicit requests and shared web settings override
+server defaults. Froggeric v22.5 defaults to medium effort when unspecified;
+Qwen's official template defaults to xhigh.
 The desktop selects `strata-efficiency17.exe` and
 `config/native/rtx5090-262k-fast.json`. It retains the prefill-first allocation
 mode introduced in efficiency14: the 4096-row workspace is physically allocated
@@ -53,18 +56,19 @@ configured chunk. The explicit reserve is now 1024 MiB after paired testing;
 the accepted efficiency14 profile with reserve 3072 remains available through
 `START-NATIVE-262K-STABLE.bat`. Bare CLI and GGUF defaults remain unchanged.
 
-The current desktop trial disables MTP entirely by omitting `--mtp` and all
-MTP draft options; draft weights and KV are not allocated. Suffix drafting
-stays off. The preceding setting was two drafts with
-`--spec 3 --mtp-max-t 3 --spec-min-p 0.5` and no minimum draft floor.
+The current desktop trial restores native MTP after the fully unloaded trial
+on 2026-10-11: `--mtp native --spec 3 --spec-min-p 0.5`, at most two drafts
+with no minimum draft floor. The unset MTP window cap follows `--spec`.
+Suffix drafting stays off. The fully unloaded alternative remains available
+in `config/native/rtx5090-262k-no-mtp.json`.
 Original main-model BF16 projections and the full target head remain enabled.
 Ordinary one-token commit remains enabled (`STRATA_ONE_TOKEN_COMMIT=0`).
 An opt-in startup weight read uses the existing guard without a forward pass,
 weight changes or session mutation. Profile timings do not isolate its benefit.
 
 The measurements below cover the preceding four-draft / 0.7-gate / floor-two
-profile. The subsequent two-draft / 0.5-gate setting and the current fully
-unloaded desktop trial requested on 2026-10-11 have not been benchmarked again.
+profile. The subsequent two-draft / 0.5-gate setting, fully unloaded trial,
+and current restored-MTP / temperature-0.7 combination have not been remeasured.
 
 Three fresh starts per profile pass all 63 visual/text/cached requests. The two
 4096 profiles have exact complete outputs for all 21 corresponding requests.
@@ -460,7 +464,8 @@ SSD reads during inference.
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-fast.json` and
 `build-native-engine/strata-efficiency17.exe`. Settings are 262144 total context,
-4096 dedicated prefill, INT8 KV, fully unloaded MTP, suffix drafting off,
+4096 dedicated prefill, INT8 KV, native MTP with two drafts and a 0.5 gate,
+temperature 0.7, no forced draft floor, suffix drafting off,
 CPU75 cold experts, kernel copying, elastic KV,
 canonical FP32 arithmetic and ordinary T1 commit. FP32 decode activations,
 BF16x2 dense prefill, W4A8 expert prefill and closed startup handles stay enabled.
