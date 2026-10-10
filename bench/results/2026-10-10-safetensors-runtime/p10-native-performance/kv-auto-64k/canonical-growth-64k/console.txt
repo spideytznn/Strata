@@ -1,0 +1,35 @@
+[strata] starting the engine: reading the model's weights ...
+
+[strata] still starting (20 s) - please wait ...
+
+[strata] still starting (41 s) - please wait ...
+
+[strata] still starting (61 s) - please wait ...
+
+[strata] filling the GPU's expert cache (4765 experts, 12.27 GiB of VRAM) ...
+
+[strata] almost ready ...
+
+Traceback (most recent call last):
+
+  File "G:\Strata\Strata-Safetensors\tools\native_config_pair.py", line 151, in <module>
+
+    main()
+
+    ~~~~^^
+
+  File "G:\Strata\Strata-Safetensors\tools\native_config_pair.py", line 91, in main
+
+    initial = generate(case+'-initial', ids, 128)
+
+  File "G:\Strata\Strata-Safetensors\tools\native_config_pair.py", line 77, in generate
+
+    out = [v for v in engine.generate(ids, limit, {'temperature': 0}, threading.Event()) if v is not None]
+
+                      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "G:\Strata\Strata-Safetensors\serve\server.py", line 1527, in generate
+
+    raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})")
+
+serve.server.EngineDied: the engine stopped unexpectedly (exit code 3221226505)

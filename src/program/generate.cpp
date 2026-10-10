@@ -4965,7 +4965,16 @@ int strata_main(int argc, char** argv) {
         // compute the same quantized expert with different float order, so a near-tie can flip. Measured teacher-
         // forced on 2,557 tokens (bench/results/2026-09-27-cache-parity): 95-98% same top-1, and perplexity equal
         // (on - off = -0.005 +- 0.005 nats). Neither output is more correct than the other.
-        std::fprintf(stderr,
+        const char* canonical_f32 = std::getenv("STRATA_NVFP4_F32_CANONICAL");
+        const char* expert_f32 = std::getenv("STRATA_NVFP4_F32");
+        const char* expert_tc = std::getenv("STRATA_NVFP4_TC");
+        if (safetensors && canonical_f32 && std::strcmp(canonical_f32,"1")==0 &&
+            expert_f32 && std::strcmp(expert_f32,"1")==0 &&
+            (!expert_tc || std::strcmp(expert_tc,"0")==0) && strata::kernels::cpu::cpu_avx512_ok()) {
+            std::fprintf(stderr,
+                         "strata generate: native NVFP4 CPU/GPU FP32 canonical arithmetic enabled\n"
+                         "                 (32-lane reduction and double exp rounded to float).\n");
+        } else std::fprintf(stderr,
                      "strata generate: the GPU computes the experts in the cache; it rounds differently from the CPU,\n"
                      "                 so a reply can differ slightly from a run without the cache (same quality:\n"
                      "                 bench/results/2026-09-27-cache-parity).\n");
@@ -11561,6 +11570,7 @@ int strata_main(int argc, char** argv) {
             }
             static const bool state_hash = std::getenv("STRATA_STATE_HASH") != nullptr;
             if (state_hash && !cancelled && o.prompt_cache > 0) {   // every finished request, ckpt=0 too (parity gates)
+                strata::core::progress_at("state fingerprint");
                 // DEBUG: a fingerprint of every part of the session over the positions it holds ([0, L)), and
                 // separately of what lies past them in the last KV page (stale cells, fine unless something reads them)
                 if (cudaDeviceSynchronize() != cudaSuccess) {
@@ -11585,18 +11595,33 @@ int strata_main(int argc, char** argv) {
                         }
                         h = fnv1a(hash_buffer.data(), n, h);
                         offset += n;
+                        strata::core::progress_beat();
                     }
                     return h;
                 };
                 // the cells [c0, c1) of one int8 K or V pool ([page][kv_head][page_size][head_dim]), bytes per value `w`
                 auto hash_cells = [&](const void* pool, int64_t per_cell, int64_t c0, int64_t c1, uint64_t h) {
                     const int64_t ps = qs.page_size;
-                    for (int64_t pg = c0 / ps; pg * ps < c1; ++pg)
+                    for (int64_t pg = c0 / ps; pg * ps < c1;) {
+                        // Complete pages are contiguous in exactly the hash's
+                        // page/head/cell order. Avoid one blocking D2H call per
+                        // tiny scale row on long contexts; partial boundary
+                        // pages still skip the other heads' unused cells.
+                        if (pg * ps >= c0 && (pg + 1) * ps <= c1) {
+                            const int64_t end = c1 / ps;
+                            const size_t off = (size_t) (pg * qs.n_head_kv * ps * per_cell);
+                            const size_t bytes = (size_t) ((end - pg) * qs.n_head_kv * ps * per_cell);
+                            h = hash_dev((const uint8_t*) pool + off, bytes, h);
+                            pg = end;
+                            continue;
+                        }
                         for (int64_t hd = 0; hd < qs.n_head_kv; ++hd) {
                             const int64_t a = std::max(c0, pg * ps) - pg * ps, e = std::min(c1, (pg + 1) * ps) - pg * ps;
                             const size_t off = (size_t) (((pg * qs.n_head_kv + hd) * ps + a) * per_cell);
                             h = hash_dev((const uint8_t*) pool + off, (size_t) ((e - a) * per_cell), h);
                         }
+                        ++pg;
+                    }
                     return h;
                 };
                 const ConvStateSizes z = conv_state_sizes(g, ss);

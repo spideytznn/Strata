@@ -6,6 +6,7 @@ State hashing is deliberately a correctness run, not a throughput measurement.
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import threading
@@ -138,7 +139,9 @@ def main():
                 assert row['committed_state_equal'], 'committed state differs'
         assert 'post-residency expert source bytes=0' in text
         assert 'post-residency MTP source bytes=0' in text
-        assert 'tokens=8192 max_chunk=8192' in text, '8192 prefill was not executed'
+        chunks = re.findall(r'strata prefill executed: tokens=(\d+) max_chunk=(\d+) capacity=(\d+)', text)
+        assert any(int(total) >= 8192 and int(maximum) == int(capacity) == 8192
+                   for total, maximum, capacity in chunks), '8192 prefill was not executed'
         row['status'] = 'pass'
         save()
     results['status'] = 'pass'

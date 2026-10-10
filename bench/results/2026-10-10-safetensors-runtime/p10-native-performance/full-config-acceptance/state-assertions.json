@@ -1,0 +1,61 @@
+{
+  "status": "pass",
+  "original_fingerprints_preserved": true,
+  "canonical_gpu_cpu_states_equal": true,
+  "self_checks": [
+    {
+      "run": 0,
+      "before": "details-8199-initial",
+      "after": "details-8199-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 0,
+      "before": "details-24583-initial",
+      "after": "details-24583-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 0,
+      "before": "A+",
+      "after": "A+-restored",
+      "main_state_equal": true
+    },
+    {
+      "run": 1,
+      "before": "details-8199-initial",
+      "after": "details-8199-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 1,
+      "before": "details-24583-initial",
+      "after": "details-24583-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 1,
+      "before": "A+",
+      "after": "A+-restored",
+      "main_state_equal": true
+    },
+    {
+      "run": 2,
+      "before": "details-8199-initial",
+      "after": "details-8199-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 2,
+      "before": "details-24583-initial",
+      "after": "details-24583-warm",
+      "main_state_equal": true
+    },
+    {
+      "run": 2,
+      "before": "A+",
+      "after": "A+-restored",
+      "main_state_equal": true
+    }
+  ]
+}

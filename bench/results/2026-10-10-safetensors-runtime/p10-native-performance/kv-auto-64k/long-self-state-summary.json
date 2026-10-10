@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "recall": [
+    {
+      "name": "growth-65543-initial",
+      "text": "ZEBRA-65543<|im_end|>",
+      "reused": 0
+    },
+    {
+      "name": "growth-65543-warm",
+      "text": "ZEBRA-65543<|im_end|>",
+      "reused": 65536
+    },
+    {
+      "name": "growth-65543-disk-restored-after-short",
+      "text": "ZEBRA-65543<|im_end|>",
+      "reused": 65536
+    }
+  ],
+  "initial_warm_disk_restored_main_states_equal": true
+}
