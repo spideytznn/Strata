@@ -43,8 +43,19 @@ metadata GGUF, without converting the main model. It uses the GPU and caps
 each image at 1024 tokens. Default sampling is the official thinking preset
 (temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0,
 repetition_penalty 1). Explicit requests and shared web settings override it.
-The desktop binary is `strata-efficiency12.exe`. After the user authorized
-benchmarking, three fresh runs per profile measured the current visual preset
+The desktop binary is now `strata-efficiency14.exe` with the user's requested
+prefill-first allocation mode. It physically allocates and writes the 4096-row
+workspace before expert-cache sizing, binds the residency table after filling
+the cache, and reuses the allocation. An additional 512 MiB startup guard is
+held until the verifier, MTP and other late startup allocations finish. The
+mode refuses startup rather than reducing the batch when its requirements
+cannot be met. It is opt-in through `STRATA_NATIVE_PREFILL_FIRST=1`; the bare
+CLI and other profiles retain the previous allocation path. CUDA SM120 build
+and configuration checks pass; GPU inference and throughput validation are
+pending while the user's existing service is active. See the
+[allocation change and acceptance procedure](../bench/results/2026-10-10-safetensors-runtime/p15-prefill-first/README.md).
+After the user authorized benchmarking, three fresh runs per profile measured
+the preceding efficiency12 visual preset
 at median **2727 tok/s (~8K text), 3109 (~24K text), and 2851 (~8K including
 1024 image tokens)**, with 145 ms median image preparation. All 57 requests
 have zero expert file reads and exact own-cache/repeat outputs. The
@@ -57,8 +68,9 @@ processed 26,328 prompt tokens in 12.89 s (2042.5 tok/s); 11,905 generated
 tokens ran at 69.9 tok/s. Thus the current reserve does not guarantee 4096
 under every desktop startup. The [real-request record and staged diagnostics](../bench/results/2026-10-10-safetensors-runtime/p14-desktop-26k/README.md)
 keep this result separate from the controlled benchmark. The 3584 MiB test
-profile and efficiency13 diagnostic build are staged, unmeasured candidates;
-the desktop launcher remains on efficiency12.
+profile and efficiency13 diagnostic build were staged, unmeasured candidates.
+The new allocation mode supersedes that reserve-only proposal; the running
+efficiency12 process keeps its original settings until the user restarts it.
 Earlier efficiency11 measurements below remain text-only greedy results.
 The [private image smoke check](../bench/results/2026-10-10-safetensors-runtime/p11-native-vision/README.md)
 passes solid-color recognition, warm image reuse, A/B/A, return to text and
@@ -428,7 +440,7 @@ SSD reads during inference.
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-mtp2.json` and
-`build-native-engine/strata-efficiency12.exe`. Settings are 262144 total context,
+`build-native-engine/strata-efficiency14.exe`. Settings are 262144 total context,
 4096 dedicated prefill, INT8 KV, original BF16 MTP2, CPU75 cold decode experts,
 kernel copying, elastic KV, canonical FP32 arithmetic and ordinary T1 commit.
 FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
@@ -441,14 +453,17 @@ and reported 22 MiB free after loading. The larger reserve keeps more space
 out of the expert cache; it does not unload experts from RAM or disable images.
 The subsequent three-round visual benchmark above measures this allocation
 correction; it does not establish a throughput improvement for every request. The [startup allocation check](../bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
-confirms 4096 rows with the visual encoder loaded and 746 MiB free. Restarting loads
-the new profile; tests do not start the public server. Logs append to
+confirms 4096 rows with the visual encoder loaded and 746 MiB free. A subsequent
+desktop startup still reduced the batch; efficiency14 therefore allocates the
+workspace first and holds a separate 512 MiB startup guard, instead of relying
+only on this estimate. This new mode is built but not yet inference-tested.
+Restarting loads the new profile; tests do not start the public server. Logs append to
 `logs/native-262k-int8.log`, whose directory the launcher creates.
 
 Build this exact binary with:
 
 ```powershell
-.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency12 -Targets @('strata')
+.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency14 -Targets @('strata')
 ```
 
 The preceding text-only efficiency11 acceptance evidence includes near-capacity

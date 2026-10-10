@@ -41,6 +41,8 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--rounds', type=int, default=3)
     p.add_argument('--new', type=int, default=128)
+    p.add_argument('--prefill-first', action='store_true',
+                   help='Compare reserve-only 3072/3584 against preallocated 4096 with a 3072 reserve.')
     a = p.parse_args()
     assert a.rounds > 0 and a.new > 0
     a.output = a.output.resolve()
@@ -48,10 +50,17 @@ def main():
     base = json.loads(a.config.read_text(encoding='utf-8-sig'))
     assert base['args'][base['args'].index('--prefill')+1] == '4096'
     assert '--vision' in base['args'] and base['vision']['gpu']
-    profiles = {'vision2048': copy.deepcopy(base), 'vision3072': copy.deepcopy(base), 'text3072': copy.deepcopy(base)}
-    profiles['vision2048']['args'][base['args'].index('--vram-reserve-mib')+1] = '2048'
-    profiles['text3072']['args'].remove('--vision')
-    del profiles['text3072']['vision']
+    if a.prefill_first:
+        profiles = {name:copy.deepcopy(base) for name in ['vision3072','vision3584','vision-priority3072']}
+        for name,cfg in profiles.items():
+            cfg['args'][cfg['args'].index('--vram-reserve-mib')+1] = '3584' if name=='vision3584' else '3072'
+            cfg.setdefault('env',{})['STRATA_NATIVE_PREFILL_FIRST'] = '1' if name=='vision-priority3072' else '0'
+    else:
+        assert base.get('env',{}).get('STRATA_NATIVE_PREFILL_FIRST','0') != '1', 'Use --prefill-first with the new desktop profile'
+        profiles = {'vision2048': copy.deepcopy(base), 'vision3072': copy.deepcopy(base), 'text3072': copy.deepcopy(base)}
+        profiles['vision2048']['args'][base['args'].index('--vram-reserve-mib')+1] = '2048'
+        profiles['text3072']['args'].remove('--vision')
+        del profiles['text3072']['vision']
     tok = SafetensorsTokenizer.from_directory(base['tokenizer'])
     template = ChatTemplate(Path(base['chat_template']))
     docpath = ROOT/'docs/DETAILS.md'
@@ -73,7 +82,7 @@ def main():
     (a.output/'fixtures.json').write_text(json.dumps(fixture_info,ensure_ascii=False,indent=2),encoding='utf-8')
     result = {'status':'running','rounds':a.rounds,'new':a.new,'seed':9950,'platform':platform.platform(),
               'source_config_sha256':hashlib.sha256(a.config.read_bytes()).hexdigest(),
-              'profiles':profiles,'runs':[],
+              'profiles':profiles,'runs':[], 'profile_mode':'prefill-first' if a.prefill_first else 'visual-reserves',
               'note':'Same binary, 4096 cap, official thinking sampling and fixed seed. Encoder loaded first. Cold/warm, image preparation and startup distinguished; no HTTP or state hashing.'}
     def save():
         (a.output/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

@@ -31,14 +31,24 @@ let expert caching crowd the visual profile: one user startup fell back to
 3072 prefill rows and reported only 22 MiB free after loading. The [startup allocation check](bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
 confirms 4096 rows with the visual encoder loaded and 746 MiB free.
 
-The desktop profile now selects `strata-efficiency12.exe`, enables images with
+At the user's request, the next desktop launch now selects efficiency14 with
+`STRATA_NATIVE_PREFILL_FIRST=1`. It allocates and writes the 4096-row owned
+workspace before sizing the expert cache, holds another 512 MiB until late
+startup allocations finish, and reuses the same workspace for requests.
+Insufficient capacity or final headroom refuses startup instead of reducing
+the configured batch. The original 3072 MiB reserve remains in addition to
+that temporary guard. CUDA SM120 builds; GPU inference and throughput checks
+are pending while the user's efficiency12 service is active. See the
+[implementation and pending acceptance](bench/results/2026-10-10-safetensors-runtime/p15-prefill-first/README.md).
+
+The desktop profile now selects `strata-efficiency14.exe`, enables images with
 `--vision`, and reuses the installed BF16 mmproj / `strata-vision` sidecar read-only.
 The main model still loads original safetensors. The GPU image encoder starts
 before the engine sizes its expert cache; it allows up to 1024 tokens per image.
 Default sampling follows Qwen thinking mode: temperature 1.0, top_p 0.95,
 top_k 20, min_p 0, presence_penalty 0, repetition_penalty 1.
 Explicit request values and shared web settings override these defaults.
-Three fresh runs per profile now measure current visual/official-thinking
+Three fresh runs per profile measured the preceding efficiency12 visual/official-thinking
 prefill medians **2727 tok/s (~8K text), 3109 (~24K text), and 2851 (~8K
 including 1024 image tokens)**. The prior visual reserve gives 1990/2396/2067.
 Image preparation adds a median 145 ms. All 57 requests have zero expert file

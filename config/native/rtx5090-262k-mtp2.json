@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency12.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency14.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -72,6 +72,7 @@
     "STRATA_PLE_TRACE": "1",
     "STRATA_NATIVE_KV_GROW": "1",
     "STRATA_NATIVE_CLOSE_FILES": "1",
+    "STRATA_NATIVE_PREFILL_FIRST": "1",
     "STRATA_NVFP4_F32_UNROLL": "1",
     "STRATA_NVFP4_F32_REUSE": "1",
     "STRATA_OWNED_PRICE": "exact",

@@ -66,9 +66,15 @@ public:
     /// `host_res`: the static residency table (n_layers x n_expert, slot or -1) or null; `cache` its slots.
     /// `borrow`/`borrow_bytes`: device memory to carve every buffer from (the top slots of the expert cache,
     /// lent for the prompt and refilled after it); null = allocate normally.
+    /// `touch_owned`: write each owned device buffer and synchronize before returning, for startup VRAM sizing.
     bool init(const core::WeightTable& wt, const core::ModelGeometry& g, core::SessionState& ss,
               core::ExpertSource* src, const core::ExpertCache* cache, const int32_t* host_res, int64_t chunk,
-              void* stream, std::string& err, void* borrow = nullptr, uint64_t borrow_bytes = 0);
+              void* stream, std::string& err, void* borrow = nullptr, uint64_t borrow_bytes = 0,
+              bool touch_owned = false);
+
+    /// Startup only, before run(): attach the completed residency table to a prompt path whose owned buffers
+    /// were allocated before the expert cache. No buffers are allocated and no model state is changed.
+    void bind_expert_residency(const core::ExpertCache* cache, const int32_t* host_res);
 
     /// With borrowed buffers: lay them out again for chunks of `chunk` tokens (at most `init`'s) in `borrow` - a
     /// request lends only the slots its prompt needs.  The stream must be idle (between prompts).

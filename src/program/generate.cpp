@@ -4607,6 +4607,56 @@ int strata_main(int argc, char** argv) {
     strata::core::ExpertCache xcache;
     // THE HEAD BEFORE THE CACHE: the native head and the logits are allocated above, before the expert arena (#620)
     const bool auto_cache = o.expert_cache < 0;
+    const char* prefill_first_env = std::getenv("STRATA_NATIVE_PREFILL_FIRST");
+    const bool prefill_first = prefill_first_env != nullptr && std::strcmp(prefill_first_env, "1") == 0;
+    std::unique_ptr<strata::prefill::Prefill> early_prefill;
+    std::unique_ptr<void, decltype(&cudaFree)> prefill_startup_guard(nullptr, &cudaFree);
+    constexpr int64_t kPrefillStartupGuard = 512ll << 20;
+    if (prefill_first) {
+        if (!safetensors || !o.serve || !auto_cache || pf_borrow || o.prefill_auto || o.prefill_chunk <= 0 ||
+            multi_gpu || o.batch > 0 || o.vram_elastic || o.peer_device >= 0 || o.pipeline_windows > 0 ||
+            std::any_of(o.expert_cache_remote.begin(), o.expert_cache_remote.end(), [](int n) { return n > 0; })) {
+            std::fprintf(stderr, "safetensors: STRATA_NATIVE_PREFILL_FIRST=1 needs native single-GPU --serve, "
+                                 "--expert-cache auto, explicit --prefill and --no-prefill-borrow, "
+                                 "without batching, peer, remote caches, pipeline or --vram-elastic\n");
+            return 2;
+        }
+        strata::prefill::gemm_prewarm_wait();
+        uint64_t pinned = 0, total = 0;
+        const auto& lay = strata::kernels::cpu::expert_layout();
+        for (int64_t l = 0; l < g.n_layers; ++l)
+            for (int64_t e = 0; e < g.n_expert; ++e) {
+                const uint64_t b = lay.blob_bytes(l);
+                total += b;
+                if (srcp->pinned(l, e)) pinned += b;
+            }
+        strata::prefill::Prefill::set_pinned_share(total ? (double) pinned / (double) total : 1.0);
+        const bool share_pool = !o.no_pool;
+        strata::prefill::Prefill::arm_cpu_share(share_pool, share_pool);
+        early_prefill = std::make_unique<strata::prefill::Prefill>();
+        if (share_pool) early_prefill->set_cpu_pool(&pool);
+        // These are real allocations, not a forecast: cache sizing below sees both the owned prompt buffers
+        // and this temporary margin already taken. Release the margin only after the verifier and MTP bind.
+        void* guard = nullptr;
+        if (cudaMalloc(&guard, (size_t) kPrefillStartupGuard) != cudaSuccess) {
+            std::fprintf(stderr, "safetensors: cannot reserve 512 MiB startup headroom for prefill-first mode\n");
+            return 1;
+        }
+        prefill_startup_guard.reset(guard);
+        if (cudaMemsetAsync(guard, 0, (size_t) kPrefillStartupGuard, main_stream) != cudaSuccess) {
+            std::fprintf(stderr, "safetensors: touching prefill startup headroom failed\n");
+            return 1;
+        }
+        if (!early_prefill->init(wt, g, ss, srcp, &xcache, nullptr, o.prefill_chunk, main_cs, err, nullptr, 0, true)) {
+            std::fprintf(stderr, "safetensors: cannot allocate the required %lld-row prompt workspace before "
+                                 "the expert cache: %s (no smaller-batch fallback)\n",
+                         (long long) o.prefill_chunk, err.c_str());
+            return 1;
+        }
+        std::fprintf(stderr, "safetensors: prefill-first: %lld rows allocated and touched before expert cache sizing; "
+                             "512 MiB startup headroom held; experts use the remaining budget\n",
+                     (long long) early_prefill->chunk());
+    }
     bool reserve_adapted = false;   // #496: the auto sizing lowered the reserve so a small card's cache fits
     // --pipeline-windows: what it allocates on CUDA0 after the cache (see kPipeWindowMib)
     const int64_t pipe_first = o.pipeline_windows <= 0 ? 0
@@ -4621,6 +4671,7 @@ int strata_main(int argc, char** argv) {
     // and gives that cache the difference.  A recommendation to try, so it is not the default.
     auto owned_prefill_mib = [&]() -> int64_t {
         if (!(o.prefill_chunk > 0 && !pf_borrow)) return 0;
+        if (early_prefill) return 64;   // allocator margin only: the real workspace is already in cudaMemGetInfo
         static const bool exact = [] { const char* v = std::getenv("STRATA_OWNED_PRICE"); return v != nullptr && std::string(v) == "exact"; }();
         if (!exact) return 160 + (o.prefill_chunk * 680) / 1024;
         const int64_t mib = ((int64_t) strata::prefill::Prefill::bytes_needed_owned(g, ss, o.prefill_chunk, srcp != nullptr) + (1 << 20) - 1) >> 20;
@@ -6623,7 +6674,8 @@ int strata_main(int argc, char** argv) {
         // neither fires, plain one-token-per-round decoding - slower, never wrong: the verify window still
         // confirms every emitted token against the real model regardless of where the draft came from.
         const bool use_mtp = !o.mtp.empty();
-        strata::prefill::Prefill sp;
+        auto serve_prefill = early_prefill ? std::move(early_prefill) : std::make_unique<strata::prefill::Prefill>();
+        strata::prefill::Prefill& sp = *serve_prefill;
         const int64_t configured_prefill_chunk = o.prefill_chunk;
         // the pool is idle while a prompt is read unless batch slots decode between its parts; with
         // STRATA_PREFILL_CPU_SHARE the staged-chunk limit before the chunk below sizes the loans (bytes_needed reads it)
@@ -6905,6 +6957,14 @@ int strata_main(int argc, char** argv) {
         // `--prefill auto` split could stop at start with "device buffers for a chunk of 2048 tokens do not fit".  A
         // chunk that does not fit is tried again one size smaller, down to 512 tokens (a smaller chunk only reads slower).
         auto init_prompt_paths = [&]() -> int {   // 0: ready; 1: failed (err set); 2: failed with "do not fit"
+            if (prefill_first) {
+                if (sp.chunk() != o.prefill_chunk || borrow != nullptr) {
+                    err = "prefill-first: the allocated chunk must stay equal to the requested chunk";
+                    return 1;
+                }
+                sp.bind_expert_residency(&xcache, host_res.data());
+                return 0;
+            }
             for (size_t i = 0; i < stages.size(); ++i) {
                 GpuStage& st = *stages[i];
                 st.sp.set_stage(st.lb, i + 1 < stages.size() ? st.le : -1, i + 1 < stages.size() ? &stages[i + 1]->sp : nullptr);
@@ -6953,7 +7013,7 @@ int strata_main(int argc, char** argv) {
             };
             int dev = 0;
             int64_t need = 0, fb = 0;
-            if (!own_fits(o.prefill_chunk, dev, need, fb)) {
+            if (!prefill_first && !own_fits(o.prefill_chunk, dev, need, fb)) {
                 int64_t c = 0;
                 for (const int64_t s : kStepChunks) {
                     int d2 = 0;
@@ -8730,8 +8790,20 @@ int strata_main(int argc, char** argv) {
         {
             // what is left once everything is allocated: under WDDM a GPU filled to the brim does not fail, it pages -
             // and a page-in while the verify graph spins on a host flag stalls the request for good
+            if (prefill_first) prefill_startup_guard.reset();
             size_t free_b = 0, total_b = 0;
             cudaMemGetInfo(&free_b, &total_b);
+            if (prefill_first && (int64_t) free_b < kPrefillStartupGuard) {
+                std::fprintf(stderr, "safetensors: prefill-first keeps %lld rows but only %lld MiB free after loading; "
+                                     "need 512 MiB headroom. Increase --vram-reserve-mib; startup refused, "
+                                     "no smaller-batch fallback\n",
+                             (long long) sp.chunk(), (long long) (free_b >> 20));
+                return 1;
+            }
+            if (prefill_first)
+                std::fprintf(stderr, "safetensors: prefill-first ready: configured=%lld allocated=%lld; "
+                                     "startup headroom released; %lld MiB free\n",
+                             (long long) configured_prefill_chunk, (long long) sp.chunk(), (long long) (free_b >> 20));
             // below ~256 MiB a later allocation (a first-used window's buffers, the desktop, another program) can make
             // the driver page GPU memory, and a verify graph spinning on a host flag then never finishes
             const int64_t free_mib = (int64_t) (free_b >> 20);

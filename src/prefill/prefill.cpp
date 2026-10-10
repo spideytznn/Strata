@@ -457,6 +457,8 @@ struct Alloc {
     uint64_t failed_bytes = 0;          ///< the take that could not be allocated; the failure message names it
     uint64_t granule = 0;               ///< count_only: each take rounds up to this (cudaMalloc's 2 MiB pages: owned buffers)
     bool count_only = false;
+    bool touch_owned = false;
+    cudaStream_t touch_stream = nullptr;
     std::vector<void*>* owned = nullptr;
     template <typename T> T* take(size_t n, bool& ok) {
         uint64_t bytes = ((uint64_t) n * sizeof(T) + 256 + 255) & ~255ull;
@@ -475,6 +477,9 @@ struct Alloc {
         if (cudaMalloc(&p, bytes) != cudaSuccess) { ok = false; failed_bytes = bytes; return nullptr; }
         owned->push_back(p);
         used += bytes;
+        if (touch_owned && cudaMemsetAsync(p, 0, bytes, touch_stream) != cudaSuccess) {
+            ok = false; failed_bytes = bytes; return nullptr;
+        }
         return (T*) p;
     }
 };
@@ -935,6 +940,11 @@ strata::kernels::QsaAttnPools pools_of(const strata::kernels::KvHostPools& h, co
 Prefill::Prefill() : impl_(new Impl) {}
 Prefill::~Prefill() { release(); }
 
+void Prefill::bind_expert_residency(const core::ExpertCache* cache, const int32_t* host_res) {
+    impl_->cache = cache;
+    impl_->host_res = host_res;
+}
+
 void Prefill::reset() {
     release();
     impl_.reset(new Impl);
@@ -1083,7 +1093,7 @@ uint64_t moe_set_bytes(size_t T, int64_t n_expert, bool fused) {
 
 bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, core::SessionState& ss,
                    core::ExpertSource* src, const core::ExpertCache* cache, const int32_t* host_res, int64_t chunk,
-                   void* stream, std::string& err, void* borrow, uint64_t borrow_bytes) {
+                   void* stream, std::string& err, void* borrow, uint64_t borrow_bytes, bool touch_owned) {
     Impl& m = *impl_;
     m.wt = &wt; m.g = &g; m.ss = &ss; m.src = src; m.cache = cache; m.host_res = host_res;
     m.T = chunk; m.cs = (cudaStream_t) stream; m.stats = &stats_;
@@ -1109,6 +1119,10 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
             return false;
         }
         m.owned.push_back(m.tok_dev);
+        if (touch_owned && cudaMemsetAsync(m.tok_dev, 0, (size_t) chunk * sizeof(int32_t), m.cs) != cudaSuccess) {
+            err = "prefill: touching the token id buffer failed";
+            return false;
+        }
         m.tok_host.resize((size_t) chunk);
     }
     if (cudaStreamCreateWithFlags(&m.copy, cudaStreamNonBlocking) != cudaSuccess) { err = "prefill: copy stream"; return false; }
@@ -1204,6 +1218,8 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
     o.base = (uint8_t*) borrow;
     o.cap = borrow_bytes;
     o.owned = &m.owned;
+    o.touch_owned = touch_owned;
+    o.touch_stream = m.cs;
     {
         uint16_t* gs = o.take<uint16_t>((size_t) GEMM_SCRATCH, ok);
         void* ws = o.take<uint8_t>(GEMM_WS, ok);
@@ -1224,6 +1240,10 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
               std::to_string(fb >> 20) + " of " + std::to_string(tb >> 20) + " MiB free at the failure; " +
               std::to_string(o.used >> 20) + " MiB taken, the failing buffer wanted " +
               std::to_string(o.failed_bytes >> 20) + " MiB)";
+        return false;
+    }
+    if (touch_owned && cudaStreamSynchronize(m.cs) != cudaSuccess) {
+        err = "prefill: touching the owned workspace failed";
         return false;
     }
     if (std::getenv("STRATA_PREFILL_TRACE")) {

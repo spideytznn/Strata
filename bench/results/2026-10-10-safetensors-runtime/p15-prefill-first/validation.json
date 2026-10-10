@@ -1,0 +1,54 @@
+{
+  "status": "build_and_static_checks_pass_runtime_pending",
+  "hardware": "RTX 5090 32 GB / Ryzen 9950X3D / 96 GB / Windows",
+  "build": "Release CUDA SM120 / MSVC; successful",
+  "help_exit": 0,
+  "python_compile": "pass",
+  "preceding_p13_audit_exact_replay": true,
+  "desktop_config_only_executable_and_opt_in_changed": true,
+  "configured_prefill": 4096,
+  "reserve_mib": 3072,
+  "temporary_startup_guard_mib": 512,
+  "busy_benchmark_guard": {
+    "expected_exit": 1,
+    "model_runs_started": 0,
+    "error": "AssertionError('Another Strata process is running')"
+  },
+  "sha256": {
+    "config/native/rtx5090-262k-mtp2.json": "74ada91578988964e24b1a60daa7d75cfd226b911a159825ca49c85e304a632e",
+    "src/program/generate.cpp": "659c031d03b31249f5483d8cfa258e46d849d88ac9665c271a0d52f1edfa8fe9",
+    "src/prefill/prefill.cpp": "4b1efcc67c0ed497f5f5d19ad571685db4c88a225f0c0748e1ae7d18923db3a2",
+    "include/strata/prefill/prefill.hpp": "b7c43d6c41a764d5017f4fac93f562336385ddb309ec8744ee62d818c3056e6e",
+    "tools/native_visual_performance.py": "60b9a663e1a9a15b0e137e1eede4460b4e0584ef1a106bae52f44cc609e5baf8",
+    "tools/native_visual_performance_summary.py": "66a41c38bd1a10c7ba3600c97df16fc94c0a024bcd28ec30624d33794fcb49ac",
+    "build-native-engine/strata-efficiency14.exe": "794241315ca5fdd54c8b90c9a4fdca61bf1e465f41d7bbaf7475d5f03a6ce6d0",
+    "logs/efficiency14-build.txt": "781bc0da4947fce2f005d3ec271e6a2599001ece6568485763fb001da3556b4b",
+    "logs/efficiency14-help.txt": "1033514ab4fecace84ba65580d4e0927e6628740fb92758f26d58a2a1b1093bb"
+  },
+  "not_tested": [
+    "GPU inference in prefill-first mode",
+    "real startup capacity/free-VRAM check",
+    "output parity across new allocation order",
+    "cache reuse and expert source counters on efficiency14",
+    "throughput",
+    "long-context KV growth/cache restore",
+    "HIP and SYCL builds"
+  ],
+  "running_user_processes_preserved": [
+    34224,
+    31084
+  ],
+  "active_engine_binary_unchanged_from_p13": true,
+  "running_processes_at_final_check": [
+    {
+      "Id": 34224,
+      "ProcessName": "strata-efficiency12"
+    },
+    {
+      "Id": 31084,
+      "ProcessName": "strata-vision"
+    }
+  ],
+  "hash_format": "Local Windows file bytes; source checkout line endings may differ from Git blobs.",
+  "base_commit": "427b69e0fea939617dbb21619d580a325670a1b0"
+}
