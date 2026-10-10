@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency11.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency12.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -43,7 +43,8 @@
     "--spec-min-p",
     "0",
     "--pool-tasks",
-    "40"
+    "40",
+    "--vision"
   ],
   "cwd": "G:\\Strata\\Strata-Safetensors",
   "log": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-int8.log",
@@ -80,5 +81,21 @@
   },
   "allowed_hosts": [
     "*"
-  ]
+  ],
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0
+  },
+  "vision": {
+    "exe": "G:\\Strata\\Strata-Official\\engine\\q6\\strata-vision.exe",
+    "mmproj": "G:\\Strata\\Strata-data\\vision\\mmproj-Qwen3.8-Flash-Next-BF16.gguf",
+    "model": "G:\\Strata\\Strata-data\\packs\\unsloth-ud-q4_k_xl\\vision-vocab.gguf",
+    "gpu": true,
+    "max_tokens": 1024,
+    "threads": 16
+  }
 }

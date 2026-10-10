@@ -2119,9 +2119,9 @@ int strata_main(int argc, char** argv) {
 #endif
         }
         if (!o.native_preset.empty() || !o.native_dense_gguf.empty() || !o.native_head_gguf.empty() || !o.embd_gguf.empty() ||
-            !o.ple_gguf.empty() || !o.layer_split.empty() || o.vision || o.no_ple || o.keep_canonical ||
+            !o.ple_gguf.empty() || !o.layer_split.empty() || o.no_ple || o.keep_canonical ||
             o.pipeline_windows > 1 || o.batch > 0) {
-            std::fprintf(stderr,"--safetensors requires the native single-GPU text path without GGUF overrides\n"); return 2;
+            std::fprintf(stderr,"--safetensors requires the native single-GPU path without GGUF weight overrides\n"); return 2;
         }
         o.stream_token = o.gr_native_mmvf = o.native_bf16 = o.native_bf16_extra = true;
         o.native_moe_combine = o.native_gdn = o.native_router = o.native_qsa = o.native_qsa_indexer = true;

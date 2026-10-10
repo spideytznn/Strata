@@ -15,8 +15,8 @@ BF16x2/FP16 prefill, full resident experts, adaptive GPU caching and original
 MTP with two draft tokens verified by the main model. FP4 remains opt-in:
 measured decode did not improve end-to-end, and faster FP4 prefill changed
 outputs. The no-MTP reference is `config/native/rtx5090-quality.json`.
-This startup does not modify the existing deployment. Native vision and
-multi-GPU are unsupported; HIP and SYCL have not been built or validated.
+This startup does not modify the existing deployment. The desktop profile below uses the existing external BF16 image encoder.
+Multi-GPU is unsupported; HIP and SYCL have not been built or validated.
 
 The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 total
 context, 8,192-token prefill and `127.0.0.1:8880`**. Its config is
@@ -25,7 +25,17 @@ context, 8,192-token prefill and `127.0.0.1:8880`**. Its config is
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 An already-running engine keeps its settings until restarted.
 
-The selected `strata-efficiency11.exe` profile uses INT8 KV, W4A8 expert prefill,
+The desktop profile now selects `strata-efficiency12.exe`, enables images with
+`--vision`, and reuses the installed BF16 mmproj / `strata-vision` sidecar read-only.
+The main model still loads original safetensors. The GPU image encoder starts
+before the engine sizes its expert cache; it allows up to 1024 tokens per image.
+Default sampling follows Qwen thinking mode: temperature 1.0, top_p 0.95,
+top_k 20, min_p 0, presence_penalty 0, repetition_penalty 1.
+Explicit request values and shared web settings override these defaults.
+These sampling/vision changes have not been throughput-benchmarked; the numbers
+below describe the preceding text-only, greedy efficiency11 profile.
+
+The measured preceding `strata-efficiency11.exe` profile uses INT8 KV, W4A8 expert prefill,
 dedicated prompt workspace, elastic KV and original BF16 MTP projections with
 two drafts. Cold decode experts are split 75% CPU / 25% GPU; hot experts remain
 on the GPU. CPU AVX-512 rows, GPU weight reuse and canonical FP32 expert math

@@ -59,7 +59,7 @@ def validate_http(engine,tokenizer,template,output):
     {'role':'user','content':'What is the secret code? Reply with the code only.'}]}))
   assert 'SIGMA-682' in late['choices'][0]['message']['content']
   rejected=request('/v1/chat/completions',{**common,'messages':[{'role':'user','content':[{'type':'image_url','image_url':{'url':'data:image/png;base64,AA=='}}]}]},expect=400)
-  if engine.info.get('native_adapter'):assert 'text only' in rejected
+  if engine.info.get('native_adapter'):assert 'without the vision encoder' in rejected
   request('/v1/chat/completions',{**body,'max_tokens':engine.max_context+1},expect=400)
   result['status']='pass';output.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
  finally:httpd.shutdown();httpd.server_close()

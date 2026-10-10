@@ -34,13 +34,28 @@ experts. The draft reuses Strata's attention, rollback, sampling and verificatio
 the main model verifies every proposed token. Draft attention currently follows
 Strata's dense/window path; the saved MTP indexer weights are validated and kept
 but are not used for sparse draft selection. Multi-GPU, batching, pipeline >1,
-vision, cross-model drafts and MTP requantization are refused by this native path.
+cross-model drafts and MTP requantization are refused by this native path.
+The desktop profile enables the inherited `--vision` / GENI embedding path with
+the installed external BF16 image encoder, including image rotary positions
+and image-aware conversation reuse. Main-model weights remain safetensors;
+the read-only visual sidecar uses the existing BF16 mmproj GGUF and vocabulary
+metadata GGUF, without converting the main model. It uses the GPU and caps
+each image at 1024 tokens. Default sampling is the official thinking preset
+(temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0,
+repetition_penalty 1). Explicit requests and shared web settings override it.
+The updated desktop binary is `strata-efficiency12.exe`; this sampling/vision
+configuration has not been throughput-benchmarked at the user's request.
+Earlier efficiency11 measurements below remain text-only greedy results.
+The [private image smoke check](../bench/results/2026-10-10-safetensors-runtime/p11-native-vision/README.md)
+passes solid-color recognition, warm image reuse, A/B/A, return to text and
+a capped request with official thinking sampling. This is not a visual quality
+suite, image-session disk-restore check or a performance comparison.
 The HF tokenizer and all added tokens are used directly. The supplied froggeric
 v22.5 template is retained in `config/native/froggeric-v22.5.jinja`.
 
 ## Runtime correctness evidence
 
-The selected desktop profile uses `strata-efficiency11.exe`, 262144 total
+The measured text-only desktop profile used `strata-efficiency11.exe`, 262144 total
 context, INT8 KV, dedicated 8192 prefill and original BF16 MTP2. Cold decode
 experts use CPU75 (`--pcie-frac 0.25`), kernel copying and 40 pool tasks, with
 15 workers plus the host on 16 physical cores. Hot experts stay on the GPU.
@@ -339,7 +354,7 @@ image rejection. Their conversation cache is 4 GiB with four slots.
 
 The completed scope is Windows single-GPU SM120 text inference from this
 original checkpoint, tested through 32K context. HIP and SYCL builds are not
-validated. Sparse MTP-indexer selection, vision and multi-GPU remain outside
+validated. Sparse MTP-indexer selection and multi-GPU remain outside
 this implementation; unsupported native modes fail explicitly. The small
 quality suite establishes migration fidelity and cache/MTP consistency, not
 general model quality or equivalence to an unquantized BF16 model. Improving
@@ -399,7 +414,7 @@ SSD reads during inference.
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`, selecting `config/native/rtx5090-262k-mtp2.json` and
-`build-native-engine/strata-efficiency11.exe`. Settings are 262144 total context,
+`build-native-engine/strata-efficiency12.exe`. Settings are 262144 total context,
 8192 dedicated prefill, INT8 KV, original BF16 MTP2, CPU75 cold decode experts,
 kernel copying, elastic KV, canonical FP32 arithmetic and ordinary T1 commit.
 FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
@@ -411,10 +426,11 @@ the new profile; tests do not start the public server. Logs append to
 Build this exact binary with:
 
 ```powershell
-.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency11 -Targets @('strata')
+.\tools\build_safetensors_engine.ps1 -Jobs 2 -OutputName strata-efficiency12 -Targets @('strata')
 ```
 
-The acceptance evidence above includes near-capacity 262000-token input and
+The preceding text-only efficiency11 acceptance evidence includes near-capacity
+262000-token input and
 full 262144-cell KV mapping, warm reuse, A/B/A, disk restore, sampled/greedy
 stability and three alternating final-binary speed pairs. The original main
 model and deployment remain separate. MTP4/Q8 were rolled back at the user's
@@ -550,7 +566,8 @@ follow-up, cache restore, MTP parity and expert-source-I/O checks after switchin
 On this machine, `START-NATIVE.bat` starts the independent MTP2 quality configuration
 at `127.0.0.1:8097`. It uses this checkout's Python environment and engine;
 the original model and other deployments are unchanged. The server runs in the
-foreground and Ctrl+C stops it. The native backend currently accepts text only.
+foreground and Ctrl+C stops it. This older 32K startup profile accepts text only;
+the updated 262K desktop profile above enables the external image encoder.
 
 `config/native/rtx5090-quality.json` selects 32,768 context, 8,192 prefill,
 FP16 KV, full mapped expert RAM, automatic VRAM cache sizing with 2,048 MiB
