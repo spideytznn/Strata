@@ -24,13 +24,11 @@ context, 4,096-token prefill and `127.0.0.1:8880`**. Its config is
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 An already-running engine keeps its settings until restarted.
-The desktop prefill cap was reduced to 4096 at the user's request; no speed
-comparison was run. Actual chunks can be smaller than this cap. Earlier
+The desktop prefill cap was reduced to 4096 at the user's request. Actual chunks can be smaller than this cap. Earlier
 measurements and the image smoke check below used an 8192 cap.
 The desktop VRAM reserve is now 3072 MiB. The previous 2048 MiB setting
 let expert caching crowd the visual profile: one user startup fell back to
-3072 prefill rows and reported only 22 MiB free after loading. No throughput
-gain is claimed from changing this reserve. The [startup allocation check](bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
+3072 prefill rows and reported only 22 MiB free after loading. The [startup allocation check](bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
 confirms 4096 rows with the visual encoder loaded and 746 MiB free.
 
 The desktop profile now selects `strata-efficiency12.exe`, enables images with
@@ -40,8 +38,14 @@ before the engine sizes its expert cache; it allows up to 1024 tokens per image.
 Default sampling follows Qwen thinking mode: temperature 1.0, top_p 0.95,
 top_k 20, min_p 0, presence_penalty 0, repetition_penalty 1.
 Explicit request values and shared web settings override these defaults.
-These sampling/vision changes have not been throughput-benchmarked; the numbers
-below describe the preceding text-only, greedy efficiency11 profile.
+Three fresh runs per profile now measure current visual/official-thinking
+prefill medians **2727 tok/s (~8K text), 3109 (~24K text), and 2851 (~8K
+including 1024 image tokens)**. The prior visual reserve gives 1990/2396/2067.
+Image preparation adds a median 145 ms. All 57 requests have zero expert file
+reads and exact own-cache/repeat outputs. Different effective chunks change
+sampled continuations, so these are not same-output decode speed comparisons.
+See [all samples, latency and limits](bench/results/2026-10-10-safetensors-runtime/p13-visual-performance/README.md).
+The older figures below describe the text-only, greedy efficiency11 profile.
 
 The measured preceding `strata-efficiency11.exe` profile uses INT8 KV, W4A8 expert prefill,
 dedicated prompt workspace, elastic KV and original BF16 MTP projections with

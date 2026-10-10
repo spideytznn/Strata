@@ -43,8 +43,14 @@ metadata GGUF, without converting the main model. It uses the GPU and caps
 each image at 1024 tokens. Default sampling is the official thinking preset
 (temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence_penalty 0,
 repetition_penalty 1). Explicit requests and shared web settings override it.
-The updated desktop binary is `strata-efficiency12.exe`; this sampling/vision
-configuration has not been throughput-benchmarked at the user's request.
+The desktop binary is `strata-efficiency12.exe`. After the user authorized
+benchmarking, three fresh runs per profile measured the current visual preset
+at median **2727 tok/s (~8K text), 3109 (~24K text), and 2851 (~8K including
+1024 image tokens)**, with 145 ms median image preparation. All 57 requests
+have zero expert file reads and exact own-cache/repeat outputs. The
+[complete visual benchmark](../bench/results/2026-10-10-safetensors-runtime/p13-visual-performance/README.md)
+includes the prior visual reserve and pure-text control, all samples, TTFT,
+sampling output differences between chunk geometries and finite-test limits.
 Earlier efficiency11 measurements below remain text-only greedy results.
 The [private image smoke check](../bench/results/2026-10-10-safetensors-runtime/p11-native-vision/README.md)
 passes solid-color recognition, warm image reuse, A/B/A, return to text and
@@ -420,13 +426,13 @@ kernel copying, elastic KV, canonical FP32 arithmetic and ordinary T1 commit.
 FP32 decode activations, BF16x2 dense prefill, W4A8 expert prefill and closed
 startup handles remain enabled. It serves `127.0.0.1:8880` in the foreground;
 Ctrl+C stops it. Wildcard Host accepts any HTTP Host header. The prefill cap
-was changed from 8192 to 4096 at the user's request, without a performance
-comparison. Actual chunks can be smaller; prior evidence used 8192.
+was changed from 8192 to 4096 at the user's request. Actual chunks can be smaller; prior evidence used 8192.
 The desktop VRAM reserve is 3072 MiB. A recorded visual startup with the
 previous 2048 MiB reserve reduced configured 4096 to effective 3072 prompt rows
 and reported 22 MiB free after loading. The larger reserve keeps more space
 out of the expert cache; it does not unload experts from RAM or disable images.
-This is a memory-allocation correction, not a measured throughput improvement. The [startup allocation check](../bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
+The subsequent three-round visual benchmark above measures this allocation
+correction; it does not establish a throughput improvement for every request. The [startup allocation check](../bench/results/2026-10-10-safetensors-runtime/p12-vision-prefill-reserve/README.md)
 confirms 4096 rows with the visual encoder loaded and 746 MiB free. Restarting loads
 the new profile; tests do not start the public server. Logs append to
 `logs/native-262k-int8.log`, whose directory the launcher creates.
