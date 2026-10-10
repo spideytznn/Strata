@@ -1,0 +1,40 @@
+{
+  "hardware": {
+    "gpu": "RTX 5090 32GB",
+    "cpu": "Ryzen 9950X3D",
+    "ram": "96GB",
+    "os": "Windows",
+    "driver": "617.14"
+  },
+  "date": "2026-10-10",
+  "engine_sha256": "d23959136245bc09a69acbfd161c287da78f093c05834ebb1cede241fa848659",
+  "prior_interactive_request": {
+    "input_tokens": 24332,
+    "prefill_ms": 21580,
+    "prefill_tok_s": 1127.5,
+    "generated_tokens": 193,
+    "decode_ms": 5938,
+    "decode_tok_s": 32.5,
+    "gather_future_wait_ms": 13537.0,
+    "mtp_callback_ms": 32.875,
+    "checkpoint_ms": 24.375,
+    "expert_file_bytes": 0
+  },
+  "default_profile": {
+    "mtp_drafts": 2,
+    "mtp_projections": "bf16",
+    "mtp_bf16_batch": false,
+    "native_elastic_kv": false,
+    "context": 262144,
+    "prefill": 8192,
+    "port": 8880,
+    "kv": "int8",
+    "dedicated_prefill": true,
+    "allowed_hosts": [
+      "*"
+    ]
+  },
+  "new_model_forward_runs": 0,
+  "native_elastic_model_acceptance": "pending",
+  "hip_sycl": "not built"
+}

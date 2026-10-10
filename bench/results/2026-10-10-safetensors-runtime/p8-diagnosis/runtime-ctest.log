@@ -1,0 +1,9 @@
+Test project G:/Strata/Strata-Safetensors/build-native-engine
+    Start  6: vmm_test
+1/2 Test  #6: vmm_test .........................   Passed    0.14 sec
+    Start 62: ple_reader_selftest
+2/2 Test #62: ple_reader_selftest ..............   Passed   77.93 sec
+
+100% tests passed out of 2
+
+Total Test time (real) =  78.11 sec

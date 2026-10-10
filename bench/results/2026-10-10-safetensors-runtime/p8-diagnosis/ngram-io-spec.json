@@ -1,0 +1,776 @@
+{
+  "native": [
+    {
+      "first_row": 0,
+      "rows": 2500012,
+      "file_offset": 416370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 2500012,
+      "rows": 2500012,
+      "file_offset": 400418290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 5000024,
+      "rows": 2500012,
+      "file_offset": 800420210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 7500036,
+      "rows": 2500012,
+      "file_offset": 1200422130,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 10000048,
+      "rows": 2500012,
+      "file_offset": 1600424050,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 12500060,
+      "rows": 2500012,
+      "file_offset": 2000425970,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 15000072,
+      "rows": 2500012,
+      "file_offset": 2400427890,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 17500084,
+      "rows": 2500012,
+      "file_offset": 2800429810,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 20000096,
+      "rows": 2500012,
+      "file_offset": 3200431730,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 22500108,
+      "rows": 2500012,
+      "file_offset": 3600433650,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 25000120,
+      "rows": 2500012,
+      "file_offset": 4000435570,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 27500132,
+      "rows": 2500012,
+      "file_offset": 4400437490,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 30000144,
+      "rows": 2500012,
+      "file_offset": 4800439410,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 32500156,
+      "rows": 2500012,
+      "file_offset": 5200441330,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 35000168,
+      "rows": 2500012,
+      "file_offset": 5600443250,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 37500180,
+      "rows": 2500012,
+      "file_offset": 6000445170,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 40000192,
+      "rows": 2500012,
+      "file_offset": 6400447090,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 42500204,
+      "rows": 2500012,
+      "file_offset": 6800449010,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 45000216,
+      "rows": 2500012,
+      "file_offset": 7200450930,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 47500228,
+      "rows": 2500012,
+      "file_offset": 7600452850,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 50000240,
+      "rows": 2500012,
+      "file_offset": 8000454770,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 52500252,
+      "rows": 2500012,
+      "file_offset": 8400456690,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 55000264,
+      "rows": 2500012,
+      "file_offset": 8800458610,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 57500276,
+      "rows": 2500012,
+      "file_offset": 9200460530,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 60000288,
+      "rows": 2500012,
+      "file_offset": 9600462450,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 62500300,
+      "rows": 2500012,
+      "file_offset": 10000464370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 65000312,
+      "rows": 2500012,
+      "file_offset": 10400466290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 67500324,
+      "rows": 2500012,
+      "file_offset": 10800468210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 70000336,
+      "rows": 2500012,
+      "file_offset": 11200470130,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 72500348,
+      "rows": 2500012,
+      "file_offset": 11600472050,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 75000360,
+      "rows": 2500012,
+      "file_offset": 12000473970,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 77500372,
+      "rows": 2500012,
+      "file_offset": 12400475890,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 80000384,
+      "rows": 2500012,
+      "file_offset": 12800477810,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 82500396,
+      "rows": 2500012,
+      "file_offset": 13200479730,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 85000408,
+      "rows": 2500012,
+      "file_offset": 13600481650,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 87500420,
+      "rows": 2500012,
+      "file_offset": 14000483570,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 90000432,
+      "rows": 2500012,
+      "file_offset": 14400485490,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 92500444,
+      "rows": 2500012,
+      "file_offset": 14800487410,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 95000456,
+      "rows": 2500012,
+      "file_offset": 15200489330,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 97500468,
+      "rows": 2500012,
+      "file_offset": 15600491250,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 100000480,
+      "rows": 2500012,
+      "file_offset": 16000493170,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 102500492,
+      "rows": 2500012,
+      "file_offset": 16400495090,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 105000504,
+      "rows": 2500012,
+      "file_offset": 16800497010,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 107500516,
+      "rows": 2500012,
+      "file_offset": 17200498930,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 110000528,
+      "rows": 2500012,
+      "file_offset": 17600500850,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 112500540,
+      "rows": 2500012,
+      "file_offset": 18000502770,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 115000552,
+      "rows": 2500012,
+      "file_offset": 18400504690,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 117500564,
+      "rows": 2500012,
+      "file_offset": 18800506610,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 120000576,
+      "rows": 2500012,
+      "file_offset": 19200508530,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 122500588,
+      "rows": 2500012,
+      "file_offset": 19600510450,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 125000600,
+      "rows": 2500012,
+      "file_offset": 20000512370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 127500612,
+      "rows": 2500012,
+      "file_offset": 20400514290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 130000624,
+      "rows": 2500012,
+      "file_offset": 20800516210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 132500636,
+      "rows": 2500012,
+      "file_offset": 21200518130,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 135000648,
+      "rows": 2500012,
+      "file_offset": 21600520050,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 137500660,
+      "rows": 2500012,
+      "file_offset": 22000521970,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 140000672,
+      "rows": 2500012,
+      "file_offset": 22400523890,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 142500684,
+      "rows": 2500012,
+      "file_offset": 22800525810,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 145000696,
+      "rows": 2500012,
+      "file_offset": 23200527730,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 147500708,
+      "rows": 2500012,
+      "file_offset": 23600529650,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 150000720,
+      "rows": 2500012,
+      "file_offset": 24000531570,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 152500732,
+      "rows": 2500012,
+      "file_offset": 24400533490,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 155000744,
+      "rows": 2500012,
+      "file_offset": 24800535410,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 157500756,
+      "rows": 2500012,
+      "file_offset": 25200537330,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 160000768,
+      "rows": 2500012,
+      "file_offset": 25600539250,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 162500780,
+      "rows": 2500012,
+      "file_offset": 26000541170,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 165000792,
+      "rows": 2500012,
+      "file_offset": 26400543090,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 167500804,
+      "rows": 2500012,
+      "file_offset": 26800545010,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 170000816,
+      "rows": 2500012,
+      "file_offset": 27200546930,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 172500828,
+      "rows": 2500012,
+      "file_offset": 27600548850,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 175000840,
+      "rows": 2500012,
+      "file_offset": 28000550770,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 177500852,
+      "rows": 2500012,
+      "file_offset": 28400552690,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 180000864,
+      "rows": 2500012,
+      "file_offset": 28800554610,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 182500876,
+      "rows": 2500012,
+      "file_offset": 29200556530,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 185000888,
+      "rows": 2500012,
+      "file_offset": 29600558450,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 187500900,
+      "rows": 2500012,
+      "file_offset": 30000560370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 190000912,
+      "rows": 2500012,
+      "file_offset": 30400562290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 192500924,
+      "rows": 2500012,
+      "file_offset": 30800564210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 195000936,
+      "rows": 2500012,
+      "file_offset": 31200566130,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 197500948,
+      "rows": 2500012,
+      "file_offset": 31600568050,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 200000960,
+      "rows": 2500012,
+      "file_offset": 32000569970,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 202500972,
+      "rows": 2500012,
+      "file_offset": 32400571890,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 205000984,
+      "rows": 2500012,
+      "file_offset": 32800573810,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 207500996,
+      "rows": 2500012,
+      "file_offset": 33200575730,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 210001008,
+      "rows": 2500012,
+      "file_offset": 33600577650,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 212501020,
+      "rows": 2500012,
+      "file_offset": 34000579570,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 215001032,
+      "rows": 2500012,
+      "file_offset": 34400581490,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 217501044,
+      "rows": 2500012,
+      "file_offset": 34800583410,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 220001056,
+      "rows": 2500012,
+      "file_offset": 35200585330,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 222501068,
+      "rows": 2500012,
+      "file_offset": 35600587250,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 225001080,
+      "rows": 2500012,
+      "file_offset": 36000589170,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 227501092,
+      "rows": 2500012,
+      "file_offset": 36400591090,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 230001104,
+      "rows": 2500012,
+      "file_offset": 36800593010,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 232501116,
+      "rows": 2500012,
+      "file_offset": 37200594930,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 235001128,
+      "rows": 2500012,
+      "file_offset": 37600596850,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 237501140,
+      "rows": 2500012,
+      "file_offset": 38000598770,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 240001152,
+      "rows": 2500012,
+      "file_offset": 38400600690,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 242501164,
+      "rows": 2500012,
+      "file_offset": 38800602610,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 245001176,
+      "rows": 2500012,
+      "file_offset": 40000608370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 247501188,
+      "rows": 2500012,
+      "file_offset": 40400610290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 250001200,
+      "rows": 2500012,
+      "file_offset": 39200604530,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 252501212,
+      "rows": 2500012,
+      "file_offset": 39600606450,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 255001224,
+      "rows": 2500012,
+      "file_offset": 40800612210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 257501236,
+      "rows": 2500012,
+      "file_offset": 41200614130,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 260001248,
+      "rows": 2500012,
+      "file_offset": 41600616050,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 262501260,
+      "rows": 2500012,
+      "file_offset": 42000617970,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 265001272,
+      "rows": 2500012,
+      "file_offset": 42400619890,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 267501284,
+      "rows": 2500012,
+      "file_offset": 42800621810,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 270001296,
+      "rows": 2500012,
+      "file_offset": 43200623730,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 272501308,
+      "rows": 2500012,
+      "file_offset": 43600625650,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 275001320,
+      "rows": 2500012,
+      "file_offset": 44000627570,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 277501332,
+      "rows": 2500012,
+      "file_offset": 44400629490,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 280001344,
+      "rows": 2500012,
+      "file_offset": 44800631410,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 282501356,
+      "rows": 2500012,
+      "file_offset": 45200633330,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 285001368,
+      "rows": 2500012,
+      "file_offset": 45600635250,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 287501380,
+      "rows": 2500012,
+      "file_offset": 46000637170,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 290001392,
+      "rows": 2500012,
+      "file_offset": 46400639090,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 292501404,
+      "rows": 2500012,
+      "file_offset": 46800641010,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 295001416,
+      "rows": 2500012,
+      "file_offset": 47200642930,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 297501428,
+      "rows": 2500012,
+      "file_offset": 47600644850,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 300001440,
+      "rows": 2500012,
+      "file_offset": 48000646770,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 302501452,
+      "rows": 2500012,
+      "file_offset": 48400648690,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 305001464,
+      "rows": 2500012,
+      "file_offset": 48800650610,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 307501476,
+      "rows": 2500012,
+      "file_offset": 49200652530,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 310001488,
+      "rows": 2500012,
+      "file_offset": 49600654450,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 312501500,
+      "rows": 2500012,
+      "file_offset": 50000656370,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 315001512,
+      "rows": 2500012,
+      "file_offset": 50400658290,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    },
+    {
+      "first_row": 317501524,
+      "rows": 2500012,
+      "file_offset": 50800660210,
+      "file": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4\\model-fp8-mtp-ple.safetensors"
+    }
+  ],
+  "sidecar": "G:\\Strata\\Strata-data\\ngram\\fp8\\ple-fp8.gguf",
+  "sidecar_offset": 384,
+  "scale": 0.00019931793212890625,
+  "rows": 320001536
+}

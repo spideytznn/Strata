@@ -44,7 +44,7 @@
     "0"
   ],
   "cwd": "G:\\Strata\\Strata-Safetensors",
-  "log": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-int8.log",
+  "log": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-mtp2-elastic-test.log",
   "tokenizer": "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
   "tokenizer_format": "safetensors",
   "chat_template": "G:\\Strata\\Strata-Safetensors\\config\\native\\froggeric-v22.5.jinja",
@@ -67,7 +67,8 @@
     "STRATA_MTP_NATIVE_PROJECTIONS": "bf16",
     "STRATA_MTP_BATCH_BF16": "0",
     "STRATA_PLE_TRACE": "1",
-    "STRATA_NATIVE_KV_GROW": "0"
+    "STRATA_NATIVE_KV_GROW": "1",
+    "STRATA_KVG_CHECK": "1"
   },
   "allowed_hosts": [
     "*"

@@ -20,21 +20,24 @@ multi-GPU are unsupported; HIP and SYCL have not been built or validated.
 
 The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 context,
 8,192-token prefill and `127.0.0.1:8880`**, with INT8 KV, W4A8 expert prefill,
-dedicated prefill workspace and four MTP draft tokens with Q8_0 draft projections.
+dedicated prefill workspace and two MTP draft tokens with original BF16 projections.
 FP32 decode activations and BF16x2 dense prefill remain enabled. Its config is
-`config/native/rtx5090-262k-mtp4.json`. The desktop
+`config/native/rtx5090-262k-mtp2.json`. The desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
 The 32K profile and its repeated benchmark settings remain available separately.
 262K is this profile's configured capacity. The completed long-context
 acceptance suite reaches 32K; this desktop profile has not completed a separate
-262K acceptance run. This INT8 KV / Q8 MTP combination has been built but still
-needs GPU acceptance and end-to-end timing. Restarting the desktop launcher
-selects the new `strata-prefill.exe`; an already-running engine keeps its previous
-settings. Engine diagnostics append to `logs/native-262k-mtp4-q8.log`.
-The original BF16 MTP path remains the engine default and is available in the
-separate MTP2 profile. Q8 applies only to ten MTP projections; its experts retain
-their original FP8 codes and the main model retains its original NVFP4 weights.
+262K acceptance run. Interactive timing of the preceding MTP4/Q8 profile was
+1,127.5 tok/s prefill and 32.5 tok/s decode after a 24,332-token prompt; the speed
+target is not met. MTP4 and Q8 have been rolled back at the user's request.
+Restarting the desktop launcher selects `strata-diagnostics.exe`; an already-running
+engine keeps its previous settings. Diagnostics append to `logs/native-262k-int8.log`.
+The optional MTP4/Q8 and BF16 batch comparison profiles remain available separately.
+The desktop uses the existing BF16 token-group MTP path, with BF16 batching off.
+The main model retains its original NVFP4 weights. Separate ngram phase timings
+now distinguish data preparation from the prefill thread's wait. An optional
+native elastic-KV path is available for acceptance testing; it is off by default.
 The desktop profile batches 64 experts and uses four CPU packing workers during
 startup, then frees that scratch memory. Weights remain bit-preserved and fully
 resident; no converted model cache is written. See the bounded CPU loading

@@ -4171,11 +4171,20 @@ int strata_main(int argc, char** argv) {
             bool remote = false;
             for (const int r : o.expert_cache_remote) remote = remote || r > 0;
             const bool asked = ev != nullptr && ev[0] != '\0' ? ev[0] != '0' : o.kv_grow;
+            // The legacy resident complement omits hot GPU experts from RAM, so it cannot give their slots
+            // to the K/V. Native safetensors instead owns every expert, including hot-slot RAM mirrors.
+            // Reuse the existing VMM grow/trim scheduler only when explicitly opted in, pending native
+            // long-context/cache-restore acceptance. No weights, KV precision or virtual addresses change.
+            const char* nv = std::getenv("STRATA_NATIVE_KV_GROW");
+            const bool native_grow = safetensors && nv != nullptr && nv[0] == '1' && nv[1] == '\0';
             const bool on = asked && !multi_gpu && o.kv_resident <= 0 &&
-                            !o.expert_profile.empty() && !o.resident_cpu_experts && o.expert_cache != 0 && !remote &&
+                            !o.expert_profile.empty() && (!o.resident_cpu_experts || native_grow) && o.expert_cache != 0 && !remote &&
                             strata::core::vmm_available() &&
                             // the batch slots carve their own K/V and --vram-elastic's cache is not one VMM range
                             o.batch == 0 && !o.vram_elastic && o.peer_device < 0;
+            if (safetensors && asked && !native_grow)
+                std::fprintf(stderr, "safetensors: elastic K/V disabled; full context allocated up front "
+                                     "(STRATA_NATIVE_KV_GROW=1 opts into native VMM acceptance testing)\n");
             if (asked && !on && (o.kv_grow_given || (ev != nullptr && ev[0] != '\0')))
                 std::fprintf(stderr, "strata generate: --kv-grow is off (one GPU, a profile, the whole K/V in VRAM, "
                                      "every expert in RAM, no --batch, --vram-elastic or --peer-device)\n");

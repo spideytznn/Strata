@@ -5,6 +5,8 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <deque>
 #include <exception>
@@ -717,7 +719,14 @@ unsigned PleReader::batch_readers() const { return (unsigned) impl_->readers.siz
 bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std::string& err,
                            const std::function<void(size_t)>& ready) {
     Impl& m = *impl_;
+    static const bool trace = [] {
+        const char* v = std::getenv("STRATA_PLE_TRACE");
+        return v != nullptr && v[0] != '\0' && v[0] != '0';
+    }();
+    const double entered = trace ? now_us() : 0;
     std::unique_lock<std::mutex> call(m.bcall);
+    double phase = trace ? now_us() : 0;
+    const double call_lock_us = phase - entered;
     // (pages and rows are 32-bit in the request's tables)
     if (m.readers.empty() || 2 * (uint64_t) n >= 0xFFFFFFFFull ||
         m.file.size() / PAGE >= 0xFFFFFFFFull) {
@@ -750,6 +759,8 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
         }
     }
     if (rearm) m.cv_work.notify_one();
+    const double lookup_us = trace ? now_us() - phase : 0;
+    if (trace) phase = now_us();
     // one 4 KiB read per page, numbered in the order of the first row that needs it. A row across a page boundary
     // is a use of both pages, each copying its part: 8 KiB reads cost this drive far more than two pages (3% of
     // them took the 32K prompt's reads from ~970K to ~735K a second)
@@ -796,8 +807,21 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     }
     m.b_uses.resize(ne);
     for (size_t e = 0; e < ne; ++e) m.b_uses[m.b_cur[m.b_job_of[e]]++] = m.b_ent[e];
+    const double plan_us = trace ? now_us() - phase : 0;
+    double wait_us = 0, insert_us = 0, callback_us = 0, drain_us = 0;
+    auto report = [&] {
+        if (trace) std::fprintf(stderr,
+            "strata ple batch phases: rows=%zu misses=%zu pages=%zu total_ms=%.3f "
+            "call_lock_ms=%.3f lookup_ms=%.3f plan_ms=%.3f group_wait_ms=%.3f "
+            "cache_insert_ms=%.3f callback_ms=%.3f reader_drain_ms=%.3f\n",
+            n, nm, nj, (now_us()-entered)/1000, call_lock_us/1000, lookup_us/1000,
+            plan_us/1000, wait_us/1000, insert_us/1000, callback_us/1000, drain_us/1000);
+    };
     if (nj == 0) {
+        if (trace) phase = now_us();
         if (ready) ready(n);
+        if (trace) callback_us += now_us()-phase;
+        report();
         return true;
     }
     BatchJobs b;
@@ -829,26 +853,34 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     m.bcv_work.notify_all();
     size_t cached = 0;   // b_missed[0, cached) are in the row cache
     for (size_t g = 0; g < ng; ++g) {
+        if (trace) phase = now_us();
         {
             std::unique_lock<std::mutex> lk(m.bmu);
             m.bcv_done.wait(lk, [&] { return b.left[g].load() == 0 || b.failed.load(); });
         }
+        if (trace) wait_us += now_us()-phase;
         if (b.failed.load()) break;
         const size_t jn = (g + 1) * b.per_group;
         const size_t rows_in = jn < nj ? m.b_uses[m.b_begin[jn]] : n;   // every row before job jn's first is in
+        if (trace) phase = now_us();
         if (m.cache.sets > 0) {   // the rows read so far go to the row cache too, as `finish` puts them
             std::unique_lock<std::mutex> lk(m.mu, std::defer_lock);
             if (m.threaded) lk.lock();
             for (; cached < nm && m.b_missed[cached] < rows_in; ++cached)
                 m.cache.insert(rows[m.b_missed[cached]], out_raw + (size_t) m.b_missed[cached] * rb);
         }
+        if (trace) insert_us += now_us()-phase;
+        if (trace) phase = now_us();
         if (ready) ready(rows_in);
+        if (trace) callback_us += now_us()-phase;
     }
+    if (trace) phase = now_us();
     {
         std::unique_lock<std::mutex> lk(m.bmu);   // no reader may touch `b` after this
         m.bcv_done.wait(lk, [&] { return m.bactive == 0; });
         m.bcur = nullptr;
     }
+    if (trace) drain_us += now_us()-phase;
     std::unique_lock<std::mutex> lk(m.mu, std::defer_lock);
     if (m.threaded) lk.lock();
     for (auto& r : m.readers) {
@@ -860,6 +892,7 @@ bool PleReader::read_batch(const uint32_t* rows, size_t n, uint8_t* out_raw, std
     m.stats.dedup_rows += dedup;
     m.stats.wait_us += now_us() - start;
     m.last_read_us = now_us();
+    report();
     if (b.failed.load()) {
         if (err.empty()) err = "PleReader: a table read failed";
         return false;

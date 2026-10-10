@@ -550,13 +550,30 @@ bool PleTable::gather_batch(const uint32_t* rows, size_t n_tokens, float* out, s
     // a prompt chunk (256 tokens or more): the batch readers; the rows that have landed are decoded while the rest
     // are read
     if (impl_->mode == PleIo::Direct && impl_->reader.batch_readers() > 0 && n_tokens >= 256) {
+        static const bool trace = [] {
+            const char* v = std::getenv("STRATA_PLE_TRACE");
+            return v != nullptr && v[0] != '\0' && v[0] != '0';
+        }();
+        const double begin = trace ? strata::platform::now_us() : 0;
+        uint64_t available_host_mib = 0;
+#if defined(_WIN32)
+        if (trace) {
+            MEMORYSTATUSEX status{}; status.dwLength = sizeof(status);
+            if (GlobalMemoryStatusEx(&status)) available_host_mib = status.ullAvailPhys >> 20;
+        }
+#endif
         if (impl_->batch_raw.size() < n * impl_->rb) impl_->batch_raw.resize(n * impl_->rb);
+        const double allocated = trace ? strata::platform::now_us() : 0;
         const uint8_t* raw = impl_->batch_raw.data();
         size_t decoded = 0;
         auto land = [&](size_t r) {
             for (; decoded < r; ++decoded) impl_->decode(raw + decoded * impl_->rb, out + decoded * PLE_HEAD_DIM);
         };
         if (!impl_->reader.read_batch(rows, n, impl_->batch_raw.data(), err, land)) return false;
+        if (trace) std::fprintf(stderr,
+            "strata ple gather phases: tokens=%zu rows=%zu total_ms=%.3f raw_resize_ms=%.3f "
+            "host_available_mib=%llu\n", n_tokens, n, (strata::platform::now_us()-begin)/1000,
+            (allocated-begin)/1000, (unsigned long long) available_host_mib);
         impl_->bytes_read += (uint64_t) n * impl_->rb;
         return true;
     }

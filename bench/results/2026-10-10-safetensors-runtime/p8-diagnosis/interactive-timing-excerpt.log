@@ -1,0 +1,17 @@
+safetensors: expert startup complete: 33.88 s, batch=64 workers=4 scratch_peak_mib=168.75 read_s=25.50 pack_s=3.79 source_read_calls=29980
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=14036 promoted_payload_bytes=38806957376 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 56352 rows, 23.7% row-cache hits, 42973 SSD reads (183.1 MB), read p50 949 us p99 7914 us, blocked 1201.119 ms total (submit 29.053 ms), cache 42965/1048576 rows, SSD kept awake by 11 reads (slowest 4.5 ms)
+strata ple: chunk 0: read started 0.6 ms into the run, layer 1 reached at 662.9, waited 6102.3 ms
+strata prefill callback: start=0 rows=8192 draft_path=batched draft_ms=17.412 checkpoint_ms=0.001 total_ms=17.480
+strata prefill chunk: start=0 rows=8192 main_and_wait_ms=8908.549 callback_ms=17.489 total_ms=8926.039
+strata ple: chunk 8192: read started 6765.3 ms into the run, layer 1 reached at 8962.7, waited 3124.6 ms
+strata prefill callback: start=8192 rows=8192 draft_path=batched draft_ms=8.306 checkpoint_ms=24.372 total_ms=32.703
+strata prefill chunk: start=8192 rows=8192 main_and_wait_ms=5287.191 callback_ms=32.717 total_ms=5319.908
+strata ple: chunk 16384: read started 12087.3 ms into the run, layer 1 reached at 14275.3, waited 2284.5 ms
+strata prefill callback: start=16384 rows=4793 draft_path=batched draft_ms=4.045 checkpoint_ms=0.001 total_ms=4.091
+strata prefill chunk: start=16384 rows=4793 main_and_wait_ms=3791.703 callback_ms=4.098 total_ms=3795.801
+strata ple: chunk 0: read started 0.1 ms into the run, layer 1 reached at 55.0, waited 2025.6 ms
+strata prefill callback: start=21177 rows=3150 draft_path=batched draft_ms=3.112 checkpoint_ms=0.001 total_ms=3.161
+strata prefill chunk: start=21177 rows=3150 main_and_wait_ms=3295.092 callback_ms=3.169 total_ms=3298.262
+safetensors residency metrics: ram_bytes=67948118016 os_locked_bytes=0 cuda_pinned_bytes=67948118016 promotions=15539 promoted_payload_bytes=42962475824 expert_file_bytes=0 (cumulative; payload is not a physical PCIe counter)
+safetensors ngram metrics: ple io: 450768 rows, 22.2% row-cache hits, 267522 SSD reads (1103.4 MB), read p50 20505 us p99 30835 us, blocked 19855.594 ms total (submit 31.459 ms), cache 259756/1048576 rows, SSD kept awake by 255 reads (slowest 224.9 ms)

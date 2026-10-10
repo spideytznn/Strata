@@ -338,8 +338,8 @@ SSD reads during inference.
 
 The desktop `Start-Strata-Safetensors.bat` calls this checkout's
 `START-NATIVE-262K.bat`. That launcher selects
-`config/native/rtx5090-262k-mtp4.json`: 262,144 context capacity, 8,192-token
-prefill, four MTP draft tokens with Q8_0 projections, INT8 KV, W4A8 expert prefill and dedicated prompt workspace, served
+`config/native/rtx5090-262k-mtp2.json`: 262,144 context capacity, 8,192-token
+prefill, two MTP draft tokens with original BF16 projections, INT8 KV, W4A8 expert prefill and dedicated prompt workspace, served
 at `127.0.0.1:8880`. It runs in the foreground; Ctrl+C stops it. Native server
 configs and the generator set `allowed_hosts: ["*"]` to accept any HTTP Host
 header. Changes to this setting take effect on the next start. The context
@@ -350,17 +350,18 @@ workspace beside the expert cache. FP32 decode activations and BF16x2 dense
 prefill remain enabled. This combination has not completed GPU acceptance or
 end-to-end timing. The user is testing the service interactively; no second
 engine is started alongside it. Restart the desktop launcher to load the staged
-`build-native-engine/strata-prefill.exe`. Diagnostics append to
-`logs/native-262k-mtp4-q8.log`; the launcher creates its directory.
+`build-native-engine/strata-diagnostics.exe`. Diagnostics append to
+`logs/native-262k-int8.log`; the launcher creates its directory. The desktop was
+rolled back from MTP4/Q8 at the user's request; BF16 MTP batching is explicitly off.
 
 ### Optional Q8 MTP projections and chunk diagnostics
 
-At the user's request, the desktop profile selects `--spec 5 --mtp-max-t 5`
+The optional `rtx5090-262k-mtp4.json` comparison profile selects `--spec 5 --mtp-max-t 5`
 (one verifier token plus four drafts) and
 `STRATA_MTP_NATIVE_PROJECTIONS=q8_0`. With this variable unset or `bf16`, native
 MTP keeps the original BF16 projection path. Invalid values are rejected at load.
 The config generator exposes `--mtp 4 --mtp-projections q8_0` and keeps BF16 as
-its default. `rtx5090-262k-mtp2.json` remains a separate BF16 reference profile.
+its default. `rtx5090-262k-mtp2.json` is again the desktop profile.
 
 The adapter quantizes the same ten matrices as the existing Q8 MTP pack:
 `fc_embedding`, `fc_hidden`, attention Q/K/V/O, indexer `index_qk_proj` and the
@@ -390,15 +391,17 @@ is not a byte-identity claim. The engine default remains the old BF16 fallback
 until GPU parity/acceptance and timing are measured. Generate a comparison
 profile with `--mtp 4 --mtp-batch-bf16`; the local
 `rtx5090-262k-mtp4-bf16.json` has the same desktop settings with BF16 projections
-and this batch opt-in. The desktop entry still selects the requested Q8 profile.
+and this batch opt-in. Neither MTP4 profile is selected by the desktop launcher.
 
 On 2026-10-10, the user's RTX 5090 / 9950X3D / 96 GB service with INT8 KV and BF16
 MTP reported 24,332 fresh input tokens in 22,577 ms (1,077.7 tok/s), below the
 2,000-2,500 target. This is an interactive observation, not a controlled A/B.
-The new Q8/MTP4 combination has not been timed on GPU. Chunk tracing now reports
+The later Q8/MTP4 interactive run reported 24,332 fresh tokens in 21,580 ms
+(1,127.5 tok/s), and 193 generated tokens in 5,938 ms (32.5 tok/s).
+These are different interactive requests, not a controlled A/B. Chunk tracing reports
 main compute plus waits, MTP callback path/time and conversation-checkpoint time.
 The desktop profile also enables the existing `STRATA_PLE_TRACE` read/wait trace
-to distinguish ngram SSD waits from MTP and checkpoint pauses. Cumulative ngram
+to distinguish ngram preparation waits from MTP and checkpoint pauses. Cumulative ngram
 blocked time includes decode and earlier requests and cannot be assigned to one
 prefill. No second engine was started during the user's active session.
 
@@ -406,8 +409,54 @@ CPU tests cover row slices, tile boundaries, exact scale/code/tie rounding,
 zero blocks, canaries and rejection of nonfinite inputs/scales and invalid
 bindings. A read-only pass over all ten real matrices converted 138,936,320 BF16
 bytes to 73,809,920 Q8 bytes (62.1 MiB less), with no main-expert or ngram reads.
-The CUDA engine builds for SM120; GPU execution, cache restore and four-draft
-acceptance with this combined profile are pending. HIP/SYCL were not built.
+The CUDA engine builds for SM120. The user ran the Q8/four-draft profile, but a
+controlled quality/cache-restore comparison of that combination remains pending.
+HIP/SYCL were not built.
+
+### Runtime diagnosis after the MTP4/Q8 rollback
+
+Evidence is in `bench/results/2026-10-10-safetensors-runtime/p8-diagnosis/`.
+On this RTX 5090 / 9950X3D / 96 GB Windows machine, the four long-request chunks
+spent 13,537 ms waiting for the async PLE gather to finish, versus 32.875 ms in
+MTP callbacks and 24.375 ms in conversation checkpoints. The gather wait includes
+row reads, row-cache operations, FP8 decoding and scheduling. It is not a disk
+service-time measurement. The cumulative `blocked` counter also includes batch
+cache/decode processing, decode requests and earlier requests.
+
+A CPU-only, idle comparison read the same 131,072 row IDs from the original D:
+safetensors shard and the existing G: FP8 GGUF sidecar. Eight readers, 256 in-flight
+requests, zero row cache and three alternating rounds gave D: 335.627 / 119.720 /
+114.476 ms and G: 842.713 / 984.212 / 914.799 ms. All requested bytes matched.
+These numbers exclude FP8 decoding and model activity; controller caches were
+not flushed. They give no basis for moving the default table to G:. The native
+path continues to read the original table, with no new sidecar or mirror.
+
+With `STRATA_PLE_TRACE=1`, `strata ple batch phases` now reports call-lock wait,
+cache lookup, page planning, group wait, cache insertion, callback decoding and
+reader drain separately. Those are caller wall-time phases: reader work overlaps
+callbacks, and group wait includes thread scheduling. `strata ple gather phases`
+adds raw-buffer resize time and available physical host RAM on Windows (0 means
+unavailable on other platforms). Default numerical paths are unchanged.
+
+The native adapter also inherited a legacy guard that disables elastic KV for
+`resident_cpu_experts`. Legacy resident mode keeps a complement of GPU experts;
+native safetensors keeps all experts, including hot-slot RAM mirrors, so it can
+use the existing VMM grow/trim scheduler. `STRATA_NATIVE_KV_GROW=1` opts into that
+integration. The separate `rtx5090-262k-mtp2-elastic-test.json` profile enables it
+and residency auditing; the desktop does not. The usual `STRATA_KV_GROW=0` still
+disables it. Context capacity remains 262,144; physical KV pages grow as needed.
+This can leave more room for hot experts at short contexts, but no native
+end-to-end speed improvement is claimed before long-context/cache-restore tests.
+The existing VMM map/unmap/transfer unit test passed on SM120; it is not an
+acceptance test of the model, adaptive swaps, conversations or MTP.
+
+The observed profile allocated 4,585,892,608 bytes of dedicated prefill workspace
+and kept approximately 3,197 GPU expert slots. INT8 KV for the full 262K context
+is also allocated up front when native elastic KV is off. In the long request,
+55.6% of expert routes were outside the hot GPU cache, with zero expert-file
+bytes. Original BF16 dense/head storage, dedicated workspace and KV allocation
+must be considered alongside kernel timing when comparing against converted
+GGUF deployments. A container-format-only explanation is not established.
 
 The native loader previously replaced every explicit `--kv` with FP16. It now
 honours `--kv int8` and keeps FP16 when unspecified. Native Q4/hybrid KV are

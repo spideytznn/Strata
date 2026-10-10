@@ -34,7 +34,7 @@ struct ReaderStats {
     uint64_t dedup_rows = 0;      ///< rows that shared a page already being read in the same ticket
     uint64_t reads = 0;           ///< SSD read requests issued
     uint64_t bytes = 0;           ///< bytes read from the SSD
-    double wait_us = 0;           ///< time `collect` spent blocked
+    double wait_us = 0;           ///< collect wait + batch processing wall time (includes cache/decode callbacks)
     double submit_us = 0;         ///< time spent inside the read submission call (non-zero = it blocks)
     double read_us_sum = 0;       ///< sum of per-read latencies (issue to completion)
     uint64_t late_injected = 0;   ///< reads delayed by fault injection

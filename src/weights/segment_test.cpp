@@ -25,13 +25,23 @@ int main() {
             PleReader reader; std::string err;
             check(reader.open(name,0,59,8,256,err,threaded,160,segments),err);
             check(reader.set_batch_readers(batch,err),err);
-            std::vector<uint32_t> rows{0,16,17,18,39,40,58,3,41,16,17};
+            std::vector<uint32_t> rows{0,16,17,18,39,40,58,3,41,16,17,59,0xFFFFFFFFu};
             std::vector<uint8_t> out(rows.size()*160);
-            check(reader.read_batch(rows.data(),rows.size(),out.data(),err),err);
-            for (size_t i=0;i<rows.size();++i) for (size_t c=0;c<160;++c)
-                check(out[i*160+c]==static_cast<uint8_t>(rows[i]*13+c*7),"segmented row differs");
+            size_t landed=0;
+            auto ready = [&](size_t end) {
+                check(end>=landed && end<=rows.size(),"batch callback boundary regressed");
+                for (size_t i=landed;i<end;++i) for (size_t c=0;c<160;++c)
+                    check(out[i*160+c]==(rows[i]<59?static_cast<uint8_t>(rows[i]*13+c*7):0),
+                          "batch callback exposed a row before its bytes landed");
+                landed=end;
+            };
+            check(reader.read_batch(rows.data(),rows.size(),out.data(),err,ready),err);
+            check(landed==rows.size(),"batch callback did not expose every row");
             const auto reads=reader.snapshot().reads;
-            check(reader.read_batch(rows.data(),rows.size(),out.data(),err),err);
+            landed=0;
+            std::fill(out.begin(),out.end(),0xA5);
+            check(reader.read_batch(rows.data(),rows.size(),out.data(),err,ready),err);
+            check(landed==rows.size(),"cached callback did not expose every row");
             check(reader.snapshot().reads==reads,"repeated rows performed disk reads");
             reader.close();
             auto bad=segments; bad[1].first_row=18;

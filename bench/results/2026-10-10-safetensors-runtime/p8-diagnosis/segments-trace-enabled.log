@@ -1,0 +1,5 @@
+strata ple batch phases: rows=13 misses=11 pages=6 total_ms=0.310 call_lock_ms=0.000 lookup_ms=0.001 plan_ms=0.002 group_wait_ms=0.267 cache_insert_ms=0.001 callback_ms=0.037 reader_drain_ms=0.000
+strata ple batch phases: rows=13 misses=0 pages=0 total_ms=0.037 call_lock_ms=0.000 lookup_ms=0.000 plan_ms=0.000 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=0.037 reader_drain_ms=0.000
+strata ple batch phases: rows=13 misses=11 pages=6 total_ms=0.284 call_lock_ms=0.000 lookup_ms=0.001 plan_ms=0.001 group_wait_ms=0.243 cache_insert_ms=0.001 callback_ms=0.037 reader_drain_ms=0.000
+strata ple batch phases: rows=13 misses=0 pages=0 total_ms=0.038 call_lock_ms=0.000 lookup_ms=0.000 plan_ms=0.000 group_wait_ms=0.000 cache_insert_ms=0.000 callback_ms=0.037 reader_drain_ms=0.000
+segmented direct I/O, cross-page, batch/worker and row-cache reuse passed

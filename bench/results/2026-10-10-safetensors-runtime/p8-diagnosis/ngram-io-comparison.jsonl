@@ -1,0 +1,6 @@
+{"GPU":false,"bytes":554967040,"cache_rows":0,"equal":true,"inflight":256,"ms":335.6267,"p50_us":289.20001220703125,"p99_us":5709.39990234375,"readers":8,"reads":135490,"round":0,"rows":131072,"source":"D_original"}
+{"GPU":false,"bytes":550207488,"cache_rows":0,"equal":true,"inflight":256,"ms":842.7127,"p50_us":1454.5,"p99_us":3620.10009765625,"readers":8,"reads":134328,"round":0,"rows":131072,"source":"G_sidecar"}
+{"GPU":false,"bytes":550207488,"cache_rows":0,"equal":true,"inflight":256,"ms":984.212,"p50_us":897.0999755859375,"p99_us":4218.0,"readers":8,"reads":134328,"round":1,"rows":131072,"source":"G_sidecar"}
+{"GPU":false,"bytes":554967040,"cache_rows":0,"equal":true,"inflight":256,"ms":119.7203,"p50_us":188.10000610351563,"p99_us":474.3999938964844,"readers":8,"reads":135490,"round":1,"rows":131072,"source":"D_original"}
+{"GPU":false,"bytes":554967040,"cache_rows":0,"equal":true,"inflight":256,"ms":114.4759,"p50_us":178.6999969482422,"p99_us":419.3999938964844,"readers":8,"reads":135490,"round":2,"rows":131072,"source":"D_original"}
+{"GPU":false,"bytes":550207488,"cache_rows":0,"equal":true,"inflight":256,"ms":914.7989,"p50_us":715.5999755859375,"p99_us":4005.800048828125,"readers":8,"reads":134328,"round":2,"rows":131072,"source":"G_sidecar"}
