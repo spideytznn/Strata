@@ -1,4 +1,16 @@
-# Strata Safetensors
+# strata-safetensors
+
+[strata-safetensors](https://github.com/spideytznn/strata-safetensors) is an
+independent native safetensors project built on
+[Strata by Niko1221](https://github.com/Niko1221/Strata) and
+[sergqwer's NVFP4 work](https://github.com/sergqwer/strata-nvfp4).
+The active release branch is `main`. Original authorship and licenses are retained.
+The engine executable and CLI remain `strata` for compatibility.
+
+The local deployment stays in `G:\Strata\Strata-Safetensors`, so existing
+desktop launchers and model/config paths continue to work. The former personal
+GGUF main branch is preserved as `archive/gguf-main-20261011`; its separate
+deployment is unchanged.
 
 Experimental native safetensors weight backend for the NVIDIA Qwen3.8-Flash-Next
 checkpoint, starting at the verified Strata NVFP4 fidelity commit
