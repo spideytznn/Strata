@@ -7,6 +7,12 @@
     "262144",
     "--prefill",
     "4096",
+    "--mtp",
+    "native",
+    "--spec",
+    "3",
+    "--spec-min-p",
+    "0.5",
     "--expert-cache",
     "auto",
     "--vram-reserve-mib",
@@ -76,7 +82,7 @@
     "*"
   ],
   "sampling": {
-    "temperature": 1.0,
+    "temperature": 0.7,
     "top_p": 0.95,
     "top_k": 20,
     "min_p": 0.0,
