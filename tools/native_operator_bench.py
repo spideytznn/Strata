@@ -35,12 +35,21 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--rounds', type=int, default=1)
     p.add_argument('--new', type=int, default=512)
+    p.add_argument('--temperature', type=float, default=0.0)
+    p.add_argument('--seed', type=int, default=9950)
+    p.add_argument('--categories', default='english,chinese,code',
+                   help='comma-separated task names for focused reproductions')
     p.add_argument('--output-comparison', choices=('exact', 'report'), default='exact',
                    help='report records cross-config differences; warm reuse must always be exact')
     a = p.parse_args()
-    assert a.rounds > 0 and a.new > 0
+    assert a.rounds > 0 and a.new > 0 and a.temperature >= 0
+    categories = a.categories.split(',')
+    assert categories and len(set(categories)) == len(categories)
+    assert set(categories) <= {name for name, _ in TASKS}
     a.output.mkdir(parents=True, exist_ok=False)
     results = {'runs': [], 'output_comparison': a.output_comparison,
+               'requested_new_tokens': a.new, 'categories': categories, 'rounds': a.rounds,
+               'sampling': {'temperature': a.temperature, 'seed': a.seed},
                'started_unix_s': time.time(), 'platform': platform.platform(),
                'gpu': subprocess.check_output(['nvidia-smi', '--query-gpu=name,driver_version,memory.total', '--format=csv,noheader'], text=True).strip(),
                'timing_note': 'Private stdin; unchanged config; first prompt includes graph capture; no state hashes or logit dumps.'}
@@ -63,6 +72,7 @@ def main():
         folder.mkdir()
         log = folder / 'engine.log'
         row = dict(config=cfg, config_path=str(path), requests=[], gpu_before=gpu,
+                   config_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                    exe_sha256=hashlib.sha256(Path(cfg['exe']).read_bytes()).hexdigest())
         results['runs'].append(row)
         save()
@@ -81,6 +91,8 @@ def main():
             tel.pid = engine.proc.pid
             for r in range(a.rounds):
                 for category, text in TASKS:
+                    if category not in categories:
+                        continue
                     text += f' Test case {r+1}.'
                     ids = tok.encode(template.render([{'role': 'user', 'content': text}], enable_thinking=False), parse_special=True)
                     previous = None
@@ -88,7 +100,7 @@ def main():
                         start = time.monotonic()
                         first = None
                         out = []
-                        for token in engine.generate(ids, a.new, {'temperature': 0}, threading.Event()):
+                        for token in engine.generate(ids, a.new, {'temperature': a.temperature, 'seed': a.seed}, threading.Event()):
                             if token is not None:
                                 if first is None:
                                     first = time.monotonic() - start

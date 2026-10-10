@@ -18,37 +18,51 @@ outputs. The no-MTP reference is `config/native/rtx5090-quality.json`.
 This startup does not modify the existing deployment. Native vision and
 multi-GPU are unsupported; HIP and SYCL have not been built or validated.
 
-The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 context,
-8,192-token prefill and `127.0.0.1:8880`**, with INT8 KV, W4A8 expert prefill,
-dedicated prefill workspace and two MTP draft tokens with original BF16 projections.
-FP32 decode activations and BF16x2 dense prefill remain enabled. Its config is
-`config/native/rtx5090-262k-mtp2.json`. The desktop
+The configured desktop profile uses `START-NATIVE-262K.bat`: **262,144 total
+context, 8,192-token prefill and `127.0.0.1:8880`**. Its config is
+`config/native/rtx5090-262k-mtp2.json`; the desktop
 `Start-Strata-Safetensors.bat` calls this launcher. Ctrl+C stops the server.
 Native profiles accept any HTTP Host header (`allowed_hosts: ["*"]`).
-The 32K profile and its repeated benchmark settings remain available separately.
-262K is this profile's configured capacity. The completed long-context
-acceptance suite reaches 32K; this desktop profile has not completed a separate
-262K acceptance run. Interactive timing of the preceding MTP4/Q8 profile was
-1,127.5 tok/s prefill and 32.5 tok/s decode after a 24,332-token prompt; the speed
-target is not met. MTP4 and Q8 have been rolled back at the user's request.
-Restarting the desktop launcher selects `strata-efficiency2.exe` and closes buffered
-startup weight handles before runtime ngram reads. Three alternating pairs on a
-varied 8199-token document measure median prefill **822 -> 2465 tok/s**, with equal
-128-token outputs. Complete 8K/24K, prefix, A/B/A and disk-restore checks preserve
-committed main-model state and zero expert/MTP source reads. Median decode remains
-about **44 tok/s**; doubling decode is still an optimization target. See
-[the measured follow-up](bench/results/2026-10-10-safetensors-runtime/p10-native-performance/README.md).
-An already-running
-engine keeps its previous settings. Diagnostics append to `logs/native-262k-int8.log`.
-The optional MTP4/Q8 and BF16 batch comparison profiles remain available separately.
-The desktop uses the existing BF16 token-group MTP path, with BF16 batching off.
-The main model retains its original NVFP4 weights. Separate ngram phase timings
-now distinguish data preparation from the prefill thread's wait. An optional
-native elastic-KV path is available for acceptance testing; it is off by default.
-The desktop profile batches 64 experts and uses four CPU packing workers during
-startup, then frees that scratch memory. Weights remain bit-preserved and fully
-resident; no converted model cache is written. See the bounded CPU loading
-measurement and the remaining full-startup timing check in the native-backend docs.
+An already-running engine keeps its settings until restarted.
+
+The selected `strata-efficiency11.exe` profile uses INT8 KV, W4A8 expert prefill,
+dedicated prompt workspace, elastic KV and original BF16 MTP projections with
+two drafts. Cold decode experts are split 75% CPU / 25% GPU; hot experts remain
+on the GPU. CPU AVX-512 rows, GPU weight reuse and canonical FP32 expert math
+are enabled. Prefill remains on the GPU, with FP32 decode activations and
+BF16x2 dense prefill. Single-token windows retain the ordinary commit graph.
+MTP4, Q8 projections and BF16 MTP batching remain off.
+
+On this machine, three alternating same-input pairs against the preceding
+native desktop profile measure median **2869 tok/s prefill** and decode
+**45.28 -> 81.59 tok/s (1.80x)**. Both use two drafts. All six 128-token outputs
+match exactly; the slower 64.57 tok/s candidate run remains in the median.
+The earlier startup-handle fix separately measured prefill 822 -> 2465 tok/s.
+See [complete commands, all samples and limits](bench/results/2026-10-10-safetensors-runtime/p10-native-performance/README.md).
+
+Full configs pass 8K/24K, prefix reuse, A/B/A and disk restore. A 262000-token
+input actually maps all 262144 KV cells; cold/warm/disk-restored output and
+committed main state agree. That repeated-document test establishes capacity
+and cache correctness, not long-distance retrieval quality or throughput.
+English/Chinese/code outputs also agree across no-draft and two-draft modes
+for 2048 greedy tokens, and across retained/unloaded MTP for 512 sampled tokens
+at temperature 0.7, seed 9950. These are finite stability checks. Native session
+identity now rejects incompatible arithmetic/commit modes before restoring data.
+
+`config/native/rtx5090-262k-no-mtp.json` is a fully unloaded MTP alternative:
+its cache/state and sampled checks pass, while one 8K screen measures 3100
+prefill / 50.5 decode tok/s. The preceding desktop profile is retained as
+`rtx5090-262k-gpu-reference.json`. CPU25/50 test profiles inherit the new settings;
+their full combined throughput has not been measured. The 32K profiles remain
+separate. Upstream/global arithmetic defaults are unchanged; HIP/SYCL are untested.
+
+Experts remain bit-preserved in 63.282 GiB of CUDA-pinned RAM, including GPU
+mirrors. Expert/MTP source counters stay zero after loading; ngram demand reads
+and explicitly requested disk sessions are separate. Startup packs the original
+weights with batches of 64 and four workers, then frees the scratch; no converted
+model cache is written. Buffered startup handles are released before inference.
+Diagnostics append to `logs/native-262k-int8.log`. Tests use private CLI/stdin
+engines and never start HTTP.
 
 ## Inherited Strata NVFP4 baseline
 

@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "all_nine_committed_main_states_equal_mtp2_candidate": true,
+  "own_warm_restore_state_checks": {
+    "details-8199-warm": true,
+    "details-24583-warm": true,
+    "A+-restored": true
+  }
+}

@@ -30,6 +30,8 @@ def main():
     p.add_argument('--reference', type=Path, help='previous passing result; compare against its last config')
     p.add_argument('--state-comparison', choices=('exact', 'report'), default='exact',
                    help='report records state differences when CPU/GPU assignments intentionally change')
+    p.add_argument('--self-state-comparison', choices=('exact', 'report'), default='exact',
+                   help='own warm/restore state must match; report is for legacy mixed-provider arithmetic')
     p.add_argument('--long-restore', action='store_true',
                    help='save the last long session, then restore it after the short A/B/A sequence')
     p.add_argument('--output', type=Path, required=True)
@@ -37,6 +39,7 @@ def main():
     a.output.mkdir(parents=True, exist_ok=False)
     fixtures = {name: ids for name, ids, _ in json.loads(a.fixture.read_text())}
     results = {'runs': [], 'state_comparison': a.state_comparison,
+               'self_state_comparison': a.self_state_comparison,
                'note': 'Private stdin engines only; state hashing adds overhead.'}
     reference = None
     if a.reference:
@@ -132,6 +135,15 @@ def main():
         text = log.read_text(encoding='utf8')
         row['states'] = state_hashes(text)
         assert len(row['states']) == len(row['requests']), 'missing state fingerprints'
+        by_name = {r['name']:i for i,r in enumerate(row['requests'])}
+        pairs = [(case+'-initial', case+'-warm') for case in a.cases.split(',')]
+        pairs.append(('A+', 'A+-restored'))
+        if a.long_restore:
+            pairs.append((long_case+'-initial', long_case+'-disk-restored-after-short'))
+        row['self_state_checks'] = {after: row['states'][by_name[before]] == row['states'][by_name[after]]
+                                    for before,after in pairs}
+        if a.self_state_comparison == 'exact':
+            assert all(row['self_state_checks'].values()), 'own warm/restore main state differs'
         before = results['runs'][0] if index else reference
         if before:
             row['committed_state_equal'] = row['states'] == before['states']

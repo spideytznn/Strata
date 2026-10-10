@@ -1,5 +1,5 @@
 {
-  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency2.exe",
+  "exe": "G:\\Strata\\Strata-Safetensors\\build-native-engine\\strata-efficiency11.exe",
   "args": [
     "--model",
     "D:\\迅雷下载\\Qwen3.8-flash-next-nvfp4",
@@ -18,7 +18,7 @@
     "--pcie-frac",
     "0.5",
     "--pcie-mode",
-    "dma",
+    "kernel",
     "--kv",
     "int8",
     "--no-prefill-borrow",
@@ -41,7 +41,9 @@
     "--mtp-max-t",
     "3",
     "--spec-min-p",
-    "0"
+    "0",
+    "--pool-tasks",
+    "40"
   ],
   "cwd": "G:\\Strata\\Strata-Safetensors",
   "log": "G:\\Strata\\Strata-Safetensors\\logs\\native-262k-cpu50-test.log",
@@ -67,8 +69,14 @@
     "STRATA_MTP_NATIVE_PROJECTIONS": "bf16",
     "STRATA_MTP_BATCH_BF16": "0",
     "STRATA_PLE_TRACE": "1",
-    "STRATA_NATIVE_KV_GROW": "0",
-    "STRATA_NATIVE_CLOSE_FILES": "1"
+    "STRATA_NATIVE_KV_GROW": "1",
+    "STRATA_NATIVE_CLOSE_FILES": "1",
+    "STRATA_NVFP4_F32_UNROLL": "1",
+    "STRATA_NVFP4_F32_REUSE": "1",
+    "STRATA_OWNED_PRICE": "exact",
+    "STRATA_NVFP4_F32_REUSE_TILE": "4",
+    "STRATA_NVFP4_F32_CANONICAL": "1",
+    "STRATA_ONE_TOKEN_COMMIT": "0"
   },
   "allowed_hosts": [
     "*"

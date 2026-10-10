@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "first_token_state_equal": [
+    true,
+    true
+  ],
+  "logits": [
+    {
+      "config": 0,
+      "request": 0,
+      "all_248320_logits_bit_equal": true,
+      "max_abs_diff": 0.0
+    },
+    {
+      "config": 0,
+      "request": 1,
+      "all_248320_logits_bit_equal": true,
+      "max_abs_diff": 0.0
+    },
+    {
+      "config": 1,
+      "request": 0,
+      "all_248320_logits_bit_equal": true,
+      "max_abs_diff": 0.0
+    },
+    {
+      "config": 1,
+      "request": 1,
+      "all_248320_logits_bit_equal": true,
+      "max_abs_diff": 0.0
+    }
+  ]
+}

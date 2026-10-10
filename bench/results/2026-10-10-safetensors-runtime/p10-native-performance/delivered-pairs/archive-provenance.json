@@ -1,0 +1,41 @@
+{
+  "note": "Summary hashes refer to original local manifest bytes. Archived text normalized UTF8/LF; tokens.txt bytes unchanged.",
+  "rows": [
+    {
+      "folder": "delivered-pair-r1-old",
+      "original_manifest_sha256": "3c9f352b0c52092ea5d4f8a11d7264868e642d74d9d2bfa5f89fa3f895f1dc8b",
+      "archived_utf8_lf_manifest_sha256": "4228e1acbfc341d00680926b2a25167e1b2a002bd278a05c820b645480f3e742",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "delivered-pair-r1-new",
+      "original_manifest_sha256": "50d2a4b61ac8fbed66c082d35cca34fb9baef40a4c1f945360d92a940ea68e1a",
+      "archived_utf8_lf_manifest_sha256": "671a3e77f3ca0b5e8b63e96685dc0a1c6fb4403316ca755fea01ad2f9fb4cdbd",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "delivered-pair-r2-old",
+      "original_manifest_sha256": "dd2963a30844c04b93adc99e41d151d7a0224c7c41a0b641b8394d342f1628ed",
+      "archived_utf8_lf_manifest_sha256": "05c4888d8b23800298b25ce4a8c298e37d4cb749b878722a97b0e1e9d6225f01",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "delivered-pair-r2-new",
+      "original_manifest_sha256": "d0e45e66cbe6d108df959945ae18ec14a6be4e7ac57153f7ce6d7b1a3ce4502d",
+      "archived_utf8_lf_manifest_sha256": "d4e70b42736b34a2e49731a7a50cf43d13a4b6208c4fd009aa4733b613828806",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "delivered-pair-r3-old",
+      "original_manifest_sha256": "495d08315859cbf45ee99583d6ac612800e46b75afe7d9b12bd52f11bc8e6760",
+      "archived_utf8_lf_manifest_sha256": "8d2e895107264561f27522864d6cc892dd2fc6f86545acfcc3fdb1307e373a76",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "delivered-pair-r3-new",
+      "original_manifest_sha256": "708ec9ecff1a5a2230495c383f5daf2eace3bae6d753a18ea1b7631058fa65ba",
+      "archived_utf8_lf_manifest_sha256": "7fadf974c0495ef2148c766785529e7e3983fb81124988dc2a80c4fbb717b59b",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    }
+  ]
+}

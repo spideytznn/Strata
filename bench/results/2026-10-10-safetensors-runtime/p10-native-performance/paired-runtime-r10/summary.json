@@ -1,0 +1,285 @@
+{
+  "status": "pass",
+  "prompt_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6",
+  "rounds": 3,
+  "output_tokens": [
+    104575,
+    108623,
+    98153,
+    132227,
+    2972,
+    2495,
+    450,
+    332,
+    220,
+    104170,
+    9616,
+    103715,
+    5861,
+    36,
+    220,
+    100900,
+    97796,
+    98277,
+    103725,
+    111892,
+    104170,
+    7313,
+    95772,
+    109054,
+    101874,
+    99135,
+    9616,
+    5182,
+    55,
+    220,
+    20,
+    15,
+    22,
+    15,
+    11,
+    89540,
+    220,
+    20,
+    220,
+    22,
+    21,
+    15,
+    15,
+    11,
+    220,
+    21,
+    19,
+    5213,
+    21360,
+    7313,
+    98276,
+    99454,
+    96902,
+    5205,
+    96314,
+    97318,
+    101751,
+    96128,
+    99945,
+    100573,
+    1710,
+    271,
+    97155,
+    101859,
+    134559,
+    108623,
+    95726,
+    98645,
+    3709,
+    97556,
+    115485,
+    332,
+    99454,
+    114520,
+    332,
+    95999,
+    332,
+    99945,
+    97493,
+    221794,
+    271,
+    4277,
+    271,
+    13962,
+    220,
+    16,
+    13,
+    220,
+    98144,
+    99454,
+    104633,
+    318,
+    5182,
+    55,
+    220,
+    20,
+    15,
+    22,
+    15,
+    478,
+    89540,
+    220,
+    20,
+    220,
+    22,
+    21,
+    15,
+    15,
+    8,
+    271,
+    9,
+    256,
+    2972,
+    52782,
+    220,
+    96961,
+    98630,
+    318,
+    28999,
+    473,
+    188912,
+    198,
+    262,
+    348,
+    256,
+    220,
+    95772,
+    220
+  ],
+  "all_outputs_equal": true,
+  "rows": [
+    {
+      "round": 1,
+      "kind": "old",
+      "manifest": "logs\\efficiency\\final-pair-r1-old\\manifest.json",
+      "manifest_sha256": "c8af5fdae5fc6a7b87ec461f28855c3faf4fcb0590529bda73b56971b170f2a3",
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2906.1,
+        "tokens_per_second": 2821.01
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2839.8,
+        "tokens_per_second": 45.07
+      },
+      "peak_process_cpu_percent": 6.4967559035027715,
+      "cpu_experts_per_layer": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "round": 1,
+      "kind": "new",
+      "manifest": "logs\\efficiency\\final-pair-r1-new\\manifest.json",
+      "manifest_sha256": "101e68b4f640eee45d606e7e03b5b4612eca6424a3b77846ab3f181a61b3437c",
+      "exe_sha256": "2faf6174cbff7b56a616b75a52bb5b8e2a8e6b9db374304b3a08b74cfa978ed2",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2896.0,
+        "tokens_per_second": 2830.84
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 1491.7,
+        "tokens_per_second": 85.81
+      },
+      "peak_process_cpu_percent": 39.18827884595624,
+      "cpu_experts_per_layer": [
+        7.2,
+        9.47
+      ]
+    },
+    {
+      "round": 2,
+      "kind": "old",
+      "manifest": "logs\\efficiency\\final-pair-r2-old\\manifest.json",
+      "manifest_sha256": "3bf3f90558f8b98a1c839a6e07df6b2d7afef3da24cc0a512f1f678283e06995",
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2848.7,
+        "tokens_per_second": 2877.8
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2825.6,
+        "tokens_per_second": 45.3
+      },
+      "peak_process_cpu_percent": 5.051110836105456,
+      "cpu_experts_per_layer": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "round": 2,
+      "kind": "new",
+      "manifest": "logs\\efficiency\\final-pair-r2-new\\manifest.json",
+      "manifest_sha256": "ad91fed8eab36fca1051707fc59346d0d6db13e63851f63587f7f4a62fd385cb",
+      "exe_sha256": "2faf6174cbff7b56a616b75a52bb5b8e2a8e6b9db374304b3a08b74cfa978ed2",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2883.2,
+        "tokens_per_second": 2843.34
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 1484.8,
+        "tokens_per_second": 86.21
+      },
+      "peak_process_cpu_percent": 49.61317764390004,
+      "cpu_experts_per_layer": [
+        7.2,
+        9.47
+      ]
+    },
+    {
+      "round": 3,
+      "kind": "old",
+      "manifest": "logs\\efficiency\\final-pair-r3-old\\manifest.json",
+      "manifest_sha256": "4ff46e693eda40c7bf5210984051a3fedf75d9240823753ebbb8e4528c3470d5",
+      "exe_sha256": "c3f83cd4d47c544f3561e0578052236d30fbc6a5a6ceb5ae3b4184eb72e7bfa3",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2871.0,
+        "tokens_per_second": 2855.46
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 2829.7,
+        "tokens_per_second": 45.23
+      },
+      "peak_process_cpu_percent": 5.466110833075648,
+      "cpu_experts_per_layer": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "round": 3,
+      "kind": "new",
+      "manifest": "logs\\efficiency\\final-pair-r3-new\\manifest.json",
+      "manifest_sha256": "2b3912c49120587ae45e640569108581e88c106719ee976305e093315f1f2504",
+      "exe_sha256": "2faf6174cbff7b56a616b75a52bb5b8e2a8e6b9db374304b3a08b74cfa978ed2",
+      "prefill": {
+        "tokens": 8198,
+        "ms": 2898.3,
+        "tokens_per_second": 2828.6
+      },
+      "decode": {
+        "tokens": 128,
+        "ms": 1541.1,
+        "tokens_per_second": 83.06
+      },
+      "peak_process_cpu_percent": 49.30058356539252,
+      "cpu_experts_per_layer": [
+        7.19,
+        9.45
+      ]
+    }
+  ],
+  "median_tok_s": {
+    "old": {
+      "prefill": 2855.46,
+      "decode": 45.23
+    },
+    "new": {
+      "prefill": 2830.84,
+      "decode": 85.81
+    }
+  },
+  "median_ratio": {
+    "prefill": 0.9913779215958199,
+    "decode": 1.8971921291178424
+  },
+  "note": "Same varied 8199-token input, 128 outputs; fresh sequential engines, round2 reversed. Engine phase timings exclude startup and first graph capture. CPU peak includes all process phases, normalized across all logical CPUs; not a decode average. No state hash or GPU timing events."
+}

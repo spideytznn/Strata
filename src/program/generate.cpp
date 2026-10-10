@@ -7469,6 +7469,18 @@ int strata_main(int argc, char** argv) {
                             for(const unsigned char* p=(const unsigned char*)value;*p;++p) hash=(hash^*p)*1099511628211ull;
                         c.switches.emplace_back(name,static_cast<int64_t>(hash));
                     }
+                    // Preserve prior identities for the inherited arithmetic and
+                    // default commit path. New arithmetic/commit choices must not
+                    // silently restore state computed with the prior choices.
+                    const char* canonical = std::getenv("STRATA_NVFP4_F32_CANONICAL");
+                    if (canonical && std::strcmp(canonical,"1")==0)
+                        c.switches.emplace_back("native_nvfp4_canonical_arithmetic",1);
+                    const char* gpu_order = std::getenv("STRATA_NVFP4_F32_GPU_ORDER");
+                    if (gpu_order && std::strcmp(gpu_order,"1")==0)
+                        c.switches.emplace_back("native_nvfp4_cpu_gpu_order",1);
+                    const char* one_commit = std::getenv("STRATA_ONE_TOKEN_COMMIT");
+                    if (one_commit && std::atoi(one_commit)==0)
+                        c.switches.emplace_back("native_one_token_self_commit",0);
                 }
                 config_fp = strata::core::session_config_fingerprint(c);
             }

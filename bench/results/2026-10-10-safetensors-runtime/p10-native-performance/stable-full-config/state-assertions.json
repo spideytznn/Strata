@@ -1,0 +1,8 @@
+{
+  "status": "pass",
+  "original_profile_states_equal_efficiency2_reference": true,
+  "canonical_all_gpu_and_cpu75_states_equal": true,
+  "all_27_outputs_equal_reference": true,
+  "all_own_cold_warm_and_disk_restore_states_equal": true,
+  "executable_sha256": "cdd577702971f8dda839d81c2d987977de6e78e424728a4c6e05fd2c1ebebc0b"
+}

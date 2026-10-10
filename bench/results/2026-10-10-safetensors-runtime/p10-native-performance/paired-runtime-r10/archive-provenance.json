@@ -1,0 +1,41 @@
+{
+  "note": "Text logs/manifests are normalized to UTF8/LF for Git. Summary manifest hashes refer to original local bytes; this mapping records archived LF bytes. Input tokens.txt bytes are preserved exactly.",
+  "rows": [
+    {
+      "folder": "final-pair-r1-new",
+      "original_manifest_sha256": "101e68b4f640eee45d606e7e03b5b4612eca6424a3b77846ab3f181a61b3437c",
+      "archived_utf8_lf_manifest_sha256": "c32bd25a2e747075e5b2505c870ad8f5848c08575fcbedcc9116a9b2ae936c18",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "final-pair-r1-old",
+      "original_manifest_sha256": "c8af5fdae5fc6a7b87ec461f28855c3faf4fcb0590529bda73b56971b170f2a3",
+      "archived_utf8_lf_manifest_sha256": "eeed0adad967e5ec45a0beda3b723bf119b6ec72db3a8a6b1a71c2574ebc42a2",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "final-pair-r2-new",
+      "original_manifest_sha256": "ad91fed8eab36fca1051707fc59346d0d6db13e63851f63587f7f4a62fd385cb",
+      "archived_utf8_lf_manifest_sha256": "f6ed810944d4dc15efe83d42ce430fe4211a625153b7bf8d2fae7eccd9ec4cc3",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "final-pair-r2-old",
+      "original_manifest_sha256": "3bf3f90558f8b98a1c839a6e07df6b2d7afef3da24cc0a512f1f678283e06995",
+      "archived_utf8_lf_manifest_sha256": "8ad69fa344abc99c230daf6daecf12936e3dbd0c98e479a259e93a46e2b0874f",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "final-pair-r3-new",
+      "original_manifest_sha256": "2b3912c49120587ae45e640569108581e88c106719ee976305e093315f1f2504",
+      "archived_utf8_lf_manifest_sha256": "e4e48da1acd68b8544d6404cd877e1221a5b14f338ec910e0ba55505b4215a0d",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    },
+    {
+      "folder": "final-pair-r3-old",
+      "original_manifest_sha256": "4ff46e693eda40c7bf5210984051a3fedf75d9240823753ebbb8e4528c3470d5",
+      "archived_utf8_lf_manifest_sha256": "7c09c68260843202ac3048f566eac17930ec0ff8726aefe20401e970f1083e6b",
+      "input_bytes_sha256": "3440da78f71123c9c03be73b05c55d4bcbcba015f818da014df0f9e0dc21e9a6"
+    }
+  ]
+}

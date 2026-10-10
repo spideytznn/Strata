@@ -1,0 +1,9 @@
+{
+  "source": "docs/DETAILS.md",
+  "source_sha256": "655672c404fdaf3b86813648bd1a3b76e2916c46aeae1de36c9dccc199540536",
+  "tokens": 262000,
+  "expected": "ZEBRA-262000",
+  "configured_context": 262144,
+  "max_new": 128,
+  "note": "Near-capacity/cache fixture; repeated documentation is not a throughput benchmark."
+}

@@ -12,6 +12,13 @@ state fingerprints match across configs. Warm outputs equal their own cold
 outputs. Expert and MTP source bytes after loading are zero. Full resident
 expert-content and alias audits report no errors during 16K -> 32K KV growth.
 
+Own warm/restored fingerprints differ in these legacy mixed CPU/GPU cases,
+despite equal tokens, because changing provider assignments changes rounding.
+They are not evidence of provider-independent main state. The canonical
+full-config and 64K suites later require exact own warm/restore state as well.
+Reproducing this older experiment with the current harness requires the
+explicit `--self-state-comparison report` option; default checks are stricter.
+
 This fixes `STRATA_KV_GROW_FLOOR=3174`: growth uses new VRAM instead of lending
 expert slots. It does not validate cache lending, automatic cache sizing, or
 trim/refill. The later 64K automatic-cache test covers those separately.
